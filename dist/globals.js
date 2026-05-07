@@ -1,0 +1,234 @@
+/*!
+ * kessler-pro-scripts / globals.js
+ * Site-wide functionality: header, reviews, recently-viewed, etc.
+ */
+
+(function () {
+  'use strict';
+
+  // -----------------------------------------------------------------
+  // External script loaders (Webflow CDN)
+  // -----------------------------------------------------------------
+
+  function loadScript(src) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  // Judge.me reviews initializer
+  loadScript(
+    'https://cdn.prod.website-files.com/67fea16d9758f16a33bef722/689e5ba67671442434f3ca35/69b90df2bcbc73ba796f6b8c/judgemeinit-7.6.0.js'
+  );
+
+  // Recently-viewed: tracker + renderer
+  loadScript(
+    'https://cdn.prod.website-files.com/67fea16d9758f16a33bef722/689e5ba67671442434f3ca35/69b90df29bf64ba7c9115271/recentlyviewedtracker-1.6.0.js'
+  );
+  loadScript(
+    'https://cdn.prod.website-files.com/67fea16d9758f16a33bef722/689e5ba67671442434f3ca35/69b90df205848ff660e39baf/recentlyviewedrender-1.6.0.js'
+  );
+
+  // PDP carousel header fix
+  loadScript(
+    'https://cdn.prod.website-files.com/67fea16d9758f16a33bef722/689e5ba67671442434f3ca35/69b90df3824c3dc3dbe32c1f/pdpcarouselheaderfix-1.6.0.js'
+  );
+
+  // -----------------------------------------------------------------
+  // Inline CSS injections
+  // -----------------------------------------------------------------
+
+  function injectStyle(css) {
+    var s = document.createElement('style');
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  // Scrollbar-hide for product-grid carousel
+  injectStyle(
+    '.product-grid_wrapper{-ms-overflow-style:none!important;scrollbar-width:none!important}' +
+      '.product-grid_wrapper::-webkit-scrollbar{display:none!important;height:0!important;width:0!important;background:transparent!important}' +
+      '.product-grid_wrapper::-webkit-scrollbar-track{display:none!important}' +
+      '.product-grid_wrapper::-webkit-scrollbar-thumb{display:none!important}'
+  );
+
+  // Rating fallback: 5-star outline if no review badge present
+  injectStyle(
+    '.product-card_rating-wrapper::before{content:"\\2606\\2606\\2606\\2606\\2606";font-size:13px;color:#ccc;letter-spacing:2px;display:block;line-height:1.4}' +
+      '.product-card_rating-wrapper:has(.jdgm-prev-badge__stars)::before{display:none}'
+  );
+
+  // -----------------------------------------------------------------
+  // Header: mega-menu hover + scroll behavior
+  // -----------------------------------------------------------------
+
+  (function initHeaderMega() {
+    var w = document.querySelector('.header_wrapper');
+    if (!w) return;
+
+    injectStyle(
+      '.header_wrapper.is-scrolled .header_promo,' +
+        '.header_wrapper.is-scrolled .header_toprow,' +
+        '.header_wrapper.is-scrolled .header_nav{max-height:0!important;padding-top:0!important;padding-bottom:0!important;opacity:0!important;pointer-events:none!important;border-bottom-width:0!important}' +
+        '.header_wrapper.is-scrolled .header_promo{transform:translateY(-100%)!important}' +
+        '.header_wrapper.is-scrolled .header_scrolled{max-height:100px!important;padding-top:12px!important;padding-bottom:12px!important;opacity:1!important;border-bottom-width:1px!important}'
+    );
+
+    var hT = w.querySelectorAll('[data-header-part="nav-row"] [data-mega-target]');
+    var cT = w.querySelectorAll('[data-header-part="scrolled-row"] [data-mega-target]');
+    var aT = w.querySelectorAll('[data-mega-target]');
+    var megas = w.querySelectorAll('[data-mega]');
+    var hideTimer = null;
+    var openMega = null;
+
+    function clearHide() {
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+    }
+
+    function closeAll() {
+      megas.forEach(function (m) {
+        m.style.display = 'none';
+      });
+      aT.forEach(function (x) {
+        x.classList.remove('is-active');
+      });
+      openMega = null;
+    }
+
+    function scheduleClose() {
+      clearHide();
+      hideTimer = setTimeout(closeAll, 150);
+    }
+
+    function show(key, trigger) {
+      clearHide();
+      megas.forEach(function (m) {
+        m.style.display = m.getAttribute('data-mega') === key ? 'grid' : 'none';
+      });
+      aT.forEach(function (x) {
+        x.classList.remove('is-active');
+      });
+      if (trigger) trigger.classList.add('is-active');
+      openMega = key;
+    }
+
+    hT.forEach(function (tr) {
+      tr.addEventListener('mouseenter', function () {
+        show(tr.getAttribute('data-mega-target'), tr);
+      });
+      tr.addEventListener('mouseleave', scheduleClose);
+    });
+
+    megas.forEach(function (m) {
+      m.addEventListener('mouseenter', clearHide);
+      m.addEventListener('mouseleave', scheduleClose);
+    });
+
+    cT.forEach(function (tr) {
+      tr.addEventListener('click', function (e) {
+        e.preventDefault();
+        var k = tr.getAttribute('data-mega-target');
+        if (openMega === k) closeAll();
+        else show(k, tr);
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (openMega && !w.contains(e.target)) closeAll();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAll();
+    });
+
+    // Sentinel-based scroll detection
+    var sen = document.createElement('div');
+    sen.setAttribute('aria-hidden', 'true');
+    sen.style.cssText =
+      'position:absolute;top:100px;left:0;width:1px;height:1px;pointer-events:none;opacity:0';
+    document.body.insertBefore(sen, document.body.firstChild);
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries[0].isIntersecting
+          ? w.classList.remove('is-scrolled')
+          : w.classList.add('is-scrolled');
+      },
+      { threshold: 0 }
+    );
+    io.observe(sen);
+  })();
+
+  // -----------------------------------------------------------------
+  // Header: mobile drawer
+  // -----------------------------------------------------------------
+
+  (function initHeaderMobileDrawer() {
+    var w = document.querySelector('.header_wrapper');
+    if (!w) return;
+
+    injectStyle(
+      '.header_mobile-overlay.is-open{visibility:visible!important;pointer-events:auto!important}' +
+        '.header_mobile-overlay.is-open .m-drawer-backdrop{background:rgba(10,10,10,.45)!important}' +
+        '.header_mobile-overlay.is-open .m-drawer{transform:translateX(0)!important}' +
+        '.header_mobile-row.is-scrolled .header_mobile-logo{position:static!important;height:36px!important;margin-left:4px!important;transform:none!important}'
+    );
+
+    var Q = w.querySelector.bind(w);
+    var A = w.querySelectorAll.bind(w);
+    var ov = Q('.header_mobile-overlay');
+    var bg = Q('.header_mobile-burger');
+    var mr = Q('.header_mobile-row');
+
+    function preventDefault(e) {
+      e.preventDefault();
+    }
+
+    function setDrawer(open) {
+      if (!ov) return;
+      ov.classList.toggle('is-open', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+
+    if (bg) {
+      bg.addEventListener('click', function (e) {
+        preventDefault(e);
+        setDrawer(true);
+      });
+    }
+
+    A('[data-mobile-trigger="drawer-close"]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        preventDefault(e);
+        setDrawer(false);
+      });
+    });
+
+    A('[data-mobile-l2]').forEach(function (el) {
+      el.addEventListener('click', preventDefault);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setDrawer(false);
+    });
+
+    if (mr) {
+      var scrolledState = false;
+      var checkScroll = function () {
+        var y = window.scrollY;
+        if (!scrolledState && y > 60) {
+          mr.classList.add('is-scrolled');
+          scrolledState = true;
+        } else if (scrolledState && y < 20) {
+          mr.classList.remove('is-scrolled');
+          scrolledState = false;
+        }
+      };
+      window.addEventListener('scroll', checkScroll, { passive: true });
+      checkScroll();
+    }
+  })();
+})();
