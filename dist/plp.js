@@ -1,7 +1,14 @@
 /*!
  * kessler-pro-scripts / plp.js
  * Product Listing Page: filter drawer, sort, filter sections, cards, active filter pills.
- * Includes today's fixes: filter button active state + clear-all handler.
+ *
+ * v1.0.1 additions:
+ *   - Hide scrollbar on .plp-drawer-inner (Chrome/Safari/Firefox/IE)
+ *   - Force .plp-page-h1 weight 300 with !important (beats default-h1 tag style)
+ *
+ * v1.0.0 baseline:
+ *   - filter button active state (body.is-drawer-open)
+ *   - clear-all click handler in tags module
  */
 
 (function () {
@@ -74,6 +81,18 @@
         '.plp-grid{grid-template-columns:repeat(2,1fr)!important;gap:16px}' +
       '}' +
       '@media(max-width:479px){.plp-grid{grid-template-columns:1fr!important}}'
+  );
+
+  // -----------------------------------------------------------------
+  // v1.0.1 additions: drawer scrollbar hide + H1 weight override
+  // -----------------------------------------------------------------
+
+  injectStyle(
+    /* Hide drawer-inner scrollbar on all browsers */
+    '.plp-drawer-inner{scrollbar-width:none;-ms-overflow-style:none}' +
+      '.plp-drawer-inner::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
+      /* Force light weight on H1 — beats default-h1 tag style */
+      '.plp-page-h1{font-weight:300!important}'
   );
 
   // -----------------------------------------------------------------
