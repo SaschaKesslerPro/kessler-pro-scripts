@@ -53,7 +53,7 @@
       /* Layout: drawer open vs closed (v1.0.6: !important to override Designer-set grid-template-columns) */
       'body:not(.is-drawer-open) .plp-shop-inner{grid-template-columns:0 1fr!important;gap:0!important}' +
       'body:not(.is-drawer-open) .plp-drawer{opacity:0;pointer-events:none;visibility:hidden}' +
-      'body.is-drawer-open .plp-shop-inner{grid-template-columns:300px 1fr!important;gap:32px!important}' +
+      'body.is-drawer-open .plp-shop-inner{grid-template-columns:360px 1fr!important;gap:32px!important}' +
       'body.is-drawer-open .plp-grid{grid-template-columns:repeat(3,1fr)!important}' +
       'body:not(.is-drawer-open) .plp-grid{grid-template-columns:repeat(4,1fr)!important}' +
       /* Empty/zero state hiding */
@@ -96,6 +96,9 @@
     /* Hide drawer-inner scrollbar on all browsers */
     '.plp-drawer-inner{scrollbar-width:none;-ms-overflow-style:none}' +
       '.plp-drawer-inner::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
+      /* v1.0.7: also hide scrollbar on .plp-drawer parent + any scrolling children */
+      '.plp-drawer,.plp-drawer-body,.plp-filter-list{scrollbar-width:none;-ms-overflow-style:none}' +
+      '.plp-drawer::-webkit-scrollbar,.plp-drawer-body::-webkit-scrollbar,.plp-filter-list::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
       /* Force light weight on H1 — beats default-h1 tag style */
       '.plp-page-h1{font-weight:300!important}'
   );
