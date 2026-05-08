@@ -2,6 +2,11 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page: filter drawer, sort, filter sections, cards, active filter pills.
  *
+ * v1.0.5 additions:
+ *   - Filter section collapse: CSS for .plp-filter-section.is-closed (was missing
+ *     after CMS conversion — toggle JS was firing but visually no effect)
+ *   - Custom checkbox styling: solid black when checked, no native checkmark
+ *
  * v1.0.1 additions:
  *   - Hide scrollbar on .plp-drawer-inner (Chrome/Safari/Firefox/IE)
  *   - Force .plp-page-h1 weight 300 with !important (beats default-h1 tag style)
@@ -93,6 +98,24 @@
       '.plp-drawer-inner::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
       /* Force light weight on H1 — beats default-h1 tag style */
       '.plp-page-h1{font-weight:300!important}'
+  );
+
+  // -----------------------------------------------------------------
+  // v1.0.5 additions: filter section collapse + custom checkbox style
+  // -----------------------------------------------------------------
+
+  injectStyle(
+    /* Filter section collapse: hide body when section is closed */
+    '.plp-filter-section.is-closed .plp-filter-body{display:none}' +
+      /* Custom checkbox: solid black when checked, no native checkmark */
+      '.plp-filter-checkbox{' +
+        'appearance:none;-webkit-appearance:none;' +
+        'width:16px;height:16px;' +
+        'border:1.5px solid #999;border-radius:3px;' +
+        'background-color:#fff;' +
+        'cursor:pointer;flex-shrink:0;margin:0' +
+      '}' +
+      '.plp-filter-checkbox:checked{background-color:#0a0a0a;border-color:#0a0a0a}'
   );
 
   // -----------------------------------------------------------------
