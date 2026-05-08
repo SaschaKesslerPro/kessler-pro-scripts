@@ -147,22 +147,20 @@
       if (e.key === 'Escape') closeAll();
     });
 
-    // Sentinel-based scroll detection
-    var sen = document.createElement('div');
-    sen.setAttribute('aria-hidden', 'true');
-    sen.style.cssText =
-      'position:absolute;top:100px;left:0;width:1px;height:1px;pointer-events:none;opacity:0';
-    document.body.insertBefore(sen, document.body.firstChild);
-
-    var io = new IntersectionObserver(
-      function (entries) {
-        entries[0].isIntersecting
-          ? w.classList.remove('is-scrolled')
-          : w.classList.add('is-scrolled');
-      },
-      { threshold: 0 }
-    );
-    io.observe(sen);
+    // Hysteresis-based scroll detection (replaces IntersectionObserver to prevent flicker at threshold)
+    var headerScrolledState = false;
+    var checkHeaderScroll = function () {
+      var y = window.scrollY;
+      if (!headerScrolledState && y > 80) {
+        w.classList.add('is-scrolled');
+        headerScrolledState = true;
+      } else if (headerScrolledState && y < 30) {
+        w.classList.remove('is-scrolled');
+        headerScrolledState = false;
+      }
+    };
+    window.addEventListener('scroll', checkHeaderScroll, { passive: true });
+    checkHeaderScroll();
   })();
 
   // -----------------------------------------------------------------
