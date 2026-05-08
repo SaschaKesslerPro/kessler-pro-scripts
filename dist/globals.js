@@ -249,4 +249,32 @@
       checkScroll();
     }
   })();
+
+  // -----------------------------------------------------------------
+  // Product Card Hover (v1.0.9)
+  // CSS inject for card-lift + cart-overlay slide-up on hover
+  // -----------------------------------------------------------------
+
+  (function initProductCardHover() {
+    if (window.__kesslerCardHoverInit) return;
+    window.__kesslerCardHoverInit = true;
+
+    if (document.getElementById('kessler-card-hover-style')) return;
+
+    var style = document.createElement('style');
+    style.id = 'kessler-card-hover-style';
+    style.textContent =
+      '.product-card_wrapper{cursor:pointer;' +
+      'transition-property:transform,box-shadow;' +
+      'transition-duration:200ms;' +
+      'transition-timing-function:ease}' +
+      '.product-card_wrapper:hover{' +
+      'transform:translateY(-3px);' +
+      'box-shadow:0 6px 20px -8px rgba(0,0,0,0.18)}' +
+      '.product-card_wrapper:hover .product-card_cart-overlay{' +
+      'transform:translateY(0);' +
+      'opacity:1;' +
+      'pointer-events:auto}';
+    document.head.appendChild(style);
+  })();
 })();
