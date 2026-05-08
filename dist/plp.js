@@ -99,6 +99,18 @@
       /* v1.0.7: also hide scrollbar on .plp-drawer parent + any scrolling children */
       '.plp-drawer,.plp-drawer-body,.plp-filter-list{scrollbar-width:none;-ms-overflow-style:none}' +
       '.plp-drawer::-webkit-scrollbar,.plp-drawer-body::-webkit-scrollbar,.plp-filter-list::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
+      /* v1.0.8: price range slider */
+      '.plp-filter-price-input,.plp-filter-price-sep{display:none!important}' +
+      '.plp-price-slider{padding:8px 0;width:100%;box-sizing:border-box}' +
+      '.plp-price-labels{display:flex;justify-content:space-between;margin-bottom:14px}' +
+      '.plp-price-label-group--right{text-align:right}' +
+      '.plp-price-label-tag{display:block;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#999;font-weight:500}' +
+      '.plp-price-label-val{display:block;font-size:14px;font-weight:500;color:#0A0A0A;margin-top:2px;font-feature-settings:"tnum"}' +
+      '.plp-price-track{position:relative;height:4px;background:#E5E3DD;border-radius:2px;margin:12px 8px}' +
+      '.plp-price-fill{position:absolute;top:0;bottom:0;background:#0A0A0A;border-radius:2px}' +
+      '.plp-price-knob{position:absolute;top:50%;width:18px;height:18px;background:#fff;border:2px solid #0A0A0A;border-radius:50%;transform:translate(-50%,-50%);cursor:grab;touch-action:none;outline:none;transition:box-shadow .12s;box-sizing:border-box}' +
+      '.plp-price-knob:hover,.plp-price-knob:focus-visible{box-shadow:0 0 0 6px rgba(10,10,10,0.08)}' +
+      '.plp-price-knob.is-dragging{cursor:grabbing;box-shadow:0 0 0 8px rgba(10,10,10,0.12)}' +
       /* Force light weight on H1 — beats default-h1 tag style */
       '.plp-page-h1{font-weight:300!important}'
   );
@@ -204,6 +216,166 @@
     } else {
       setup();
     }
+  })();
+
+  // -----------------------------------------------------------------
+  // v1.0.8: Price range slider (dual-knob)
+  // Replaces the two .plp-filter-price-input fields with a visual slider.
+  // Original inputs stay in DOM (display:none) so Finsweet can still
+  // read/filter on them. Min/max/step come from data-min, data-max,
+  // data-step on .plp-filter-price-row (defaults: 0, 500, 5).
+  // -----------------------------------------------------------------
+
+  (function initPriceSlider() {
+    function setup() {
+      var row = document.querySelector('.plp-filter-price-row');
+      if (!row) return;
+      if (row.getAttribute('data-k-slider') === '1') return;
+      var inputs = row.querySelectorAll('.plp-filter-price-input');
+      if (inputs.length !== 2) return;
+      row.setAttribute('data-k-slider', '1');
+
+      var min = parseInt(row.getAttribute('data-min'), 10);
+      if (isNaN(min)) min = 0;
+      var max = parseInt(row.getAttribute('data-max'), 10);
+      if (isNaN(max)) max = 500;
+      var step = parseInt(row.getAttribute('data-step'), 10);
+      if (isNaN(step) || step < 1) step = 5;
+
+      var fromInput = inputs[0];
+      var toInput = inputs[1];
+
+      if (!fromInput.getAttribute('fs-cmsfilter-range')) {
+        fromInput.setAttribute('fs-cmsfilter-range', 'from');
+        fromInput.setAttribute('fs-cmsfilter-field', 'preis-numerisch');
+      }
+      if (!toInput.getAttribute('fs-cmsfilter-range')) {
+        toInput.setAttribute('fs-cmsfilter-range', 'to');
+        toInput.setAttribute('fs-cmsfilter-field', 'preis-numerisch');
+      }
+      fromInput.value = min;
+      toInput.value = max;
+
+      var slider = document.createElement('div');
+      slider.className = 'plp-price-slider';
+      slider.innerHTML =
+        '<div class="plp-price-labels">' +
+          '<div class="plp-price-label-group">' +
+            '<span class="plp-price-label-tag">Von</span>' +
+            '<span class="plp-price-label-val" data-from-val>\u20AC ' + min + '</span>' +
+          '</div>' +
+          '<div class="plp-price-label-group plp-price-label-group--right">' +
+            '<span class="plp-price-label-tag">Bis</span>' +
+            '<span class="plp-price-label-val" data-to-val>\u20AC ' + max + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="plp-price-track" data-track>' +
+          '<div class="plp-price-fill" data-fill></div>' +
+          '<div class="plp-price-knob" data-knob="from" tabindex="0" role="slider" aria-label="Mindestpreis"></div>' +
+          '<div class="plp-price-knob" data-knob="to" tabindex="0" role="slider" aria-label="H\u00F6chstpreis"></div>' +
+        '</div>';
+      row.insertBefore(slider, row.firstChild);
+
+      var track = slider.querySelector('[data-track]');
+      var fill = slider.querySelector('[data-fill]');
+      var knobFrom = slider.querySelector('[data-knob="from"]');
+      var knobTo = slider.querySelector('[data-knob="to"]');
+      var fromVal = slider.querySelector('[data-from-val]');
+      var toVal = slider.querySelector('[data-to-val]');
+
+      var values = { from: min, to: max };
+
+      function pct(v) { return ((v - min) / (max - min)) * 100; }
+      function valFromX(clientX, rect) {
+        var p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        var v = min + p * (max - min);
+        return Math.round(v / step) * step;
+      }
+
+      function render() {
+        var pFrom = pct(values.from);
+        var pTo = pct(values.to);
+        knobFrom.style.left = pFrom + '%';
+        knobTo.style.left = pTo + '%';
+        fill.style.left = pFrom + '%';
+        fill.style.right = (100 - pTo) + '%';
+        fromVal.textContent = '\u20AC ' + values.from;
+        toVal.textContent = '\u20AC ' + values.to;
+        knobFrom.setAttribute('aria-valuenow', values.from);
+        knobTo.setAttribute('aria-valuenow', values.to);
+      }
+
+      function commit() {
+        fromInput.value = values.from;
+        toInput.value = values.to;
+        fromInput.dispatchEvent(new Event('input', { bubbles: true }));
+        fromInput.dispatchEvent(new Event('change', { bubbles: true }));
+        toInput.dispatchEvent(new Event('input', { bubbles: true }));
+        toInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      function startDrag(which) {
+        return function (e) {
+          e.preventDefault();
+          var knob = which === 'from' ? knobFrom : knobTo;
+          knob.classList.add('is-dragging');
+          var rect = track.getBoundingClientRect();
+          function move(ev) {
+            var x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+            var v = valFromX(x, rect);
+            if (which === 'from') values.from = Math.min(v, values.to - step);
+            else values.to = Math.max(v, values.from + step);
+            render();
+          }
+          function end() {
+            knob.classList.remove('is-dragging');
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('touchmove', move);
+            document.removeEventListener('mouseup', end);
+            document.removeEventListener('touchend', end);
+            commit();
+          }
+          document.addEventListener('mousemove', move);
+          document.addEventListener('touchmove', move, { passive: false });
+          document.addEventListener('mouseup', end);
+          document.addEventListener('touchend', end);
+        };
+      }
+
+      function arrowKeys(which) {
+        return function (e) {
+          if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+          e.preventDefault();
+          var dir = e.key === 'ArrowLeft' ? -1 : 1;
+          var amount = e.shiftKey ? step * 10 : step;
+          if (which === 'from') values.from = Math.max(min, Math.min(values.to - step, values.from + dir * amount));
+          else values.to = Math.min(max, Math.max(values.from + step, values.to + dir * amount));
+          render();
+          commit();
+        };
+      }
+
+      knobFrom.addEventListener('mousedown', startDrag('from'));
+      knobFrom.addEventListener('touchstart', startDrag('from'), { passive: false });
+      knobTo.addEventListener('mousedown', startDrag('to'));
+      knobTo.addEventListener('touchstart', startDrag('to'), { passive: false });
+      knobFrom.addEventListener('keydown', arrowKeys('from'));
+      knobTo.addEventListener('keydown', arrowKeys('to'));
+
+      render();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setup);
+    } else {
+      setup();
+    }
+
+    var debounce = null;
+    new MutationObserver(function () {
+      clearTimeout(debounce);
+      debounce = setTimeout(setup, 200);
+    }).observe(document.body, { childList: true, subtree: true });
   })();
 
   // -----------------------------------------------------------------
