@@ -50,12 +50,12 @@
   injectStyle(
     /* Sort dropdown arrow */
     '#sort-select{background:#FAFAFA url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236A6A66\' stroke-width=\'1.6\'><path d=\'M6 9l6 6 6-6\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>") no-repeat right 10px center/14px}' +
-      /* Layout: drawer open vs closed */
-      'body:not(.is-drawer-open) .plp-shop-inner{grid-template-columns:0 1fr;gap:0}' +
+      /* Layout: drawer open vs closed (v1.0.6: !important to override Designer-set grid-template-columns) */
+      'body:not(.is-drawer-open) .plp-shop-inner{grid-template-columns:0 1fr!important;gap:0!important}' +
       'body:not(.is-drawer-open) .plp-drawer{opacity:0;pointer-events:none;visibility:hidden}' +
-      'body.is-drawer-open .plp-shop-inner{grid-template-columns:300px 1fr;gap:32px}' +
-      'body.is-drawer-open .plp-grid{grid-template-columns:repeat(3,1fr)}' +
-      'body:not(.is-drawer-open) .plp-grid{grid-template-columns:repeat(4,1fr)}' +
+      'body.is-drawer-open .plp-shop-inner{grid-template-columns:300px 1fr!important;gap:32px!important}' +
+      'body.is-drawer-open .plp-grid{grid-template-columns:repeat(3,1fr)!important}' +
+      'body:not(.is-drawer-open) .plp-grid{grid-template-columns:repeat(4,1fr)!important}' +
       /* Empty/zero state hiding */
       '.plp-tags-row:empty{display:none}' +
       '.plp-clear-all.is-hidden,.plp-filter-btn-num:empty,.plp-filter-btn-num.is-zero{display:none}' +
