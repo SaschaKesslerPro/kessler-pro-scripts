@@ -68,7 +68,10 @@
     if (!w) return;
 
     injectStyle(
-      '.header_wrapper.is-scrolled .header_promo,' +
+      /* Default state: header_scrolled is HIDDEN until is-scrolled class is added */
+      '.header_wrapper:not(.is-scrolled) .header_scrolled{max-height:0!important;opacity:0!important;pointer-events:none!important;padding-top:0!important;padding-bottom:0!important;border-bottom-width:0!important;overflow:hidden!important}' +
+        /* Scrolled state: hide promo/toprow/nav, show scrolled-row */
+        '.header_wrapper.is-scrolled .header_promo,' +
         '.header_wrapper.is-scrolled .header_toprow,' +
         '.header_wrapper.is-scrolled .header_nav{max-height:0!important;padding-top:0!important;padding-bottom:0!important;opacity:0!important;pointer-events:none!important;border-bottom-width:0!important}' +
         '.header_wrapper.is-scrolled .header_promo{transform:translateY(-100%)!important}' +
