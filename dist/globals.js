@@ -147,19 +147,36 @@
       if (e.key === 'Escape') closeAll();
     });
 
-    // Hysteresis-based scroll detection (replaces IntersectionObserver to prevent flicker at threshold)
+    // Hysteresis-based scroll detection with lock + rAF throttle (prevents layout-shift flicker)
     var headerScrolledState = false;
+    var headerLockedUntil = 0;
     var checkHeaderScroll = function () {
+      if (Date.now() < headerLockedUntil) return;
       var y = window.scrollY;
-      if (!headerScrolledState && y > 80) {
+      if (!headerScrolledState && y > 100) {
         w.classList.add('is-scrolled');
         headerScrolledState = true;
-      } else if (headerScrolledState && y < 30) {
+        headerLockedUntil = Date.now() + 400;
+      } else if (headerScrolledState && y < 40) {
         w.classList.remove('is-scrolled');
         headerScrolledState = false;
+        headerLockedUntil = Date.now() + 400;
       }
     };
-    window.addEventListener('scroll', checkHeaderScroll, { passive: true });
+    var headerTicking = false;
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (!headerTicking) {
+          requestAnimationFrame(function () {
+            checkHeaderScroll();
+            headerTicking = false;
+          });
+          headerTicking = true;
+        }
+      },
+      { passive: true }
+    );
     checkHeaderScroll();
   })();
 
