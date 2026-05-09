@@ -251,8 +251,9 @@
   })();
 
   // -----------------------------------------------------------------
-  // Product Card Hover (v1.0.9)
-  // CSS inject for card-lift + cart-overlay slide-up on hover
+  // Product Card Hover (v1.0.9) + Layout Tweaks (v1.0.10)
+  // CSS inject for card-lift, cart-overlay slide-up,
+  // and PLP grid spacing overrides
   // -----------------------------------------------------------------
 
   (function initProductCardHover() {
@@ -274,7 +275,16 @@
       '.product-card_wrapper:hover .product-card_cart-overlay{' +
       'transform:translateY(0);' +
       'opacity:1;' +
-      'pointer-events:auto}';
+      'pointer-events:auto}' +
+      // v1.0.10: more whitespace under price, tighter grid, full width cards on PLP
+      '.product-card_content{' +
+      'padding-top:12px;' +
+      'padding-bottom:16px}' +
+      '.plp-grid{gap:12px}' +
+      '.plp-grid .product-card_wrapper{' +
+      'width:100%;' +
+      'max-width:none;' +
+      'min-width:0}';
     document.head.appendChild(style);
   })();
 })();
