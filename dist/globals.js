@@ -287,4 +287,25 @@
       'min-width:0}';
     document.head.appendChild(style);
   })();
+
+  // -----------------------------------------------------------------
+  // PDP Hero Info-Column flex order fix (v1.0.11)
+  // pdp_info uses flex with `order` properties on existing children.
+  // New elements (pdp_heritage-tag, pdp_subline) need explicit order
+  // so they slot in: breadcrumb=1, h1=2, ...cta=6, shipping=7, trust=8
+  // -----------------------------------------------------------------
+
+  (function initPdpHeroOrder() {
+    if (window.__kesslerPdpHeroOrderInit) return;
+    window.__kesslerPdpHeroOrderInit = true;
+
+    if (document.getElementById('kessler-pdp-hero-order-style')) return;
+
+    var style = document.createElement('style');
+    style.id = 'kessler-pdp-hero-order-style';
+    style.textContent =
+      '.pdp_heritage-tag{order:1}' +
+      '.pdp_subline{order:2}';
+    document.head.appendChild(style);
+  })();
 })();
