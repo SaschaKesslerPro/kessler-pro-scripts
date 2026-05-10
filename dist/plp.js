@@ -2,6 +2,9 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page: filter drawer, sort, filter sections, cards, active filter pills.
  *
+ * v1.0.14 additions:
+ *   - product-card_content padding-bottom 10px → 4px (Designer-locked override)
+ *
  * v1.0.13 additions:
  *   - Wrap desktop-only drawer/grid rules in @media(min-width:992px) so body-class
  *     specifity (body:not(.is-drawer-open) .plp-grid {repeat(4,1fr)}) no longer
@@ -70,6 +73,8 @@
         /* v1.0.13: override Designer-locked main-breakpoint card-wrapper width/min/max/flex-shrink */
         '.product-card_wrapper{width:auto!important;max-width:none!important;min-width:0!important;flex-shrink:1!important;flex-basis:auto!important}' +
       '}' +
+      /* v1.0.14: card-content reduced bottom padding (Designer-locked at 10px) */
+      '.product-card_content{padding-bottom:4px!important}' +
       /* Empty/zero state hiding */
       '.plp-tags-row:empty{display:none}' +
       '.plp-clear-all.is-hidden,.plp-filter-btn-num:empty,.plp-filter-btn-num.is-zero{display:none}' +
