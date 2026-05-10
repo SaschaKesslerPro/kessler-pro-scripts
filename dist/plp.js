@@ -2,6 +2,16 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page: filter drawer, sort, filter sections, cards, active filter pills.
  *
+ * v1.0.13 additions:
+ *   - Wrap desktop-only drawer/grid rules in @media(min-width:992px) so body-class
+ *     specifity (body:not(.is-drawer-open) .plp-grid {repeat(4,1fr)}) no longer
+ *     overrides mobile media queries. Fixes 4-cards-on-mobile bug.
+ *   - Mobile shop-inner: display:block (no sidebar grid swallowing card column)
+ *   - Mobile card-wrapper: reset width/max-width/min-width/flex-shrink to undo
+ *     Designer-locked main-breakpoint calc(25%-12px)/300px/240px/0 values
+ *   - Desktop card-wrapper: same reset wrapped in min-width:992px media
+ *   - Mobile grid: 1 col (per Sascha) instead of 2 col, gap 24/20
+ *
  * v1.0.5 additions:
  *   - Filter section collapse: CSS for .plp-filter-section.is-closed (was missing
  *     after CMS conversion — toggle JS was firing but visually no effect)
@@ -50,12 +60,16 @@
   injectStyle(
     /* Sort dropdown arrow */
     '#sort-select{background:#FAFAFA url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236A6A66\' stroke-width=\'1.6\'><path d=\'M6 9l6 6 6-6\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>") no-repeat right 10px center/14px}' +
-      /* Layout: drawer open vs closed (v1.0.6: !important to override Designer-set grid-template-columns) */
-      'body:not(.is-drawer-open) .plp-shop-inner{grid-template-columns:0 1fr!important;gap:0!important}' +
-      'body:not(.is-drawer-open) .plp-drawer{opacity:0;pointer-events:none;visibility:hidden}' +
-      'body.is-drawer-open .plp-shop-inner{grid-template-columns:360px 1fr!important;gap:32px!important}' +
-      'body.is-drawer-open .plp-grid{grid-template-columns:repeat(3,1fr)!important}' +
-      'body:not(.is-drawer-open) .plp-grid{grid-template-columns:repeat(4,1fr)!important}' +
+      /* v1.0.13: Desktop-only layout rules wrapped in @media(min-width:992px) so body-class specifity does not override mobile rules */
+      '@media(min-width:992px){' +
+        'body:not(.is-drawer-open) .plp-shop-inner{grid-template-columns:0 1fr!important;gap:0!important}' +
+        'body:not(.is-drawer-open) .plp-drawer{opacity:0;pointer-events:none;visibility:hidden}' +
+        'body.is-drawer-open .plp-shop-inner{grid-template-columns:360px 1fr!important;gap:32px!important}' +
+        'body.is-drawer-open .plp-grid{grid-template-columns:repeat(3,1fr)!important}' +
+        'body:not(.is-drawer-open) .plp-grid{grid-template-columns:repeat(4,1fr)!important}' +
+        /* v1.0.13: override Designer-locked main-breakpoint card-wrapper width/min/max/flex-shrink */
+        '.product-card_wrapper{width:auto!important;max-width:none!important;min-width:0!important;flex-shrink:1!important;flex-basis:auto!important}' +
+      '}' +
       /* Empty/zero state hiding */
       '.plp-tags-row:empty{display:none}' +
       '.plp-clear-all.is-hidden,.plp-filter-btn-num:empty,.plp-filter-btn-num.is-zero{display:none}' +
@@ -79,13 +93,18 @@
       '.stars-empty{color:#D4D4D4}' +
       /* Mobile breakpoint */
       '@media(max-width:991px){' +
-        '.plp-drawer{position:fixed!important;top:0!important;left:0;right:0;bottom:0;width:100%;max-height:100vh;background:#fff;z-index:9999;transform:translateX(-100%);transition:transform .3s;border-radius:0}' +
+        /* v1.0.13: shop-inner becomes block on mobile (no sidebar grid) */
+        '.plp-shop-inner{display:block!important;grid-template-columns:none!important;gap:0!important}' +
+        /* v1.0.13: reset card-wrapper sizing on mobile (cascades from main desktop calc/min/max) */
+        '.product-card_wrapper{width:100%!important;max-width:none!important;min-width:0!important;flex-shrink:1!important;flex-basis:auto!important}' +
+        '.plp-drawer{position:fixed!important;top:0!important;left:0;right:0;bottom:0;width:100%;max-height:100vh;background:#fff;z-index:9999;transform:translateX(-100%);transition:transform .3s;border-radius:0;display:block!important}' +
         'body.is-drawer-open .plp-drawer{transform:translateX(0)}' +
         'body.is-drawer-open{overflow:hidden}' +
         '.plp-drawer-inner{border:0;border-radius:0;height:100%;display:flex;flex-direction:column}' +
-        '.plp-grid{grid-template-columns:repeat(2,1fr)!important;gap:16px}' +
+        /* v1.0.13: 1 card per row on mobile (Sascha override of mockup 2-col) */
+        '.plp-grid{grid-template-columns:1fr!important;gap:24px!important}' +
       '}' +
-      '@media(max-width:479px){.plp-grid{grid-template-columns:1fr!important}}'
+      '@media(max-width:479px){.plp-grid{grid-template-columns:1fr!important;gap:20px!important}}'
   );
 
   // -----------------------------------------------------------------
