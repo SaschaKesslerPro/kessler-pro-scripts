@@ -68,8 +68,10 @@
     if (!w) return;
 
     injectStyle(
-      /* Default state: header_scrolled is HIDDEN until is-scrolled class is added */
-      '.header_wrapper:not(.is-scrolled) .header_scrolled{max-height:0!important;opacity:0!important;pointer-events:none!important;padding-top:0!important;padding-bottom:0!important;border-bottom-width:0!important;overflow:hidden!important}' +
+      /* v1.0.15: disable browser scroll-anchoring to prevent feedback-loop flicker */
+      'body,html{overflow-anchor:none!important}' +
+        /* Default state: header_scrolled is HIDDEN until is-scrolled class is added */
+        '.header_wrapper:not(.is-scrolled) .header_scrolled{max-height:0!important;opacity:0!important;pointer-events:none!important;padding-top:0!important;padding-bottom:0!important;border-bottom-width:0!important;overflow:hidden!important}' +
         /* Scrolled state: hide promo/toprow/nav, show scrolled-row */
         '.header_wrapper.is-scrolled .header_promo,' +
         '.header_wrapper.is-scrolled .header_toprow,' +
@@ -147,20 +149,17 @@
       if (e.key === 'Escape') closeAll();
     });
 
-    // Hysteresis-based scroll detection with lock + rAF throttle (prevents layout-shift flicker)
+    // v1.0.15: simple top vs scrolled — y === 0 is standard, y > 0 is sticky.
+    // No hysteresis, no lock. rAF throttle handles fast scroll bursts.
     var headerScrolledState = false;
-    var headerLockedUntil = 0;
     var checkHeaderScroll = function () {
-      if (Date.now() < headerLockedUntil) return;
       var y = window.scrollY;
-      if (!headerScrolledState && y > 100) {
+      if (!headerScrolledState && y > 0) {
         w.classList.add('is-scrolled');
         headerScrolledState = true;
-        headerLockedUntil = Date.now() + 400;
-      } else if (headerScrolledState && y < 40) {
+      } else if (headerScrolledState && y === 0) {
         w.classList.remove('is-scrolled');
         headerScrolledState = false;
-        headerLockedUntil = Date.now() + 400;
       }
     };
     var headerTicking = false;
@@ -234,13 +233,14 @@
     });
 
     if (mr) {
+      // v1.0.15: simple top vs scrolled (matches desktop logic)
       var scrolledState = false;
       var checkScroll = function () {
         var y = window.scrollY;
-        if (!scrolledState && y > 60) {
+        if (!scrolledState && y > 0) {
           mr.classList.add('is-scrolled');
           scrolledState = true;
-        } else if (scrolledState && y < 20) {
+        } else if (scrolledState && y === 0) {
           mr.classList.remove('is-scrolled');
           scrolledState = false;
         }
