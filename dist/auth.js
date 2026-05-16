@@ -1,4 +1,4 @@
-/* kessler-pro-scripts/auth.js v1.0.21 — type-switch + native Webflow custom-checkbox styled as brand box */
+/* kessler-pro-scripts/auth.js v1.0.22 — Webflow custom-checkbox styling + explicit toggle JS */
 (function(){
   if(window.__kpAuthV1)return;
   window.__kpAuthV1=true;
@@ -12,7 +12,10 @@
       '.kp-checkbox-row + .kp-checkbox-row{margin-top:16px}',
 
       /* The w-checkbox label is the clickable container */
-      '.kp-checkbox-row .w-checkbox{padding-left:0;margin-bottom:0;display:flex;align-items:flex-start;gap:12px;cursor:pointer}',
+      '.kp-checkbox-row .w-checkbox{padding-left:0;margin-bottom:0;display:flex;align-items:flex-start;gap:12px;cursor:pointer;position:relative}',
+
+      /* Hide native input completely (we render the visual via custom div) */
+      '.kp-checkbox-row .w-checkbox input[type="checkbox"]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}',
 
       /* Style Webflow custom visual div as brand box */
       '.kp-checkbox-row .w-checkbox-input--inputType-custom{width:20px;height:20px;min-width:20px;border:1.5px solid #E5E5E5;border-radius:4px;margin:0;margin-top:1px;background-color:#FFFFFF;background-image:none;transition:all .15s ease;position:relative;box-shadow:none;flex-shrink:0}',
@@ -40,5 +43,19 @@
     document.querySelectorAll('.kp-b2b-only').forEach(function(f){
       f.style.display=(type==='b2b')?'block':'none';
     });
+  });
+
+  /* Checkbox click handler: toggle input + sync visual div class */
+  document.addEventListener('click',function(e){
+    if(e.target.tagName==='A')return;
+    var label=e.target.closest('.kp-checkbox-row .w-checkbox');
+    if(!label)return;
+    e.preventDefault();
+    var input=label.querySelector('input[type="checkbox"]');
+    var visual=label.querySelector('.w-checkbox-input--inputType-custom');
+    if(!input||!visual)return;
+    input.checked=!input.checked;
+    visual.classList.toggle('w--redirected-checked',input.checked);
+    input.dispatchEvent(new Event('change',{bubbles:true}));
   });
 })();
