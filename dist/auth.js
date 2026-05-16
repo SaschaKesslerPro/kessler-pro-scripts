@@ -1,4 +1,4 @@
-/* kessler-pro-scripts/auth.js v1.0.23 — target Webflow's actually-rendered checkbox structure */
+/* kessler-pro-scripts/auth.js v1.0.24 — work WITH Designer styles, transparent-label trick */
 (function(){
   if(window.__kpAuthV1)return;
   window.__kpAuthV1=true;
@@ -7,30 +7,27 @@
     var css=document.createElement('style');
     css.id='kp-auth-css';
     css.textContent=[
-      /* Row outer wrapper */
-      '.kp-checkbox-row{display:block !important;margin:0 !important;padding:0 !important}',
-      '.kp-checkbox-row + .kp-checkbox-row{margin-top:14px !important}',
-
-      /* Outer FormBlockLabel is the actual flex row (box + text) */
-      '.kp-checkbox-row > label{display:flex !important;align-items:center !important;gap:12px !important;font-weight:400 !important;margin:0 !important;padding:0 !important;cursor:pointer;width:auto}',
+      /* Make Webflow's auto-wrapped FormBlockLabel transparent to flex layout
+         so kp-checkbox-row's existing Designer flex/gap/margin-bottom works as intended */
+      '.kp-checkbox-row > label{display:contents}',
 
       /* Hide the leftover empty placeholder div from API insertion */
-      '.kp-checkbox-row > label > div:empty{display:none !important}',
+      '.kp-checkbox-row > label > div:empty{display:none}',
 
-      /* FormCheckboxWrapper - just holds the input, no padding */
-      '.kp-checkbox-row .w-checkbox{padding-left:0 !important;margin:0 !important;flex-shrink:0 !important;display:inline-flex !important;align-items:center}',
+      /* FormCheckboxWrapper — inline holder for the input, no extra spacing */
+      '.kp-checkbox-row .w-checkbox{padding:0;margin:0;display:inline-flex;align-items:center;flex-shrink:0}',
 
-      /* Hide the zero-width inner FormInlineLabel inside .w-checkbox */
-      '.kp-checkbox-row .w-checkbox > .w-form-label{display:none !important}',
+      /* Hide the empty zero-width inner FormInlineLabel inside w-checkbox */
+      '.kp-checkbox-row .w-checkbox > .w-form-label{display:none}',
 
-      /* Style the native checkbox itself as the brand box */
-      '.kp-checkbox-row input[type="checkbox"]{-webkit-appearance:none !important;appearance:none !important;width:20px !important;height:20px !important;min-width:20px;border:1.5px solid #E5E5E5 !important;border-radius:4px !important;background-color:#FFFFFF !important;background-image:none !important;margin:0 !important;padding:0 !important;cursor:pointer !important;position:relative !important;opacity:1 !important;flex-shrink:0 !important;transition:all .15s ease;box-shadow:none !important}',
-      '.kp-checkbox-row input[type="checkbox"]:checked{background-color:#1E1E1E !important;border-color:#1E1E1E !important}',
+      /* Style the native input as brand box (no appearance, brand colors, checkmark via ::after) */
+      '.kp-checkbox-row input[type="checkbox"]{-webkit-appearance:none;appearance:none;width:20px;height:20px;min-width:20px;border:1.5px solid #E5E5E5;border-radius:4px;background-color:#FFFFFF;background-image:none;margin:0;padding:0;cursor:pointer;position:relative;transition:all .15s ease;flex-shrink:0;box-shadow:none}',
+      '.kp-checkbox-row input[type="checkbox"]:checked{background-color:#1E1E1E;border-color:#1E1E1E}',
       '.kp-checkbox-row input[type="checkbox"]:checked::after{content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border-right:2px solid #FFFFFF;border-bottom:2px solid #FFFFFF;transform:rotate(45deg)}',
-      '.kp-checkbox-row input[type="checkbox"]:focus{outline:none !important;box-shadow:0 0 0 3px rgba(30,30,30,.12) !important;border-color:#1E1E1E !important}',
+      '.kp-checkbox-row input[type="checkbox"]:focus{outline:none;box-shadow:0 0 0 3px rgba(30,30,30,.12);border-color:#1E1E1E}',
 
-      /* The outer FormInlineLabel with the real text — direct child of outer label, NOT inside w-checkbox */
-      '.kp-checkbox-row > label > .w-form-label{font-size:14px !important;line-height:1.5 !important;color:#1E1E1E !important;font-weight:400 !important;flex:1;margin:0 !important;padding:0 !important;display:inline}'
+      /* The text FormInlineLabel — reset Webflow default font-weight:bold, become flex:1 */
+      '.kp-checkbox-row > label > .w-form-label{font-weight:400;margin:0;padding:0;flex:1}'
     ].join('');
     document.head.appendChild(css);
   }
