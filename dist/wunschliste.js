@@ -1,5 +1,10 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.1
+ * Kessler PRO · wunschliste.js v1.2.2
+ *
+ * Changes vs v1.2.1:
+ *   - FIX: metafieldsSet mutation now includes ownerId (Customer GID).
+ *     Required by Customer Account API metafieldsSet schema.
+ *   - userErrors selection now includes 'code' field for clearer diagnostics.
  *
  * Changes vs v1.2.0:
  *   - FIX: Authorization header sends raw token (no Bearer prefix).
@@ -56,7 +61,7 @@
     }
   }
 
-  log('boot','v1.2.1 starting');
+  log('boot','v1.2.2 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -171,6 +176,17 @@
     return 'https://shopify.com/'+resolveShopId()+'/account/customer/api/'+API_VERSION+'/graphql';
   }
 
+  function getCustomerGid(){
+    try{
+      if(window.shopyflow&&typeof window.shopyflow.getCustomer==='function'){
+        var cust=window.shopyflow.getCustomer();
+        if(cust&&cust.id)return cust.id;
+      }
+    }catch(e){}
+    return null;
+  }
+
+
   // -----------------------------------------------------------------
   // GraphQL with telemetry
   // -----------------------------------------------------------------
@@ -225,8 +241,14 @@
   }
 
   function writeMetafield(token,list){
-    var q='mutation($v:String!){metafieldsSet(metafields:[{namespace:"'+MF_NS+'",key:"'+MF_KEY+'",type:"json",value:$v}]){userErrors{message field}}}';
-    return gql(q,{v:JSON.stringify(list)},token,'writeMF').then(function(res){
+    var ownerId=getCustomerGid();
+    if(!ownerId){
+      log('mf','write skipped \u2014 no customer GID available');
+      return Promise.resolve({ok:false,status:0,json:null});
+    }
+    log('mf','write start',{ownerId:ownerId});
+    var q='mutation($v:String!,$oid:ID!){metafieldsSet(metafields:[{namespace:"'+MF_NS+'",key:"'+MF_KEY+'",type:"json",ownerId:$oid,value:$v}]){userErrors{message field code}}}';
+    return gql(q,{v:JSON.stringify(list),oid:ownerId},token,'writeMF').then(function(res){
       try{
         var ue=res.json&&res.json.data&&res.json.data.metafieldsSet&&res.json.data.metafieldsSet.userErrors;
         if(ue&&ue.length)log('mf','write userErrors',ue);
@@ -525,7 +547,7 @@
     _debug:function(){
       var sfToken=readSfTokens();
       return{
-        version:'1.2.1',
+        version:'1.2.2',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
