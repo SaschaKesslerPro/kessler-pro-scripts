@@ -1,5 +1,15 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.2
+ * Kessler PRO · wunschliste.js v1.2.3
+ *
+ * Changes vs v1.2.2:
+ *   - FIX: Auth-state visibility toggle. Shopyflow doesn't set
+ *     body[_sf-logged-in] / body[_sf-logged-out] for Shopify-hosted OAuth
+ *     logins. We set these ourselves based on localStorage token presence,
+ *     and inject CSS to hide the wrong .sf-logged-in/.sf-logged-out variant.
+ *     Restores Avatar/Heart visibility for logged-in customers.
+ *   - FIX: Race-condition first-write. If first sync runs before
+ *     shopyflow.getCustomer() returns customer object, writeMF was skipped.
+ *     Now scheduled retry-sync 3s later (one retry max per page lifecycle).
  *
  * Changes vs v1.2.1:
  *   - FIX: metafieldsSet mutation now includes ownerId (Customer GID).
@@ -61,7 +71,7 @@
     }
   }
 
-  log('boot','v1.2.2 starting');
+  log('boot','v1.2.3 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -186,6 +196,41 @@
     return null;
   }
 
+  // -----------------------------------------------------------------
+  // Auth-state body attribute management (Shopyflow compat shim)
+  // -----------------------------------------------------------------
+  // Shopyflow's docs convention is body[_sf-logged-in] / body[_sf-logged-out]
+  // attributes which toggle visibility of .sf-logged-in / .sf-logged-out
+  // elements via CSS. However Shopyflow does NOT set these attributes when
+  // login happens via Shopify-hosted OAuth (Customer Account API).
+  // We set them ourselves based on our authoritative source: localStorage
+  // token presence + expiry.
+  function injectAuthCSS(){
+    if(document.getElementById('kp-auth-css'))return;
+    var s=document.createElement('style');
+    s.id='kp-auth-css';
+    s.textContent='body[_sf-logged-in] .sf-logged-out{display:none!important}body[_sf-logged-out] .sf-logged-in{display:none!important}';
+    (document.head||document.documentElement).appendChild(s);
+  }
+  function setAuthBody(loggedIn){
+    try{
+      var b=document.body;
+      if(!b)return;
+      if(loggedIn){
+        b.setAttribute('_sf-logged-in','');
+        b.removeAttribute('_sf-logged-out');
+      }else{
+        b.setAttribute('_sf-logged-out','');
+        b.removeAttribute('_sf-logged-in');
+      }
+    }catch(e){}
+  }
+  function evalAuthState(){
+    var t=readSfTokens();
+    return !!(t&&!t.expired&&t.accessToken);
+  }
+
+
 
   // -----------------------------------------------------------------
   // GraphQL with telemetry
@@ -195,6 +240,8 @@
   var pollTimer=null;
   var pollCount=0;
   var POLL_MAX=60; // 30s @ 500ms
+  var writeRetryTimer=null;
+  var writeRetryUsed=false;
 
   function gql(query,variables,token,opName){
     var ep=gqlEndpoint();
@@ -244,7 +291,7 @@
     var ownerId=getCustomerGid();
     if(!ownerId){
       log('mf','write skipped \u2014 no customer GID available');
-      return Promise.resolve({ok:false,status:0,json:null});
+      return Promise.resolve({ok:false,status:0,json:null,skippedNoGid:true});
     }
     log('mf','write start',{ownerId:ownerId});
     var q='mutation($v:String!,$oid:ID!){metafieldsSet(metafields:[{namespace:"'+MF_NS+'",key:"'+MF_KEY+'",type:"json",ownerId:$oid,value:$v}]){userErrors{message field code}}}';
@@ -313,7 +360,16 @@
         emit();
         log('sync','local updated from remote',{newCount:merged.length});
       }
-      return writeMetafield(customerCtx.token,merged).then(function(){
+      return writeMetafield(customerCtx.token,merged).then(function(wRes){
+        if(wRes&&wRes.skippedNoGid&&!writeRetryUsed&&!writeRetryTimer){
+          writeRetryUsed=true;
+          log('sync','scheduling retry in 3s \u2014 waiting for customer GID');
+          writeRetryTimer=setTimeout(function(){
+            writeRetryTimer=null;
+            log('sync','retry firing (GID was missing earlier)');
+            sync();
+          },3000);
+        }
         log('sync','complete');
         return true;
       });
@@ -365,6 +421,7 @@
       tokenPreview:sfToken.accessToken.slice(0,12)+'\u2026'
     });
     customerCtx={token:sfToken.accessToken,source:'localStorage',expiresAt:sfToken.expiresAt};
+    setAuthBody(true);
     sync();
     stopPolling();
   }
@@ -395,11 +452,13 @@
     var sfToken=readSfTokens();
     if(sfToken&&!sfToken.expired){
       customerCtx={token:sfToken.accessToken,source:'storage-event',expiresAt:sfToken.expiresAt};
+      setAuthBody(true);
       log('storage-event','token acquired, syncing');
       sync();
     }else if(!sfToken){
       log('storage-event','tokens cleared (logout in another tab)');
       customerCtx=null;
+      setAuthBody(false);
     }
   }
   window.addEventListener('storage',onStorageEvent);
@@ -423,6 +482,7 @@
     var sfToken=readSfTokens();
     if(sfToken&&!sfToken.expired){
       customerCtx={token:sfToken.accessToken,source:'event:'+ev.type,expiresAt:sfToken.expiresAt};
+      setAuthBody(true);
       sync();
       stopPolling();
     }
@@ -431,6 +491,7 @@
   function onLogoutEvent(ev){
     log('event','logout: '+ev.type);
     customerCtx=null;
+    setAuthBody(false);
   }
 
   LOGIN_EVENTS.forEach(function(ev){
@@ -529,6 +590,8 @@
   document.addEventListener('kpw:change',refresh);
 
   function init(){
+    injectAuthCSS();
+    setAuthBody(evalAuthState());
     refresh();
     log('boot','DOM ready, starting polling');
     startPolling();
@@ -547,7 +610,7 @@
     _debug:function(){
       var sfToken=readSfTokens();
       return{
-        version:'1.2.2',
+        version:'1.2.3',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
