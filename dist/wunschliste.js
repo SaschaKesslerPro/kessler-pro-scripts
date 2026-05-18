@@ -1,5 +1,9 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.0
+ * Kessler PRO · wunschliste.js v1.2.1
+ *
+ * Changes vs v1.2.0:
+ *   - FIX: Authorization header sends raw token (no Bearer prefix).
+ *     Shopify Customer Account API expects raw shcat_* tokens despite token_type=bearer.
  *
  * Major changes vs v1.1.0:
  *   1. Token source switched: localStorage._sf_oauth_tokens.tokens.access_token
@@ -52,7 +56,7 @@
     }
   }
 
-  log('boot','v1.2.0 starting');
+  log('boot','v1.2.1 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -183,7 +187,7 @@
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'Authorization':'Bearer '+token
+        'Authorization':token
       },
       body:JSON.stringify({query:query,variables:variables||{}})
     }).then(function(r){
@@ -521,7 +525,7 @@
     _debug:function(){
       var sfToken=readSfTokens();
       return{
-        version:'1.2.0',
+        version:'1.2.1',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
