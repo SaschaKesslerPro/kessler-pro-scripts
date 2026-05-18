@@ -1,27 +1,32 @@
 /*!
- * Kessler PRO · wunschliste.js v1.1.0 — Diagnose-Pass
+ * Kessler PRO · wunschliste.js v1.2.0
  *
- * Changes vs v1.0.0:
- *   1. Console-logging mit [KPW] prefix + 120-entry log-buffer in KPW._debug()
- *   2. Authorization header gets "Bearer " prefix (was: raw token)
- *   3. Customer-detection: 3 strategies in parallel — events (12 names) + polling
- *      window.shopyflow (500ms × 60 ticks = 30s) + window.shopyflow.config snapshot
- *   4. Shop-ID resolution: tries window.shopyflow.config.shopId first, falls back
- *      to hardcoded 100010033498
- *   5. GraphQL fetch wrapper logs status + parses errors + 300-char body preview
- *      on parse-fail
- *   6. KPW._debug() now returns {version, customerCtx, list, logs, shopyflow,
- *      resolvedEndpoint, pollState}
+ * Major changes vs v1.1.0:
+ *   1. Token source switched: localStorage._sf_oauth_tokens.tokens.access_token
+ *      (Shopyflow's getCustomer() only returns {id, email, tags} — no token —
+ *       so we read OAuth tokens directly from where Shopyflow caches them.)
+ *   2. Expiry-check via parsed.expiresAt (Date.now() comparison)
+ *   3. storage-event listener for cross-tab reactive updates (logout / token refresh)
+ *   4. Polling now scans localStorage instead of customer-object
+ *   5. KPW._debug() exposes tokenInfo (expiresAt, msUntilExpiry, source) without
+ *      leaking the access_token string itself
  *
- * Toggle: window.__kpWlVerbose = false   // before bootstrap loads, to silence console
+ * Architecture:
+ *   1. localStorage (kp_wl_v1) = source of truth for wishlist items
+ *   2. Customer Account API Metafield (kessler.wishlist JSON) for cross-device sync
+ *   3. Token acquired from localStorage._sf_oauth_tokens (Shopyflow OAuth cache)
+ *   4. Universal-load (every page) for header counter
+ *   5. DOM render only on .kp-wishlist-grid pages
  *
  * Public API unchanged: window.KPW = { get, has, add, remove, count, sync, _debug }
+ * Toggle: window.__kpWlVerbose = false (before bootstrap) to silence console
  */
 (function(){
   if(window.__kpWishlistV1)return;
   window.__kpWishlistV1=true;
 
   var KEY='kp_wl_v1';
+  var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var MF_NS='kessler';
   var MF_KEY='wishlist';
   var SYNC_DEBOUNCE=1500;
@@ -29,7 +34,7 @@
   var API_VERSION='2024-10';
 
   // -----------------------------------------------------------------
-  // Diagnostic logging
+  // Logging
   // -----------------------------------------------------------------
   var LOG_BUFFER_MAX=120;
   var logs=[];
@@ -47,10 +52,10 @@
     }
   }
 
-  log('boot','v1.1.0 starting');
+  log('boot','v1.2.0 starting');
 
   // -----------------------------------------------------------------
-  // localStorage layer
+  // localStorage layer (wishlist items)
   // -----------------------------------------------------------------
   function read(){
     try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}
@@ -92,36 +97,52 @@
   }
 
   // -----------------------------------------------------------------
-  // Shopyflow runtime introspection
+  // OAuth token from Shopyflow's localStorage cache
   // -----------------------------------------------------------------
-  var customerCtx=null;
-  var syncTimer=null;
-  var pollTimer=null;
-  var pollCount=0;
-  var POLL_MAX=60; // 30s @ 500ms
+  function readSfTokens(){
+    try{
+      var raw=localStorage.getItem(TOKEN_STORAGE_KEY);
+      if(!raw)return null;
+      var parsed=JSON.parse(raw);
+      if(!parsed||!parsed.tokens||!parsed.tokens.access_token)return null;
+      var now=Date.now();
+      var expiresAt=parsed.expiresAt||0;
+      return {
+        accessToken:parsed.tokens.access_token,
+        tokenType:parsed.tokens.token_type||'bearer',
+        refreshToken:parsed.tokens.refresh_token,
+        expiresAt:expiresAt,
+        expired:expiresAt>0&&now>=expiresAt,
+        msUntilExpiry:expiresAt-now
+      };
+    }catch(e){
+      log('storage','token-parse-fail',{err:String(e)});
+      return null;
+    }
+  }
 
+  // -----------------------------------------------------------------
+  // Shopyflow runtime introspection (for shopId resolution + diagnostics)
+  // -----------------------------------------------------------------
   function snapshotShopyflow(){
     var sf=window.shopyflow;
     if(!sf)return null;
     var snap={
       type:typeof sf,
-      keys:[],
-      hasCustomer:false,
       hasConfig:false,
-      hasGetCustomer:false
+      keys:[]
     };
     try{
-      snap.keys=Object.keys(sf).slice(0,30);
-      snap.hasCustomer=!!sf.customer;
+      snap.keys=Object.keys(sf).slice(0,40);
       snap.hasConfig=!!sf.config;
-      snap.hasGetCustomer=typeof sf.getCustomer==='function';
-      if(sf.customer){
-        snap.customerKeys=Object.keys(sf.customer).slice(0,20);
-        snap.customerHasToken=!!(sf.customer.accessToken||sf.customer.token||sf.customer.customerAccessToken||sf.customer.access_token);
-      }
       if(sf.config){
         snap.configKeys=Object.keys(sf.config).slice(0,20);
-        snap.shopId=sf.config.shopId||sf.config.shop_id||sf.config.shopID||null;
+        var sid=sf.config.shopId||sf.config.shop_id||sf.config.shopID;
+        if(sid){
+          // shopId might be "gid://shopify/Shop/100010033498" — extract numeric
+          var m=String(sid).match(/(\d+)$/);
+          snap.shopId=m?m[1]:String(sid);
+        }
       }
     }catch(e){snap.err=String(e)}
     return snap;
@@ -131,8 +152,12 @@
     try{
       var sf=window.shopyflow;
       if(sf&&sf.config){
-        var id=sf.config.shopId||sf.config.shop_id||sf.config.shopID;
-        if(id)return String(id);
+        var sid=sf.config.shopId||sf.config.shop_id||sf.config.shopID;
+        if(sid){
+          // Extract trailing digits if it's a GID like "gid://shopify/Shop/100010033498"
+          var m=String(sid).match(/(\d+)$/);
+          if(m)return m[1];
+        }
       }
     }catch(e){}
     return SHOP_ID_FALLBACK;
@@ -145,6 +170,12 @@
   // -----------------------------------------------------------------
   // GraphQL with telemetry
   // -----------------------------------------------------------------
+  var customerCtx=null;
+  var syncTimer=null;
+  var pollTimer=null;
+  var pollCount=0;
+  var POLL_MAX=60; // 30s @ 500ms
+
   function gql(query,variables,token,opName){
     var ep=gqlEndpoint();
     log('gql',opName+' fetch start',{endpoint:ep,tokenPreview:token?token.slice(0,12)+'\u2026':'(none)'});
@@ -216,12 +247,37 @@
     return out;
   }
 
+  function refreshTokenFromStorage(){
+    // Re-read token from storage in case it rotated (e.g. silent refresh)
+    var sfToken=readSfTokens();
+    if(!sfToken){
+      if(customerCtx){
+        log('ctx','token disappeared from storage — clearing customerCtx');
+        customerCtx=null;
+      }
+      return false;
+    }
+    if(sfToken.expired){
+      log('ctx','token expired in storage',{expiresAt:sfToken.expiresAt});
+      customerCtx=null;
+      return false;
+    }
+    if(!customerCtx){
+      customerCtx={token:sfToken.accessToken,source:'storage-fresh',expiresAt:sfToken.expiresAt};
+    }else if(customerCtx.token!==sfToken.accessToken){
+      log('ctx','token rotated, updating customerCtx');
+      customerCtx.token=sfToken.accessToken;
+      customerCtx.expiresAt=sfToken.expiresAt;
+    }
+    return true;
+  }
+
   function sync(){
-    if(!customerCtx||!customerCtx.token){
-      log('sync','skipped \u2014 no customerCtx');
+    if(!refreshTokenFromStorage()){
+      log('sync','skipped \u2014 no valid token');
       return Promise.resolve(false);
     }
-    log('sync','start');
+    log('sync','start',{msUntilExpiry:customerCtx.expiresAt-Date.now()});
     var local=read();
     return readMetafield(customerCtx.token).then(function(remote){
       var merged=mergeNewer(local,remote);
@@ -242,14 +298,87 @@
   }
 
   function queueSync(){
-    if(!customerCtx){log('sync','queueSync skipped \u2014 no ctx');return}
+    if(!customerCtx){
+      var sfToken=readSfTokens();
+      if(sfToken&&!sfToken.expired){
+        customerCtx={token:sfToken.accessToken,source:'queueSync-pickup',expiresAt:sfToken.expiresAt};
+        log('ctx','token picked up at queueSync');
+      }else{
+        log('sync','queueSync skipped \u2014 no token in storage');
+        return;
+      }
+    }
     if(syncTimer)clearTimeout(syncTimer);
     syncTimer=setTimeout(function(){syncTimer=null;sync()},SYNC_DEBOUNCE);
   }
 
   // -----------------------------------------------------------------
-  // Customer-login detection: events + polling in parallel
+  // Customer detection: storage poll + storage-event + legacy events
   // -----------------------------------------------------------------
+
+  function pollProbe(){
+    pollCount++;
+    var sfToken=readSfTokens();
+    if(!sfToken){
+      if(pollCount===1||pollCount%10===0)log('poll','no oauth tokens in localStorage',{tick:pollCount});
+      return;
+    }
+    if(sfToken.expired){
+      if(pollCount===1||pollCount%10===0)log('poll','token expired in storage',{tick:pollCount,expiresAt:sfToken.expiresAt});
+      return;
+    }
+    if(customerCtx&&customerCtx.token===sfToken.accessToken){
+      // already have it
+      stopPolling();
+      return;
+    }
+    log('poll','token acquired from localStorage',{
+      source:'poll',
+      tick:pollCount,
+      msUntilExpiry:sfToken.msUntilExpiry,
+      tokenPreview:sfToken.accessToken.slice(0,12)+'\u2026'
+    });
+    customerCtx={token:sfToken.accessToken,source:'localStorage',expiresAt:sfToken.expiresAt};
+    sync();
+    stopPolling();
+  }
+
+  function startPolling(){
+    if(pollTimer)return;
+    pollTimer=setInterval(function(){
+      if(pollCount>=POLL_MAX){stopPolling();return}
+      pollProbe();
+    },500);
+    log('poll','started (500ms \u00d7 60 = 30s, watching localStorage)');
+    // also probe immediately on start
+    pollProbe();
+  }
+
+  function stopPolling(){
+    if(pollTimer){
+      clearInterval(pollTimer);
+      pollTimer=null;
+      log('poll','stopped',{tick:pollCount});
+    }
+  }
+
+  // Cross-tab reactive: storage event fires when ANOTHER tab modifies localStorage
+  function onStorageEvent(e){
+    if(e.key!==TOKEN_STORAGE_KEY)return;
+    log('storage-event','_sf_oauth_tokens changed in another tab');
+    var sfToken=readSfTokens();
+    if(sfToken&&!sfToken.expired){
+      customerCtx={token:sfToken.accessToken,source:'storage-event',expiresAt:sfToken.expiresAt};
+      log('storage-event','token acquired, syncing');
+      sync();
+    }else if(!sfToken){
+      log('storage-event','tokens cleared (logout in another tab)');
+      customerCtx=null;
+    }
+  }
+  window.addEventListener('storage',onStorageEvent);
+
+  // Legacy event listeners (kept for future compatibility — won't hurt if never fires)
   var LOGIN_EVENTS=[
     'shopyflow:customer-login','shopyflow:login','sf-customer-login',
     'shopyflow:customer:login','shopyflow:auth:login','sf:customer-login',
@@ -262,43 +391,12 @@
     'customer:logout','customer-logout','sf-logout','logout'
   ];
 
-  function extractToken(payload){
-    if(!payload)return null;
-    var c=payload.detail||payload;
-    if(!c||typeof c!=='object')return null;
-    var token=c.accessToken||c.token||c.customerAccessToken||c.access_token;
-    if(token)return token;
-    if(c.customer){
-      token=c.customer.accessToken||c.customer.token||c.customer.customerAccessToken||c.customer.access_token;
-      if(token)return token;
-    }
-    if(c.data){
-      token=c.data.accessToken||c.data.token||c.data.customerAccessToken;
-      if(token)return token;
-    }
-    return null;
-  }
-
-  function describePayload(payload){
-    if(!payload)return null;
-    var c=payload.detail||payload;
-    if(!c)return {empty:true};
-    try{
-      return {
-        topKeys:Object.keys(c).slice(0,15),
-        hasCustomer:!!c.customer,
-        customerKeys:c.customer?Object.keys(c.customer).slice(0,15):null,
-        tokenFound:!!extractToken(payload)
-      };
-    }catch(e){return {err:String(e)}}
-  }
-
   function onLoginEvent(ev){
-    log('event','fired: '+ev.type,describePayload(ev));
-    var token=extractToken(ev);
-    if(token){
-      log('event','token acquired',{from:ev.type});
-      customerCtx={token:token,source:ev.type};
+    log('event','fired: '+ev.type);
+    // Don't trust event payload anymore — always re-read from storage
+    var sfToken=readSfTokens();
+    if(sfToken&&!sfToken.expired){
+      customerCtx={token:sfToken.accessToken,source:'event:'+ev.type,expiresAt:sfToken.expiresAt};
       sync();
       stopPolling();
     }
@@ -317,70 +415,6 @@
     document.addEventListener(ev,onLogoutEvent);
     window.addEventListener(ev,onLogoutEvent);
   });
-
-  // Polling for window.shopyflow
-  function pollProbe(){
-    pollCount++;
-    var sf=window.shopyflow;
-    if(!sf){
-      if(pollCount===1||pollCount%10===0)log('poll','no window.shopyflow yet',{tick:pollCount});
-      return;
-    }
-    if(!window.__kpSfSnapped){
-      window.__kpSfSnapped=true;
-      log('poll','first shopyflow snapshot',snapshotShopyflow());
-    }
-    var customer=null;
-    try{
-      if(typeof sf.getCustomer==='function'){
-        customer=sf.getCustomer();
-        if(customer&&typeof customer.then==='function'){
-          customer.then(function(c){processCustomer(c,'getCustomer-promise')}).catch(function(){});
-          return;
-        }
-      }else if(sf.customer){
-        customer=sf.customer;
-      }
-    }catch(e){log('poll','introspect err',{err:String(e)})}
-    if(customer)processCustomer(customer,'poll');
-  }
-
-  function processCustomer(customer,source){
-    if(!customer)return;
-    var token=customer.accessToken||customer.token||customer.customerAccessToken||customer.access_token;
-    if(!token){
-      if(!window.__kpNoTokenLogged){
-        window.__kpNoTokenLogged=true;
-        log('poll','customer present but no token field',{
-          source:source,
-          keys:Object.keys(customer).slice(0,15)
-        });
-      }
-      return;
-    }
-    if(customerCtx&&customerCtx.token===token)return;
-    log('poll','token acquired',{source:source});
-    customerCtx={token:token,source:source};
-    sync();
-    stopPolling();
-  }
-
-  function startPolling(){
-    if(pollTimer)return;
-    pollTimer=setInterval(function(){
-      if(pollCount>=POLL_MAX){stopPolling();return}
-      pollProbe();
-    },500);
-    log('poll','started (500ms \u00d7 60 = 30s)');
-  }
-
-  function stopPolling(){
-    if(pollTimer){
-      clearInterval(pollTimer);
-      pollTimer=null;
-      log('poll','stopped',{tick:pollCount});
-    }
-  }
 
   // -----------------------------------------------------------------
   // DOM rendering (wishlist page only)
@@ -435,6 +469,7 @@
     });
   }
 
+  // Universal toggle button (PDP/PLP heart icons, Phase 8)
   document.addEventListener('click',function(e){
     var btn=e.target.closest('[data-kp-wl-add]');
     if(!btn)return;
@@ -484,9 +519,22 @@
     count:count,
     sync:sync,
     _debug:function(){
+      var sfToken=readSfTokens();
       return{
-        version:'1.1.0',
-        customerCtx:customerCtx,
+        version:'1.2.0',
+        customerCtx:customerCtx?{
+          source:customerCtx.source,
+          tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
+          expiresAt:customerCtx.expiresAt,
+          msUntilExpiry:customerCtx.expiresAt-Date.now()
+        }:null,
+        sfToken:sfToken?{
+          tokenType:sfToken.tokenType,
+          expiresAt:sfToken.expiresAt,
+          msUntilExpiry:sfToken.msUntilExpiry,
+          expired:sfToken.expired,
+          tokenLen:sfToken.accessToken.length
+        }:null,
         list:read(),
         logs:logs.slice(),
         shopyflow:snapshotShopyflow(),
