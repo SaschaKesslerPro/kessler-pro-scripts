@@ -1,12 +1,11 @@
 /*!
- * Kessler PRO · headerscroll v1.5.10
- * v1.5.9 + Mobile Logo-Fix (icons margin-left:auto) + Desktop snappier .15s
+ * Kessler PRO · headerscroll v1.5.11
+ * v1.5.10 + Mobile: transition:none!important auf alle mobile-wrapper-Elemente
  *
- * CHANGES vs v1.5.9 (19.05.2026):
- *   - Mobile Logo-Position: korrigiert via .header_mobile-icons{margin-left:auto}
- *     (Designer-Struktur: keine Spacer-DIVs, sondern flex space-between)
- *   - Desktop transitions: .25s → .15s (snappier, Sascha-Feedback)
- *   - body{transition:padding-top}: .25s → .15s (synchron mit row transitions)
+ * CHANGES vs v1.5.10 (19.05.2026):
+ *   - @media (max-width:991px): transition:none + animation:none auf
+ *     .header_mobile-row + alle Kinder + mobile-wrapper. Killt jede
+ *     Designer-side oder Webflow-Interaction Animation für instant snap.
  *
  * UNVERÄNDERT: Sticky-Mechanik, Desktop-Logic-Flow, ResizeObserver auf Mobile,
  *   Counter-Logic, promo-banner-Handling
@@ -29,8 +28,9 @@
       '.kp-hdr-scrolled [data-header-part="scrolled-row"]{max-height:var(--kp-scrolled-h,96px);opacity:1}'+
       'body{transition:padding-top .15s '+ez+'}'+
     '}'+
-    // ─── Mobile-only: permanent compact + Logo links ───────────
+    // ─── Mobile-only: permanent compact + Logo links + NO transitions ─
     '@media (max-width:991px){'+
+      '.header_mobile-row,.header_mobile-row *,[data-header-part="mobile-wrapper"],[data-header-part="mobile-wrapper"] *{transition:none!important;animation:none!important}'+
       '.header_mobile-row{display:flex!important;flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;gap:12px!important;min-height:48px!important;padding-top:8px!important;padding-bottom:8px!important}'+
       '.header_mobile-logo{margin:0!important}'+
       '.header_mobile-icons{margin-left:auto!important}'+
