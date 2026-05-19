@@ -1,7 +1,13 @@
 /*!
- * Kessler PRO · headerscroll v1.5.5
+ * Kessler PRO · headerscroll v1.5.6
  * Grid-template-rows interpolation + position:sticky
  * Synthesis of 2026 best practices for smooth sticky-header state transitions
+ *
+ * KEY CHANGES from v1.5.5:
+ *   - FIX: Sentinel was at top:0 with negative rootMargin — caused initial
+ *          stuck=true (top-row + nav-row + promo all collapsed on page load).
+ *          Now sentinel sits at document y=100, no rootMargin, attached to <html>
+ *          to avoid body.padding-top side effects.
  *
  * KEY CHANGES from v1.5.4:
  *   - position: fixed → position: sticky (eliminates body.paddingTop sync entirely)
@@ -103,9 +109,11 @@
   initCounters();
 
   // ─── Sentinel for IntersectionObserver-based state trigger ─
+  // Positioned at document y=100; appended to <html> to avoid body.padding-top
+  // side effects. When user scrolls > 100px, sentinel exits viewport → stuck.
   var sent=document.createElement('div');
-  sent.style.cssText='position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none';
-  document.body.insertBefore(sent,document.body.firstChild);
+  sent.style.cssText='position:absolute;top:100px;left:0;width:1px;height:1px;pointer-events:none';
+  document.documentElement.appendChild(sent);
 
   // ─── Breakpoint tracking via MediaQueryList.onchange ───────
   var promoHidden=false;
@@ -114,7 +122,8 @@
   dq.onchange=function(e){desk=e.matches};
 
   // ─── Desktop sticky-state toggle ───────────────────────────
-  // rootMargin -100px 0 0 0 → observer triggers when user scrolls past 100px
+  // Sentinel at document y=100. When scrollY > 100, sentinel exits viewport
+  // top → !isIntersecting → stuck=true.
   new IntersectionObserver(function(entries){
     if(!desk)return;
     var stuck=!entries[0].isIntersecting;
@@ -123,7 +132,7 @@
       hdr.classList.add('kp-hdr-promo-hidden');
       promoHidden=true;
     }
-  },{threshold:0,rootMargin:'-100px 0 0 0'}).observe(sent);
+  },{threshold:0}).observe(sent);
 
   // ─── Mobile 60/20-Logic (kept from v1.5.4) ─────────────────
   var t=false;
