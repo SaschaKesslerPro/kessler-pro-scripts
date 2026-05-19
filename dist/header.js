@@ -1,14 +1,15 @@
 /*!
- * Kessler PRO · headerscroll v1.5.8
- * v1.5.7 + Mobile-Fix: @media-Wrap für Desktop-only CSS, ResizeObserver zurück auf Mobile
+ * Kessler PRO · headerscroll v1.5.9
+ * v1.5.8 + Mobile permanent shrunk + Logo links neben Burger
  *
- * FIXES vs v1.5.7 (19.05.2026):
- *   - Row-Transitions für top/nav/scrolled in @media(min-width:992px) eingeschlossen
- *     → auf Mobile keine CSS-Override mehr, Designer-Layout bleibt unberührt
- *   - body{transition:padding-top} ebenfalls nur Desktop (kein Mobile-Lag)
- *   - Temporäres .kp-hdr-scrolled Class-Toggle entfernt → scrH=96 hardcoded
- *   - Mobile zurück zu ResizeObserver-Pattern aus v1.5.4 (bewährt)
- *   - Desktop behält die v1.5.7-Verbesserungen (measured heights, class-toggle setBodyPad)
+ * CHANGES vs v1.5.8 (19.05.2026):
+ *   - Mobile: permanent shrunk state (kein Toggle mehr) via @media (max-width:991px)
+ *   - Mobile: Logo links via justify-content:flex-start + ersten Spacer ausblenden
+ *   - Mobile scroll-handler-Branch deaktiviert (kein add/remove kp-hdr-mobile-shrunk mehr)
+ *   - CSS-Regel '.kp-hdr-mobile-shrunk' entfernt (redundant)
+ *
+ * UNVERÄNDERT: Desktop-Logic 100%, ResizeObserver auf Mobile,
+ *   Counter-Logic, position:fixed Sticky-Mechanik, promo-banner-Handling
  */
 (function(){
   if(window.__kpHdrScrollV1)return;window.__kpHdrScrollV1=true;
@@ -28,12 +29,16 @@
       '.kp-hdr-scrolled [data-header-part="scrolled-row"]{max-height:var(--kp-scrolled-h,96px);opacity:1}'+
       'body{transition:padding-top .25s '+ez+'}'+
     '}'+
+    // ─── Mobile-only: permanent shrunk + Logo links ────────────
+    '@media (max-width:991px){'+
+      '[data-header-part="mobile-row"]{min-height:48px!important;padding-top:8px!important;padding-bottom:8px!important;justify-content:flex-start!important}'+
+      '[data-header-part="mobile-row"] > [class*="spacer"]:first-of-type,'+
+      '[data-header-part="mobile-row"] > [class*="Spacer"]:first-of-type,'+
+      '[data-header-part="mobile-row"] > div.spacer:first-of-type{display:none!important}'+
+    '}'+
     // ─── Universal: promo-banner ───────────────────────────────
     '[data-header-part="promo-banner"]{transition:transform .25s '+ez+',opacity .25s '+ez+',max-height .25s '+ez+',padding-top .25s '+ez+',padding-bottom .25s '+ez+';overflow:hidden;max-height:var(--kp-promo-h,60px)}'+
     '.kp-hdr-promo-hidden [data-header-part="promo-banner"]{transform:translateY(-100%);opacity:0;max-height:0;padding-top:0;padding-bottom:0}'+
-    // ─── Mobile-only: mobile-row transition ────────────────────
-    '[data-header-part="mobile-row"]{transition:min-height .15s '+ez+',padding-top .15s '+ez+',padding-bottom .15s '+ez+'}'+
-    '.kp-hdr-mobile-shrunk [data-header-part="mobile-row"]{min-height:48px;padding-top:8px;padding-bottom:8px}'+
     // ─── Counter visibility ────────────────────────────────────
     '.m-icon-link{position:relative}'+
     '.kp-icon-counter{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;background:#1e1e1e;color:#fff;font-size:10px;line-height:1;border-radius:8px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-weight:500}'+
@@ -53,7 +58,6 @@
     topH=topEl?topEl.offsetHeight:80;
     navH=navEl?navEl.offsetHeight:50;
     promoH=promoEl?promoEl.offsetHeight:60;
-    // scrH stays at 96 (Designer convention from v1.5.4 hardcoded value)
     hdr.style.setProperty('--kp-top-h',topH+'px');
     hdr.style.setProperty('--kp-nav-h',navH+'px');
     hdr.style.setProperty('--kp-scrolled-h',scrH+'px');
@@ -63,14 +67,13 @@
       var p=promoHidden?0:promoH;
       document.body.style.paddingTop=(scrolled?scrH:(p+topH+navH))+'px';
     };
-    // Initial snap (no transition for first set) then enable CSS transition
     document.body.style.transition='padding-top 0s';
     setBodyPad(false);
     requestAnimationFrame(function(){requestAnimationFrame(function(){
       document.body.style.transition='';
     })});
   } else {
-    // ─── Mobile: live sync via ResizeObserver (bewährt v1.5.4) ─
+    // ─── Mobile: live sync (header is permanent compact now) ──
     setBodyPad=function(){document.body.style.paddingTop=hdr.offsetHeight+'px'};
     setBodyPad();
     if(window.ResizeObserver){
@@ -96,31 +99,20 @@
   initCounters();
 
   // ─── Scroll handler (RAF-throttled) ─────────────────────────
+  // Mobile: no scroll-actions — header permanent compact
   function fire(){
     var y=window.scrollY||window.pageYOffset;
-    if(desk){
-      if(y>100){
-        if(!hdr.classList.contains('kp-hdr-scrolled')){
-          hdr.classList.add('kp-hdr-scrolled');
-          if(!promoHidden){hdr.classList.add('kp-hdr-promo-hidden');promoHidden=true}
-          setBodyPad(true);
-        }
-      } else if(y<10){
-        if(hdr.classList.contains('kp-hdr-scrolled')){
-          hdr.classList.remove('kp-hdr-scrolled');
-          setBodyPad(false);
-        }
+    if(!desk)return;
+    if(y>100){
+      if(!hdr.classList.contains('kp-hdr-scrolled')){
+        hdr.classList.add('kp-hdr-scrolled');
+        if(!promoHidden){hdr.classList.add('kp-hdr-promo-hidden');promoHidden=true}
+        setBodyPad(true);
       }
-    }else{
-      if(y>60){
-        if(!hdr.classList.contains('kp-hdr-mobile-shrunk')){
-          hdr.classList.add('kp-hdr-mobile-shrunk');
-          if(!promoHidden){hdr.classList.add('kp-hdr-promo-hidden');promoHidden=true}
-        }
-      } else if(y<30){
-        if(hdr.classList.contains('kp-hdr-mobile-shrunk')){
-          hdr.classList.remove('kp-hdr-mobile-shrunk');
-        }
+    } else if(y<10){
+      if(hdr.classList.contains('kp-hdr-scrolled')){
+        hdr.classList.remove('kp-hdr-scrolled');
+        setBodyPad(false);
       }
     }
   }
