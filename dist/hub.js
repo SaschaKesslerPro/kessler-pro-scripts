@@ -1,22 +1,25 @@
 /*!
- * Kessler PRO · hub.js v1.0.0
+ * Kessler PRO · hub.js v1.1.0
  *
- * Phase 8.1 MVP — Customer-Data Hydration für Account-Pages.
+ * Phase 8.2 — Customer-Data Hydration mit Numeric Counters.
  *
- * Scope v1.0.0:
+ * Scope v1.1.0 (Δ gegen v1.0.0):
+ *   + 3 DOM-Counts via data-kph-count:
+ *       * orders    → customer.orders.nodes.length
+ *       * wishlist  → JSON.parse(metafield.value).length
+ *       * addresses → customer.addresses.nodes.length
+ *     mit Singular/Plural-Label und Empty-State-Text aus countLabels.
+ *   + Customer-Query erweitert um orders/addresses (id-only) + wishlist metafield.
+ *   + STATE_SELECTOR jetzt '[data-kph-bind],[data-kph-count]' (loading/ready/error
+ *     greift auch auf Count-Slots).
+ *
+ * Unverändert aus v1.0.0:
  *   - Bootstrap + Auth-Token-Acquisition (mirror wunschliste.js pattern)
- *   - Single Customer-Query (firstName/lastName/emailAddress)
- *   - 3 DOM-Bindings via data-kph-bind:
- *       * greeting → Heading komplett-Replace mit Fallback
- *       * email    → Schwarze Card Email-Span
- *       * avatar   → Header Avatar-Initial (email[0].toUpperCase())
- *   - Loading / Ready / Error CSS-States via .kph-loading / .kph-ready / .kph-error
+ *   - 3 DOM-Bindings via data-kph-bind: greeting / email / avatar
+ *   - Public API: window.KPH = { version, refresh, _debug }
+ *   - Verbose toggle: window.__kpHubVerbose = false silences console.
  *
- * Public API: window.KPH = { version, refresh, _debug }
- * Verbose toggle: window.__kpHubVerbose = false (before bootstrap) silences console.
- *
- * Future scope (Phase 8.2+):
- *   - data-kph-count="orders|wishlist|addresses"   → numeric counters
+ * Future scope (Phase 8.3+):
  *   - data-kph-card="order-current"                → aktuelle Bestellung
  *   - data-kph-list="orders" + data-kph-tpl=…      → Order-Liste
  *   - data-kph-show-if="orders.empty"              → Empty-State-Conditional
@@ -26,7 +29,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.0.0';
+  var VERSION='1.1.0';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -127,11 +130,17 @@
     });
   }
 
-  // Phase 8.1 query — minimal customer fields
-  var CUSTOMER_QUERY_V1='{customer{id firstName lastName displayName emailAddress{emailAddress}}}';
+  // Phase 8.2 query — customer + counts (id-only sub-selection minimizes cost)
+  var CUSTOMER_QUERY_V11='{customer{'+
+    'id firstName lastName displayName '+
+    'emailAddress{emailAddress} '+
+    'addresses(first:20){nodes{id}} '+
+    'orders(first:50,sortKey:PROCESSED_AT,reverse:true){nodes{id}} '+
+    'metafield(namespace:"kessler",key:"wishlist"){value}'+
+  '}}';
 
   function fetchCustomer(token){
-    return gql(CUSTOMER_QUERY_V1,token,'fetchCustomer').then(function(res){
+    return gql(CUSTOMER_QUERY_V11,token,'fetchCustomer').then(function(res){
       if(!res.ok)return null;
       var c=res.json&&res.json.data&&res.json.data.customer;
       if(!c){
@@ -141,14 +150,17 @@
       log('parse','customer ok',{
         fields:Object.keys(c),
         firstName:c.firstName,
-        hasEmail:!!(c.emailAddress&&c.emailAddress.emailAddress)
+        hasEmail:!!(c.emailAddress&&c.emailAddress.emailAddress),
+        ordersLen:c.orders&&c.orders.nodes?c.orders.nodes.length:0,
+        addressesLen:c.addresses&&c.addresses.nodes?c.addresses.nodes.length:0,
+        hasWishlistMf:!!(c.metafield&&c.metafield.value)
       });
       return c;
     });
   }
 
   // -----------------------------------------------------------------
-  // Binding resolvers
+  // Binding resolvers (text-replace via data-kph-bind)
   // -----------------------------------------------------------------
   var bindings={
     greeting:function(c){
@@ -165,10 +177,41 @@
   };
 
   // -----------------------------------------------------------------
+  // Count resolvers + Labels (via data-kph-count)
+  // -----------------------------------------------------------------
+  var counters={
+    orders:function(c){
+      return c&&c.orders&&c.orders.nodes?c.orders.nodes.length:0;
+    },
+    wishlist:function(c){
+      try{
+        var v=c&&c.metafield&&c.metafield.value;
+        if(!v)return 0;
+        var arr=JSON.parse(v);
+        return Array.isArray(arr)?arr.length:0;
+      }catch(e){
+        log('count','wishlist-parse-fail',{err:String(e)});
+        return 0;
+      }
+    },
+    addresses:function(c){
+      return c&&c.addresses&&c.addresses.nodes?c.addresses.nodes.length:0;
+    }
+  };
+
+  var countLabels={
+    orders:   {singular:'Bestellung',                 plural:'Bestellungen',           empty:'Keine Bestellungen'},
+    wishlist: {singular:'St\u00fcck gespeichert',     plural:'St\u00fccke gespeichert', empty:'Noch nichts gespeichert'},
+    addresses:{singular:'Adresse',                    plural:'Adressen',                empty:'Noch keine Adresse'}
+  };
+
+  // -----------------------------------------------------------------
   // DOM rendering
   // -----------------------------------------------------------------
+  var STATE_SELECTOR='[data-kph-bind],[data-kph-count]';
+
   function setStateClass(state){
-    var nodes=document.querySelectorAll('[data-kph-bind]');
+    var nodes=document.querySelectorAll(STATE_SELECTOR);
     for(var i=0;i<nodes.length;i++){
       var el=nodes[i];
       el.classList.remove('kph-loading','kph-ready','kph-error');
@@ -176,15 +219,15 @@
     }
   }
 
-  function render(customer){
+  function renderBindings(customer){
     var nodes=document.querySelectorAll('[data-kph-bind]');
-    log('render','nodes found',{count:nodes.length});
+    log('render','bind nodes found',{count:nodes.length});
     for(var i=0;i<nodes.length;i++){
       var el=nodes[i];
       var key=el.getAttribute('data-kph-bind');
       var resolver=bindings[key];
       if(!resolver){
-        log('render','no resolver for key',{key:key});
+        log('render','no resolver for bind key',{key:key});
         continue;
       }
       try{
@@ -195,6 +238,38 @@
         log('render','resolver-fail',{key:key,err:String(e)});
       }
     }
+  }
+
+  function renderCounts(customer){
+    var nodes=document.querySelectorAll('[data-kph-count]');
+    log('render','count nodes found',{count:nodes.length});
+    for(var i=0;i<nodes.length;i++){
+      var el=nodes[i];
+      var key=el.getAttribute('data-kph-count');
+      var resolver=counters[key];
+      var labels=countLabels[key];
+      if(!resolver||!labels){
+        log('render','no resolver/labels for count key',{key:key});
+        continue;
+      }
+      try{
+        var n=resolver(customer);
+        if(n===0){
+          el.textContent=labels.empty;
+        }else{
+          var lbl=n===1?labels.singular:labels.plural;
+          el.innerHTML='<span>'+n+'</span> '+lbl;
+        }
+        log('render','count '+key+'='+n);
+      }catch(e){
+        log('render','count-fail',{key:key,err:String(e)});
+      }
+    }
+  }
+
+  function render(customer){
+    renderBindings(customer);
+    renderCounts(customer);
     setStateClass('ready');
   }
 
