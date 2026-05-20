@@ -1,13 +1,16 @@
 /*!
- * Kessler PRO · hub.js v1.1.1
+ * Kessler PRO · hub.js v1.1.2
  *
  * Phase 8.2 — Customer-Data Hydration mit Numeric Counters.
  *
- * v1.1.1 Patch (Δ gegen v1.1.0):
- *   + fetchInFlight Guard verhindert Doppel-Init Race-Condition:
- *     init() startete setInterval, weil customerCtx beim sync-Check noch null war,
- *     obwohl fetchCustomer schon lief. Folge: 2× fetchCustomer pro Page-Load.
- *     Fix: fetchInFlight Flag schützt re-entry.
+ * v1.1.2 Patch (Δ gegen v1.1.1):
+ *   + init() prüft jetzt auch fetchInFlight, bevor das Polling-Interval startet.
+ *     v1.1.1 hatte den Guard nur in attemptInit() — Polling wurde trotzdem started
+ *     und feuerte 500ms später ein zweites attemptInit, das nach Promise-Resolve
+ *     fetchInFlight=false sah und einen 2. fetchCustomer Call auslöste.
+ *
+ * v1.1.1 Patch (unverändert):
+ *   + fetchInFlight Guard in attemptInit() verhindert Re-Entry während Promise pending.
  *
  * Scope v1.1.0 (unverändert):
  *   + 3 DOM-Counts via data-kph-count:
@@ -35,7 +38,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.1.1';
+  var VERSION='1.1.2';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -325,8 +328,8 @@
     setStateClass('loading');
     // First attempt immediate
     attemptInit();
-    // Subsequent attempts every POLL_INTERVAL_MS
-    if(!customerCtx&&!pollTimer){
+    // Subsequent attempts every POLL_INTERVAL_MS — only if first attempt did not already trigger a fetch
+    if(!customerCtx&&!pollTimer&&!fetchInFlight){
       pollTimer=setInterval(attemptInit,POLL_INTERVAL_MS);
     }
   }
