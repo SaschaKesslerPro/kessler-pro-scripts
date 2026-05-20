@@ -1,9 +1,15 @@
 /*!
- * Kessler PRO · hub.js v1.1.0
+ * Kessler PRO · hub.js v1.1.1
  *
  * Phase 8.2 — Customer-Data Hydration mit Numeric Counters.
  *
- * Scope v1.1.0 (Δ gegen v1.0.0):
+ * v1.1.1 Patch (Δ gegen v1.1.0):
+ *   + fetchInFlight Guard verhindert Doppel-Init Race-Condition:
+ *     init() startete setInterval, weil customerCtx beim sync-Check noch null war,
+ *     obwohl fetchCustomer schon lief. Folge: 2× fetchCustomer pro Page-Load.
+ *     Fix: fetchInFlight Flag schützt re-entry.
+ *
+ * Scope v1.1.0 (unverändert):
  *   + 3 DOM-Counts via data-kph-count:
  *       * orders    → customer.orders.nodes.length
  *       * wishlist  → JSON.parse(metafield.value).length
@@ -29,7 +35,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.1.0';
+  var VERSION='1.1.1';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -277,6 +283,7 @@
   // Init flow with token polling
   // -----------------------------------------------------------------
   var customerCtx=null;
+  var fetchInFlight=false;
   var pollCount=0;
   var pollTimer=null;
   var startTs=0;
@@ -284,14 +291,16 @@
   function attemptInit(){
     pollCount++;
     var tok=readSfTokens();
-    if(tok&&!tok.expired&&tok.accessToken){
+    if(tok&&!tok.expired&&tok.accessToken&&!fetchInFlight){
       clearInterval(pollTimer);pollTimer=null;
+      fetchInFlight=true;
       log('auth','token acquired',{
         attempts:pollCount,
         elapsedMs:Date.now()-startTs,
         msUntilExpiry:tok.msUntilExpiry
       });
       return fetchCustomer(tok.accessToken).then(function(c){
+        fetchInFlight=false;
         if(!c){
           log('init','customer null \u2014 setting error state');
           setStateClass('error');
@@ -330,6 +339,7 @@
     refresh:function(){
       log('api','refresh called');
       customerCtx=null;
+      fetchInFlight=false;
       init();
     },
     _debug:function(){
