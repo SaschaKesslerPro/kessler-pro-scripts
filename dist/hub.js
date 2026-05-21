@@ -1,57 +1,56 @@
 /*!
- * Kessler PRO · hub.js v1.2.0
+ * Kessler PRO · hub.js v1.3.0
  *
- * Phase 8.3 — Aktuelle Bestellung Card mit Status-Mapping, ETA, Tracking-Link.
+ * Phase 8.4 — Profil & Einstellungen (Customer-Data Edit)
  *
- * v1.2.0 Patch (Δ gegen v1.1.2):
- *   + CUSTOMER_QUERY_V12: orders.nodes erweitert um name/processedAt/financial+fulfillment
- *     Status/statusPageUrl/fulfillments(first:1){nodes{status,estimatedDeliveryAt,
- *     trackingInformation{number,url,company}}}. Query-Cost ~30/7500.
- *   + Neues data-kph-card="order-current" mit Bind-Slots:
- *       * data-kph-bind="order.name"     → Order-Number (textContent)
- *       * data-kph-bind="order.status"   → Status-Label (textContent)
- *       * data-kph-bind="order.eta"      → ETA "DD.MM.YYYY" (textContent)
- *       * data-kph-bind="order.link"     → /account/bestellung-detail?id=… (href)
- *       * data-kph-bind="order.tracking" → trackingInformation.url (href)
- *   + Neue Show-If-Mechanik via data-kph-show-if (initial display:none in Site CSS):
- *       * orders.empty / orders.notEmpty
- *       * wishlist.empty / wishlist.notEmpty
- *       * addresses.empty / addresses.notEmpty
- *       * order.hasEta / order.hasTracking
- *   + Bindings-Schema unified: {kind:'text'|'href', resolve:fn}.
- *     Rückwärts-kompatibel: greeting/email/avatar wurden auf neues Schema migriert.
- *   + STATE_SELECTOR erweitert um [data-kph-show-if].
- *   + Status-Label DE (Kessler-Brand, Manufaktur-Sprache):
- *       PAID + UNFULFILLED/IN_PROGRESS → "in Produktion"
- *       PAID + PARTIALLY_FULFILLED     → "teilweise versandt"
- *       PAID + FULFILLED               → "versandt"
- *       PAID + ON_HOLD                 → "vorgemerkt"
- *       REFUNDED / VOIDED              → "storniert"
- *       PARTIALLY_REFUNDED             → "teilrückerstattet"
- *       PENDING / AUTHORIZED           → "Zahlung in Bearbeitung"
- *       (fallback)                     → "in Bearbeitung"
+ * v1.3.0 Patch (Δ gegen v1.2.0):
+ *   + CUSTOMER_QUERY_V13: erweitert um emailAddress.marketingState +
+ *     2 metafield-Aliases (localeMf, orderUpdatesMf) im kessler_profile-Namespace.
+ *     Wishlist-Metafield via Alias wishlistMf umbenannt (vorher: metafield singular).
+ *   + 6 neue Profile-Bindings:
+ *       * profile.firstName    → input.value (kind:'value')
+ *       * profile.lastName     → input.value (kind:'value')
+ *       * profile.email        → input.value + readOnly=true (kind:'value-readonly')
+ *       * profile.locale       → select.value (kind:'select', default 'DE')
+ *       * profile.newsletter   → DIV-toggle via .kp-toggle--on class (kind:'toggle')
+ *       * profile.orderUpdates → DIV-toggle via .kp-toggle--on class (kind:'toggle')
+ *   + Neue Render-kinds: 'value', 'value-readonly', 'select', 'toggle'
+ *   + Toggle-Click-Handler für [data-kph-action="toggle"] (visuelles class-toggling)
+ *   + Save-Action via [data-kph-action="save-profile"]:
+ *       - Diff initial vs. current → nur geänderte Felder werden mutiert
+ *       - Promise.all von bis zu 3 parallelen Mutations:
+ *           customerUpdate(input:{firstName,lastName})           ← wenn name geändert
+ *           customerEmailMarketing(Un)subscribe()                ← wenn newsletter geändert
+ *           metafieldsSet([{owner,namespace,key,type,value},…])  ← wenn locale/orderUpdates geändert
+ *       - Feedback via [data-kph-feedback] element (success/error)
+ *   + Token-Pre-Check vor Save: wenn msUntilExpiry < 60s → Block + Reload-Banner
+ *   + initialProfile snapshot bei render + neu nach erfolgreichem Save
  *
- * Unverändert aus v1.1.2:
- *   - Bootstrap + Auth-Token-Acquisition
- *   - 3 Counts (orders/wishlist/addresses) mit Singular/Plural/Empty-Labels
- *   - fetchInFlight Guard in attemptInit() + init() (Race-Condition Fix)
+ * Unverändert aus v1.2.0:
+ *   - Hub-Bindings (greeting, email, avatar, order.*) + show-if + counts
+ *   - Auth-Token-Polling + fetchInFlight Guard
  *   - Public API: window.KPH = { version, refresh, _debug }
  *
- * Future scope (Phase 8.4+):
- *   - data-kph-list="orders" + data-kph-tpl=…  → Order-Liste auf /account/bestellungen
- *   - data-kph-action="logout"                 → Logout-Trigger
- *   - DHL-Webhook-Status (Phase 9+)            → "geliefert"-Detection via Order-Metafield
+ * Future scope:
+ *   - Auto-Token-Refresh via OAuth refresh_token (Phase 8.4-Polish)
+ *   - Adress-Management (Phase 8.5)
+ *   - data-kph-list="orders" für /account/bestellungen (Phase 8.5)
  */
 (function(){
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.2.0';
+  var VERSION='1.3.0';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
   var POLL_INTERVAL_MS=500;
   var POLL_MAX=60; // 30s @ 500ms
+  var TOKEN_MIN_MS_FOR_WRITE=60000; // Minimum 60s remaining for write actions
+
+  var PROFILE_MF_NAMESPACE='kessler_profile';
+  var PROFILE_MF_LOCALE_KEY='locale';
+  var PROFILE_MF_ORDER_UPDATES_KEY='order_updates';
 
   // -----------------------------------------------------------------
   // Logging
@@ -76,7 +75,6 @@
 
   // -----------------------------------------------------------------
   // OAuth token from Shopyflow's localStorage cache
-  // (RAW token in Authorization header — no 'Bearer ' prefix)
   // -----------------------------------------------------------------
   function readSfTokens(){
     try{
@@ -119,16 +117,18 @@
   // -----------------------------------------------------------------
   // GraphQL with telemetry
   // -----------------------------------------------------------------
-  function gql(query,token,opName){
+  function gql(query,token,opName,variables){
     var ep=gqlEndpoint();
     log('gql',opName+' fetch start',{endpoint:ep,tokenPreview:token?token.slice(0,12)+'\u2026':'(none)'});
+    var body={query:query};
+    if(variables)body.variables=variables;
     return fetch(ep,{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
         'Authorization':token
       },
-      body:JSON.stringify({query:query})
+      body:JSON.stringify(body)
     }).then(function(r){
       log('gql',opName+' http',{status:r.status,ok:r.ok});
       return r.text().then(function(txt){
@@ -147,10 +147,10 @@
     });
   }
 
-  // Phase 8.3 query — customer + counts + latest-order detail subset
-  var CUSTOMER_QUERY_V12='{customer{'+
+  // Phase 8.4 query — customer + counts + latest-order + profile fields + 3 metafield aliases
+  var CUSTOMER_QUERY_V13='{customer{'+
     'id firstName lastName displayName '+
-    'emailAddress{emailAddress} '+
+    'emailAddress{emailAddress marketingState} '+
     'addresses(first:20){nodes{id}} '+
     'orders(first:50,sortKey:PROCESSED_AT,reverse:true){nodes{'+
       'id name processedAt '+
@@ -161,11 +161,13 @@
         'trackingInformation{number url company}'+
       '}}'+
     '}} '+
-    'metafield(namespace:"kessler",key:"wishlist"){value}'+
+    'wishlistMf:metafield(namespace:"kessler",key:"wishlist"){value} '+
+    'localeMf:metafield(namespace:"'+PROFILE_MF_NAMESPACE+'",key:"'+PROFILE_MF_LOCALE_KEY+'"){value type} '+
+    'orderUpdatesMf:metafield(namespace:"'+PROFILE_MF_NAMESPACE+'",key:"'+PROFILE_MF_ORDER_UPDATES_KEY+'"){value type}'+
   '}}';
 
   function fetchCustomer(token){
-    return gql(CUSTOMER_QUERY_V12,token,'fetchCustomer').then(function(res){
+    return gql(CUSTOMER_QUERY_V13,token,'fetchCustomer').then(function(res){
       if(!res.ok)return null;
       var c=res.json&&res.json.data&&res.json.data.customer;
       if(!c){
@@ -177,9 +179,12 @@
         fields:Object.keys(c),
         firstName:c.firstName,
         hasEmail:!!(c.emailAddress&&c.emailAddress.emailAddress),
+        marketingState:c.emailAddress&&c.emailAddress.marketingState,
         ordersLen:c.orders&&c.orders.nodes?c.orders.nodes.length:0,
         addressesLen:c.addresses&&c.addresses.nodes?c.addresses.nodes.length:0,
-        hasWishlistMf:!!(c.metafield&&c.metafield.value),
+        hasWishlistMf:!!(c.wishlistMf&&c.wishlistMf.value),
+        localeMfValue:c.localeMf&&c.localeMf.value,
+        orderUpdatesMfValue:c.orderUpdatesMf&&c.orderUpdatesMf.value,
         latestOrder:latest?{
           name:latest.name,
           financialStatus:latest.financialStatus,
@@ -240,7 +245,32 @@
   }
 
   // -----------------------------------------------------------------
-  // Binding resolvers — unified schema {kind:'text'|'href', resolve:fn}
+  // Profile helpers
+  // -----------------------------------------------------------------
+  function getMarketingState(c){
+    return c&&c.emailAddress&&c.emailAddress.marketingState||'';
+  }
+
+  function isSubscribed(c){
+    return getMarketingState(c)==='SUBSCRIBED';
+  }
+
+  function getLocale(c){
+    var v=c&&c.localeMf&&c.localeMf.value;
+    if(v==='DE'||v==='PL'||v==='EN')return v;
+    return 'DE'; // Default
+  }
+
+  function getOrderUpdatesEnabled(c){
+    var v=c&&c.orderUpdatesMf&&c.orderUpdatesMf.value;
+    if(v==='true')return true;
+    if(v==='false')return false;
+    return true; // Default opt-in
+  }
+
+  // -----------------------------------------------------------------
+  // Binding resolvers — unified schema {kind, resolve}
+  // kinds: 'text' | 'href' | 'value' | 'value-readonly' | 'select' | 'toggle'
   // -----------------------------------------------------------------
   var bindings={
     // Phase 8.1 — hub text bindings
@@ -270,6 +300,25 @@
     }},
     'order.tracking':{kind:'href',resolve:function(c){
       return getTrackingUrl(latestOrder(c))||'#';
+    }},
+    // Phase 8.4 — profile form bindings
+    'profile.firstName':{kind:'value',resolve:function(c){
+      return c&&c.firstName||'';
+    }},
+    'profile.lastName':{kind:'value',resolve:function(c){
+      return c&&c.lastName||'';
+    }},
+    'profile.email':{kind:'value-readonly',resolve:function(c){
+      return c&&c.emailAddress&&c.emailAddress.emailAddress||'';
+    }},
+    'profile.locale':{kind:'select',resolve:function(c){
+      return getLocale(c);
+    }},
+    'profile.newsletter':{kind:'toggle',resolve:function(c){
+      return isSubscribed(c);
+    }},
+    'profile.orderUpdates':{kind:'toggle',resolve:function(c){
+      return getOrderUpdatesEnabled(c);
     }}
   };
 
@@ -282,7 +331,7 @@
     },
     wishlist:function(c){
       try{
-        var v=c&&c.metafield&&c.metafield.value;
+        var v=c&&c.wishlistMf&&c.wishlistMf.value;
         if(!v)return 0;
         var arr=JSON.parse(v);
         return Array.isArray(arr)?arr.length:0;
@@ -303,7 +352,7 @@
   };
 
   // -----------------------------------------------------------------
-  // Show-If rules (via data-kph-show-if; elements default display:none in Site CSS)
+  // Show-If rules
   // -----------------------------------------------------------------
   var showIfRules={
     'orders.empty':function(c){
@@ -383,6 +432,22 @@
         if(b.kind==='href'){
           el.setAttribute('href',val||'#');
           log('render',key+' href="'+(val||'#')+'"');
+        }else if(b.kind==='value'){
+          el.value=val==null?'':String(val);
+          log('render',key+' value="'+el.value+'"');
+        }else if(b.kind==='value-readonly'){
+          el.value=val==null?'':String(val);
+          el.readOnly=true;
+          el.setAttribute('aria-readonly','true');
+          log('render',key+' value="'+el.value+'" (readonly)');
+        }else if(b.kind==='select'){
+          el.value=val==null?'':String(val);
+          log('render',key+' select="'+el.value+'"');
+        }else if(b.kind==='toggle'){
+          var on=!!val;
+          if(on)el.classList.add('kp-toggle--on');
+          else el.classList.remove('kp-toggle--on');
+          log('render',key+' toggle='+on);
         }else{
           el.textContent=val;
           log('render',key+'="'+val+'"');
@@ -420,12 +485,255 @@
     }
   }
 
+  // -----------------------------------------------------------------
+  // Phase 8.4 — Profile state-tracking, actions, mutations
+  // -----------------------------------------------------------------
+  var initialProfileSnapshot=null;
+
+  function snapshotProfile(customer){
+    initialProfileSnapshot={
+      firstName:customer&&customer.firstName||'',
+      lastName:customer&&customer.lastName||'',
+      locale:getLocale(customer),
+      newsletter:isSubscribed(customer),
+      orderUpdates:getOrderUpdatesEnabled(customer)
+    };
+    log('profile','initial snapshot',initialProfileSnapshot);
+  }
+
+  function readCurrentProfile(){
+    var get=function(key,prop){
+      var el=document.querySelector('[data-kph-bind="profile.'+key+'"]');
+      if(!el)return null;
+      return prop==='class'?el.classList.contains('kp-toggle--on'):el[prop];
+    };
+    return {
+      firstName:(get('firstName','value')||'').trim(),
+      lastName:(get('lastName','value')||'').trim(),
+      locale:get('locale','value')||'DE',
+      newsletter:get('newsletter','class'),
+      orderUpdates:get('orderUpdates','class')
+    };
+  }
+
+  function diffProfile(initial,current){
+    var d={};
+    if(initial.firstName!==current.firstName)d.firstName=current.firstName;
+    if(initial.lastName!==current.lastName)d.lastName=current.lastName;
+    if(initial.locale!==current.locale)d.locale=current.locale;
+    if(initial.newsletter!==current.newsletter)d.newsletter=current.newsletter;
+    if(initial.orderUpdates!==current.orderUpdates)d.orderUpdates=current.orderUpdates;
+    return d;
+  }
+
+  function escGql(s){
+    return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+  }
+
+  function mutCustomerUpdate(token,firstName,lastName){
+    var input=[];
+    if(firstName!=null)input.push('firstName:"'+escGql(firstName)+'"');
+    if(lastName!=null)input.push('lastName:"'+escGql(lastName)+'"');
+    var q='mutation{customerUpdate(input:{'+input.join(',')+'}){customer{firstName lastName} userErrors{field message code}}}';
+    return gql(q,token,'mut.customerUpdate');
+  }
+
+  function mutNewsletter(token,subscribe){
+    var op=subscribe?'customerEmailMarketingSubscribe':'customerEmailMarketingUnsubscribe';
+    var q='mutation{'+op+'{customer{emailAddress{emailAddress marketingState}} userErrors{field message code}}}';
+    return gql(q,token,'mut.'+op);
+  }
+
+  function mutMetafields(token,customerGid,fields){
+    // fields: array of {key, type, value}
+    var items=fields.map(function(f){
+      return '{ownerId:"'+escGql(customerGid)+'",namespace:"'+PROFILE_MF_NAMESPACE+'",key:"'+escGql(f.key)+'",type:"'+escGql(f.type)+'",value:"'+escGql(f.value)+'"}';
+    });
+    var q='mutation{metafieldsSet(metafields:['+items.join(',')+']){metafields{id key namespace value} userErrors{field message code}}}';
+    return gql(q,token,'mut.metafieldsSet');
+  }
+
+  function setFeedback(state,msg){
+    var el=document.querySelector('[data-kph-feedback]');
+    if(!el)return;
+    el.classList.remove('kph-fb-success','kph-fb-error','kph-fb-info','kph-fb-hidden');
+    el.classList.add('kph-fb-'+state);
+    el.textContent=msg||'';
+    el.style.display='';
+    if(state==='success'){
+      setTimeout(function(){
+        el.classList.add('kph-fb-hidden');
+        el.style.display='none';
+      },3000);
+    }
+  }
+
+  function setSaveBtnState(busy){
+    var btns=document.querySelectorAll('[data-kph-action="save-profile"]');
+    for(var i=0;i<btns.length;i++){
+      var b=btns[i];
+      if(busy){
+        b.setAttribute('aria-busy','true');
+        b.classList.add('kph-busy');
+        b.style.pointerEvents='none';
+        b.style.opacity='0.6';
+      }else{
+        b.removeAttribute('aria-busy');
+        b.classList.remove('kph-busy');
+        b.style.pointerEvents='';
+        b.style.opacity='';
+      }
+    }
+  }
+
+  function extractUserErrors(res){
+    // Walk through res.json.data.<op>.userErrors and res.json.errors
+    var errs=[];
+    if(res&&res.json){
+      if(res.json.errors&&res.json.errors.length){
+        res.json.errors.forEach(function(e){errs.push(e.message||'GraphQL-Fehler')});
+      }
+      if(res.json.data){
+        Object.keys(res.json.data).forEach(function(k){
+          var payload=res.json.data[k];
+          if(payload&&payload.userErrors&&payload.userErrors.length){
+            payload.userErrors.forEach(function(e){
+              errs.push(e.message||(e.code+': '+(e.field||'').toString()));
+            });
+          }
+        });
+      }
+    }
+    if(!errs.length&&res&&!res.ok)errs.push('Netzwerkfehler (HTTP '+(res.status||0)+')');
+    return errs;
+  }
+
+  function saveProfile(){
+    if(!customerCtx){
+      setFeedback('error','Keine Kundendaten geladen. Bitte Seite neu laden.');
+      return;
+    }
+    var tok=readSfTokens();
+    if(!tok||tok.expired){
+      setFeedback('error','Deine Sitzung ist abgelaufen. Bitte Seite neu laden.');
+      return;
+    }
+    if(tok.msUntilExpiry<TOKEN_MIN_MS_FOR_WRITE){
+      setFeedback('error','Deine Sitzung l\u00e4uft gleich ab. Bitte Seite neu laden, um zu speichern.');
+      return;
+    }
+    if(!initialProfileSnapshot){
+      log('save','no snapshot \u2014 abort');
+      return;
+    }
+    var current=readCurrentProfile();
+    var diff=diffProfile(initialProfileSnapshot,current);
+    var diffKeys=Object.keys(diff);
+    log('save','diff',{diff:diff,count:diffKeys.length});
+
+    // Validate required fields
+    if(current.firstName.length===0||current.lastName.length===0){
+      setFeedback('error','Vorname und Nachname d\u00fcrfen nicht leer sein.');
+      return;
+    }
+
+    if(diffKeys.length===0){
+      setFeedback('info','Keine \u00c4nderungen.');
+      return;
+    }
+
+    setSaveBtnState(true);
+    setFeedback('info','Speichere\u2026');
+
+    var jobs=[];
+    var token=tok.accessToken;
+
+    if(diff.firstName!==undefined||diff.lastName!==undefined){
+      jobs.push(mutCustomerUpdate(token,
+        diff.firstName!==undefined?diff.firstName:current.firstName,
+        diff.lastName!==undefined?diff.lastName:current.lastName
+      ));
+    }
+    if(diff.newsletter!==undefined){
+      jobs.push(mutNewsletter(token,diff.newsletter));
+    }
+    var mfFields=[];
+    if(diff.locale!==undefined){
+      mfFields.push({key:PROFILE_MF_LOCALE_KEY,type:'single_line_text_field',value:diff.locale});
+    }
+    if(diff.orderUpdates!==undefined){
+      mfFields.push({key:PROFILE_MF_ORDER_UPDATES_KEY,type:'boolean',value:diff.orderUpdates?'true':'false'});
+    }
+    if(mfFields.length>0){
+      jobs.push(mutMetafields(token,customerCtx.id,mfFields));
+    }
+
+    Promise.all(jobs).then(function(results){
+      var allOk=true;
+      var allErrs=[];
+      results.forEach(function(r){
+        if(!r.ok){allOk=false;}
+        var errs=extractUserErrors(r);
+        if(errs.length){allOk=false;allErrs=allErrs.concat(errs);}
+      });
+      setSaveBtnState(false);
+      if(allOk){
+        // Update snapshot to current (no more diffs until next edit)
+        Object.keys(diff).forEach(function(k){initialProfileSnapshot[k]=current[k];});
+        log('save','success',{updated:diffKeys});
+        setFeedback('success','Gespeichert');
+      }else{
+        log('save','failure',{errors:allErrs});
+        setFeedback('error','Fehler beim Speichern: '+(allErrs.join(' · ')||'Unbekannter Fehler'));
+      }
+    }).catch(function(e){
+      setSaveBtnState(false);
+      log('save','exception',{err:String(e)});
+      setFeedback('error','Unerwarteter Fehler: '+String(e));
+    });
+  }
+
+  // -----------------------------------------------------------------
+  // Action handlers wiring
+  // -----------------------------------------------------------------
+  function wireActions(){
+    // Toggle elements
+    var toggles=document.querySelectorAll('[data-kph-action="toggle"]');
+    for(var i=0;i<toggles.length;i++){
+      var t=toggles[i];
+      if(t.__kphWired)continue;
+      t.__kphWired=true;
+      t.style.cursor='pointer';
+      t.setAttribute('role','switch');
+      t.addEventListener('click',function(ev){
+        ev.preventDefault();
+        var el=ev.currentTarget;
+        el.classList.toggle('kp-toggle--on');
+        var on=el.classList.contains('kp-toggle--on');
+        el.setAttribute('aria-checked',on?'true':'false');
+        log('action','toggle',{key:el.getAttribute('data-kph-bind'),on:on});
+      });
+    }
+    // Save buttons
+    var saves=document.querySelectorAll('[data-kph-action="save-profile"]');
+    for(var j=0;j<saves.length;j++){
+      var s=saves[j];
+      if(s.__kphWired)continue;
+      s.__kphWired=true;
+      s.addEventListener('click',function(ev){
+        ev.preventDefault();
+        saveProfile();
+      });
+    }
+    log('action','wired',{toggles:toggles.length,saves:saves.length});
+  }
+
   function render(customer){
-    // Order: show-if first (sets display before content paint),
-    // then bindings + counts populate visible content.
     renderShowIfs(customer);
     renderBindings(customer);
     renderCounts(customer);
+    snapshotProfile(customer);
+    wireActions();
     setStateClass('ready');
   }
 
@@ -488,14 +796,18 @@
       log('api','refresh called');
       customerCtx=null;
       fetchInFlight=false;
+      initialProfileSnapshot=null;
       init();
     },
+    save:saveProfile,
     _debug:function(){
       var tok=readSfTokens();
       return {
         version:VERSION,
         customerCtx:customerCtx,
         latestOrder:customerCtx?latestOrder(customerCtx):null,
+        initialProfileSnapshot:initialProfileSnapshot,
+        currentProfile:initialProfileSnapshot?readCurrentProfile():null,
         sfToken:tok?{
           present:true,
           expired:tok.expired,
