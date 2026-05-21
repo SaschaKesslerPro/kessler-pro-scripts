@@ -1,9 +1,16 @@
 /*!
- * Kessler PRO · hub.js v1.3.0
+ * Kessler PRO · hub.js v1.3.1
  *
  * Phase 8.4 — Profil & Einstellungen (Customer-Data Edit)
  *
- * v1.3.0 Patch (Δ gegen v1.2.0):
+ * v1.3.1 Patch (Δ gegen v1.3.0):
+ *   * mutNewsletter: customer{emailAddress{…}} return-selection entfernt.
+ *     CustomerEmailMarketing(Un)subscribePayload akzeptiert nur userErrors —
+ *     customer-Field ist NICHT verfügbar (anders als customerUpdate).
+ *     Fix für Fehler: "Field 'customer' doesn't exist on type
+ *     'CustomerEmailMarketingUnsubscribePayload'".
+ *
+ * v1.3.0 (vorher):
  *   + CUSTOMER_QUERY_V13: erweitert um emailAddress.marketingState +
  *     2 metafield-Aliases (localeMf, orderUpdatesMf) im kessler_profile-Namespace.
  *     Wishlist-Metafield via Alias wishlistMf umbenannt (vorher: metafield singular).
@@ -40,7 +47,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.3.0';
+  var VERSION='1.3.1';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -540,7 +547,8 @@
 
   function mutNewsletter(token,subscribe){
     var op=subscribe?'customerEmailMarketingSubscribe':'customerEmailMarketingUnsubscribe';
-    var q='mutation{'+op+'{customer{emailAddress{emailAddress marketingState}} userErrors{field message code}}}';
+    // CustomerEmailMarketing(Un)subscribePayload has no 'customer' field — only userErrors selectable.
+    var q='mutation{'+op+'{userErrors{field message code}}}';
     return gql(q,token,'mut.'+op);
   }
 
