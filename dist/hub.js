@@ -1,9 +1,42 @@
 /*!
- * Kessler PRO · hub.js v1.3.1
+ * Kessler PRO · hub.js v1.4.0
  *
- * Phase 8.4 — Profil & Einstellungen (Customer-Data Edit)
+ * Phase 8.5a — Adressen-Page Read-Path (List-Render + Action-Stubs)
  *
- * v1.3.1 Patch (Δ gegen v1.3.0):
+ * v1.4.0 (Δ gegen v1.3.1):
+ *   + CUSTOMER_QUERY_V14: addresses(first:20) erweitert von {nodes{id}} auf
+ *     vollständiges Address-Schema {id firstName lastName company address1
+ *     address2 city zip phoneNumber territoryCode zoneCode formatted province
+ *     country}. Plus separate Top-Level defaultAddress{id} für Default-
+ *     Detection per Vergleich (Customer Account API hat KEINEN isDefault-Flag
+ *     pro Address-Node).
+ *   + Neue Render-Engine `renderAddressList(customer)`:
+ *       - Template-Discovery via [data-kph-tpl="address-card"] innerhalb
+ *         [data-kph-list="addresses"]
+ *       - Cleanup vorheriger Renders via [data-kph-rendered="address-card"]
+ *       - Pro Address: cloneNode(true), removeAttribute(data-kph-tpl),
+ *         set data-kph-rendered + data-kph-address-id, applyAddressBindings,
+ *         insertBefore Add-Card (oder appendChild als fallback)
+ *       - Default-Card kriegt zusätzlich Class kp-address-card--default
+ *   + Item-Scoped Bindings (neu, kollisionsfrei zu globalen Bindings):
+ *       - [data-kph-bind-text="fullName"|"company"|...] → textContent
+ *       - [data-kph-bind-lines="formatted"] → child-divs pro Array-Eintrag
+ *         + Phone als zusätzlicher Child (separat, nicht in formatted enthalten)
+ *       - [data-kph-show-if="isDefault"|"!isDefault"] (logical NOT-Prefix)
+ *         innerhalb Clones — werden item-scoped resolved, NICHT über
+ *         globale showIfRules
+ *   + Action-Stubs für Phase 8.5a (nur Logging, Mutations folgen in 8.5b–d):
+ *       - address-edit       → console.log (UI-Form folgt in 8.5c)
+ *       - address-delete     → console.log (Mutation folgt in 8.5b)
+ *       - address-set-default → console.log (Mutation folgt in 8.5b)
+ *       - address-create     → console.log (UI-Form folgt in 8.5d)
+ *     Address-ID wird via closest('[data-kph-address-id]') aus Click-Target
+ *     extrahiert. address-create hat keine Card-Context (Add-Card).
+ *   + injectHubCSS(): inline <style id="kph-css"> mit
+ *     [data-kph-tpl]{display:none!important} — verhindert Template-Flash
+ *     vor erstem Render. Beim Init aufgerufen, einmalig.
+ *
+ * v1.3.1 Patch (vorher):
  *   * mutNewsletter: customer{emailAddress{…}} return-selection entfernt.
  *     CustomerEmailMarketing(Un)subscribePayload akzeptiert nur userErrors —
  *     customer-Field ist NICHT verfügbar (anders als customerUpdate).
@@ -39,15 +72,17 @@
  *   - Public API: window.KPH = { version, refresh, _debug }
  *
  * Future scope:
+ *   - Phase 8.5b: Delete-Path (customerAddressDelete + customerDefaultAddressUpdate)
+ *   - Phase 8.5c: Edit-Path (customerAddressUpdate via Modal/Inline-Form)
+ *   - Phase 8.5d: Create-Path (customerAddressCreate via Modal/Inline-Form)
  *   - Auto-Token-Refresh via OAuth refresh_token (Phase 8.4-Polish)
- *   - Adress-Management (Phase 8.5)
- *   - data-kph-list="orders" für /account/bestellungen (Phase 8.5)
+ *   - data-kph-list="orders" für /account/bestellungen (Phase 8.6)
  */
 (function(){
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.3.1';
+  var VERSION='1.4.0';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -155,10 +190,17 @@
   }
 
   // Phase 8.4 query — customer + counts + latest-order + profile fields + 3 metafield aliases
-  var CUSTOMER_QUERY_V13='{customer{'+
+  // Phase 8.5a — addresses(first:20) expanded to full Address schema + separate defaultAddress{id}
+  var CUSTOMER_QUERY_V14='{customer{'+
     'id firstName lastName displayName '+
     'emailAddress{emailAddress marketingState} '+
-    'addresses(first:20){nodes{id}} '+
+    'defaultAddress{id} '+
+    'addresses(first:20){nodes{'+
+      'id firstName lastName company '+
+      'address1 address2 city zip phoneNumber '+
+      'territoryCode zoneCode '+
+      'formatted province country'+
+    '}} '+
     'orders(first:50,sortKey:PROCESSED_AT,reverse:true){nodes{'+
       'id name processedAt '+
       'financialStatus fulfillmentStatus '+
@@ -174,7 +216,7 @@
   '}}';
 
   function fetchCustomer(token){
-    return gql(CUSTOMER_QUERY_V13,token,'fetchCustomer').then(function(res){
+    return gql(CUSTOMER_QUERY_V14,token,'fetchCustomer').then(function(res){
       if(!res.ok)return null;
       var c=res.json&&res.json.data&&res.json.data.customer;
       if(!c){
@@ -189,6 +231,7 @@
         marketingState:c.emailAddress&&c.emailAddress.marketingState,
         ordersLen:c.orders&&c.orders.nodes?c.orders.nodes.length:0,
         addressesLen:c.addresses&&c.addresses.nodes?c.addresses.nodes.length:0,
+        defaultAddressId:c.defaultAddress&&c.defaultAddress.id||null,
         hasWishlistMf:!!(c.wishlistMf&&c.wishlistMf.value),
         localeMfValue:c.localeMf&&c.localeMf.value,
         orderUpdatesMfValue:c.orderUpdatesMf&&c.orderUpdatesMf.value,
@@ -493,6 +536,112 @@
   }
 
   // -----------------------------------------------------------------
+  // Phase 8.5a — Address list rendering (item-scoped)
+  // -----------------------------------------------------------------
+  function resolveAddressField(addr,key){
+    if(!addr)return '';
+    if(key==='fullName'){
+      var fn=(addr.firstName||'').trim();
+      var ln=(addr.lastName||'').trim();
+      var name=(fn+' '+ln).replace(/\s+/g,' ').trim();
+      if(name)return name;
+      if(addr.company)return addr.company;
+      return '\u2014';
+    }
+    if(key==='formatted')return addr.formatted||[];
+    if(key==='phoneNumber')return addr.phoneNumber||'';
+    if(key==='company')return addr.company||'';
+    return addr[key]==null?'':String(addr[key]);
+  }
+
+  function applyAddressBindings(root,addr){
+    // [data-kph-bind-text] — single text node
+    var texts=root.querySelectorAll('[data-kph-bind-text]');
+    for(var i=0;i<texts.length;i++){
+      var tkey=texts[i].getAttribute('data-kph-bind-text');
+      try{
+        var tval=resolveAddressField(addr,tkey);
+        texts[i].textContent=tval==null?'':String(tval);
+      }catch(e){
+        log('list','bind-text-fail',{key:tkey,err:String(e)});
+      }
+    }
+    // [data-kph-bind-lines] — array → child divs + optional phone
+    var lines=root.querySelectorAll('[data-kph-bind-lines]');
+    for(var j=0;j<lines.length;j++){
+      var lkey=lines[j].getAttribute('data-kph-bind-lines');
+      var el=lines[j];
+      el.innerHTML='';
+      try{
+        var arr=resolveAddressField(addr,lkey);
+        if(Array.isArray(arr)){
+          for(var k=0;k<arr.length;k++){
+            var ln=document.createElement('div');
+            ln.textContent=arr[k];
+            el.appendChild(ln);
+          }
+        }
+        // Phone is NOT included in `formatted` — render below if present
+        if(addr.phoneNumber){
+          var ph=document.createElement('div');
+          ph.className='kp-address-card-phone';
+          ph.style.marginTop='4px';
+          ph.textContent=addr.phoneNumber;
+          el.appendChild(ph);
+        }
+      }catch(e){
+        log('list','bind-lines-fail',{key:lkey,err:String(e)});
+      }
+    }
+    // [data-kph-show-if] — item-scoped: isDefault / !isDefault
+    var sifs=root.querySelectorAll('[data-kph-show-if]');
+    for(var m=0;m<sifs.length;m++){
+      var sif=sifs[m].getAttribute('data-kph-show-if');
+      var visible;
+      if(sif==='isDefault')visible=!!addr.isDefault;
+      else if(sif==='!isDefault')visible=!addr.isDefault;
+      else continue; // Don't touch global show-ifs from item scope
+      sifs[m].style.display=visible?'':'none';
+    }
+  }
+
+  function renderAddressList(customer){
+    var grid=document.querySelector('[data-kph-list="addresses"]');
+    if(!grid){
+      log('list','no address-list container on page');
+      return;
+    }
+    var tpl=grid.querySelector('[data-kph-tpl="address-card"]');
+    if(!tpl){
+      log('list','no address-card template inside grid');
+      return;
+    }
+    // Cleanup previous renders (re-render safe)
+    var prev=grid.querySelectorAll('[data-kph-rendered="address-card"]');
+    for(var i=0;i<prev.length;i++){
+      prev[i].parentNode.removeChild(prev[i]);
+    }
+    var nodes=customer&&customer.addresses&&customer.addresses.nodes||[];
+    var defaultId=customer&&customer.defaultAddress&&customer.defaultAddress.id||null;
+    log('list','rendering addresses',{count:nodes.length,defaultId:defaultId});
+    // Anchor: insert before Add-Card if present, else append to grid
+    var addCard=grid.querySelector('[data-kph-action="address-create"]');
+    for(var j=0;j<nodes.length;j++){
+      var addr=nodes[j];
+      addr.isDefault=(defaultId!=null&&addr.id===defaultId);
+      var clone=tpl.cloneNode(true);
+      clone.removeAttribute('data-kph-tpl');
+      clone.setAttribute('data-kph-rendered','address-card');
+      clone.setAttribute('data-kph-address-id',addr.id);
+      if(addr.isDefault)clone.classList.add('kp-address-card--default');
+      applyAddressBindings(clone,addr);
+      if(addCard)grid.insertBefore(clone,addCard);
+      else grid.appendChild(clone);
+      log('list','card rendered',{id:addr.id,isDefault:addr.isDefault,name:resolveAddressField(addr,'fullName')});
+    }
+  }
+
+  // -----------------------------------------------------------------
   // Phase 8.4 — Profile state-tracking, actions, mutations
   // -----------------------------------------------------------------
   var initialProfileSnapshot=null;
@@ -733,13 +882,36 @@
         saveProfile();
       });
     }
+    // Phase 8.5a — address action stubs (Mutations come in 8.5b–d)
+    wireAddressAction('address-edit',     function(addrId){ log('action','address-edit (stub)',{id:addrId}); });
+    wireAddressAction('address-delete',   function(addrId){ log('action','address-delete (stub)',{id:addrId}); });
+    wireAddressAction('address-set-default',function(addrId){ log('action','address-set-default (stub)',{id:addrId}); });
+    wireAddressAction('address-create',   function(){ log('action','address-create (stub)',{}); });
     log('action','wired',{toggles:toggles.length,saves:saves.length});
+  }
+
+  function wireAddressAction(actionName,handler){
+    var els=document.querySelectorAll('[data-kph-action="'+actionName+'"]');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];
+      if(el.__kphWired)continue;
+      el.__kphWired=true;
+      el.style.cursor='pointer';
+      el.addEventListener('click',function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        var card=ev.currentTarget.closest&&ev.currentTarget.closest('[data-kph-address-id]');
+        var addrId=card?card.getAttribute('data-kph-address-id'):null;
+        try{ handler(addrId,ev); }catch(e){ log('action','handler-fail',{action:actionName,err:String(e)}); }
+      });
+    }
   }
 
   function render(customer){
     renderShowIfs(customer);
     renderBindings(customer);
     renderCounts(customer);
+    renderAddressList(customer);
     snapshotProfile(customer);
     wireActions();
     setStateClass('ready');
@@ -753,6 +925,14 @@
   var pollCount=0;
   var pollTimer=null;
   var startTs=0;
+
+  function injectHubCSS(){
+    if(document.getElementById('kph-css'))return;
+    var s=document.createElement('style');
+    s.id='kph-css';
+    s.textContent='[data-kph-tpl]{display:none!important}';
+    (document.head||document.documentElement).appendChild(s);
+  }
 
   function attemptInit(){
     pollCount++;
@@ -786,6 +966,7 @@
   }
 
   function init(){
+    injectHubCSS();
     startTs=Date.now();
     pollCount=0;
     setStateClass('loading');
