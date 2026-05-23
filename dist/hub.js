@@ -1,9 +1,35 @@
 /*!
- * Kessler PRO · hub.js v1.4.0
+ * Kessler PRO · hub.js v1.5.0
  *
- * Phase 8.5a — Adressen-Page Read-Path (List-Render + Action-Stubs)
+ * Phase 8.5b+c+d — Adressen-CRUD komplett (Create/Update/Delete/SetDefault)
  *
- * v1.4.0 (Δ gegen v1.3.1):
+ * v1.5.0 (Δ gegen v1.4.0):
+ *   + 3 Address-Mutations (alle drei: defaultAddress:Boolean optional):
+ *       * mutAddressCreate(token,fields,isDefault)
+ *           → customerAddressCreate(address:CustomerAddressInput!,defaultAddress:Boolean)
+ *       * mutAddressUpdate(token,addressId,fields,isDefault)
+ *           → customerAddressUpdate(addressId:ID!,address:CustomerAddressInput,defaultAddress:Boolean)
+ *       * mutAddressDelete(token,addressId)
+ *           → customerAddressDelete(addressId:ID!)
+ *     KEIN separater customerDefaultAddressUpdate nötig — defaultAddress-Param
+ *     auf Update setzt eine bestehende Address als Default.
+ *   + Modal-Form als JS-injected DOM (kein Designer-Setup):
+ *       - injectAddressModal() baut <div data-kph-modal="address-form"> ans body
+ *       - Backdrop + Dialog + Form-Grid mit allen CustomerAddressInput-Feldern
+ *       - Country-Select mit 16 Top-Märkten (DE/PL + Nachbarn + Top-EU)
+ *       - openAddressForm(mode,addr?) populates + shows
+ *       - closeAddressForm() resets + hides
+ *       - saveAddressForm() validates + dispatches Mutation + refresh
+ *   + Action-Handler echt (waren Stubs in v1.4.0):
+ *       - address-edit       → openAddressForm('edit', findAddress(addrId))
+ *       - address-delete     → confirm() + mutAddressDelete + refresh
+ *       - address-set-default → mutAddressUpdate(id,{},defaultAddress:true) + refresh
+ *       - address-create     → openAddressForm('create')
+ *   + findAddress(addrId) Helper — sucht Address in customerCtx.addresses.nodes
+ *   + Token-Pre-Check vor jedem write (gleich wie saveProfile in 8.4)
+ *   + Modal-CSS in injectHubCSS() erweitert (backdrop + dialog + form-grid)
+ *
+ * v1.4.0 (vorher):
  *   + CUSTOMER_QUERY_V14: addresses(first:20) erweitert von {nodes{id}} auf
  *     vollständiges Address-Schema {id firstName lastName company address1
  *     address2 city zip phoneNumber territoryCode zoneCode formatted province
@@ -25,13 +51,6 @@
  *       - [data-kph-show-if="isDefault"|"!isDefault"] (logical NOT-Prefix)
  *         innerhalb Clones — werden item-scoped resolved, NICHT über
  *         globale showIfRules
- *   + Action-Stubs für Phase 8.5a (nur Logging, Mutations folgen in 8.5b–d):
- *       - address-edit       → console.log (UI-Form folgt in 8.5c)
- *       - address-delete     → console.log (Mutation folgt in 8.5b)
- *       - address-set-default → console.log (Mutation folgt in 8.5b)
- *       - address-create     → console.log (UI-Form folgt in 8.5d)
- *     Address-ID wird via closest('[data-kph-address-id]') aus Click-Target
- *     extrahiert. address-create hat keine Card-Context (Add-Card).
  *   + injectHubCSS(): inline <style id="kph-css"> mit
  *     [data-kph-tpl]{display:none!important} — verhindert Template-Flash
  *     vor erstem Render. Beim Init aufgerufen, einmalig.
@@ -72,17 +91,15 @@
  *   - Public API: window.KPH = { version, refresh, _debug }
  *
  * Future scope:
- *   - Phase 8.5b: Delete-Path (customerAddressDelete + customerDefaultAddressUpdate)
- *   - Phase 8.5c: Edit-Path (customerAddressUpdate via Modal/Inline-Form)
- *   - Phase 8.5d: Create-Path (customerAddressCreate via Modal/Inline-Form)
  *   - Auto-Token-Refresh via OAuth refresh_token (Phase 8.4-Polish)
  *   - data-kph-list="orders" für /account/bestellungen (Phase 8.6)
+ *   - Bestelldetail-Page hydration (Phase 8.7)
  */
 (function(){
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.4.0';
+  var VERSION='1.5.0';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -611,6 +628,8 @@
       log('list','no address-list container on page');
       return;
     }
+    // Phase 8.5c+d — inject modal DOM here so wireActions() catches its buttons
+    injectAddressModal();
     var tpl=grid.querySelector('[data-kph-tpl="address-card"]');
     if(!tpl){
       log('list','no address-card template inside grid');
@@ -851,6 +870,331 @@
   }
 
   // -----------------------------------------------------------------
+  // Phase 8.5b+c+d — Address mutations
+  // -----------------------------------------------------------------
+  // CustomerAddressInput fields (alle optional Strings):
+  //   firstName, lastName, address1, address2, city, company,
+  //   territoryCode, phoneNumber, zoneCode, zip
+  // Mutation responses:
+  //   customerAddress{id} + userErrors{field message code}
+  function buildAddressInputLiteral(fields){
+    var parts=[];
+    var keys=['firstName','lastName','company','address1','address2','city','zip','phoneNumber','territoryCode','zoneCode'];
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i];
+      var v=fields[k];
+      if(v==null||v==='')continue;
+      parts.push(k+':"'+escGql(String(v))+'"');
+    }
+    return '{'+parts.join(',')+'}';
+  }
+
+  function mutAddressCreate(token,fields,isDefault){
+    var addrLit=buildAddressInputLiteral(fields);
+    var defLit=isDefault?',defaultAddress:true':'';
+    var q='mutation{customerAddressCreate(address:'+addrLit+defLit+'){customerAddress{id} userErrors{field message code}}}';
+    return gql(q,token,'mut.customerAddressCreate');
+  }
+
+  function mutAddressUpdate(token,addressId,fields,isDefault){
+    var addrLit=buildAddressInputLiteral(fields);
+    var hasFields=addrLit!=='{}';
+    var defLit=(isDefault===true||isDefault===false)?(',defaultAddress:'+(isDefault?'true':'false')):'';
+    var addrArg=hasFields?(',address:'+addrLit):'';
+    var q='mutation{customerAddressUpdate(addressId:"'+escGql(addressId)+'"'+addrArg+defLit+'){customerAddress{id} userErrors{field message code}}}';
+    return gql(q,token,'mut.customerAddressUpdate');
+  }
+
+  function mutAddressDelete(token,addressId){
+    var q='mutation{customerAddressDelete(addressId:"'+escGql(addressId)+'"){deletedAddressId userErrors{field message code}}}';
+    return gql(q,token,'mut.customerAddressDelete');
+  }
+
+  // -----------------------------------------------------------------
+  // Phase 8.5c+d — Address modal form (DOM-injected, no Designer setup)
+  // -----------------------------------------------------------------
+  var COUNTRY_OPTIONS=[
+    ['DE','Deutschland'],['PL','Polen'],['AT','Österreich'],['CH','Schweiz'],
+    ['NL','Niederlande'],['BE','Belgien'],['LU','Luxemburg'],['FR','Frankreich'],
+    ['IT','Italien'],['ES','Spanien'],['GB','Vereinigtes Königreich'],['IE','Irland'],
+    ['CZ','Tschechien'],['SK','Slowakei'],['DK','Dänemark'],['SE','Schweden'],
+    ['NO','Norwegen'],['FI','Finnland']
+  ];
+
+  function findAddress(addrId){
+    if(!customerCtx||!customerCtx.addresses||!customerCtx.addresses.nodes)return null;
+    var nodes=customerCtx.addresses.nodes;
+    for(var i=0;i<nodes.length;i++){
+      if(nodes[i].id===addrId)return nodes[i];
+    }
+    return null;
+  }
+
+  function buildCountrySelectHtml(){
+    var opts='';
+    for(var i=0;i<COUNTRY_OPTIONS.length;i++){
+      var c=COUNTRY_OPTIONS[i];
+      opts+='<option value="'+c[0]+'">'+c[1]+'</option>';
+    }
+    return opts;
+  }
+
+  function injectAddressModal(){
+    if(document.getElementById('kph-address-modal'))return;
+    var html=
+      '<div id="kph-address-modal" class="kph-modal" data-kph-modal="address-form" style="display:none">'+
+        '<div class="kph-modal-backdrop" data-kph-action="address-cancel"></div>'+
+        '<div class="kph-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="kph-form-title">'+
+          '<header class="kph-modal-head">'+
+            '<h2 id="kph-form-title" data-kph-form-title>Neue Adresse</h2>'+
+            '<button type="button" class="kph-modal-close" data-kph-action="address-cancel" aria-label="Schließen">×</button>'+
+          '</header>'+
+          '<div class="kph-form-grid">'+
+            '<div class="kph-row-2">'+
+              '<label class="kph-field"><span>Vorname *</span><input type="text" data-kph-field="firstName" required></label>'+
+              '<label class="kph-field"><span>Nachname *</span><input type="text" data-kph-field="lastName" required></label>'+
+            '</div>'+
+            '<label class="kph-field"><span>Firma (optional)</span><input type="text" data-kph-field="company"></label>'+
+            '<label class="kph-field"><span>Straße &amp; Hausnummer *</span><input type="text" data-kph-field="address1" required></label>'+
+            '<label class="kph-field"><span>Adresszusatz (optional)</span><input type="text" data-kph-field="address2"></label>'+
+            '<div class="kph-row-zip">'+
+              '<label class="kph-field"><span>PLZ *</span><input type="text" data-kph-field="zip" required></label>'+
+              '<label class="kph-field"><span>Stadt *</span><input type="text" data-kph-field="city" required></label>'+
+            '</div>'+
+            '<div class="kph-row-2">'+
+              '<label class="kph-field"><span>Land *</span><select data-kph-field="territoryCode" required>'+buildCountrySelectHtml()+'</select></label>'+
+              '<label class="kph-field"><span>Telefon (optional)</span><input type="tel" data-kph-field="phoneNumber"></label>'+
+            '</div>'+
+            '<label class="kph-checkbox" data-kph-default-wrapper><input type="checkbox" data-kph-field="isDefault"> <span>Als Standardadresse setzen</span></label>'+
+          '</div>'+
+          '<div class="kph-form-feedback" data-kph-form-feedback></div>'+
+          '<footer class="kph-modal-foot">'+
+            '<button type="button" class="kph-btn kph-btn-secondary" data-kph-action="address-cancel">Abbrechen</button>'+
+            '<button type="button" class="kph-btn kph-btn-primary" data-kph-action="address-save">Speichern</button>'+
+          '</footer>'+
+        '</div>'+
+      '</div>';
+    var wrap=document.createElement('div');
+    wrap.innerHTML=html;
+    document.body.appendChild(wrap.firstChild);
+    // ESC key closes modal
+    document.addEventListener('keydown',function(ev){
+      if(ev.key==='Escape'){
+        var m=document.getElementById('kph-address-modal');
+        if(m&&m.style.display!=='none')closeAddressForm();
+      }
+    });
+    log('modal','injected');
+  }
+
+  function openAddressForm(mode,addr){
+    injectAddressModal();
+    var modal=document.getElementById('kph-address-modal');
+    if(!modal)return;
+    modal.setAttribute('data-kph-form-mode',mode);
+    if(mode==='edit'&&addr){
+      modal.setAttribute('data-kph-editing-id',addr.id);
+    }else{
+      modal.removeAttribute('data-kph-editing-id');
+    }
+    // Title
+    var title=modal.querySelector('[data-kph-form-title]');
+    if(title)title.textContent=mode==='edit'?'Adresse bearbeiten':'Neue Adresse';
+    // Populate fields
+    var fields=['firstName','lastName','company','address1','address2','city','zip','phoneNumber','territoryCode','zoneCode'];
+    for(var i=0;i<fields.length;i++){
+      var f=fields[i];
+      var el=modal.querySelector('[data-kph-field="'+f+'"]');
+      if(!el)continue;
+      el.value=(mode==='edit'&&addr&&addr[f]!=null)?addr[f]:'';
+    }
+    if(mode==='create'){
+      var ccEl=modal.querySelector('[data-kph-field="territoryCode"]');
+      if(ccEl&&!ccEl.value)ccEl.value='DE';
+    }
+    // Default-Checkbox
+    var defWrap=modal.querySelector('[data-kph-default-wrapper]');
+    var defCb=modal.querySelector('[data-kph-field="isDefault"]');
+    if(mode==='edit'&&addr&&addr.isDefault){
+      // already default — hide checkbox to avoid no-op confusion
+      if(defWrap)defWrap.style.display='none';
+      if(defCb)defCb.checked=true;
+    }else{
+      if(defWrap)defWrap.style.display='';
+      if(defCb)defCb.checked=false;
+    }
+    // Clear feedback
+    setFormFeedback('','');
+    setSaveBusy(false);
+    // Show
+    modal.style.display='';
+    // Focus first input
+    setTimeout(function(){
+      var first=modal.querySelector('[data-kph-field="firstName"]');
+      if(first)try{first.focus();}catch(e){}
+    },50);
+    log('modal','opened',{mode:mode,addrId:addr?addr.id:null});
+  }
+
+  function closeAddressForm(){
+    var modal=document.getElementById('kph-address-modal');
+    if(!modal)return;
+    modal.style.display='none';
+    modal.removeAttribute('data-kph-form-mode');
+    modal.removeAttribute('data-kph-editing-id');
+    log('modal','closed');
+  }
+
+  function readAddressForm(){
+    var modal=document.getElementById('kph-address-modal');
+    if(!modal)return null;
+    var data={};
+    var fields=['firstName','lastName','company','address1','address2','city','zip','phoneNumber','territoryCode','zoneCode'];
+    for(var i=0;i<fields.length;i++){
+      var f=fields[i];
+      var el=modal.querySelector('[data-kph-field="'+f+'"]');
+      data[f]=el?(el.value||'').trim():'';
+    }
+    var cb=modal.querySelector('[data-kph-field="isDefault"]');
+    data.isDefault=!!(cb&&cb.checked);
+    return data;
+  }
+
+  function validateAddressForm(data){
+    var required=['firstName','lastName','address1','city','zip','territoryCode'];
+    for(var i=0;i<required.length;i++){
+      if(!data[required[i]])return 'Bitte fülle alle Pflichtfelder aus.';
+    }
+    return null;
+  }
+
+  function setFormFeedback(state,msg){
+    var modal=document.getElementById('kph-address-modal');
+    if(!modal)return;
+    var el=modal.querySelector('[data-kph-form-feedback]');
+    if(!el)return;
+    el.className='kph-form-feedback';
+    if(state)el.classList.add('kph-fb-'+state);
+    el.textContent=msg||'';
+    el.style.display=msg?'':'none';
+  }
+
+  function setSaveBusy(busy){
+    var modal=document.getElementById('kph-address-modal');
+    if(!modal)return;
+    var btn=modal.querySelector('[data-kph-action="address-save"]');
+    if(!btn)return;
+    if(busy){
+      btn.setAttribute('aria-busy','true');
+      btn.style.pointerEvents='none';
+      btn.style.opacity='0.6';
+      btn.textContent='Speichere\u2026';
+    }else{
+      btn.removeAttribute('aria-busy');
+      btn.style.pointerEvents='';
+      btn.style.opacity='';
+      btn.textContent='Speichern';
+    }
+  }
+
+  function checkTokenForWrite(){
+    var tok=readSfTokens();
+    if(!tok||tok.expired){
+      return {ok:false,msg:'Deine Sitzung ist abgelaufen. Bitte Seite neu laden.'};
+    }
+    if(tok.msUntilExpiry<TOKEN_MIN_MS_FOR_WRITE){
+      return {ok:false,msg:'Deine Sitzung läuft gleich ab. Bitte Seite neu laden, um zu speichern.'};
+    }
+    return {ok:true,token:tok.accessToken};
+  }
+
+  function saveAddressForm(){
+    var modal=document.getElementById('kph-address-modal');
+    if(!modal)return;
+    var mode=modal.getAttribute('data-kph-form-mode')||'create';
+    var addrId=modal.getAttribute('data-kph-editing-id');
+    var data=readAddressForm();
+    var verr=validateAddressForm(data);
+    if(verr){setFormFeedback('error',verr);return;}
+    var tokCheck=checkTokenForWrite();
+    if(!tokCheck.ok){setFormFeedback('error',tokCheck.msg);return;}
+    setFormFeedback('info','Speichere…');
+    setSaveBusy(true);
+    var fields={
+      firstName:data.firstName,lastName:data.lastName,
+      company:data.company,address1:data.address1,address2:data.address2,
+      city:data.city,zip:data.zip,phoneNumber:data.phoneNumber,
+      territoryCode:data.territoryCode,zoneCode:data.zoneCode
+    };
+    var p;
+    if(mode==='edit'&&addrId){
+      // Only send isDefault if currently NOT default and checkbox is checked
+      var current=findAddress(addrId);
+      var alreadyDefault=current&&current.isDefault;
+      var setDef=(!alreadyDefault&&data.isDefault)?true:undefined;
+      p=mutAddressUpdate(tokCheck.token,addrId,fields,setDef);
+    }else{
+      p=mutAddressCreate(tokCheck.token,fields,data.isDefault);
+    }
+    p.then(function(res){
+      var errs=extractUserErrors(res);
+      if(errs.length){
+        setSaveBusy(false);
+        setFormFeedback('error','Fehler beim Speichern: '+errs.join(' · '));
+        log('save','address mutation failed',{errs:errs});
+        return;
+      }
+      log('save','address mutation ok',{mode:mode});
+      // Close + refresh
+      closeAddressForm();
+      window.KPH.refresh();
+    }).catch(function(e){
+      setSaveBusy(false);
+      setFormFeedback('error','Unerwarteter Fehler: '+String(e));
+      log('save','address mutation exception',{err:String(e)});
+    });
+  }
+
+  function deleteAddress(addrId){
+    if(!addrId)return;
+    if(!window.confirm('Adresse wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'))return;
+    var tokCheck=checkTokenForWrite();
+    if(!tokCheck.ok){alert(tokCheck.msg);return;}
+    log('action','address-delete starting',{id:addrId});
+    mutAddressDelete(tokCheck.token,addrId).then(function(res){
+      var errs=extractUserErrors(res);
+      if(errs.length){
+        alert('Fehler beim Löschen: '+errs.join(' · '));
+        log('save','address-delete failed',{errs:errs});
+        return;
+      }
+      log('save','address-delete ok');
+      window.KPH.refresh();
+    }).catch(function(e){
+      alert('Unerwarteter Fehler: '+String(e));
+    });
+  }
+
+  function setAddressAsDefault(addrId){
+    if(!addrId)return;
+    var tokCheck=checkTokenForWrite();
+    if(!tokCheck.ok){alert(tokCheck.msg);return;}
+    log('action','address-set-default starting',{id:addrId});
+    mutAddressUpdate(tokCheck.token,addrId,{},true).then(function(res){
+      var errs=extractUserErrors(res);
+      if(errs.length){
+        alert('Fehler: '+errs.join(' · '));
+        log('save','set-default failed',{errs:errs});
+        return;
+      }
+      log('save','set-default ok');
+      window.KPH.refresh();
+    }).catch(function(e){
+      alert('Unerwarteter Fehler: '+String(e));
+    });
+  }
+
+  // -----------------------------------------------------------------
   // Action handlers wiring
   // -----------------------------------------------------------------
   function wireActions(){
@@ -871,7 +1215,7 @@
         log('action','toggle',{key:el.getAttribute('data-kph-bind'),on:on});
       });
     }
-    // Save buttons
+    // Save profile buttons
     var saves=document.querySelectorAll('[data-kph-action="save-profile"]');
     for(var j=0;j<saves.length;j++){
       var s=saves[j];
@@ -882,11 +1226,27 @@
         saveProfile();
       });
     }
-    // Phase 8.5a — address action stubs (Mutations come in 8.5b–d)
-    wireAddressAction('address-edit',     function(addrId){ log('action','address-edit (stub)',{id:addrId}); });
-    wireAddressAction('address-delete',   function(addrId){ log('action','address-delete (stub)',{id:addrId}); });
-    wireAddressAction('address-set-default',function(addrId){ log('action','address-set-default (stub)',{id:addrId}); });
-    wireAddressAction('address-create',   function(){ log('action','address-create (stub)',{}); });
+    // Phase 8.5b+c+d — Address actions (real handlers)
+    wireAddressAction('address-edit',function(addrId){
+      var addr=findAddress(addrId);
+      if(!addr){log('action','edit-no-address',{id:addrId});return;}
+      openAddressForm('edit',addr);
+    });
+    wireAddressAction('address-delete',function(addrId){
+      deleteAddress(addrId);
+    });
+    wireAddressAction('address-set-default',function(addrId){
+      setAddressAsDefault(addrId);
+    });
+    wireAddressAction('address-create',function(){
+      openAddressForm('create',null);
+    });
+    wireAddressAction('address-cancel',function(){
+      closeAddressForm();
+    });
+    wireAddressAction('address-save',function(){
+      saveAddressForm();
+    });
     log('action','wired',{toggles:toggles.length,saves:saves.length});
   }
 
@@ -930,7 +1290,46 @@
     if(document.getElementById('kph-css'))return;
     var s=document.createElement('style');
     s.id='kph-css';
-    s.textContent='[data-kph-tpl]{display:none!important}';
+    s.textContent=[
+      /* Template hide */
+      '[data-kph-tpl]{display:none!important}',
+      /* Modal */
+      '.kph-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit;font-feature-settings:inherit}',
+      '.kph-modal-backdrop{position:absolute;inset:0;background:rgba(10,10,10,0.6);backdrop-filter:blur(2px)}',
+      '.kph-modal-dialog{position:relative;background:#fff;border-radius:8px;width:100%;max-width:560px;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,0.24);display:flex;flex-direction:column}',
+      /* Modal header */
+      '.kph-modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #e5e5e5}',
+      '.kph-modal-head h2{margin:0;font-family:inherit;font-weight:500;font-size:18px;color:#0a0a0a;letter-spacing:-0.01em}',
+      '.kph-modal-close{background:transparent;border:0;cursor:pointer;font-size:24px;line-height:1;color:#0a0a0a;padding:4px 8px;border-radius:4px;font-family:inherit}',
+      '.kph-modal-close:hover{background:#f2f2f2}',
+      /* Form grid */
+      '.kph-form-grid{padding:20px 24px;display:flex;flex-direction:column;gap:14px}',
+      '.kph-form-grid .kph-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}',
+      '.kph-form-grid .kph-row-zip{display:grid;grid-template-columns:120px 1fr;gap:14px}',
+      '@media (max-width:500px){.kph-form-grid .kph-row-2,.kph-form-grid .kph-row-zip{grid-template-columns:1fr}}',
+      /* Form fields */
+      '.kph-field{display:flex;flex-direction:column;gap:6px;font-family:inherit}',
+      '.kph-field>span{font-family:inherit;font-size:12px;font-weight:500;color:#1e1e1e;letter-spacing:0.01em}',
+      '.kph-field input,.kph-field select{font-family:inherit;font-feature-settings:inherit;font-size:14px;padding:10px 12px;border:1px solid #e5e5e5;border-radius:6px;background:#fff;color:#0a0a0a;outline:none;transition:border-color 0.15s}',
+      '.kph-field input:focus,.kph-field select:focus{border-color:#1e1e1e}',
+      '.kph-field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'8\' viewBox=\'0 0 12 8\'><path d=\'M1 1l5 5 5-5\' stroke=\'%231e1e1e\' fill=\'none\' stroke-width=\'1.5\'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}',
+      /* Checkbox row */
+      '.kph-checkbox{display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-size:13px;color:#1e1e1e;user-select:none;padding-top:4px}',
+      '.kph-checkbox input{cursor:pointer;width:16px;height:16px;accent-color:#0a0a0a}',
+      /* Feedback */
+      '.kph-form-feedback{padding:0 24px;font-family:inherit;font-size:13px;line-height:1.4}',
+      '.kph-form-feedback.kph-fb-info{color:#1e1e1e}',
+      '.kph-form-feedback.kph-fb-success{color:#1f5e2d}',
+      '.kph-form-feedback.kph-fb-error{color:#a8302b}',
+      /* Modal footer */
+      '.kph-modal-foot{padding:16px 24px 20px;border-top:1px solid #e5e5e5;margin-top:auto;display:flex;justify-content:flex-end;gap:10px}',
+      /* Buttons */
+      '.kph-btn{font-family:inherit;font-feature-settings:inherit;font-size:14px;font-weight:500;padding:10px 18px;border-radius:6px;cursor:pointer;border:1px solid transparent;transition:opacity 0.15s,background-color 0.15s}',
+      '.kph-btn-primary{background:#0a0a0a;color:#fff;border-color:#0a0a0a}',
+      '.kph-btn-primary:hover{background:#1e1e1e}',
+      '.kph-btn-secondary{background:#fff;color:#0a0a0a;border-color:#e5e5e5}',
+      '.kph-btn-secondary:hover{background:#f2f2f2}'
+    ].join('');
     (document.head||document.documentElement).appendChild(s);
   }
 
