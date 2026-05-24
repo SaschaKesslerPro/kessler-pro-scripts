@@ -1,9 +1,18 @@
 /*!
- * Kessler PRO · hub.js v1.6.1
+ * Kessler PRO · hub.js v1.6.2
  *
- * Phase 8.6b — Bestellungen-Liste Filter-Logic
+ * Phase 8.6c — Polish-Items
  *
- * v1.6.1 (Δ gegen v1.6.0):
+ * v1.6.2 (Δ gegen v1.6.1):
+ *   + CUSTOMER_QUERY: + customer.creationDate
+ *   + Neue formatCreationDate(iso) — Same DE-format wie formatProcessedAt
+ *   + Neue Binding-Key customer.creationDateFormatted → ersetzt static
+ *     "12. März 2024" im Sub-Header
+ *   + Pre-Hide-CSS: injizierter <style id="kph-prehide"> am IIFE-Top hidet
+ *     alle [data-kph-show-if] sofort (verhindert 200ms Flash vor renderShowIfs).
+ *     Wird in render() nach renderShowIfs() removed → JS-Entscheidungen greifen.
+ *
+ * v1.6.1 (vorher):
  *   + renderOrderList: setzt data-kph-order-bucket="production|shipped|completed|cancelled"
  *     auf jede gerenderte Card → filter-readable Persistence
  *   + Neue wireFilterPills() — Click-Handler auf [data-kph-filter] elements.
@@ -143,16 +152,24 @@
  *
  * Future scope:
  *   - Auto-Token-Refresh via OAuth refresh_token (Phase 8.4-Polish)
- *   - memberSince + creationDate resolver (Phase 8.6c)
- *   - Bucket-aware empty-state ("Keine versandten Bestellungen") (Phase 8.6c)
- *   - renderList Generic-Refactor + Pagination (Phase 8.6c)
+ *   - Bucket-aware empty-state — skipped, pill counts already cover this
+ *   - renderList Generic-Refactor + Pagination (Phase 8.7)
  *   - Bestelldetail-Page hydration (Phase 8.7)
  */
 (function(){
+  // Pre-Hide CSS: hides [data-kph-show-if] until renderShowIfs decides.
+  // Removed in render() after renderShowIfs.
+  (function injectPreHide(){
+    if(document.getElementById('kph-prehide'))return;
+    var s=document.createElement('style');
+    s.id='kph-prehide';
+    s.textContent='[data-kph-show-if]{display:none!important}';
+    (document.head||document.documentElement).appendChild(s);
+  })();
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.6.1';
+  var VERSION='1.6.2';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -263,7 +280,7 @@
   // Phase 8.5a — addresses(first:20) expanded to full Address schema + separate defaultAddress{id}
   // Phase 8.6a — orders extended with totalPrice + lineItems (für Order-Card-Liste)
   var CUSTOMER_QUERY_V14='{customer{'+
-    'id firstName lastName displayName '+
+    'id firstName lastName displayName creationDate '+
     'emailAddress{emailAddress marketingState} '+
     'defaultAddress{id} '+
     'addresses(first:20){nodes{'+
@@ -518,6 +535,10 @@
     'avatar':{kind:'text',resolve:function(c){
       var em=c&&c.emailAddress&&c.emailAddress.emailAddress;
       return em?em[0].toUpperCase():'?';
+    }},
+    // Phase 8.6c — Member-since (account creationDate, DE-format)
+    'customer.memberSince':{kind:'text',resolve:function(c){
+      return c&&c.creationDate?formatProcessedAt(c.creationDate):'';
     }},
     // Phase 8.3 — order card slots
     'order.name':{kind:'text',resolve:function(c){
@@ -1623,6 +1644,9 @@
     renderAddressList(customer);
     renderOrderList(customer);
     wireFilterPills();
+    // Pre-hide CSS removed → JS show-if decisions now take effect
+    var preHide=document.getElementById('kph-prehide');
+    if(preHide&&preHide.parentNode)preHide.parentNode.removeChild(preHide);
     snapshotProfile(customer);
     wireActions();
     setStateClass('ready');
