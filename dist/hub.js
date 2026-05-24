@@ -1,9 +1,21 @@
 /*!
- * Kessler PRO · hub.js v1.6.2
+ * Kessler PRO · hub.js v1.6.3
  *
- * Phase 8.6c — Polish-Items
+ * Phase 8.6c+ — Login-Required-State (Empty-State + Anmelde-Button-Pattern)
  *
- * v1.6.2 (Δ gegen v1.6.1):
+ * v1.6.3 (Δ gegen v1.6.2):
+ *   + Neue showIfRules: auth.guest (customer===null) + auth.user (customer!==null)
+ *   + Neue renderGuest() Helper: renderShowIfs(null) + Pre-Hide removed + setStateClass('guest')
+ *   + Poll-Timeout (POLL_MAX 60→12, 30s→6s) → renderGuest() statt setStateClass('error')
+ *   + fetchCustomer null/fail → renderGuest() statt setStateClass('error')
+ *   + setStateClass: 'kph-guest' in remove list
+ *
+ *   Pattern: Unauthenticated user sees "Bitte einloggen" Empty-State (data-kph-show-if="auth.guest"),
+ *   authenticated user sees normal content (data-kph-show-if="auth.user"). Beide initial via
+ *   Pre-Hide-CSS versteckt, renderShowIfs entscheidet. Empty-State enthält Button mit sf-login="1"
+ *   → Shopyflow intercepts Click → OAuth-Flow → Shopify-Login → zurück.
+ *
+ * v1.6.2 (vorher):
  *   + CUSTOMER_QUERY: + customer.creationDate
  *   + Neue formatCreationDate(iso) — Same DE-format wie formatProcessedAt
  *   + Neue Binding-Key customer.creationDateFormatted → ersetzt static
@@ -169,12 +181,12 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.6.2';
+  var VERSION='1.6.3';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
   var POLL_INTERVAL_MS=500;
-  var POLL_MAX=60; // 30s @ 500ms
+  var POLL_MAX=12; // 6s @ 500ms — was 60 (30s), reduced for snappier guest-state detection
   var TOKEN_MIN_MS_FOR_WRITE=60000; // Minimum 60s remaining for write actions
 
   var PROFILE_MF_NAMESPACE='kessler_profile';
@@ -627,28 +639,35 @@
   // -----------------------------------------------------------------
   var showIfRules={
     'orders.empty':function(c){
-      return !c||!c.orders||!c.orders.nodes||c.orders.nodes.length===0;
+      return !!(c&&c.orders&&c.orders.nodes&&c.orders.nodes.length===0);
     },
     'orders.notEmpty':function(c){
       return !!(c&&c.orders&&c.orders.nodes&&c.orders.nodes.length>0);
     },
     'wishlist.empty':function(c){
-      return counters.wishlist(c)===0;
+      return !!c&&counters.wishlist(c)===0;
     },
     'wishlist.notEmpty':function(c){
-      return counters.wishlist(c)>0;
+      return !!c&&counters.wishlist(c)>0;
     },
     'addresses.empty':function(c){
-      return counters.addresses(c)===0;
+      return !!c&&counters.addresses(c)===0;
     },
     'addresses.notEmpty':function(c){
-      return counters.addresses(c)>0;
+      return !!c&&counters.addresses(c)>0;
     },
     'order.hasEta':function(c){
       return !!getEtaIso(latestOrder(c));
     },
     'order.hasTracking':function(c){
       return !!getTrackingUrl(latestOrder(c));
+    },
+    // Phase 8.6c+ — Auth-State (customer===null = guest, customer truthy = user)
+    'auth.guest':function(c){
+      return c===null;
+    },
+    'auth.user':function(c){
+      return c!==null;
     }
   };
 
@@ -661,9 +680,18 @@
     var nodes=document.querySelectorAll(STATE_SELECTOR);
     for(var i=0;i<nodes.length;i++){
       var el=nodes[i];
-      el.classList.remove('kph-loading','kph-ready','kph-error');
+      el.classList.remove('kph-loading','kph-ready','kph-error','kph-guest');
       el.classList.add('kph-'+state);
     }
+  }
+
+  // Phase 8.6c+ — Guest-State (no token / no customer)
+  function renderGuest(){
+    renderShowIfs(null); // null-safe rules: auth.guest=true, auth.user=false, others=false
+    var preHide=document.getElementById('kph-prehide');
+    if(preHide&&preHide.parentNode)preHide.parentNode.removeChild(preHide);
+    setStateClass('guest');
+    log('render','guest state — auth-required UI shown');
   }
 
   function renderShowIfs(customer){
@@ -1725,8 +1753,8 @@
       return fetchCustomer(tok.accessToken).then(function(c){
         fetchInFlight=false;
         if(!c){
-          log('init','customer null \u2014 setting error state');
-          setStateClass('error');
+          log('init','customer null \u2014 entering guest state');
+          renderGuest();
           return;
         }
         customerCtx=c;
@@ -1736,8 +1764,8 @@
     }
     if(pollCount>=POLL_MAX){
       clearInterval(pollTimer);pollTimer=null;
-      log('auth','token timeout after '+(POLL_MAX*POLL_INTERVAL_MS)+'ms',{attempts:pollCount});
-      setStateClass('error');
+      log('auth','token timeout after '+(POLL_MAX*POLL_INTERVAL_MS)+'ms \u2014 entering guest state',{attempts:pollCount});
+      renderGuest();
       return;
     }
   }
