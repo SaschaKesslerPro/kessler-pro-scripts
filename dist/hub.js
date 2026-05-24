@@ -1,9 +1,18 @@
 /*!
- * Kessler PRO · hub.js v1.6.0
+ * Kessler PRO · hub.js v1.6.1
  *
- * Phase 8.6a — Bestellungen-Liste Read-Path
+ * Phase 8.6b — Bestellungen-Liste Filter-Logic
  *
- * v1.6.0 (Δ gegen v1.5.1):
+ * v1.6.1 (Δ gegen v1.6.0):
+ *   + renderOrderList: setzt data-kph-order-bucket="production|shipped|completed|cancelled"
+ *     auf jede gerenderte Card → filter-readable Persistence
+ *   + Neue wireFilterPills() — Click-Handler auf [data-kph-filter] elements.
+ *     Toggle kp-filter-pill--active. Idempotent via data-kph-filter-wired Guard.
+ *   + Neue filterOrders(bucket) — show/hide order-cards basierend auf
+ *     data-kph-order-bucket. "all" bucket = show everything.
+ *   + render() orchestrator: wireFilterPills() nach renderOrderList()
+ *
+ * v1.6.0 (vorher):
  *   + CUSTOMER_QUERY_V14 → _V15:
  *       - orders.nodes erweitert um totalPrice{amount currencyCode}
  *         und lineItems(first:10){nodes{title quantity image{url altText}}}
@@ -134,8 +143,8 @@
  *
  * Future scope:
  *   - Auto-Token-Refresh via OAuth refresh_token (Phase 8.4-Polish)
- *   - Filter-Pills active-toggle + filter-logic (Phase 8.6b)
  *   - memberSince + creationDate resolver (Phase 8.6c)
+ *   - Bucket-aware empty-state ("Keine versandten Bestellungen") (Phase 8.6c)
  *   - renderList Generic-Refactor + Pagination (Phase 8.6c)
  *   - Bestelldetail-Page hydration (Phase 8.7)
  */
@@ -143,7 +152,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.6.0';
+  var VERSION='1.6.1';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -951,11 +960,53 @@
       clone.removeAttribute('data-kph-tpl');
       clone.setAttribute('data-kph-rendered','order-card');
       clone.setAttribute('data-kph-order-id',order.id||'');
+      clone.setAttribute('data-kph-order-bucket',orderBucket(order));
       applyOrderBindings(clone,order);
       // Insert after template (template stays hidden via [data-kph-tpl]{display:none} CSS)
       tpl.parentNode.appendChild(clone);
       log('list','order card rendered',{id:order.id,name:order.name,bucket:orderBucket(order)});
     }
+  }
+
+  // Phase 8.6b — Filter pills (click toggles active + filters cards by bucket)
+  function wireFilterPills(){
+    var pills=document.querySelectorAll('[data-kph-filter]');
+    if(pills.length===0){
+      return;
+    }
+    var newCount=0;
+    for(var i=0;i<pills.length;i++){
+      if(pills[i].getAttribute('data-kph-filter-wired'))continue;
+      (function(pill){
+        pill.addEventListener('click',function(e){
+          if(e&&e.preventDefault)e.preventDefault();
+          var bucket=pill.getAttribute('data-kph-filter');
+          // Toggle active class — remove from all, add to clicked
+          var all=document.querySelectorAll('[data-kph-filter]');
+          for(var k=0;k<all.length;k++){
+            all[k].classList.remove('kp-filter-pill--active');
+          }
+          pill.classList.add('kp-filter-pill--active');
+          filterOrders(bucket);
+          log('filter','clicked',{bucket:bucket});
+        });
+      })(pills[i]);
+      pills[i].setAttribute('data-kph-filter-wired','1');
+      newCount++;
+    }
+    log('filter','pills wired',{newWires:newCount,totalPills:pills.length});
+  }
+
+  function filterOrders(bucket){
+    var cards=document.querySelectorAll('[data-kph-rendered="order-card"]');
+    var shown=0;
+    for(var i=0;i<cards.length;i++){
+      var cardBucket=cards[i].getAttribute('data-kph-order-bucket')||'';
+      var visible=(bucket==='all'||cardBucket===bucket);
+      cards[i].style.display=visible?'':'none';
+      if(visible)shown++;
+    }
+    log('filter','applied',{bucket:bucket,shown:shown,total:cards.length});
   }
 
   // -----------------------------------------------------------------
@@ -1571,6 +1622,7 @@
     renderCounts(customer);
     renderAddressList(customer);
     renderOrderList(customer);
+    wireFilterPills();
     snapshotProfile(customer);
     wireActions();
     setStateClass('ready');
