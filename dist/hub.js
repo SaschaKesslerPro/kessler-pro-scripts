@@ -1159,8 +1159,16 @@
   }
 
   function applyOrderBindings(root,order){
+    // Helper: querySelectorAll + include root if matches (querySelectorAll excludes root)
+    function self(sel){
+      var nodes=root.querySelectorAll(sel);
+      var arr=[];
+      if(root.matches&&root.matches(sel))arr.push(root);
+      for(var i=0;i<nodes.length;i++)arr.push(nodes[i]);
+      return arr;
+    }
     // [data-kph-bind-text] — text content (reused from address-pattern)
-    var texts=root.querySelectorAll('[data-kph-bind-text]');
+    var texts=self('[data-kph-bind-text]');
     for(var i=0;i<texts.length;i++){
       var tkey=texts[i].getAttribute('data-kph-bind-text');
       try{
@@ -1168,7 +1176,7 @@
       }catch(e){log('list','order-bind-text-fail',{key:tkey,err:String(e)})}
     }
     // [data-kph-bind-href] — Card link, tracking link (NEW in 8.6a)
-    var hrefs=root.querySelectorAll('[data-kph-bind-href]');
+    var hrefs=self('[data-kph-bind-href]');
     for(var j=0;j<hrefs.length;j++){
       var hkey=hrefs[j].getAttribute('data-kph-bind-href');
       try{
@@ -1177,7 +1185,7 @@
       }catch(e){log('list','order-bind-href-fail',{key:hkey,err:String(e)})}
     }
     // [data-kph-status-class="kp-pill-status"] — append --{modifier}
-    var statusEls=root.querySelectorAll('[data-kph-status-class]');
+    var statusEls=self('[data-kph-status-class]');
     for(var k=0;k<statusEls.length;k++){
       var prefix=statusEls[k].getAttribute('data-kph-status-class');
       var mod=resolveOrderField(order,'statusModifier');
@@ -1190,7 +1198,7 @@
       statusEls[k].className=kept.join(' ').replace(/\s+/g,' ').trim();
     }
     // [data-kph-thumbs] — custom thumb-strip rendering
-    var thumbsCtns=root.querySelectorAll('[data-kph-thumbs]');
+    var thumbsCtns=self('[data-kph-thumbs]');
     for(var m=0;m<thumbsCtns.length;m++){
       renderOrderThumbs(thumbsCtns[m],order);
     }
