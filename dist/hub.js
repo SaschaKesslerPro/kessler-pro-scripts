@@ -1,9 +1,15 @@
 /*!
- * Kessler PRO · hub.js v1.5.0
+ * Kessler PRO · hub.js v1.5.1
  *
- * Phase 8.5b+c+d — Adressen-CRUD komplett (Create/Update/Delete/SetDefault)
+ * Phase 8.5 — Polish-Patch (show-if scope fix)
  *
- * v1.5.0 (Δ gegen v1.4.0):
+ * v1.5.1 Patch (Δ gegen v1.5.0):
+ *   * renderShowIfs überspringt Elements innerhalb [data-kph-rendered] oder
+ *     [data-kph-tpl] — diese item-scoped show-ifs werden korrekt von
+ *     applyAddressBindings behandelt. Eliminiert "no rule for show-if"-
+ *     Spam der mit Card-Count skaliert (2 Cards = 4 Warnings vorher, 0 jetzt).
+ *
+ * v1.5.0 (vorher):
  *   + 3 Address-Mutations (alle drei: defaultAddress:Boolean optional):
  *       * mutAddressCreate(token,fields,isDefault)
  *           → customerAddressCreate(address:CustomerAddressInput!,defaultAddress:Boolean)
@@ -99,7 +105,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.5.0';
+  var VERSION='1.5.1';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -464,9 +470,15 @@
 
   function renderShowIfs(customer){
     var nodes=document.querySelectorAll('[data-kph-show-if]');
-    log('render','show-if nodes found',{count:nodes.length});
+    var skipped=0;
     for(var i=0;i<nodes.length;i++){
       var el=nodes[i];
+      // Skip item-scoped show-ifs (inside template or cloned items) —
+      // those are resolved by applyAddressBindings against the item, not the customer.
+      if(el.closest&&el.closest('[data-kph-rendered],[data-kph-tpl]')){
+        skipped++;
+        continue;
+      }
       var key=el.getAttribute('data-kph-show-if');
       var rule=showIfRules[key];
       if(!rule){
@@ -481,6 +493,7 @@
         log('render','show-if-fail',{key:key,err:String(e)});
       }
     }
+    log('render','show-if nodes scanned',{total:nodes.length,skipped:skipped});
   }
 
   function renderBindings(customer){
