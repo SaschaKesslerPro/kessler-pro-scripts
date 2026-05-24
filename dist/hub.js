@@ -2137,7 +2137,18 @@
       '.kph-btn-secondary:hover{background:#f2f2f2}',
       /* Phase 8.6a — order-thumb image variant (overrides Designer text-thumb styling) */
       '.kp-order-thumb--img{padding:0!important;overflow:hidden}',
-      '.kp-order-thumb--img img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}'
+      '.kp-order-thumb--img img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}',
+      /* Phase 8.7 — Bestelldetail timeline pseudo-elements (Designer cannot author ::before) */
+      '.kp-timeline{position:relative;padding-left:24px}',
+      '.kp-timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:#E5E5E0}',
+      '.kp-timeline-step{position:relative}',
+      '.kp-timeline-step::before{content:"";position:absolute;left:-22px;top:10px;width:13px;height:13px;border-radius:50%;background:#FFFFFF;border:1px solid #999;box-sizing:border-box}',
+      '.kp-timeline-step--done::before{background:#0A0A0A;border-color:#0A0A0A}',
+      '.kp-timeline-step--current::before{background:#0A0A0A;border-color:#0A0A0A;box-shadow:0 0 0 4px #F0EFE9}',
+      '.kp-timeline-step--upcoming .kp-timeline-step-title{color:#999}',
+      /* Phase 8.7 — Bestelldetail item-thumb image variant */
+      '.kp-detail-item-thumb--img{padding:0!important;overflow:hidden}',
+      '.kp-detail-item-thumb--img img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}'
     ].join('');
     (document.head||document.documentElement).appendChild(s);
   }
