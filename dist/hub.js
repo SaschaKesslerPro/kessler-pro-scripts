@@ -1,5 +1,42 @@
 /*!
- * Kessler PRO · hub.js v1.6.3
+ * Kessler PRO · hub.js v1.7.0
+ *
+ * Phase 8.7 — Bestelldetail-Page Hydration (single-order detail view)
+ *
+ * v1.7.0 (Δ gegen v1.6.3):
+ *   + CUSTOMER_QUERY_V14 → V15: erweitert um
+ *       - subtotal{amount currencyCode}
+ *       - totalShipping{amount currencyCode}
+ *       - totalTax{amount currencyCode}
+ *       - shippingAddress{formatted firstName lastName}
+ *       - billingAddress{formatted firstName lastName}
+ *       - lineItems(first:20) (war first:10) mit sku + variantTitle + price{amount currencyCode}
+ *       - fulfillments(first:5) (war first:1) mit zusätzlich createdAt
+ *   + Neue Helpers für Detail-Page-Hydration:
+ *       - getOrderIdFromUrl() — URL ?id= param
+ *       - findOrderByGid(c, gid) / findOrderByName(c, name)
+ *       - getDetailOrder(c) — URL-resolved order (GID oder Name)
+ *       - isOnOrderDetailPage() — /account/bestellung-detail*
+ *       - resolveOrderContext(c) — context-aware: detail page → URL-order, sonst → latestOrder
+ *       - formatDateShort(iso) — "12. Mai"
+ *       - getTimelineSteps(order) — 4-Step state machine (received/production/shipped/delivered)
+ *   + Modifiziert: order.hasEta, order.hasTracking showIfRules sind jetzt context-aware
+ *     (resolveOrderContext statt direkt latestOrder). Auf Hub-Page identisches Verhalten,
+ *     auf Bestelldetail-Page Detail-Order.
+ *   + Neue showIfRules: order.hasTax, order.hasInvoice (always-false Stub für Phase 9 Sufio),
+ *     order.hasPaymentMethod (always-false Stub, kein API-Field)
+ *   + Neue Render-Funktionen:
+ *       - renderOrderDetail(customer) — Master-Renderer für /account/bestellung-detail
+ *       - applyOrderDetailBindingsGlobal(order) — walkt data-kph-bind-text/lines mit "order.*"-Keys
+ *         outside template-clones, resolved gegen URL-Order
+ *       - renderTimeline(order) — 4-Step state-machine, setzt --done/--current/--upcoming modifier
+ *       - renderLineItemsList(order) — Template-Clone-Pattern für data-kph-list="lineItems"
+ *       - applyLineItemBindings(root, item) — data-kph-bind-text="item.*" + data-kph-thumb (image/initials)
+ *       - resolveOrderDetailField(order, key) — bindings für order.subtotalLabel etc.
+ *       - resolveLineItemField(item, key) — bindings für item.title, item.variantTitle, etc.
+ *       - wireReorderAction(order) — MVP-Stub (Alert + Redirect zu /produkte)
+ *   + render() orchestrator erweitert um renderOrderDetail(customer) nach renderOrderList
+ *   + In wireActions(): wireReorderAction integriert (Phase 9 echte Impl → cart.add per item)
  *
  * Phase 8.6c+ — Login-Required-State (Empty-State + Anmelde-Button-Pattern)
  *
@@ -181,7 +218,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.6.3';
+  var VERSION='1.7.0';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -291,7 +328,10 @@
   // Phase 8.4 query — customer + counts + latest-order + profile fields + 3 metafield aliases
   // Phase 8.5a — addresses(first:20) expanded to full Address schema + separate defaultAddress{id}
   // Phase 8.6a — orders extended with totalPrice + lineItems (für Order-Card-Liste)
-  var CUSTOMER_QUERY_V14='{customer{'+
+  // Phase 8.7  — V15: order detail fields (subtotal, totalShipping, totalTax,
+  //              shippingAddress, billingAddress, lineItems first:20 + sku + variantTitle + price,
+  //              fulfillments first:5 + createdAt)
+  var CUSTOMER_QUERY_V15='{customer{'+
     'id firstName lastName displayName creationDate '+
     'emailAddress{emailAddress marketingState} '+
     'defaultAddress{id} '+
@@ -306,12 +346,18 @@
       'financialStatus fulfillmentStatus '+
       'statusPageUrl '+
       'totalPrice{amount currencyCode} '+
-      'lineItems(first:10){nodes{'+
-        'title quantity '+
+      'subtotal{amount currencyCode} '+
+      'totalShipping{amount currencyCode} '+
+      'totalTax{amount currencyCode} '+
+      'shippingAddress{formatted firstName lastName} '+
+      'billingAddress{formatted firstName lastName} '+
+      'lineItems(first:20){nodes{'+
+        'title quantity sku variantTitle '+
+        'price{amount currencyCode} '+
         'image{url altText}'+
       '}} '+
-      'fulfillments(first:1){nodes{'+
-        'status estimatedDeliveryAt '+
+      'fulfillments(first:5){nodes{'+
+        'status estimatedDeliveryAt createdAt '+
         'trackingInformation{number url company}'+
       '}}'+
     '}} '+
@@ -321,7 +367,7 @@
   '}}';
 
   function fetchCustomer(token){
-    return gql(CUSTOMER_QUERY_V14,token,'fetchCustomer').then(function(res){
+    return gql(CUSTOMER_QUERY_V15,token,'fetchCustomer').then(function(res){
       if(!res.ok)return null;
       var c=res.json&&res.json.data&&res.json.data.customer;
       if(!c){
@@ -508,6 +554,186 @@
   }
 
   // -----------------------------------------------------------------
+  // Phase 8.7 — Bestelldetail helpers: URL routing, order lookup, formatting
+  // -----------------------------------------------------------------
+  function getOrderIdFromUrl(){
+    try{
+      var p=new URLSearchParams(location.search);
+      return p.get('id');
+    }catch(e){
+      return null;
+    }
+  }
+
+  function findOrderByGid(c,gid){
+    if(!c||!c.orders||!c.orders.nodes||!gid)return null;
+    for(var i=0;i<c.orders.nodes.length;i++){
+      if(c.orders.nodes[i].id===gid)return c.orders.nodes[i];
+    }
+    return null;
+  }
+
+  function findOrderByName(c,name){
+    if(!c||!c.orders||!c.orders.nodes||!name)return null;
+    for(var i=0;i<c.orders.nodes.length;i++){
+      if(c.orders.nodes[i].name===name)return c.orders.nodes[i];
+    }
+    return null;
+  }
+
+  function getDetailOrder(c){
+    if(!c)return null;
+    var idParam=getOrderIdFromUrl();
+    if(!idParam)return null;
+    // GID format: "gid://shopify/Order/12345" — Bestellungen-Liste in v1.6.x baut Links so
+    if(idParam.indexOf('gid://')===0)return findOrderByGid(c,idParam);
+    // Name format: "KP-2026-1004" — preferred URL-friendly form
+    return findOrderByName(c,idParam);
+  }
+
+  function isOnOrderDetailPage(){
+    return location.pathname.indexOf('/account/bestellung-detail')===0;
+  }
+
+  // Context-aware order resolution — Hub-Page uses latestOrder, Bestelldetail uses URL-Order.
+  // Used by showIfRules order.hasEta, order.hasTracking, order.hasTax to work on both pages
+  // with same attribute keys.
+  function resolveOrderContext(c){
+    if(!c)return null;
+    if(isOnOrderDetailPage())return getDetailOrder(c);
+    return latestOrder(c);
+  }
+
+  // "12. Mai" — short format (no year, no time)
+  function formatDateShort(iso){
+    if(!iso)return '';
+    var d=new Date(iso);
+    if(isNaN(d.getTime()))return '';
+    return d.getDate()+'. '+MONTHS_DE[d.getMonth()];
+  }
+
+  // 4-Step state machine for Bestelldetail Timeline.
+  // Returns array of {key, state, dateLabel, title, note}.
+  // States: 'done' | 'current' | 'upcoming'
+  function getTimelineSteps(order){
+    if(!order)return [];
+    var fStatus=(order.fulfillmentStatus||'').toUpperCase();
+    var finStatus=(order.financialStatus||'').toUpperCase();
+    var fulfillment=order.fulfillments&&order.fulfillments.nodes&&order.fulfillments.nodes[0]||null;
+    var fulfillmentStatus=(fulfillment&&fulfillment.status||'').toUpperCase();
+
+    var isDelivered=fulfillmentStatus==='DELIVERED';
+    var isShipped=fStatus==='FULFILLED'||fStatus==='PARTIALLY_FULFILLED';
+    var isPaid=finStatus==='PAID'||finStatus==='PARTIALLY_PAID';
+    var isInProduction=!isShipped&&!isDelivered&&isPaid;
+
+    var shippedDate=fulfillment&&fulfillment.createdAt||null;
+    var etaIso=fulfillment&&fulfillment.estimatedDeliveryAt||null;
+
+    return [
+      {
+        key:'received',
+        state:'done',
+        dateLabel:formatDateShort(order.processedAt),
+        title:'Bestellung eingegangen',
+        note:isPaid?'Zahlung best\u00e4tigt':'Wartet auf Zahlung'
+      },
+      {
+        key:'production',
+        state:isShipped||isDelivered?'done':(isInProduction?'current':'upcoming'),
+        dateLabel:isInProduction?'seit '+formatDateShort(order.processedAt):'',
+        title:'In der Werkstatt',
+        note:'Tischplatte wird zugeschnitten und ge\u00f6lt'
+      },
+      {
+        key:'shipped',
+        state:isDelivered?'done':(isShipped?'current':'upcoming'),
+        dateLabel:isShipped?formatDateShort(shippedDate):'',
+        title:'Versendet',
+        note:fulfillment&&fulfillment.trackingInformation&&fulfillment.trackingInformation.company
+          ?fulfillment.trackingInformation.company
+          :'DHL Speditionsversand \u00b7 2\u20134 Werktage'
+      },
+      {
+        key:'delivered',
+        state:isDelivered?'current':'upcoming',
+        dateLabel:etaIso?'voraussichtlich \u00b7 '+formatDateShort(etaIso):'',
+        title:'Geliefert',
+        note:''
+      }
+    ];
+  }
+
+  // -----------------------------------------------------------------
+  // Phase 8.7 — Bestelldetail field resolvers
+  // -----------------------------------------------------------------
+  function computeEstimatedShippingLabel(order){
+    if(!order)return '';
+    var fulfillment=order.fulfillments&&order.fulfillments.nodes&&order.fulfillments.nodes[0];
+    if(fulfillment&&fulfillment.estimatedDeliveryAt){
+      return 'Voraussichtlich versandt am '+formatProcessedAt(fulfillment.estimatedDeliveryAt);
+    }
+    if((order.fulfillmentStatus||'').toUpperCase()==='FULFILLED')return 'Versendet';
+    return 'In Bearbeitung';
+  }
+
+  function formatShippingLabel(order){
+    if(!order)return '';
+    if(order.totalShipping&&parseFloat(order.totalShipping.amount)>0){
+      return 'Spedition \u00b7 '+formatPrice(order.totalShipping);
+    }
+    return 'Versandkostenfrei';
+  }
+
+  function computeSubtotalLabel(order){
+    if(!order)return '';
+    if(order.subtotal)return formatPrice(order.subtotal);
+    // Fallback: total - shipping - tax
+    if(!order.totalPrice)return '';
+    var total=parseFloat(order.totalPrice.amount)||0;
+    var ship=order.totalShipping?parseFloat(order.totalShipping.amount)||0:0;
+    var tax=order.totalTax?parseFloat(order.totalTax.amount)||0:0;
+    var sub=total-ship-tax;
+    return formatPrice({amount:String(sub),currencyCode:order.totalPrice.currencyCode});
+  }
+
+  function resolveOrderDetailField(order,key){
+    if(!order)return '';
+    switch(key){
+      case 'name':                   return order.name||'';
+      case 'processedAtLong':        return formatProcessedAt(order.processedAt);
+      case 'estimatedShippingLabel': return computeEstimatedShippingLabel(order);
+      case 'shippingAddressLines':   return order.shippingAddress&&order.shippingAddress.formatted||[];
+      case 'billingAddressLines':{
+        var b=order.billingAddress&&order.billingAddress.formatted;
+        var s=order.shippingAddress&&order.shippingAddress.formatted;
+        if(b&&b.length)return b;
+        return s||[];
+      }
+      case 'shippingLabel':          return formatShippingLabel(order);
+      case 'subtotalLabel':          return computeSubtotalLabel(order);
+      case 'taxLabel':               return formatPrice(order.totalTax);
+      case 'totalLabel':             return formatPrice(order.totalPrice);
+      case 'paymentMethod':          return ''; // not in Customer Account API
+      case 'trackingUrl':            return getTrackingUrl(order)||'';
+      default:                       return '';
+    }
+  }
+
+  function resolveLineItemField(item,key){
+    if(!item)return '';
+    switch(key){
+      case 'title':         return item.title||'';
+      case 'variantTitle':  return item.variantTitle||'';
+      case 'sku':           return item.sku||'';
+      case 'qtyLabel':      return 'Menge: '+(item.quantity||1);
+      case 'priceLabel':    return item.price?formatPrice(item.price):'';
+      case 'thumbInitials': return getThumbInitials(item.title);
+      default:              return item[key]==null?'':String(item[key]);
+    }
+  }
+
+  // -----------------------------------------------------------------
   // Profile helpers
   // -----------------------------------------------------------------
   function getMarketingState(c){
@@ -657,10 +883,24 @@
       return !!c&&counters.addresses(c)>0;
     },
     'order.hasEta':function(c){
-      return !!getEtaIso(latestOrder(c));
+      return !!getEtaIso(resolveOrderContext(c));
     },
     'order.hasTracking':function(c){
-      return !!getTrackingUrl(latestOrder(c));
+      return !!getTrackingUrl(resolveOrderContext(c));
+    },
+    // Phase 8.7 — Bestelldetail show-ifs (context-aware via resolveOrderContext)
+    'order.hasTax':function(c){
+      var o=resolveOrderContext(c);
+      return !!(o&&o.totalTax&&parseFloat(o.totalTax.amount)>0);
+    },
+    'order.hasInvoice':function(c){
+      // Phase 9: Sufio for Shopify integration via order.metafield(namespace:"sufio",key:"invoice_pdf_url")
+      // V1: button always hidden
+      return false;
+    },
+    'order.hasPaymentMethod':function(c){
+      // Customer Account API does not expose payment method — Phase 9+ via Order-Status-Page-Scrape or metafield
+      return false;
     },
     // Phase 8.6c+ — Auth-State (customer===null = guest, customer truthy = user)
     'auth.guest':function(c){
@@ -1056,6 +1296,168 @@
       if(visible)shown++;
     }
     log('filter','applied',{bucket:bucket,shown:shown,total:cards.length});
+  }
+
+  // -----------------------------------------------------------------
+  // Phase 8.7 — Bestelldetail-Page rendering
+  // -----------------------------------------------------------------
+  function renderOrderDetail(customer){
+    if(!isOnOrderDetailPage())return;
+    if(!customer){
+      log('detail','no customer — skip');
+      return;
+    }
+    var order=getDetailOrder(customer);
+    if(!order){
+      var idParam=getOrderIdFromUrl();
+      log('detail','order not found',{idParam:idParam,ordersAvailable:customer.orders&&customer.orders.nodes?customer.orders.nodes.length:0});
+      // V1: bind elements stay empty. Phase 8.7-Polish: add "not found" empty state.
+      return;
+    }
+    applyOrderDetailBindingsGlobal(order);
+    renderTimeline(order);
+    renderLineItemsList(order);
+    wireReorderAction(order);
+    log('detail','rendered',{name:order.name,id:order.id});
+  }
+
+  // Walks data-kph-bind-text and data-kph-bind-lines with "order.*" keys outside template clones,
+  // resolves against the URL-detail order. Item-scoped clones are handled by applyLineItemBindings.
+  // step.* keys are handled by renderTimeline.
+  function applyOrderDetailBindingsGlobal(order){
+    if(!order)return;
+    var texts=document.querySelectorAll('[data-kph-bind-text]');
+    for(var i=0;i<texts.length;i++){
+      var el=texts[i];
+      if(el.closest&&el.closest('[data-kph-rendered],[data-kph-tpl]'))continue;
+      var key=el.getAttribute('data-kph-bind-text');
+      if(!key||key.indexOf('order.')!==0)continue;
+      try{
+        var val=resolveOrderDetailField(order,key.substring(6));
+        el.textContent=val==null?'':String(val);
+      }catch(e){
+        log('detail','bind-text-fail',{key:key,err:String(e)});
+      }
+    }
+    var lines=document.querySelectorAll('[data-kph-bind-lines]');
+    for(var j=0;j<lines.length;j++){
+      var lEl=lines[j];
+      if(lEl.closest&&lEl.closest('[data-kph-rendered],[data-kph-tpl]'))continue;
+      var lKey=lEl.getAttribute('data-kph-bind-lines');
+      if(!lKey||lKey.indexOf('order.')!==0)continue;
+      lEl.innerHTML='';
+      try{
+        var arr=resolveOrderDetailField(order,lKey.substring(6));
+        if(Array.isArray(arr)){
+          for(var k=0;k<arr.length;k++){
+            var ln=document.createElement('div');
+            ln.textContent=arr[k];
+            lEl.appendChild(ln);
+          }
+        }
+      }catch(e){
+        log('detail','bind-lines-fail',{key:lKey,err:String(e)});
+      }
+    }
+    log('detail','global bindings applied');
+  }
+
+  function renderTimeline(order){
+    var tl=document.querySelector('[data-kph-timeline]');
+    if(!tl)return;
+    var steps=getTimelineSteps(order);
+    for(var i=0;i<steps.length;i++){
+      var s=steps[i];
+      var stepEl=tl.querySelector('[data-kph-step="'+s.key+'"]');
+      if(!stepEl)continue;
+      // Reset modifier classes, then add current state
+      stepEl.classList.remove('kp-timeline-step--done','kp-timeline-step--current','kp-timeline-step--upcoming');
+      stepEl.classList.add('kp-timeline-step--'+s.state);
+      // Bind text via step.* keys
+      var labelEl=stepEl.querySelector('[data-kph-bind-text="step.dateLabel"]');
+      if(labelEl)labelEl.textContent=s.dateLabel||'';
+      var titleEl=stepEl.querySelector('[data-kph-bind-text="step.title"]');
+      if(titleEl)titleEl.textContent=s.title||'';
+      var noteEl=stepEl.querySelector('[data-kph-bind-text="step.note"]');
+      if(noteEl)noteEl.textContent=s.note||'';
+    }
+    log('detail','timeline rendered',{steps:steps.length});
+  }
+
+  function renderLineItemsList(order){
+    var list=document.querySelector('[data-kph-list="lineItems"]');
+    if(!list)return;
+    var tpl=list.querySelector('[data-kph-tpl="line-item"]');
+    if(!tpl){
+      log('detail','no line-item template inside list');
+      return;
+    }
+    // Cleanup previous renders (re-render safe)
+    var prev=list.querySelectorAll('[data-kph-rendered="line-item"]');
+    for(var i=0;i<prev.length;i++){
+      prev[i].parentNode.removeChild(prev[i]);
+    }
+    var items=getLineItems(order);
+    log('detail','rendering lineItems',{count:items.length});
+    for(var j=0;j<items.length;j++){
+      var item=items[j];
+      var clone=tpl.cloneNode(true);
+      clone.removeAttribute('data-kph-tpl');
+      clone.setAttribute('data-kph-rendered','line-item');
+      applyLineItemBindings(clone,item);
+      tpl.parentNode.appendChild(clone);
+    }
+  }
+
+  function applyLineItemBindings(root,item){
+    if(!item)return;
+    // data-kph-bind-text within clone — only item.* keys
+    var texts=root.querySelectorAll('[data-kph-bind-text]');
+    for(var i=0;i<texts.length;i++){
+      var key=texts[i].getAttribute('data-kph-bind-text');
+      if(!key||key.indexOf('item.')!==0)continue;
+      try{
+        var val=resolveLineItemField(item,key.substring(5));
+        texts[i].textContent=val==null?'':String(val);
+      }catch(e){
+        log('detail','item-bind-fail',{key:key,err:String(e)});
+      }
+    }
+    // data-kph-thumb — render image OR initials fallback
+    var thumbs=root.querySelectorAll('[data-kph-thumb]');
+    for(var j=0;j<thumbs.length;j++){
+      var thumb=thumbs[j];
+      thumb.innerHTML='';
+      if(item.image&&item.image.url){
+        var img=document.createElement('img');
+        img.src=item.image.url;
+        img.alt=item.image.altText||item.title||'';
+        img.loading='lazy';
+        img.style.width='100%';
+        img.style.height='100%';
+        img.style.objectFit='cover';
+        thumb.appendChild(img);
+        thumb.classList.add('kp-detail-item-thumb--img');
+      }else{
+        thumb.textContent=getThumbInitials(item.title);
+        thumb.classList.remove('kp-detail-item-thumb--img');
+      }
+    }
+  }
+
+  function wireReorderAction(order){
+    var btn=document.querySelector('[data-kph-action="reorder"]');
+    if(!btn||btn.__kphWired)return;
+    btn.__kphWired=true;
+    btn.style.cursor='pointer';
+    btn.addEventListener('click',function(ev){
+      ev.preventDefault();
+      // MVP-Stub: shopify-handle CMS-field aktuell null → echte Cart-Add nicht möglich.
+      // Phase 9: shopyflow.cart.add({merchandiseId, quantity}) pro lineItem.
+      alert('„Erneut bestellen" ist in Vorbereitung. Du findest unsere Produkte aktuell direkt im Shop \u2014 wir leiten dich weiter.');
+      location.href='/produkte';
+      log('action','reorder MVP-stub triggered',{orderName:order&&order.name});
+    });
   }
 
   // -----------------------------------------------------------------
@@ -1671,6 +2073,7 @@
     renderCounts(customer);
     renderAddressList(customer);
     renderOrderList(customer);
+    renderOrderDetail(customer);
     wireFilterPills();
     // Pre-hide CSS removed → JS show-if decisions now take effect
     var preHide=document.getElementById('kph-prehide');
