@@ -1,7 +1,43 @@
 /*!
- * Kessler PRO · hub.js v1.5.1
+ * Kessler PRO · hub.js v1.6.0
  *
- * Phase 8.5 — Polish-Patch (show-if scope fix)
+ * Phase 8.6a — Bestellungen-Liste Read-Path
+ *
+ * v1.6.0 (Δ gegen v1.5.1):
+ *   + CUSTOMER_QUERY_V14 → _V15:
+ *       - orders.nodes erweitert um totalPrice{amount currencyCode}
+ *         und lineItems(first:10){nodes{title quantity image{url altText}}}
+ *   + Neue Order-Helpers:
+ *       - formatPrice({amount,currencyCode}) — DE-Format mit EUR/PLN/GBP/USD
+ *       - formatProcessedAt(iso) — "DD. Monat YYYY"
+ *       - getLineItems / getOrderItemCount — safe getters mit quantity-sum
+ *       - getThumbInitials(title) — first-2-chars first-word uppercase
+ *       - orderStatusModifier(o) — CSS-Modifier "produktion|versendet|abgeschlossen|storniert"
+ *       - orderBucket(o) — Filter-Bucket "production|shipped|completed|cancelled"
+ *         (FULFILLED + > 30 days alt = completed, sonst shipped)
+ *       - orderSummary(o) — "Item A + Item B [+N]" für .kp-order-name
+ *       - orderMetaLine(o) — "2 Artikel · in Produktion"
+ *       - countOrdersByBucket(c, bucket) — für 4 Filter-Pills
+ *   + resolveOrderField(o,key) + applyOrderBindings(root,order)
+ *     parallel zu Address-Funktionen (kein renderList-Refactor in 8.6a,
+ *     reduziert Risiko an live Adressen-Page; Refactor Polish 8.6c)
+ *   + Neue Bindings:
+ *       - data-kph-bind="orders.count" für Sub-Header-Counter
+ *       - data-kph-bind="orderCounts.all/production/shipped/completed"
+ *         für 4 Filter-Pills (Active-Toggle-Logic kommt 8.6b)
+ *   + Neue Binding-Attribute (item-scoped):
+ *       - data-kph-bind-text="key" (gleich wie Address-Card)
+ *       - data-kph-bind-href="key" (NEU — für Card-Link → detailUrl)
+ *       - data-kph-status-class="kp-pill-status" (NEU — appended modifier
+ *         basierend auf orderStatusModifier(order))
+ *       - data-kph-thumbs="key" (NEU — custom thumb-strip rendering)
+ *   + renderOrderThumbs(container,order) — first 3 lineItems als
+ *     .kp-order-thumb (img wenn lineItem.image.url, sonst Initials),
+ *     plus .kp-order-thumb--more "+N" Overflow
+ *   + renderOrderList(customer) — Template-Clone-Pattern analog
+ *     renderAddressList. Cleanup via [data-kph-rendered="order-card"]
+ *   + render() orchestrator erweitert um renderOrderList(customer)
+ *   + injectHubCSS() erweitert um .kp-order-thumb img Styling
  *
  * v1.5.1 Patch (Δ gegen v1.5.0):
  *   * renderShowIfs überspringt Elements innerhalb [data-kph-rendered] oder
@@ -98,14 +134,16 @@
  *
  * Future scope:
  *   - Auto-Token-Refresh via OAuth refresh_token (Phase 8.4-Polish)
- *   - data-kph-list="orders" für /account/bestellungen (Phase 8.6)
+ *   - Filter-Pills active-toggle + filter-logic (Phase 8.6b)
+ *   - memberSince + creationDate resolver (Phase 8.6c)
+ *   - renderList Generic-Refactor + Pagination (Phase 8.6c)
  *   - Bestelldetail-Page hydration (Phase 8.7)
  */
 (function(){
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.5.1';
+  var VERSION='1.6.0';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -214,6 +252,7 @@
 
   // Phase 8.4 query — customer + counts + latest-order + profile fields + 3 metafield aliases
   // Phase 8.5a — addresses(first:20) expanded to full Address schema + separate defaultAddress{id}
+  // Phase 8.6a — orders extended with totalPrice + lineItems (für Order-Card-Liste)
   var CUSTOMER_QUERY_V14='{customer{'+
     'id firstName lastName displayName '+
     'emailAddress{emailAddress marketingState} '+
@@ -228,6 +267,11 @@
       'id name processedAt '+
       'financialStatus fulfillmentStatus '+
       'statusPageUrl '+
+      'totalPrice{amount currencyCode} '+
+      'lineItems(first:10){nodes{'+
+        'title quantity '+
+        'image{url altText}'+
+      '}} '+
       'fulfillments(first:1){nodes{'+
         'status estimatedDeliveryAt '+
         'trackingInformation{number url company}'+
@@ -318,6 +362,114 @@
   }
 
   // -----------------------------------------------------------------
+  // Phase 8.6a — Order list helpers (formatting, thumbs, status modifier, buckets)
+  // -----------------------------------------------------------------
+  function formatPrice(money){
+    if(!money||money.amount==null)return '';
+    var amt=parseFloat(money.amount);
+    if(isNaN(amt))return '';
+    var cc=money.currencyCode||'EUR';
+    var formatted=amt.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    if(cc==='EUR')return formatted+' \u20ac';
+    if(cc==='PLN')return formatted+' z\u0142';
+    if(cc==='GBP')return '\u00a3'+formatted;
+    if(cc==='USD')return '$'+formatted;
+    return formatted+' '+cc;
+  }
+
+  var MONTHS_DE=['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+  function formatProcessedAt(iso){
+    if(!iso)return '';
+    var d=new Date(iso);
+    if(isNaN(d.getTime()))return '';
+    var dd=String(d.getDate());if(dd.length<2)dd='0'+dd;
+    return dd+'. '+MONTHS_DE[d.getMonth()]+' '+d.getFullYear();
+  }
+
+  function getLineItems(o){
+    return o&&o.lineItems&&o.lineItems.nodes||[];
+  }
+
+  function getOrderItemCount(o){
+    var items=getLineItems(o);
+    var sum=0;
+    for(var i=0;i<items.length;i++){
+      sum+=Number(items[i].quantity)||0;
+    }
+    return sum;
+  }
+
+  function getThumbInitials(title){
+    if(!title)return '?';
+    var t=String(title);
+    // Find first letter-sequence; excludes digits, ×, ÷, hyphens.
+    // Range: A-Z, a-z, plus Latin-1 letters (À-Ö, Ø-ö, ø-ÿ) — Ü, Ä, Ö, ß all included.
+    var m=t.match(/[A-Za-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u00ff]+/);
+    if(!m)return '?';
+    return m[0].slice(0,2).toUpperCase();
+  }
+
+  // Returns CSS-modifier name (without prefix) — appended to data-kph-status-class prefix
+  // Designer has: kp-pill-status--produktion | --versendet | --abgeschlossen
+  // We map: storniert (refund/void) | versendet (fulfilled or partial) | produktion (otherwise)
+  // "abgeschlossen" is bucket-only (FULFILLED + > 30 days) — used by filter, not pill
+  function orderStatusModifier(o){
+    if(!o)return '';
+    var fs=o.financialStatus;
+    var ff=o.fulfillmentStatus;
+    if(fs==='REFUNDED'||fs==='VOIDED')return 'storniert';
+    if(ff==='FULFILLED'||ff==='PARTIALLY_FULFILLED')return 'versendet';
+    return 'produktion';
+  }
+
+  // Bucket for filter pills. FULFILLED + >30 days = "completed", sonst "shipped".
+  function orderBucket(o){
+    if(!o)return '';
+    var fs=o.financialStatus;
+    var ff=o.fulfillmentStatus;
+    if(fs==='REFUNDED'||fs==='VOIDED')return 'cancelled';
+    if(ff==='FULFILLED'){
+      if(o.processedAt){
+        var d=new Date(o.processedAt);
+        if(!isNaN(d.getTime())){
+          var daysAgo=(Date.now()-d.getTime())/86400000;
+          if(daysAgo>30)return 'completed';
+        }
+      }
+      return 'shipped';
+    }
+    if(ff==='PARTIALLY_FULFILLED')return 'shipped';
+    return 'production';
+  }
+
+  function countOrdersByBucket(c,bucket){
+    if(!c||!c.orders||!c.orders.nodes)return 0;
+    var n=0;
+    for(var i=0;i<c.orders.nodes.length;i++){
+      if(orderBucket(c.orders.nodes[i])===bucket)n++;
+    }
+    return n;
+  }
+
+  // Order-summary text — used in .kp-order-name slot
+  // 0 items → '' | 1 → title | 2 → "A + B" | 3+ → "A + B +N"
+  function orderSummary(o){
+    var items=getLineItems(o);
+    if(items.length===0)return '';
+    if(items.length===1)return items[0].title||'';
+    if(items.length===2)return (items[0].title||'')+' + '+(items[1].title||'');
+    return (items[0].title||'')+' + '+(items[1].title||'')+' +'+(items.length-2);
+  }
+
+  // Meta-line — used in .kp-order-meta slot
+  function orderMetaLine(o){
+    var n=getOrderItemCount(o);
+    var statusLbl=orderStatusLabel(o);
+    return n+' Artikel'+(statusLbl?' \u00b7 '+statusLbl:'');
+  }
+
+  // -----------------------------------------------------------------
   // Profile helpers
   // -----------------------------------------------------------------
   function getMarketingState(c){
@@ -392,6 +544,22 @@
     }},
     'profile.orderUpdates':{kind:'toggle',resolve:function(c){
       return getOrderUpdatesEnabled(c);
+    }},
+    // Phase 8.6a — Bestellungen-Liste counters (Sub-Header + 4 Filter-Pills)
+    'orders.count':{kind:'text',resolve:function(c){
+      return counters.orders(c);
+    }},
+    'orderCounts.all':{kind:'text',resolve:function(c){
+      return counters.orders(c);
+    }},
+    'orderCounts.production':{kind:'text',resolve:function(c){
+      return countOrdersByBucket(c,'production');
+    }},
+    'orderCounts.shipped':{kind:'text',resolve:function(c){
+      return countOrdersByBucket(c,'shipped');
+    }},
+    'orderCounts.completed':{kind:'text',resolve:function(c){
+      return countOrdersByBucket(c,'completed');
     }}
   };
 
@@ -670,6 +838,123 @@
       if(addCard)grid.insertBefore(clone,addCard);
       else grid.appendChild(clone);
       log('list','card rendered',{id:addr.id,isDefault:addr.isDefault,name:resolveAddressField(addr,'fullName')});
+    }
+  }
+
+  // -----------------------------------------------------------------
+  // Phase 8.6a — Order list rendering (item-scoped, parallel to Address)
+  // -----------------------------------------------------------------
+  function resolveOrderField(o,key){
+    if(!o)return '';
+    switch(key){
+      case 'name':                 return o.name||'';
+      case 'processedAtFormatted': return formatProcessedAt(o.processedAt);
+      case 'totalPrice':           return formatPrice(o.totalPrice);
+      case 'statusLabel':          return orderStatusLabel(o);
+      case 'statusModifier':       return orderStatusModifier(o);
+      case 'lineItemsSummary':     return orderSummary(o);
+      case 'metaLine':             return orderMetaLine(o);
+      case 'detailUrl':            return orderDetailUrl(o);
+      case 'trackingUrl':          return getTrackingUrl(o)||'';
+      default:                     return o[key]==null?'':String(o[key]);
+    }
+  }
+
+  function applyOrderBindings(root,order){
+    // [data-kph-bind-text] — text content (reused from address-pattern)
+    var texts=root.querySelectorAll('[data-kph-bind-text]');
+    for(var i=0;i<texts.length;i++){
+      var tkey=texts[i].getAttribute('data-kph-bind-text');
+      try{
+        texts[i].textContent=String(resolveOrderField(order,tkey)||'');
+      }catch(e){log('list','order-bind-text-fail',{key:tkey,err:String(e)})}
+    }
+    // [data-kph-bind-href] — Card link, tracking link (NEW in 8.6a)
+    var hrefs=root.querySelectorAll('[data-kph-bind-href]');
+    for(var j=0;j<hrefs.length;j++){
+      var hkey=hrefs[j].getAttribute('data-kph-bind-href');
+      try{
+        var hval=resolveOrderField(order,hkey);
+        hrefs[j].setAttribute('href',hval||'#');
+      }catch(e){log('list','order-bind-href-fail',{key:hkey,err:String(e)})}
+    }
+    // [data-kph-status-class="kp-pill-status"] — append --{modifier}
+    var statusEls=root.querySelectorAll('[data-kph-status-class]');
+    for(var k=0;k<statusEls.length;k++){
+      var prefix=statusEls[k].getAttribute('data-kph-status-class');
+      var mod=resolveOrderField(order,'statusModifier');
+      var cls=(statusEls[k].className||'').split(/\s+/);
+      var kept=[];
+      for(var l=0;l<cls.length;l++){
+        if(cls[l]&&cls[l].indexOf(prefix+'--')!==0)kept.push(cls[l]);
+      }
+      if(mod)kept.push(prefix+'--'+mod);
+      statusEls[k].className=kept.join(' ').replace(/\s+/g,' ').trim();
+    }
+    // [data-kph-thumbs] — custom thumb-strip rendering
+    var thumbsCtns=root.querySelectorAll('[data-kph-thumbs]');
+    for(var m=0;m<thumbsCtns.length;m++){
+      renderOrderThumbs(thumbsCtns[m],order);
+    }
+  }
+
+  function renderOrderThumbs(container,order){
+    container.innerHTML='';
+    var items=getLineItems(order);
+    var maxShown=3;
+    var shown=Math.min(items.length,maxShown);
+    for(var i=0;i<shown;i++){
+      var item=items[i];
+      var t=document.createElement('div');
+      t.className='kp-order-thumb';
+      if(item.image&&item.image.url){
+        var img=document.createElement('img');
+        img.src=item.image.url;
+        img.alt=item.image.altText||item.title||'';
+        img.loading='lazy';
+        t.appendChild(img);
+        t.classList.add('kp-order-thumb--img');
+      }else{
+        t.textContent=getThumbInitials(item.title);
+      }
+      container.appendChild(t);
+    }
+    if(items.length>maxShown){
+      var more=document.createElement('div');
+      more.className='kp-order-thumb kp-order-thumb--more';
+      more.textContent='+'+(items.length-maxShown);
+      container.appendChild(more);
+    }
+  }
+
+  function renderOrderList(customer){
+    var list=document.querySelector('[data-kph-list="orders"]');
+    if(!list){
+      log('list','no order-list container on page');
+      return;
+    }
+    var tpl=list.querySelector('[data-kph-tpl="order-card"]');
+    if(!tpl){
+      log('list','no order-card template inside list');
+      return;
+    }
+    // Cleanup previous renders (re-render safe)
+    var prev=list.querySelectorAll('[data-kph-rendered="order-card"]');
+    for(var i=0;i<prev.length;i++){
+      prev[i].parentNode.removeChild(prev[i]);
+    }
+    var nodes=customer&&customer.orders&&customer.orders.nodes||[];
+    log('list','rendering orders',{count:nodes.length});
+    for(var j=0;j<nodes.length;j++){
+      var order=nodes[j];
+      var clone=tpl.cloneNode(true);
+      clone.removeAttribute('data-kph-tpl');
+      clone.setAttribute('data-kph-rendered','order-card');
+      clone.setAttribute('data-kph-order-id',order.id||'');
+      applyOrderBindings(clone,order);
+      // Insert after template (template stays hidden via [data-kph-tpl]{display:none} CSS)
+      tpl.parentNode.appendChild(clone);
+      log('list','order card rendered',{id:order.id,name:order.name,bucket:orderBucket(order)});
     }
   }
 
@@ -1285,6 +1570,7 @@
     renderBindings(customer);
     renderCounts(customer);
     renderAddressList(customer);
+    renderOrderList(customer);
     snapshotProfile(customer);
     wireActions();
     setStateClass('ready');
@@ -1341,7 +1627,10 @@
       '.kph-btn-primary{background:#0a0a0a;color:#fff;border-color:#0a0a0a}',
       '.kph-btn-primary:hover{background:#1e1e1e}',
       '.kph-btn-secondary{background:#fff;color:#0a0a0a;border-color:#e5e5e5}',
-      '.kph-btn-secondary:hover{background:#f2f2f2}'
+      '.kph-btn-secondary:hover{background:#f2f2f2}',
+      /* Phase 8.6a — order-thumb image variant (overrides Designer text-thumb styling) */
+      '.kp-order-thumb--img{padding:0!important;overflow:hidden}',
+      '.kp-order-thumb--img img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}'
     ].join('');
     (document.head||document.documentElement).appendChild(s);
   }
