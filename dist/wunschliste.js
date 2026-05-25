@@ -1,5 +1,11 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.6
+ * Kessler PRO · wunschliste.js v1.2.7
+ *
+ * Changes vs v1.2.6:
+ *   - injectWLToggleCSS() expanded with force-overrides for product-card_wrapper
+ *     (align-self:flex-start) and product-card_content (flex-grow:0, padding-bottom:4px)
+ *     to fix Webflow style-update silent-failure on Carpenters-locked properties.
+ *     Cards now end snugly below price instead of being stretched to row max-height.
  *
  * Changes vs v1.2.5:
  *   - NEW: injectWLToggleCSS() injects '.kp-wl-toggle.is-active svg{fill:currentColor}'
@@ -96,7 +102,7 @@
     }
   }
 
-  log('boot','v1.2.6 starting');
+  log('boot','v1.2.7 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -256,7 +262,7 @@
     if(document.getElementById('kp-wl-toggle-css'))return;
     var s=document.createElement('style');
     s.id='kp-wl-toggle-css';
-    s.textContent='.kp-wl-toggle.is-active svg{fill:currentColor}';
+    s.textContent='.kp-wl-toggle.is-active svg{fill:currentColor}.product-card_wrapper{align-self:flex-start!important}.product-card_content{flex-grow:0!important;padding-bottom:4px!important}';
     (document.head||document.documentElement).appendChild(s);
   }
   function setAuthBody(loggedIn){
@@ -688,7 +694,7 @@
       var raw=read();
       var liveN=raw.filter(function(i){return i&&!i.d}).length;
       return{
-        version:'1.2.6',
+        version:'1.2.7',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
