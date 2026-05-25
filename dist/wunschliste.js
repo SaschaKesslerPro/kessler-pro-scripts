@@ -1,5 +1,12 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.4
+ * Kessler PRO · wunschliste.js v1.2.5
+ *
+ * Changes vs v1.2.4:
+ *   - NEW: dynamic count label rendering on the wishlist page. Any element
+ *     with [data-kpw-bind="count-label"] receives a freshly formatted
+ *     "{N} Stück gespeichert · sortiert nach zuletzt hinzugefügt" string
+ *     (proper singular/plural). At count=0 the element is hidden via
+ *     display:none so the empty-state replaces it entirely.
  *
  * Changes vs v1.2.3:
  *   - FIX (CRITICAL): removeItem() was non-persistent. mergeNewer(local, remote)
@@ -83,7 +90,7 @@
     }
   }
 
-  log('boot','v1.2.4 starting');
+  log('boot','v1.2.5 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -596,6 +603,19 @@
     });
   }
 
+  function renderCountLabel(){
+    var n=count();
+    var nodes=document.querySelectorAll('[data-kpw-bind="count-label"]');
+    if(!nodes.length)return;
+    var label='';
+    if(n===1)label='1 Stück gespeichert \u00b7 sortiert nach zuletzt hinzugef\u00fcgt';
+    else if(n>1)label=n+' St\u00fccke gespeichert \u00b7 sortiert nach zuletzt hinzugef\u00fcgt';
+    Array.prototype.slice.call(nodes).forEach(function(el){
+      el.textContent=label;
+      el.style.display=n>0?'':'none';
+    });
+  }
+
   // Universal toggle button (PDP/PLP heart icons, Phase 8)
   document.addEventListener('click',function(e){
     var btn=e.target.closest('[data-kp-wl-add]');
@@ -623,6 +643,7 @@
 
   function refresh(){
     setCounter();
+    renderCountLabel();
     renderPage();
     syncToggleStates();
   }
@@ -652,7 +673,7 @@
       var raw=read();
       var liveN=raw.filter(function(i){return i&&!i.d}).length;
       return{
-        version:'1.2.4',
+        version:'1.2.5',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',

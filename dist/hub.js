@@ -1,5 +1,11 @@
 /*!
- * Kessler PRO · hub.js v1.7.0
+ * Kessler PRO · hub.js v1.7.3
+ *
+ * v1.7.3 (Δ gegen v1.7.2):
+ *   - P3: orderDetailUrl prefers human-readable o.name ("KP-2026-1004") over
+ *     GID ("gid://shopify/Order/12345"). URL becomes /account/bestellung-detail?id=KP-2026-1004
+ *     instead of the ugly encoded GID. Bestelldetail-Page already accepts both
+ *     formats via getDetailOrder (findOrderByName + findOrderByGid).
  *
  * Phase 8.7 — Bestelldetail-Page Hydration (single-order detail view)
  *
@@ -218,7 +224,7 @@
   if(window.__KPH_INIT)return;
   window.__KPH_INIT=true;
 
-  var VERSION='1.7.0';
+  var VERSION='1.7.3';
   var TOKEN_STORAGE_KEY='_sf_oauth_tokens';
   var SHOP_ID_FALLBACK='100010033498';
   var API_VERSION='2024-10';
@@ -441,8 +447,12 @@
   }
 
   function orderDetailUrl(o){
-    if(!o||!o.id)return '#';
-    return '/account/bestellung-detail?id='+encodeURIComponent(o.id);
+    if(!o)return '#';
+    // P3 v1.7.3: prefer human-readable name ("KP-2026-1004") over GID for URL.
+    // Bestelldetail-Page's getDetailOrder accepts both via findOrderByName/Gid.
+    var ref=o.name||o.id;
+    if(!ref)return '#';
+    return '/account/bestellung-detail?id='+encodeURIComponent(ref);
   }
 
   // -----------------------------------------------------------------
