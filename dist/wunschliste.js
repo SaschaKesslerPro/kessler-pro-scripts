@@ -1,5 +1,11 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.5
+ * Kessler PRO · wunschliste.js v1.2.6
+ *
+ * Changes vs v1.2.5:
+ *   - NEW: injectWLToggleCSS() injects '.kp-wl-toggle.is-active svg{fill:currentColor}'
+ *     so wishlist heart buttons show as filled when the item is in the wishlist.
+ *     Replaces the standalone Webflow inline-script kpwlactivestate — all wishlist
+ *     CSS/JS now consolidated in wunschliste.js (GitHub-hosted).
  *
  * Changes vs v1.2.4:
  *   - NEW: dynamic count label rendering on the wishlist page. Any element
@@ -90,7 +96,7 @@
     }
   }
 
-  log('boot','v1.2.5 starting');
+  log('boot','v1.2.6 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -243,6 +249,14 @@
     var s=document.createElement('style');
     s.id='kp-auth-css';
     s.textContent='body[_sf-logged-in] .sf-logged-out{display:none!important}body[_sf-logged-out] .sf-logged-in{display:none!important}';
+    (document.head||document.documentElement).appendChild(s);
+  }
+  // Inject CSS so [.kp-wl-toggle.is-active] hearts render filled (saved state).
+  function injectWLToggleCSS(){
+    if(document.getElementById('kp-wl-toggle-css'))return;
+    var s=document.createElement('style');
+    s.id='kp-wl-toggle-css';
+    s.textContent='.kp-wl-toggle.is-active svg{fill:currentColor}';
     (document.head||document.documentElement).appendChild(s);
   }
   function setAuthBody(loggedIn){
@@ -652,6 +666,7 @@
 
   function init(){
     injectAuthCSS();
+    injectWLToggleCSS();
     setAuthBody(evalAuthState());
     refresh();
     log('boot','DOM ready, starting polling');
@@ -673,7 +688,7 @@
       var raw=read();
       var liveN=raw.filter(function(i){return i&&!i.d}).length;
       return{
-        version:'1.2.5',
+        version:'1.2.6',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
