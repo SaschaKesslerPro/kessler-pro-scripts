@@ -1,5 +1,17 @@
 /*!
- * Kessler PRO · wunschliste.js v1.2.3
+ * Kessler PRO · wunschliste.js v1.2.4
+ *
+ * Changes vs v1.2.3:
+ *   - FIX (CRITICAL): removeItem() was non-persistent. mergeNewer(local, remote)
+ *     was a pure union — items removed locally were re-added from remote on the
+ *     next sync. Now uses a tombstone pattern: removeItem writes {h,t,d:true}
+ *     to localStorage instead of dropping the entry. Tombstones propagate to
+ *     remote via writeMetafield so cross-device removes work too. mergeNewer
+ *     GC-expires tombstones older than 30 days.
+ *   - Storage format is backward compatible: existing live items without a `d`
+ *     field continue to be treated as live. No migration required.
+ *   - Internal helpers: live() returns the filtered live-only list. read() still
+ *     returns the raw list (including tombstones) for sync transport.
  *
  * Changes vs v1.2.2:
  *   - FIX: Auth-state visibility toggle. Shopyflow doesn't set
@@ -71,7 +83,7 @@
     }
   }
 
-  log('boot','v1.2.3 starting');
+  log('boot','v1.2.4 starting');
 
   // -----------------------------------------------------------------
   // localStorage layer (wishlist items)
@@ -84,35 +96,49 @@
       log('storage','write-failed',{err:String(e)});
     }
   }
+  // Live = non-tombstoned entries. Public-facing operations use this view.
+  function live(){
+    return read().filter(function(i){return i&&!i.d});
+  }
   function has(handle){
-    return read().some(function(i){return i.h===handle});
+    return read().some(function(i){return i.h===handle&&!i.d});
   }
   function addItem(item){
     if(!item||!item.h)return false;
-    var list=read();
-    if(has(item.h))return false;
+    var raw=read();
+    // Strip any prior entry (live OR tombstone) for this handle, then push fresh.
+    var filtered=raw.filter(function(i){return i.h!==item.h});
+    // If there was already a live entry, treat as no-op (preserve old behaviour).
+    if(filtered.length!==raw.length){
+      var hadLive=raw.some(function(i){return i.h===item.h&&!i.d});
+      if(hadLive)return false;
+    }
     item.t=item.t||Date.now();
-    list.unshift(item);
-    write(list);
+    delete item.d;
+    filtered.unshift(item);
+    write(filtered);
     log('item','added',{h:item.h});
     emit();
     queueSync();
     return true;
   }
   function removeItem(handle){
-    var before=read().length;
-    var list=read().filter(function(i){return i.h!==handle});
-    if(list.length===before)return false;
-    write(list);
+    var raw=read();
+    var hadLive=raw.some(function(i){return i.h===handle&&!i.d});
+    if(!hadLive)return false;
+    // Replace any entry for this handle with a tombstone {h,t,d:true}.
+    var filtered=raw.filter(function(i){return i.h!==handle});
+    filtered.push({h:handle,t:Date.now(),d:true});
+    write(filtered);
     log('item','removed',{h:handle});
     emit();
     queueSync();
     return true;
   }
-  function count(){return read().length}
+  function count(){return live().length}
 
   function emit(){
-    document.dispatchEvent(new CustomEvent('kpw:change',{detail:{items:read()}}));
+    document.dispatchEvent(new CustomEvent('kpw:change',{detail:{items:live()}}));
   }
 
   // -----------------------------------------------------------------
@@ -278,7 +304,9 @@
       try{
         var v=res.json&&res.json.data&&res.json.data.customer&&res.json.data.customer.metafield&&res.json.data.customer.metafield.value;
         var list=v?JSON.parse(v):[];
-        log('mf','read ok',{count:list.length});
+        var liveN=list.filter(function(i){return i&&!i.d}).length;
+        var tombN=list.length-liveN;
+        log('mf','read ok',{count:list.length,live:liveN,tombstones:tombN});
         return list;
       }catch(e){
         log('mf','read parse-fail',{err:String(e)});
@@ -299,7 +327,11 @@
       try{
         var ue=res.json&&res.json.data&&res.json.data.metafieldsSet&&res.json.data.metafieldsSet.userErrors;
         if(ue&&ue.length)log('mf','write userErrors',ue);
-        else if(res.ok)log('mf','write ok',{count:list.length});
+        else if(res.ok){
+          var liveN=list.filter(function(i){return i&&!i.d}).length;
+          var tombN=list.length-liveN;
+          log('mf','write ok',{count:list.length,live:liveN,tombstones:tombN});
+        }
       }catch(e){log('mf','write check-fail',{err:String(e)})}
       return res;
     });
@@ -315,7 +347,15 @@
       });
     }
     addList(a||[]);addList(b||[]);
-    var out=Object.keys(map).map(function(k){return map[k]});
+    var TOMBSTONE_TTL_MS=30*24*3600*1000;
+    var now=Date.now();
+    var out=Object.keys(map).map(function(k){return map[k]}).filter(function(i){
+      // Drop tombstones older than TTL — GC step
+      if(i&&i.d){
+        return (now-(i.t||0))<TOMBSTONE_TTL_MS;
+      }
+      return true;
+    });
     out.sort(function(a,b){return (b.t||0)-(a.t||0)});
     return out;
   }
@@ -522,7 +562,7 @@
       tpl.style.display='none';
     }
     Array.prototype.slice.call(grid.querySelectorAll('.kp-product-card:not([data-kp-tpl])')).forEach(function(n){n.remove()});
-    var list=read();
+    var list=live();
     var empty=document.querySelector('.kp-empty');
     if(empty)empty.style.display=list.length?'none':'';
     list.forEach(function(item){
@@ -601,7 +641,7 @@
   else document.addEventListener('DOMContentLoaded',init);
 
   window.KPW={
-    get:read,
+    get:live,
     has:has,
     add:addItem,
     remove:removeItem,
@@ -609,8 +649,10 @@
     sync:sync,
     _debug:function(){
       var sfToken=readSfTokens();
+      var raw=read();
+      var liveN=raw.filter(function(i){return i&&!i.d}).length;
       return{
-        version:'1.2.3',
+        version:'1.2.4',
         customerCtx:customerCtx?{
           source:customerCtx.source,
           tokenPreview:customerCtx.token.slice(0,12)+'\u2026',
@@ -624,7 +666,9 @@
           expired:sfToken.expired,
           tokenLen:sfToken.accessToken.length
         }:null,
-        list:read(),
+        liveCount:liveN,
+        tombstoneCount:raw.length-liveN,
+        list:raw,
         logs:logs.slice(),
         shopyflow:snapshotShopyflow(),
         resolvedEndpoint:gqlEndpoint(),
