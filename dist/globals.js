@@ -59,6 +59,12 @@
       '.product-card_rating-wrapper:has(.jdgm-prev-badge__stars)::before{display:none}'
   );
 
+  // Hide empty material cards (slot without category set) — Räume detail
+  // Native conditional-visibility unavailable on static template elements; API visibility-binding also unavailable.
+  injectStyle(
+    '.raum-material-card:has(.raum-material-card-name:empty){display:none!important}'
+  );
+
   // -----------------------------------------------------------------
   // Header: mega-menu hover + scroll behavior
   // -----------------------------------------------------------------
