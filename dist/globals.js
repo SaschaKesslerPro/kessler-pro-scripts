@@ -65,6 +65,11 @@
     '.raum-material-card:has(.raum-material-card-name:empty){display:none!important}'
   );
 
+  // Räume hero: inner CMS heading inherits global h1 color; force white inside the dark hero
+  injectStyle(
+    '.raum-hero-headline,.raum-hero-headline h1,.raum-hero-headline h2{color:#FFFFFF}'
+  );
+
   // -----------------------------------------------------------------
   // Header: mega-menu hover + scroll behavior
   // -----------------------------------------------------------------
