@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.4
+   Kessler PRO — search.js  v1.0.5
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -165,6 +165,21 @@
 
   function roomName(slug){ for (var i=0;i<IDX.rooms.length;i++){ if(IDX.rooms[i].s===slug) return IDX.rooms[i].n; } return null; }
 
+  // Deep-link into the PLP's Finsweet CMS Filter via its field query params (kategorie/raume).
+  function matchedCat(term){
+    if (!term) return null;
+    return IDX.cats.filter(function(c){ return norm(c.n) === norm(term); })[0]
+        || IDX.cats.filter(function(c){ return norm(c.n).indexOf(norm(term)) > -1; })[0] || null;
+  }
+  function resultsURL(){
+    var term = els.input.value.trim();
+    var params = [];
+    if (activeRoom){ var rn = roomName(activeRoom); if (rn) params.push('raume=' + encodeURIComponent(rn)); }
+    var cat = matchedCat(term);
+    if (cat) params.push('kategorie=' + encodeURIComponent(cat.n));
+    return '/produkte' + (params.length ? '?' + params.join('&') : '');
+  }
+
   function renderRooms(){
     els.rooms.innerHTML = IDX.rooms.map(function(r){
       var ic = r.icon || ROOM_FALLBACK_ICONS[r.s] || '';
@@ -211,7 +226,7 @@
     if (term){
       var catHit = IDX.cats.filter(function(c){ return norm(c.n).indexOf(norm(term)) > -1; })[0];
       if (catHit && list.length < 3){
-        html += '<a class="kp-catjump" href="'+CFG.CAT(catHit.s)+'">'
+        html += '<a class="kp-catjump" href="/produkte?kategorie='+encodeURIComponent(catHit.n)+'">'
           + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
           + 'Alle <b style="font-weight:600">'+esc(catHit.n)+'</b> ansehen<span class="kp-k">'+(catHit.k||0)+' Produkte →</span></a>';
       }
@@ -221,12 +236,10 @@
     nav = [].slice.call(els.products.querySelectorAll('.kp-prow'));
   }
   function renderCount(term){
-    if (!term){ els.count.textContent = IDX.products.length; els.all.setAttribute('href', CFG.RESULTS('')); return; }
-    var pr = matchProducts(term).length;
-    var ca = IDX.cats.filter(function(c){ return norm(c.n).indexOf(norm(term)) > -1; }).length;
-    var ro = IDX.rooms.filter(function(r){ return norm(r.n).indexOf(norm(term)) > -1; }).length;
-    els.count.textContent = pr + ca + ro;
-    els.all.setAttribute('href', CFG.RESULTS(term));
+    var n = term ? matchProducts(term).length
+                 : (activeRoom ? IDX.products.filter(function(p){ return (p.rm||[]).indexOf(activeRoom) > -1; }).length : IDX.products.length);
+    els.count.textContent = n;
+    els.all.setAttribute('href', resultsURL());
   }
   function render(){
     var term = els.input.value.trim();
@@ -265,7 +278,7 @@
       if (e.key === 'ArrowUp'){ e.preventDefault(); ai=Math.max(ai-1, -1); highlight(); }
       if (e.key === 'Enter'){
         if (ai > -1 && nav[ai]){ window.location.href = nav[ai].getAttribute('href'); }
-        else if (els.input.value.trim()){ window.location.href = CFG.RESULTS(els.input.value.trim()); }
+        else if (els.input.value.trim() || activeRoom){ window.location.href = resultsURL(); }
       }
     });
     // room = toggle filter · category chip = set text filter (panel is on <body>)
@@ -324,5 +337,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.4', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.5', reload: loadIndex, _idx: IDX };
 })();
