@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.17
+   Kessler PRO — search.js  v1.0.18
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Mobile V2: Vorschläge (abgeleitet) + Verlauf + Beliebt, leichte Fuzzy-Logik.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
@@ -257,6 +257,9 @@
 .kp-panel--sheet .kp-col{overflow:visible}
 .kp-panel--sheet .kp-c1{border-right:0;border-bottom:0.5px solid #E5E5E5}
 .kp-panel--sheet .kp-c1{display:none}
+.kp-panel--sheet .kp-hint{display:none}
+.kp-panel--sheet .kp-foot{justify-content:center;padding:14px 16px}
+.kp-panel--sheet .kp-foot a{white-space:nowrap}
 /* ---- V2 mobile suggestions / recent / popular (sheet only) ---- */
 .kp-sg{display:none}
 .kp-sheet .kp-sg{display:block;padding:14px 16px 4px}
@@ -611,6 +614,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.17', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+  window.KPSearch = { version: '1.0.18', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
                       _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();
