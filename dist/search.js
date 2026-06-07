@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.10
+   Kessler PRO — search.js  v1.0.11
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -161,7 +161,7 @@
   function buildField(mount){
     mount.classList.add('kp-search');
     // Neutralize the host slot (pre-styled fake search bar: border/padding/flex/max-width)
-    mount.style.cssText += ';display:block;border:0;padding:0;background:transparent;max-width:460px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
+    mount.style.cssText += ';display:flex;align-items:center;border:0;padding:0;background:transparent;max-width:460px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
     mount.innerHTML = FIELD_HTML;
     var f = { root: mount, field: mount.querySelector('.kp-field'), input: mount.querySelector('input'), clear: mount.querySelector('.kp-clear') };
     FIELDS.push(f);
@@ -363,5 +363,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.10', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.11', reload: loadIndex, _idx: IDX };
 })();
