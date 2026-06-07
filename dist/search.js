@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.5
+   Kessler PRO — search.js  v1.0.6
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -118,19 +118,18 @@
   }
 
   /* ---- BUILD UI -------------------------------------------------------- */
-  var els = {};
-  function buildUI(mount){
-    mount.classList.add('kp-search');
-    // Neutralize the host slot (it was a pre-styled fake search bar: border/padding/flex/max-width)
-    mount.style.cssText += ';display:block;border:0;padding:0;background:transparent;max-width:600px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
-    mount.innerHTML =
+  var els = {};            // panel refs + pointers to the ACTIVE field
+  var FIELDS = [];         // [{root, field, input, clear}]
+
+  var FIELD_HTML =
       '<div class="kp-field">'
-      + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#1E1E1E" stroke-width="1.7"/><path d="M20 20l-3.4-3.4" stroke="#1E1E1E" stroke-width="1.7" stroke-linecap="round"/></svg>'
-      + '<input type="text" placeholder="Suche nach Tischplatte, Schreibtisch, Eiche …" autocomplete="off" aria-label="Suche">'
-      + '<span class="kp-kbd">/</span>'
-      + '<button class="kp-clear" aria-label="Leeren"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>'
-      + '</div>';
-    // Panel + scrim live on <body> → no header container can clip or mis-position them
+    + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#1E1E1E" stroke-width="1.7"/><path d="M20 20l-3.4-3.4" stroke="#1E1E1E" stroke-width="1.7" stroke-linecap="round"/></svg>'
+    + '<input type="text" placeholder="Suche nach Tischplatte, Schreibtisch, Eiche …" autocomplete="off" aria-label="Suche">'
+    + '<span class="kp-kbd">/</span>'
+    + '<button class="kp-clear" aria-label="Leeren"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>'
+    + '</div>';
+
+  function buildPanel(){
     var panel = document.createElement('div'); panel.className = 'kp-panel';
     panel.innerHTML =
         '<div class="kp-cols">'
@@ -141,23 +140,34 @@
       + '<div class="kp-foot"><span class="kp-hint">↑ ↓ navigieren · ↵ alle Treffer · ESC schließen</span>'
       +   '<a data-kp-all><span class="kp-u">Zu allen <span data-kp-count>0</span> Ergebnissen</span> →</a></div>';
     var scrim = document.createElement('div'); scrim.className = 'kp-scrim';
-    document.body.appendChild(scrim);
-    document.body.appendChild(panel);
-    els = {
-      root: mount,
-      field: mount.querySelector('.kp-field'),
-      input: mount.querySelector('input'),
-      clear: mount.querySelector('.kp-clear'),
-      scrim: scrim,
-      panel: panel,
-      rooms: panel.querySelector('[data-kp-rooms]'),
-      cats: panel.querySelector('[data-kp-cats]'),
-      products: panel.querySelector('[data-kp-products]'),
-      plabel: panel.querySelector('[data-kp-plabel]'),
-      pmeta: panel.querySelector('[data-kp-pmeta]'),
-      count: panel.querySelector('[data-kp-count]'),
-      all: panel.querySelector('[data-kp-all]')
-    };
+    document.body.appendChild(scrim); document.body.appendChild(panel);
+    els.panel = panel; els.scrim = scrim;
+    els.rooms = panel.querySelector('[data-kp-rooms]');
+    els.cats = panel.querySelector('[data-kp-cats]');
+    els.products = panel.querySelector('[data-kp-products]');
+    els.plabel = panel.querySelector('[data-kp-plabel]');
+    els.pmeta = panel.querySelector('[data-kp-pmeta]');
+    els.count = panel.querySelector('[data-kp-count]');
+    els.all = panel.querySelector('[data-kp-all]');
+  }
+
+  function buildField(mount){
+    mount.classList.add('kp-search');
+    // Neutralize the host slot (pre-styled fake search bar: border/padding/flex/max-width)
+    mount.style.cssText += ';display:block;border:0;padding:0;background:transparent;max-width:600px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
+    mount.innerHTML = FIELD_HTML;
+    var f = { root: mount, field: mount.querySelector('.kp-field'), input: mount.querySelector('input'), clear: mount.querySelector('.kp-clear') };
+    FIELDS.push(f);
+    return f;
+  }
+  function setActive(f){ els.root = f.root; els.field = f.field; els.input = f.input; }
+  function mirror(v){ FIELDS.forEach(function(f){ if (f.input.value !== v) f.input.value = v; }); }
+  function visibleField(){
+    for (var i=0;i<FIELDS.length;i++){
+      var r = FIELDS[i].field.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight) return FIELDS[i];
+    }
+    return null;
   }
 
   /* ---- RENDER ---------------------------------------------------------- */
@@ -243,7 +253,7 @@
   }
   function render(){
     var term = els.input.value.trim();
-    els.root.classList.toggle('kp-has-q', term.length > 0);
+    for (var i=0;i<FIELDS.length;i++) FIELDS[i].root.classList.toggle('kp-has-q', term.length > 0);
     renderRooms(); renderCats(term); renderProducts(term); renderCount(term);
   }
 
@@ -261,18 +271,21 @@
   }
   function open(){ if (isOpen) return; isOpen = true; positionPanel(); els.panel.classList.add('kp-open'); els.scrim.classList.add('kp-open'); }
   function close(){ isOpen = false; els.panel.classList.remove('kp-open'); els.scrim.classList.remove('kp-open'); }
+  function reposition(){ var f = visibleField(); if (!f){ close(); return; } setActive(f); positionPanel(); }
   function highlight(){ nav.forEach(function(el,i){ el.classList.toggle('kp-active', i===ai); }); if (nav[ai]) nav[ai].scrollIntoView({block:'nearest'}); }
 
   function wire(){
-    els.input.addEventListener('focus', open);
-    els.input.addEventListener('input', function(){ ai=-1; render(); });
-    els.clear.addEventListener('click', function(){ els.input.value=''; ai=-1; render(); els.input.focus(); });
+    FIELDS.forEach(function(f){
+      f.input.addEventListener('focus', function(){ setActive(f); open(); });
+      f.input.addEventListener('input', function(){ setActive(f); mirror(f.input.value); ai=-1; render(); });
+      f.clear.addEventListener('click', function(){ setActive(f); mirror(''); ai=-1; render(); f.input.focus(); });
+    });
     els.scrim.addEventListener('click', close);
-    window.addEventListener('resize', function(){ if (isOpen) positionPanel(); });
-    window.addEventListener('scroll', function(){ if (isOpen) positionPanel(); }, true);
+    window.addEventListener('resize', function(){ if (isOpen) reposition(); });
+    window.addEventListener('scroll', function(){ if (isOpen) reposition(); }, true);
     document.addEventListener('keydown', function(e){
-      if (e.key === '/' && document.activeElement !== els.input){ e.preventDefault(); els.input.focus(); open(); }
-      if (e.key === 'Escape'){ if (els.input.value){ els.input.value=''; ai=-1; render(); } else close(); }
+      if (e.key === '/' && (!document.activeElement || document.activeElement.tagName !== 'INPUT')){ e.preventDefault(); var f = visibleField() || FIELDS[0]; if (f){ setActive(f); f.input.focus(); open(); } }
+      if (e.key === 'Escape'){ if (els.input.value){ mirror(''); ai=-1; render(); } else close(); }
       if (!isOpen) return;
       if (e.key === 'ArrowDown'){ e.preventDefault(); ai=Math.min(ai+1, nav.length-1); highlight(); }
       if (e.key === 'ArrowUp'){ e.preventDefault(); ai=Math.max(ai-1, -1); highlight(); }
@@ -292,13 +305,14 @@
       }
       var set = e.target.closest('[data-kp-set]'); if (!set) return;
       var val = set.getAttribute('data-kp-set');
-      els.input.value = (els.input.value.trim() === val) ? '' : val;
+      mirror(els.input.value.trim() === val ? '' : val);
       ai=-1; render(); els.input.focus();
     });
-    // click outside field+panel closes
+    // click outside any field + panel closes
     document.addEventListener('mousedown', function(e){
       if (!isOpen) return;
-      if (els.root.contains(e.target) || els.panel.contains(e.target)) return;
+      if (els.panel.contains(e.target)) return;
+      for (var i=0;i<FIELDS.length;i++){ if (FIELDS[i].root.contains(e.target)) return; }
       close();
     });
   }
@@ -326,10 +340,15 @@
 
   /* ---- INIT ------------------------------------------------------------ */
   function init(){
-    var mount = document.querySelector(CFG.MOUNT);
-    if (!mount) return;
+    var seen = [], mounts = [];
+    document.querySelectorAll(CFG.MOUNT + ', .header_scrolled-search').forEach(function(el){
+      if (seen.indexOf(el) < 0){ seen.push(el); mounts.push(el); }
+    });
+    if (!mounts.length) return;
     injectCSS();
-    buildUI(mount);
+    buildPanel();
+    mounts.forEach(buildField);
+    setActive(FIELDS[0]);
     wire();
     render();      // renders empty-state from cache (if any) immediately
     loadIndex();   // then refreshes from network
@@ -337,5 +356,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.5', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.6', reload: loadIndex, _idx: IDX };
 })();
