@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.6
+   Kessler PRO — search.js  v1.0.7
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -52,10 +52,10 @@
   function injectCSS(){
     if (document.getElementById('kp-search-css')) return;
     var css = `
-.kp-search{position:relative;display:block;flex:1 1 auto;max-width:600px;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
-.kp-field{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:13px;background:#fff;border:1.5px solid #1E1E1E;border-radius:8px;padding:14px 14px 14px 16px;transition:box-shadow .16s}
+.kp-search{position:relative;display:block;flex:1 1 auto;max-width:460px;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
+.kp-field{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:10px;background:#fff;border:1.5px solid #1E1E1E;border-radius:8px;padding:10px 12px 10px 14px;transition:box-shadow .16s}
 .kp-field:focus-within{box-shadow:0 10px 30px -8px rgba(10,10,10,.22)}
-.kp-field input{border:0;outline:0;flex:1;font:inherit;font-size:16px;color:#1E1E1E;background:transparent}
+.kp-field input{border:0;outline:0;flex:1;font:inherit;font-size:15px;color:#1E1E1E;background:transparent}
 .kp-field input::placeholder{color:#a39d94}
 .kp-kbd{font-size:12px;color:#6f6a63;border:1px solid #E5E5E5;border-radius:5px;padding:2px 8px;background:#FAFAFA}
 .kp-search.kp-has-q .kp-kbd{display:none}
@@ -154,7 +154,7 @@
   function buildField(mount){
     mount.classList.add('kp-search');
     // Neutralize the host slot (pre-styled fake search bar: border/padding/flex/max-width)
-    mount.style.cssText += ';display:block;border:0;padding:0;background:transparent;max-width:600px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
+    mount.style.cssText += ';display:block;border:0;padding:0;background:transparent;max-width:460px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
     mount.innerHTML = FIELD_HTML;
     var f = { root: mount, field: mount.querySelector('.kp-field'), input: mount.querySelector('input'), clear: mount.querySelector('.kp-clear') };
     FIELDS.push(f);
@@ -356,5 +356,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.6', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.7', reload: loadIndex, _idx: IDX };
 })();
