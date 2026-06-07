@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.15
+   Kessler PRO — search.js  v1.0.16
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -131,6 +131,7 @@
 .kp-panel--sheet .kp-cols{display:flex!important;flex-direction:column}
 .kp-panel--sheet .kp-col{overflow:visible}
 .kp-panel--sheet .kp-c1{border-right:0;border-bottom:0.5px solid #E5E5E5}
+.kp-panel--sheet .kp-c1{display:none}
 `;
     var st = document.createElement('style'); st.id = 'kp-search-css'; st.textContent = css; document.head.appendChild(st);
   }
@@ -307,6 +308,7 @@
   }
   function openSheet(){
     if (sheetOpen || !SHEET) return; sheetOpen = true;
+    activeRoom = null; ai = -1;
     SHEET.body.appendChild(els.panel);                 // move the shared panel into the sheet
     els.panel.style.cssText = '';                      // drop desktop fixed-position inline styles
     els.panel.classList.add('kp-open', 'kp-panel--sheet');
@@ -451,5 +453,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.15', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
+  window.KPSearch = { version: '1.0.16', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
 })();
