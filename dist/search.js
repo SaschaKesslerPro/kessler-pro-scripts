@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.14
+   Kessler PRO — search.js  v1.0.15
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -120,6 +120,17 @@
 .kp-stg{animation:kp-rise .26s ease both}
 @keyframes kp-rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media(max-width:760px){.kp-cols{grid-template-columns:1fr}.kp-c1{border-right:0;border-bottom:1px solid #E5E5E5}.kp-panel{width:calc(100vw - 24px)}}
+.kp-sheet{position:fixed;inset:0;z-index:100001;background:#fff;display:none;flex-direction:column;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
+.kp-sheet.kp-open{display:flex}
+.kp-sheet-top{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:0.5px solid #E5E5E5}
+.kp-sheet-top .kp-search{flex:1 1 auto;max-width:none}
+.kp-sheet-top .kp-kbd{display:none}
+.kp-sheet-close{flex:0 0 auto;border:0;background:transparent;color:#1E1E1E;font-size:26px;line-height:1;padding:2px 8px;cursor:pointer}
+.kp-sheet-body{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.kp-panel--sheet{position:static!important;width:100%!important;max-width:none!important;max-height:none!important;height:auto!important;border:0!important;border-radius:0!important;box-shadow:none!important;display:flex!important;animation:none!important}
+.kp-panel--sheet .kp-cols{display:flex!important;flex-direction:column}
+.kp-panel--sheet .kp-col{overflow:visible}
+.kp-panel--sheet .kp-c1{border-right:0;border-bottom:0.5px solid #E5E5E5}
 `;
     var st = document.createElement('style'); st.id = 'kp-search-css'; st.textContent = css; document.head.appendChild(st);
   }
@@ -278,6 +289,40 @@
   }
   function open(){ if (isOpen) return; isOpen = true; positionPanel(); els.panel.classList.add('kp-open'); els.scrim.classList.add('kp-open'); }
   function close(){ isOpen = false; els.panel.classList.remove('kp-open'); els.scrim.classList.remove('kp-open'); }
+
+  /* ---- MOBILE FULL-SCREEN SHEET (reuses the same panel) ---------------- */
+  var SHEET = null, sheetOpen = false;
+  function buildSheet(){
+    var sheet = document.createElement('div'); sheet.className = 'kp-sheet';
+    var top = document.createElement('div'); top.className = 'kp-sheet-top';
+    var fieldWrap = document.createElement('div'); fieldWrap.className = 'kp-search'; fieldWrap.innerHTML = FIELD_HTML;
+    var closeBtn = document.createElement('button'); closeBtn.className = 'kp-sheet-close'; closeBtn.setAttribute('aria-label', 'Schließen'); closeBtn.innerHTML = '&times;';
+    top.appendChild(fieldWrap); top.appendChild(closeBtn);
+    var body = document.createElement('div'); body.className = 'kp-sheet-body';
+    sheet.appendChild(top); sheet.appendChild(body);
+    document.body.appendChild(sheet);
+    var f = { root: fieldWrap, field: fieldWrap.querySelector('.kp-field'), input: fieldWrap.querySelector('input'), clear: fieldWrap.querySelector('.kp-clear'), sheet: true };
+    FIELDS.push(f);
+    SHEET = { el: sheet, body: body, field: f, close: closeBtn };
+  }
+  function openSheet(){
+    if (sheetOpen || !SHEET) return; sheetOpen = true;
+    SHEET.body.appendChild(els.panel);                 // move the shared panel into the sheet
+    els.panel.style.cssText = '';                      // drop desktop fixed-position inline styles
+    els.panel.classList.add('kp-open', 'kp-panel--sheet');
+    setActive(SHEET.field);
+    SHEET.el.classList.add('kp-open');
+    document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden';
+    render();
+    setTimeout(function(){ SHEET.field.input.focus(); }, 60);
+  }
+  function closeSheet(){
+    if (!sheetOpen) return; sheetOpen = false;
+    SHEET.el.classList.remove('kp-open');
+    els.panel.classList.remove('kp-open', 'kp-panel--sheet');
+    document.body.appendChild(els.panel);              // return the panel to <body> for desktop
+    document.documentElement.style.overflow = ''; document.body.style.overflow = '';
+  }
   function reposition(){ var f = visibleField(); if (!f){ close(); return; } setActive(f); positionPanel(); }
   function highlight(){ nav.forEach(function(el,i){ el.classList.toggle('kp-active', i===ai); }); if (nav[ai]) nav[ai].scrollIntoView({block:'nearest'}); }
 
@@ -302,10 +347,21 @@
 
   function wire(){
     FIELDS.forEach(function(f){
-      f.input.addEventListener('focus', function(){ setActive(f); open(); });
+      f.input.addEventListener('focus', function(){ setActive(f); if (!f.sheet) open(); });
       f.input.addEventListener('input', function(){ setActive(f); mirror(f.input.value); ai=-1; render(); });
       f.clear.addEventListener('click', function(){ setActive(f); mirror(''); ai=-1; render(); f.input.focus(); });
+      if (f.sheet){
+        f.input.addEventListener('keydown', function(e){
+          if (e.key === 'Enter' && (f.input.value.trim() || activeRoom)){ window.location.href = resultsURL(); }
+          if (e.key === 'Escape'){ if (f.input.value){ mirror(''); ai=-1; render(); } else closeSheet(); }
+        });
+      }
     });
+    // Mobile: tapping the whole search bar (m-search-row) opens the full-screen sheet
+    [].forEach.call(document.querySelectorAll('[data-mobile-trigger="search-open"]'), function(t){
+      t.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openSheet(); });
+    });
+    if (SHEET) SHEET.close.addEventListener('click', closeSheet);
     els.scrim.addEventListener('click', close);
     window.addEventListener('resize', function(){ equalizeSoon(); if (isOpen) reposition(); });
     window.addEventListener('scroll', function(){
@@ -318,6 +374,7 @@
       if (r.bottom < 4 || r.top > window.innerHeight - 4) close();
     }, true);
     document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && sheetOpen){ if (SHEET.field.input.value){ mirror(''); ai=-1; render(); } else closeSheet(); return; }
       if (e.key === '/' && (!document.activeElement || document.activeElement.tagName !== 'INPUT')){ e.preventDefault(); var f = visibleField() || FIELDS[0]; if (f){ setActive(f); f.input.focus(); open(); } }
       if (e.key === 'Escape'){ if (els.input.value){ mirror(''); ai=-1; render(); } else close(); }
       if (!isOpen) return;
@@ -382,6 +439,7 @@
     injectCSS();
     buildPanel();
     mounts.forEach(buildField);
+    buildSheet();
     setActive(FIELDS[0]);
     wire();
     render();      // renders empty-state from cache (if any) immediately
@@ -393,5 +451,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.14', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
+  window.KPSearch = { version: '1.0.15', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
 })();
