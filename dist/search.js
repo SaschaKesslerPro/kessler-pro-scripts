@@ -1,6 +1,7 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.16
+   Kessler PRO — search.js  v1.0.17
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
+   Mobile V2: Vorschläge (abgeleitet) + Verlauf + Beliebt, leichte Fuzzy-Logik.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
    ============================================================ */
@@ -47,6 +48,130 @@
     return THUMB;
   }
   function maxCount(){ var m=1; IDX.cats.forEach(function(c){ if((c.k||0)>m) m=c.k; }); return m; }
+
+  /* ---- V2: derived vocabulary · fuzzy · recent searches --------------- */
+  var VOCAB = [];      // [{ d:display, n:norm, c:count }]
+  var POPULAR = [];    // top derived terms (display strings)
+  var RECENT_KEY = 'kp_recent_v1', RECENT_MAX = 6;
+  var STOP = { 'farbe':1,'mit':1,'und':1,'der':1,'die':1,'das':1,'für':1,'fur':1,'cm':1,'mm':1,'set':1,'inkl':1,'aus':1,'pro':1,'cm²':1,'stk':1,'inkl.':1 };
+
+  function buildVocab(){
+    var map = {};   // norm -> {d, n, c}
+    function add(disp, weight, force){
+      var d = (disp||'').trim(); if (!d) return;
+      var n = norm(d);
+      if (!force){ if (n.length < 3) return; if (STOP[n]) return; if (/^\d/.test(n)) return; }
+      if (!map[n]) map[n] = { d: d, n: n, c: 0 };
+      map[n].c += (weight||1);
+    }
+    // product-name tokens (the words people actually type)
+    IDX.products.forEach(function(p){
+      var raw = (p.n||'').replace(/[^0-9A-Za-zÄÖÜäöüß]+/g,' ').split(' ');
+      raw.forEach(function(tok){ add(tok, 1); });
+    });
+    // full category names (force-kept) + their tokens — high weight so they surface
+    IDX.cats.forEach(function(c){
+      add(c.n, 40, true);
+      (c.n||'').replace(/[^0-9A-Za-zÄÖÜäöüß]+/g,' ').split(' ').forEach(function(t){ add(t, 8); });
+    });
+    // room names (force-kept)
+    IDX.rooms.forEach(function(r){ add(r.n, 12, true); });
+
+    VOCAB = Object.keys(map).map(function(k){ return map[k]; });
+    POPULAR = VOCAB.slice().sort(function(a,b){ return b.c - a.c || a.d.length - b.d.length; })
+                   .filter(function(e){ return e.n.indexOf(' ') < 0; })   // single, snappy words for chips
+                   .slice(0, 6).map(function(e){ return e.d; });
+  }
+
+  function lev(a, b){
+    if (a === b) return 0;
+    var m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+    var prev = [], i, j; for (j=0;j<=n;j++) prev[j]=j;
+    for (i=1;i<=m;i++){ var cur=[i]; for (j=1;j<=n;j++){ var cost=a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1; cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+cost); } prev=cur; }
+    return prev[n];
+  }
+  function fuzzyHit(nt, e){
+    if (nt.length < 4) return false;
+    if (lev(nt, e.n) <= 1) return true;
+    var w = e.n.split(' ');
+    for (var i=0;i<w.length;i++){ if (w[i].length >= 4 && lev(nt, w[i]) <= 1) return true; }
+    return false;
+  }
+  function suggest(term){
+    var nt = norm(term); if (!nt) return [];
+    var out = [];
+    VOCAB.forEach(function(e){
+      if (e.n === nt) return;            // don't echo the exact word back
+      var rank;
+      if (e.n.indexOf(nt) === 0) rank = 0;
+      else if (e.n.indexOf(nt) > 0) rank = 1;
+      else if (fuzzyHit(nt, e)) rank = 2;
+      else return;
+      out.push({ d: e.d, r: rank, c: e.c, l: e.d.length });
+    });
+    out.sort(function(a,b){ return a.r - b.r || b.c - a.c || a.l - b.l; });
+    var seen = {}, res = [];
+    for (var i=0;i<out.length && res.length<7;i++){ var k=norm(out[i].d); if(seen[k])continue; seen[k]=1; res.push(out[i].d); }
+    return res;
+  }
+
+  function recentGet(){ try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch(e){ return []; } }
+  function recentAdd(term){
+    var t = (term||'').trim(); if (!t) return;
+    try {
+      var list = recentGet().filter(function(x){ return norm(x) !== norm(t); });
+      list.unshift(t); list = list.slice(0, RECENT_MAX);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch(e){}
+  }
+  function recentRemove(term){
+    try {
+      var list = recentGet().filter(function(x){ return norm(x) !== norm(term); });
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch(e){}
+  }
+  function recentRemoveAll(){ try { localStorage.removeItem(RECENT_KEY); } catch(e){} }
+
+  var ICON_CLOCK = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+  var ICON_SEARCH = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-3.4-3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  var ICON_TREND = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>';
+  var ICON_ARROW = '<svg class="kp-sgarrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+
+  function renderSuggest(term){
+    if (!SHEET) return;
+    var sg = SHEET.sg, html = '';
+    if (term){
+      var sg_terms = suggest(term);
+      if (sg_terms.length){
+        html += '<div class="kp-sg-sec">';
+        html += sg_terms.map(function(t){
+          return '<button type="button" class="kp-sgrow" data-kp-sgterm="'+esc(t)+'">'+ICON_SEARCH
+               + '<span class="kp-sgt">'+hl(t, term)+'</span>'+ICON_ARROW+'</button>';
+        }).join('');
+        html += '</div>';
+      }
+    } else {
+      var rec = recentGet();
+      if (rec.length){
+        html += '<div class="kp-sg-sec"><p class="kp-sg-h">Letzte Suchen'
+              + '<button type="button" class="kp-sg-clear" data-kp-recclear>Verlauf löschen</button></p>';
+        html += rec.map(function(t){
+          return '<div class="kp-sgrow kp-rec" data-kp-sgterm="'+esc(t)+'">'+ICON_CLOCK
+               + '<span class="kp-sgt">'+esc(t)+'</span>'
+               + '<button type="button" class="kp-recx" data-kp-recx="'+esc(t)+'" aria-label="Entfernen">&times;</button></div>';
+        }).join('');
+        html += '</div>';
+      }
+      if (POPULAR.length){
+        html += '<div class="kp-sg-sec"><p class="kp-sg-h">Beliebt</p><div class="kp-chips2">';
+        html += POPULAR.map(function(t){
+          return '<button type="button" class="kp-sgchip" data-kp-sgterm="'+esc(t)+'">'+ICON_TREND+esc(t)+'</button>';
+        }).join('');
+        html += '</div></div>';
+      }
+    }
+    sg.innerHTML = html;
+  }
 
   /* ---- CSS (Onest · Monochrom-Deep · 8px · Ink-Eyebrows) --------------- */
   function injectCSS(){
@@ -132,6 +257,26 @@
 .kp-panel--sheet .kp-col{overflow:visible}
 .kp-panel--sheet .kp-c1{border-right:0;border-bottom:0.5px solid #E5E5E5}
 .kp-panel--sheet .kp-c1{display:none}
+/* ---- V2 mobile suggestions / recent / popular (sheet only) ---- */
+.kp-sg{display:none}
+.kp-sheet .kp-sg{display:block;padding:14px 16px 4px}
+.kp-sg-sec{margin-bottom:14px}
+.kp-sg-h{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1E1E1E;font-weight:500}
+.kp-sg-clear{border:0;background:transparent;color:#1E1E1E;opacity:.5;font-size:11px;letter-spacing:.04em;text-transform:none;cursor:pointer;padding:2px 0}
+.kp-sg-clear:hover{opacity:1;text-decoration:underline}
+.kp-sgrow{display:flex;align-items:center;gap:11px;width:100%;box-sizing:border-box;padding:11px 6px;border:0;background:transparent;text-align:left;font:inherit;color:#1E1E1E;cursor:pointer;border-radius:8px;border-bottom:0.5px solid #F2F0EB}
+.kp-sgrow:last-child{border-bottom:0}
+.kp-sgrow:active{background:#FAFAFA}
+.kp-sgrow svg{flex:0 0 auto;color:#1E1E1E;opacity:.55}
+.kp-sgrow .kp-sgt{flex:1 1 auto;min-width:0;font-size:15px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp-sgrow .kp-sgt mark{background:transparent;color:#1E1E1E;font-weight:600}
+.kp-sgrow .kp-sgarrow{flex:0 0 auto;opacity:.4}
+.kp-rec .kp-recx{flex:0 0 auto;border:0;background:transparent;color:#1E1E1E;opacity:.4;font-size:18px;line-height:1;padding:4px 6px;cursor:pointer;border-radius:6px}
+.kp-rec .kp-recx:active{background:#F2F0EB;opacity:.9}
+.kp-chips2{display:flex;flex-wrap:wrap;gap:8px}
+.kp-sgchip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;color:#1E1E1E;font-size:13px;font-weight:400;cursor:pointer;font-family:inherit}
+.kp-sgchip:active{background:#FAFAFA;border-color:#1E1E1E}
+.kp-sgchip svg{opacity:.5}
 `;
     var st = document.createElement('style'); st.id = 'kp-search-css'; st.textContent = css; document.head.appendChild(st);
   }
@@ -274,6 +419,7 @@
     var term = els.input.value.trim();
     for (var i=0;i<FIELDS.length;i++) FIELDS[i].root.classList.toggle('kp-has-q', term.length > 0);
     renderRooms(); renderCats(term); renderProducts(term); renderCount(term);
+    if (sheetOpen) renderSuggest(term);
   }
 
   /* ---- INTERACTION ----------------------------------------------------- */
@@ -300,11 +446,21 @@
     var closeBtn = document.createElement('button'); closeBtn.className = 'kp-sheet-close'; closeBtn.setAttribute('aria-label', 'Schließen'); closeBtn.innerHTML = '&times;';
     top.appendChild(fieldWrap); top.appendChild(closeBtn);
     var body = document.createElement('div'); body.className = 'kp-sheet-body';
+    var sg = document.createElement('div'); sg.className = 'kp-sg'; sg.setAttribute('data-kp-suggest','');
+    body.appendChild(sg);
     sheet.appendChild(top); sheet.appendChild(body);
     document.body.appendChild(sheet);
     var f = { root: fieldWrap, field: fieldWrap.querySelector('.kp-field'), input: fieldWrap.querySelector('input'), clear: fieldWrap.querySelector('.kp-clear'), sheet: true };
     FIELDS.push(f);
-    SHEET = { el: sheet, body: body, field: f, close: closeBtn };
+    SHEET = { el: sheet, body: body, field: f, close: closeBtn, sg: sg };
+    sg.addEventListener('click', function(e){
+      var clr = e.target.closest('[data-kp-recclear]');
+      if (clr){ recentRemoveAll(); renderSuggest(SHEET.field.input.value.trim()); return; }
+      var rx = e.target.closest('[data-kp-recx]');
+      if (rx){ e.stopPropagation(); recentRemove(rx.getAttribute('data-kp-recx')); renderSuggest(SHEET.field.input.value.trim()); return; }
+      var row = e.target.closest('[data-kp-sgterm]');
+      if (row){ var t = row.getAttribute('data-kp-sgterm'); mirror(t); recentAdd(t); ai=-1; render(); SHEET.field.input.focus(); }
+    });
   }
   function openSheet(){
     if (sheetOpen || !SHEET) return; sheetOpen = true;
@@ -354,7 +510,7 @@
       f.clear.addEventListener('click', function(){ setActive(f); mirror(''); ai=-1; render(); f.input.focus(); });
       if (f.sheet){
         f.input.addEventListener('keydown', function(e){
-          if (e.key === 'Enter' && (f.input.value.trim() || activeRoom)){ window.location.href = resultsURL(); }
+          if (e.key === 'Enter' && (f.input.value.trim() || activeRoom)){ recentAdd(f.input.value.trim()); window.location.href = resultsURL(); }
           if (e.key === 'Escape'){ if (f.input.value){ mirror(''); ai=-1; render(); } else closeSheet(); }
         });
       }
@@ -389,6 +545,7 @@
     });
     // room = toggle filter · category chip = set text filter (panel is on <body>)
     els.panel.addEventListener('click', function(e){
+      if (sheetOpen && e.target.closest('a[href]')){ var q = els.input.value.trim(); if (q) recentAdd(q); }
       var room = e.target.closest('[data-kp-room]');
       if (room){
         var rs = room.getAttribute('data-kp-room');
@@ -415,6 +572,7 @@
     IDX.products = data.products || [];
     IDX.cats = data.cats || [];
     IDX.rooms = data.rooms || [];
+    buildVocab();
   }
   function loadIndex(){
     try {
@@ -453,5 +611,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.16', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
+  window.KPSearch = { version: '1.0.17', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+                      _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();
