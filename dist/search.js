@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.8
+   Kessler PRO — search.js  v1.0.9
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -58,7 +58,7 @@
 .kp-field input{border:0;outline:0;flex:1;font:inherit;font-size:15px;color:#1E1E1E;background:transparent}
 .kp-field input::placeholder{color:#a39d94}
 /* Sticky/scrolled header slot: more compact than the main field */
-.header_scrolled-search.kp-search{max-width:360px !important}
+.header_scrolled-search.kp-search{max-width:360px !important;margin-bottom:4px}
 .header_scrolled-search .kp-field{padding:6px 11px 6px 13px;gap:9px;border-width:1.5px}
 .header_scrolled-search .kp-field input{font-size:14px}
 .header_scrolled-search .kp-field svg{width:18px;height:18px}
@@ -362,5 +362,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.8', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.9', reload: loadIndex, _idx: IDX };
 })();
