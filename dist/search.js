@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.3
+   Kessler PRO — search.js  v1.0.4
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -85,9 +85,9 @@
 .kp-rrow.kp-on .kp-chev{opacity:1;color:#fff}
 .kp-rrow.kp-on mark{color:#fff}
 .kp-chips{display:flex;flex-wrap:wrap;gap:8px}
-.kp-chip{border:1px solid #E5E5E5;border-radius:8px;padding:7px 13px;font-size:13.5px;cursor:pointer;background:#fff;transition:.12s;display:inline-flex;align-items:center;gap:7px}
+.kp-chip{border:1px solid #E5E5E5;border-radius:8px;padding:7px 13px;font-size:13.5px;line-height:1.3;cursor:pointer;background:#fff;transition:.12s;display:inline-block;white-space:nowrap}
 .kp-chip:hover{border-color:#1E1E1E}
-.kp-chip .kp-k{font-size:11px;color:#a9a399}
+.kp-chip .kp-k{font-size:11px;color:#a9a399;margin-left:6px}
 .kp-chip.kp-on{background:#1E1E1E;color:#fff;border-color:#1E1E1E}
 .kp-chip.kp-on .kp-k{color:rgba(255,255,255,.6)}
 .kp-chip.kp-on mark{color:#fff}
@@ -324,5 +324,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.3', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.4', reload: loadIndex, _idx: IDX };
 })();
