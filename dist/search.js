@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.13
+   Kessler PRO — search.js  v1.0.14
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -308,7 +308,15 @@
     });
     els.scrim.addEventListener('click', close);
     window.addEventListener('resize', function(){ equalizeSoon(); if (isOpen) reposition(); });
-    window.addEventListener('scroll', function(){ equalizeSoon(); if (isOpen) reposition(); }, true);
+    window.addEventListener('scroll', function(){
+      equalizeSoon();
+      if (!isOpen) return;
+      // Don't move the panel while scrolling (that caused it to jump). The panel is
+      // position:fixed and the sticky field stays put, so they remain aligned.
+      // Only close if the anchored field has scrolled out of view.
+      var r = els.field.getBoundingClientRect();
+      if (r.bottom < 4 || r.top > window.innerHeight - 4) close();
+    }, true);
     document.addEventListener('keydown', function(e){
       if (e.key === '/' && (!document.activeElement || document.activeElement.tagName !== 'INPUT')){ e.preventDefault(); var f = visibleField() || FIELDS[0]; if (f){ setActive(f); f.input.focus(); open(); } }
       if (e.key === 'Escape'){ if (els.input.value){ mirror(''); ai=-1; render(); } else close(); }
@@ -385,5 +393,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.13', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
+  window.KPSearch = { version: '1.0.14', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
 })();
