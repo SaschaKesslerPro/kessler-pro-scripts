@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.1
+   Kessler PRO — search.js  v1.0.2
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -52,8 +52,8 @@
   function injectCSS(){
     if (document.getElementById('kp-search-css')) return;
     var css = `
-.kp-search{position:relative;flex:1;max-width:600px;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
-.kp-field{display:flex;align-items:center;gap:13px;background:#fff;border:1.5px solid #1E1E1E;border-radius:8px;padding:14px 14px 14px 16px;transition:box-shadow .16s}
+.kp-search{position:relative;display:block;flex:1 1 auto;max-width:600px;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
+.kp-field{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:13px;background:#fff;border:1.5px solid #1E1E1E;border-radius:8px;padding:14px 14px 14px 16px;transition:box-shadow .16s}
 .kp-field:focus-within{box-shadow:0 10px 30px -8px rgba(10,10,10,.22)}
 .kp-field input{border:0;outline:0;flex:1;font:inherit;font-size:16px;color:#1E1E1E;background:transparent}
 .kp-field input::placeholder{color:#a39d94}
@@ -62,10 +62,10 @@
 .kp-clear{border:0;background:transparent;cursor:pointer;color:#6f6a63;width:28px;height:28px;border-radius:6px;display:none;align-items:center;justify-content:center}
 .kp-clear:hover{background:#F2F0EB;color:#1E1E1E}
 .kp-search.kp-has-q .kp-clear{display:flex}
-.kp-scrim{position:fixed;inset:0;background:rgba(10,10,10,.34);z-index:9998;opacity:0;pointer-events:none;transition:opacity .2s}
-.kp-search.kp-open .kp-scrim{opacity:1;pointer-events:auto}
-.kp-panel{position:absolute;z-index:9999;left:0;top:calc(100% + 12px);width:min(1120px,calc(100vw - clamp(32px,8vw,144px)));background:#fff;border:1px solid #E5E5E5;border-radius:8px;box-shadow:0 30px 80px -20px rgba(10,10,10,.30);overflow:hidden;display:none}
-.kp-search.kp-open .kp-panel{display:block;animation:kp-pop .2s cubic-bezier(.2,.7,.3,1) both}
+.kp-scrim{position:fixed;inset:0;background:rgba(10,10,10,.34);z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+.kp-scrim.kp-open{opacity:1;pointer-events:auto}
+.kp-panel{position:fixed;z-index:100000;left:0;top:0;width:min(1120px,calc(100vw - 48px));background:#fff;border:1px solid #E5E5E5;border-radius:8px;box-shadow:0 30px 80px -20px rgba(10,10,10,.30);overflow:hidden;display:none}
+.kp-panel.kp-open{display:block;animation:kp-pop .2s cubic-bezier(.2,.7,.3,1) both}
 @keyframes kp-pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .kp-cols{display:grid;grid-template-columns:270px minmax(0,1fr)}
 .kp-col{padding:24px 26px;min-height:344px}
@@ -117,35 +117,42 @@
   var els = {};
   function buildUI(mount){
     mount.classList.add('kp-search');
+    // Neutralize the host slot (it was a pre-styled fake search bar: border/padding/flex/max-width)
+    mount.style.cssText += ';display:block;border:0;padding:0;background:transparent;max-width:600px;min-width:0;min-height:0;height:auto;color:#1E1E1E;cursor:auto;overflow:visible;box-shadow:none;gap:0';
     mount.innerHTML =
       '<div class="kp-field">'
       + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#1E1E1E" stroke-width="1.7"/><path d="M20 20l-3.4-3.4" stroke="#1E1E1E" stroke-width="1.7" stroke-linecap="round"/></svg>'
       + '<input type="text" placeholder="Suche nach Tischplatte, Schreibtisch, Eiche …" autocomplete="off" aria-label="Suche">'
       + '<span class="kp-kbd">/</span>'
       + '<button class="kp-clear" aria-label="Leeren"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>'
-      + '</div>'
-      + '<div class="kp-panel">'
-      +   '<div class="kp-cols">'
-      +     '<div class="kp-col kp-c1"><p class="kp-eyebrow">Nach Raum</p><div data-kp-rooms></div>'
-      +       '<p class="kp-eyebrow" style="margin-top:26px">Kategorien</p><div class="kp-chips" data-kp-cats></div></div>'
-      +     '<div class="kp-col kp-c2"><p class="kp-eyebrow"><span data-kp-plabel>Bestseller</span><span class="kp-meta" data-kp-pmeta></span></p><div data-kp-products></div></div>'
-      +   '</div>'
-      +   '<div class="kp-foot"><span class="kp-hint">↑ ↓ navigieren · ↵ alle Treffer · ESC schließen</span>'
-      +     '<a data-kp-all><span class="kp-u">Zu allen <span data-kp-count>0</span> Ergebnissen</span> →</a></div>'
       + '</div>';
-    var scrim = document.createElement('div'); scrim.className = 'kp-scrim'; mount.appendChild(scrim);
+    // Panel + scrim live on <body> → no header container can clip or mis-position them
+    var panel = document.createElement('div'); panel.className = 'kp-panel';
+    panel.innerHTML =
+        '<div class="kp-cols">'
+      +   '<div class="kp-col kp-c1"><p class="kp-eyebrow">Nach Raum</p><div data-kp-rooms></div>'
+      +     '<p class="kp-eyebrow" style="margin-top:26px">Kategorien</p><div class="kp-chips" data-kp-cats></div></div>'
+      +   '<div class="kp-col kp-c2"><p class="kp-eyebrow"><span data-kp-plabel>Bestseller</span><span class="kp-meta" data-kp-pmeta></span></p><div data-kp-products></div></div>'
+      + '</div>'
+      + '<div class="kp-foot"><span class="kp-hint">↑ ↓ navigieren · ↵ alle Treffer · ESC schließen</span>'
+      +   '<a data-kp-all><span class="kp-u">Zu allen <span data-kp-count>0</span> Ergebnissen</span> →</a></div>';
+    var scrim = document.createElement('div'); scrim.className = 'kp-scrim';
+    document.body.appendChild(scrim);
+    document.body.appendChild(panel);
     els = {
       root: mount,
+      field: mount.querySelector('.kp-field'),
       input: mount.querySelector('input'),
       clear: mount.querySelector('.kp-clear'),
       scrim: scrim,
-      rooms: mount.querySelector('[data-kp-rooms]'),
-      cats: mount.querySelector('[data-kp-cats]'),
-      products: mount.querySelector('[data-kp-products]'),
-      plabel: mount.querySelector('[data-kp-plabel]'),
-      pmeta: mount.querySelector('[data-kp-pmeta]'),
-      count: mount.querySelector('[data-kp-count]'),
-      all: mount.querySelector('[data-kp-all]')
+      panel: panel,
+      rooms: panel.querySelector('[data-kp-rooms]'),
+      cats: panel.querySelector('[data-kp-cats]'),
+      products: panel.querySelector('[data-kp-products]'),
+      plabel: panel.querySelector('[data-kp-plabel]'),
+      pmeta: panel.querySelector('[data-kp-pmeta]'),
+      count: panel.querySelector('[data-kp-count]'),
+      all: panel.querySelector('[data-kp-all]')
     };
   }
 
@@ -220,8 +227,19 @@
   }
 
   /* ---- INTERACTION ----------------------------------------------------- */
-  function open(){ els.root.classList.add('kp-open'); }
-  function close(){ els.root.classList.remove('kp-open'); }
+  var isOpen = false;
+  function positionPanel(){
+    var r = els.field.getBoundingClientRect();
+    var vw = window.innerWidth, pad = 24;
+    var w = Math.min(1120, vw - pad * 2);
+    var left = Math.min(r.left, vw - pad - w);
+    left = Math.max(pad, left);
+    els.panel.style.width = w + 'px';
+    els.panel.style.left = left + 'px';
+    els.panel.style.top = (r.bottom + 12) + 'px';
+  }
+  function open(){ if (isOpen) return; isOpen = true; positionPanel(); els.panel.classList.add('kp-open'); els.scrim.classList.add('kp-open'); }
+  function close(){ isOpen = false; els.panel.classList.remove('kp-open'); els.scrim.classList.remove('kp-open'); }
   function highlight(){ nav.forEach(function(el,i){ el.classList.toggle('kp-active', i===ai); }); if (nav[ai]) nav[ai].scrollIntoView({block:'nearest'}); }
 
   function wire(){
@@ -229,10 +247,12 @@
     els.input.addEventListener('input', function(){ ai=-1; render(); });
     els.clear.addEventListener('click', function(){ els.input.value=''; ai=-1; render(); els.input.focus(); });
     els.scrim.addEventListener('click', close);
+    window.addEventListener('resize', function(){ if (isOpen) positionPanel(); });
+    window.addEventListener('scroll', function(){ if (isOpen) positionPanel(); }, true);
     document.addEventListener('keydown', function(e){
       if (e.key === '/' && document.activeElement !== els.input){ e.preventDefault(); els.input.focus(); open(); }
       if (e.key === 'Escape'){ if (els.input.value){ els.input.value=''; ai=-1; render(); } else close(); }
-      if (!els.root.classList.contains('kp-open')) return;
+      if (!isOpen) return;
       if (e.key === 'ArrowDown'){ e.preventDefault(); ai=Math.min(ai+1, nav.length-1); highlight(); }
       if (e.key === 'ArrowUp'){ e.preventDefault(); ai=Math.max(ai-1, -1); highlight(); }
       if (e.key === 'Enter'){
@@ -240,15 +260,20 @@
         else if (els.input.value.trim()){ window.location.href = CFG.RESULTS(els.input.value.trim()); }
       }
     });
-    // chip/room toggle (set) — clicking active again clears
-    els.root.addEventListener('click', function(e){
-      var set = e.target.closest('[data-kp-set]'); if (!set) return;
-      // room rows navigate directly:
+    // chip/room clicks live in the panel (now on <body>)
+    els.panel.addEventListener('click', function(e){
       var roomLink = e.target.closest('[data-kp-go="room"]');
       if (roomLink){ window.location.href = CFG.ROOM(roomLink.getAttribute('data-kp-slug')); return; }
+      var set = e.target.closest('[data-kp-set]'); if (!set) return;
       var val = set.getAttribute('data-kp-set');
       els.input.value = (els.input.value.trim() === val) ? '' : val;
       ai=-1; render(); els.input.focus();
+    });
+    // click outside field+panel closes
+    document.addEventListener('mousedown', function(e){
+      if (!isOpen) return;
+      if (els.root.contains(e.target) || els.panel.contains(e.target)) return;
+      close();
     });
   }
 
@@ -286,5 +311,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.1', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.2', reload: loadIndex, _idx: IDX };
 })();
