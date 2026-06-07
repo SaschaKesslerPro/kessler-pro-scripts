@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.11
+   Kessler PRO — search.js  v1.0.12
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -53,14 +53,14 @@
     if (document.getElementById('kp-search-css')) return;
     var css = `
 .kp-search{position:relative;display:block;flex:1 1 auto;max-width:460px;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
-.kp-field{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:10px;background:#fff;border:1.5px solid #1E1E1E;border-radius:8px;padding:10px 12px 10px 14px;transition:box-shadow .16s}
+.kp-field{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:10px;background:#fff;border:1.5px solid #1E1E1E;border-radius:8px;padding:13px 12px 13px 14px;transition:box-shadow .16s}
 .kp-field:focus-within{box-shadow:0 10px 30px -8px rgba(10,10,10,.22)}
 .kp-field input{border:0;outline:0;flex:1;font:inherit;font-size:15px;color:#1E1E1E;background:transparent}
 .kp-field input::placeholder{color:#a39d94}
 /* Sticky/scrolled header slot: more compact than the main field */
 .header_scrolled-search.kp-search{max-width:360px !important}
 .header_scrolled-link{padding-top:6px}
-.header_scrolled-search .kp-field{padding:6px 11px 6px 13px;gap:9px;border-width:1.5px}
+.header_scrolled-search .kp-field{padding:8px 11px 8px 13px;gap:9px;border-width:1.5px}
 .header_scrolled-search .kp-field input{font-size:14px}
 .header_scrolled-search .kp-field svg{width:18px;height:18px}
 .header_scrolled-search .kp-kbd{padding:1px 7px;font-size:11px}
@@ -363,5 +363,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.11', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.12', reload: loadIndex, _idx: IDX };
 })();
