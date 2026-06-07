@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.2
+   Kessler PRO — search.js  v1.0.3
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -17,7 +17,7 @@
     CAT: function (s) { return '/produktkategorien/' + s; },
     ROOM: function (s) { return '/raume/' + s; },
     RESULTS: function (q) { return '/produkte?q=' + encodeURIComponent(q); },
-    MAX_PRODUCTS: 6,
+    MAX_PRODUCTS: 5,
     POPULAR: [] // optional; Variante A nutzt Räume/Kategorien statt Wortliste
   };
 
@@ -64,11 +64,11 @@
 .kp-search.kp-has-q .kp-clear{display:flex}
 .kp-scrim{position:fixed;inset:0;background:rgba(10,10,10,.34);z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
 .kp-scrim.kp-open{opacity:1;pointer-events:auto}
-.kp-panel{position:fixed;z-index:100000;left:0;top:0;width:min(1120px,calc(100vw - 48px));background:#fff;border:1px solid #E5E5E5;border-radius:8px;box-shadow:0 30px 80px -20px rgba(10,10,10,.30);overflow:hidden;display:none}
-.kp-panel.kp-open{display:block;animation:kp-pop .2s cubic-bezier(.2,.7,.3,1) both}
+.kp-panel{position:fixed;z-index:100000;left:0;top:0;width:min(960px,calc(100vw - 48px));max-height:min(72vh,560px);flex-direction:column;background:#fff;border:1px solid #E5E5E5;border-radius:8px;box-shadow:0 30px 80px -20px rgba(10,10,10,.30);overflow:hidden;display:none;font-family:Onest,"DM Sans",sans-serif;color:#1E1E1E}
+.kp-panel.kp-open{display:flex;animation:kp-pop .2s cubic-bezier(.2,.7,.3,1) both}
 @keyframes kp-pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-.kp-cols{display:grid;grid-template-columns:270px minmax(0,1fr)}
-.kp-col{padding:24px 26px;min-height:344px}
+.kp-cols{display:grid;grid-template-columns:258px minmax(0,1fr);flex:1 1 auto;min-height:0}
+.kp-col{padding:20px 22px;min-height:0;overflow-y:auto}
 .kp-c1{background:#FAFAFA;border-right:1px solid #E5E5E5}
 .kp-eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#1E1E1E;margin:0 0 14px;display:flex;align-items:center;gap:10px}
 .kp-eyebrow::after{content:"";flex:1;height:1px;background:#1E1E1E}
@@ -80,6 +80,10 @@
 .kp-rrow .kp-chev{opacity:0;color:#a9a399;transition:opacity .12s}
 .kp-rrow:hover .kp-chev{opacity:1}
 .kp-rrow.kp-dim{opacity:.3}
+.kp-rrow.kp-on{background:#1E1E1E;color:#fff}
+.kp-rrow.kp-on .kp-ic{color:#fff}
+.kp-rrow.kp-on .kp-chev{opacity:1;color:#fff}
+.kp-rrow.kp-on mark{color:#fff}
 .kp-chips{display:flex;flex-wrap:wrap;gap:8px}
 .kp-chip{border:1px solid #E5E5E5;border-radius:8px;padding:7px 13px;font-size:13.5px;cursor:pointer;background:#fff;transition:.12s;display:inline-flex;align-items:center;gap:7px}
 .kp-chip:hover{border-color:#1E1E1E}
@@ -100,7 +104,7 @@
 .kp-prow:hover .kp-go,.kp-prow.kp-active .kp-go{opacity:1}
 .kp-catjump{display:flex;align-items:center;gap:10px;padding:12px 8px;margin:8px -8px 0;border-radius:8px;background:#F2F0EB;cursor:pointer;font-size:14px;font-weight:500;text-decoration:none;color:inherit}
 .kp-catjump .kp-k{margin-left:auto;font-size:12px;color:#6f6a63;font-weight:400}
-.kp-search mark{background:transparent;color:#1E1E1E;font-weight:600}
+.kp-panel mark,.kp-search mark{background:transparent;color:#1E1E1E;font-weight:600}
 .kp-muted{color:#a9a399;font-size:13.5px;padding:8px 0;line-height:1.5}
 .kp-foot{border-top:1px solid #E5E5E5;padding:15px 26px;display:flex;justify-content:space-between;align-items:center}
 .kp-foot .kp-hint{font-size:12px;color:#a9a399}
@@ -157,15 +161,17 @@
   }
 
   /* ---- RENDER ---------------------------------------------------------- */
-  var nav = [], ai = -1;
+  var nav = [], ai = -1, activeRoom = null;
 
-  function renderRooms(term){
+  function roomName(slug){ for (var i=0;i<IDX.rooms.length;i++){ if(IDX.rooms[i].s===slug) return IDX.rooms[i].n; } return null; }
+
+  function renderRooms(){
     els.rooms.innerHTML = IDX.rooms.map(function(r){
-      var hit = !term || norm(r.n).indexOf(norm(term)) > -1;
       var ic = r.icon || ROOM_FALLBACK_ICONS[r.s] || '';
-      return '<div class="kp-rrow'+(hit?'':' kp-dim')+'" data-kp-go="room" data-kp-slug="'+esc(r.s)+'" data-kp-set="'+esc(r.n)+'">'
+      var on = activeRoom === r.s;
+      return '<div class="kp-rrow'+(on?' kp-on':'')+'" data-kp-room="'+esc(r.s)+'">'
         + '<svg class="kp-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg>'
-        + '<span class="kp-rn">'+hl(r.n,term)+'</span>'
+        + '<span class="kp-rn">'+esc(r.n)+'</span>'
         + '<svg class="kp-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>';
     }).join('');
   }
@@ -177,21 +183,23 @@
     }).join('');
   }
   function matchProducts(term){
+    var base = activeRoom ? IDX.products.filter(function(p){ return (p.rm||[]).indexOf(activeRoom) > -1; }) : IDX.products;
     if (!term){
-      var bs = IDX.products.filter(function(p){ return p.bs; });
+      var bs = base.filter(function(p){ return p.bs; });
       if (bs.length < CFG.MAX_PRODUCTS){
-        var rest = IDX.products.filter(function(p){ return !p.bs; });
+        var rest = base.filter(function(p){ return !p.bs; });
         bs = bs.concat(rest.slice(0, CFG.MAX_PRODUCTS - bs.length));
       }
       return bs;
     }
     var n = norm(term);
-    return IDX.products.filter(function(p){ return norm((p.n||'')+' '+(p.c||'')+' '+(p.sp||'')).indexOf(n) > -1; });
+    return base.filter(function(p){ return norm((p.n||'')+' '+(p.c||'')+' '+(p.sp||'')).indexOf(n) > -1; });
   }
   function renderProducts(term){
     var list = matchProducts(term);
-    els.plabel.textContent = term ? 'Produkte' : 'Bestseller';
-    els.pmeta.textContent = term ? (list.length + ' Treffer') : (IDX.products.length + ' Produkte gesamt');
+    els.plabel.textContent = term ? 'Produkte' : (activeRoom ? roomName(activeRoom) : 'Bestseller');
+    var total = activeRoom ? IDX.products.filter(function(p){ return (p.rm||[]).indexOf(activeRoom) > -1; }).length : IDX.products.length;
+    els.pmeta.textContent = term ? (list.length + ' Treffer') : (total + ' Produkte');
     var html = list.slice(0, CFG.MAX_PRODUCTS).map(function(p, i){
       return '<a class="kp-prow kp-stg" href="'+CFG.PDP(p.s)+'" style="animation-delay:'+(i*22)+'ms" data-kp-nav>'
         + thumb(p)
@@ -223,7 +231,7 @@
   function render(){
     var term = els.input.value.trim();
     els.root.classList.toggle('kp-has-q', term.length > 0);
-    renderRooms(term); renderCats(term); renderProducts(term); renderCount(term);
+    renderRooms(); renderCats(term); renderProducts(term); renderCount(term);
   }
 
   /* ---- INTERACTION ----------------------------------------------------- */
@@ -231,7 +239,7 @@
   function positionPanel(){
     var r = els.field.getBoundingClientRect();
     var vw = window.innerWidth, pad = 24;
-    var w = Math.min(1120, vw - pad * 2);
+    var w = Math.min(960, vw - pad * 2);
     var left = Math.min(r.left, vw - pad - w);
     left = Math.max(pad, left);
     els.panel.style.width = w + 'px';
@@ -260,10 +268,15 @@
         else if (els.input.value.trim()){ window.location.href = CFG.RESULTS(els.input.value.trim()); }
       }
     });
-    // chip/room clicks live in the panel (now on <body>)
+    // room = toggle filter · category chip = set text filter (panel is on <body>)
     els.panel.addEventListener('click', function(e){
-      var roomLink = e.target.closest('[data-kp-go="room"]');
-      if (roomLink){ window.location.href = CFG.ROOM(roomLink.getAttribute('data-kp-slug')); return; }
+      var room = e.target.closest('[data-kp-room]');
+      if (room){
+        var rs = room.getAttribute('data-kp-room');
+        activeRoom = (activeRoom === rs) ? null : rs;
+        ai=-1; render(); els.input.focus();
+        return;
+      }
       var set = e.target.closest('[data-kp-set]'); if (!set) return;
       var val = set.getAttribute('data-kp-set');
       els.input.value = (els.input.value.trim() === val) ? '' : val;
@@ -311,5 +324,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.2', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.3', reload: loadIndex, _idx: IDX };
 })();
