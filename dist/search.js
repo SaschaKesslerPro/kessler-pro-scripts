@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.12
+   Kessler PRO — search.js  v1.0.13
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
    Selbst-rendernd: braucht im Header nur  <div data-kp-search></div>
@@ -281,6 +281,25 @@
   function reposition(){ var f = visibleField(); if (!f){ close(); return; } setActive(f); positionPanel(); }
   function highlight(){ nav.forEach(function(el,i){ el.classList.toggle('kp-active', i===ai); }); if (nav[ai]) nav[ai].scrollIntoView({block:'nearest'}); }
 
+  /* Self-correcting vertical centering: measure each field's real position inside its
+     header row and nudge it to the row's exact center (handles logo height, animated
+     max-height and any inline padding the scroll script applies). */
+  function headerRowOf(f){ return f.root.closest('.header_toprow, .header_scrolled, .header_mobile-row'); }
+  function equalize(){
+    for (var i=0;i<FIELDS.length;i++){
+      var f = FIELDS[i], row = headerRowOf(f);
+      if (!row) continue;
+      var fr = f.field.getBoundingClientRect(), rr = row.getBoundingClientRect();
+      if (rr.height < 8 || fr.height < 4) continue; // collapsed/hidden → skip
+      var cur = f._ty || 0;
+      var delta = ((rr.top + rr.bottom) / 2) - ((fr.top + fr.bottom) / 2) + cur;
+      f._ty = delta;
+      f.field.style.transform = Math.abs(delta) < 0.5 ? '' : 'translateY(' + delta.toFixed(1) + 'px)';
+    }
+  }
+  var _eqRAF;
+  function equalizeSoon(){ if (_eqRAF) cancelAnimationFrame(_eqRAF); _eqRAF = requestAnimationFrame(equalize); }
+
   function wire(){
     FIELDS.forEach(function(f){
       f.input.addEventListener('focus', function(){ setActive(f); open(); });
@@ -288,8 +307,8 @@
       f.clear.addEventListener('click', function(){ setActive(f); mirror(''); ai=-1; render(); f.input.focus(); });
     });
     els.scrim.addEventListener('click', close);
-    window.addEventListener('resize', function(){ if (isOpen) reposition(); });
-    window.addEventListener('scroll', function(){ if (isOpen) reposition(); }, true);
+    window.addEventListener('resize', function(){ equalizeSoon(); if (isOpen) reposition(); });
+    window.addEventListener('scroll', function(){ equalizeSoon(); if (isOpen) reposition(); }, true);
     document.addEventListener('keydown', function(e){
       if (e.key === '/' && (!document.activeElement || document.activeElement.tagName !== 'INPUT')){ e.preventDefault(); var f = visibleField() || FIELDS[0]; if (f){ setActive(f); f.input.focus(); open(); } }
       if (e.key === 'Escape'){ if (els.input.value){ mirror(''); ai=-1; render(); } else close(); }
@@ -359,9 +378,12 @@
     wire();
     render();      // renders empty-state from cache (if any) immediately
     loadIndex();   // then refreshes from network
+    equalize();
+    [120, 400, 900].forEach(function(ms){ setTimeout(equalize, ms); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.12', reload: loadIndex, _idx: IDX };
+  window.KPSearch = { version: '1.0.13', reload: loadIndex, _idx: IDX, center: function(){ equalize(); } };
 })();
