@@ -262,7 +262,7 @@
     if(document.getElementById('kp-wl-toggle-css'))return;
     var s=document.createElement('style');
     s.id='kp-wl-toggle-css';
-    s.textContent='.kp-wl-toggle.is-active svg{fill:currentColor}.product-card_wrapper{align-self:flex-start!important}.product-card_content{flex-grow:0!important;padding-bottom:4px!important}';
+    s.textContent='.kp-wl-toggle.is-active svg{fill:currentColor}.product-card_wrapper{align-self:flex-start!important}.product-card_content{flex-grow:0!important}';
     (document.head||document.documentElement).appendChild(s);
   }
   function setAuthBody(loggedIn){
