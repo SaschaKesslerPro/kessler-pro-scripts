@@ -278,4 +278,35 @@
     style.textContent = '.plp-grid{gap:12px}.plp-grid .product-card_wrapper{width:100%;max-width:none;min-width:0}';
     document.head.appendChild(style);
   })();
+
+  // -----------------------------------------------------------------
+  // Storesynk Cart Glue (migrated 2026-06-20 from inline kesslercartmount v1.1.0)
+  // 1) Move .cart-popup to <body> (escape the animated/opacity footer wrapper).
+  // 2) Wire header cart icon click -> Shopyflow.openCart() (preventDefault).
+  // -----------------------------------------------------------------
+  (function initStoresynkCartGlue() {
+    function mountToBody() {
+      var c = document.querySelector('.cart-popup');
+      if (c && c.parentElement !== document.body) {
+        document.body.appendChild(c);
+      }
+    }
+    function wireOpeners() {
+      var els = document.querySelectorAll('a[aria-label="Warenkorb"], a[href$="/cart"]');
+      els.forEach(function (el) {
+        if (el.getAttribute('data-sfopen')) return;
+        el.setAttribute('data-sfopen', '1');
+        el.addEventListener('click', function (e) {
+          var SF = window.Shopyflow || window.Storesynk;
+          if (SF && typeof SF.openCart === 'function') {
+            e.preventDefault();
+            SF.openCart();
+          }
+        });
+      });
+    }
+    function init() { mountToBody(); wireOpeners(); }
+    if (document.readyState !== 'loading') { init(); }
+    else { document.addEventListener('DOMContentLoaded', init); }
+  })();
 })();
