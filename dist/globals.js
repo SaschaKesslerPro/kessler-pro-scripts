@@ -309,4 +309,64 @@
     if (document.readyState !== 'loading') { init(); }
     else { document.addEventListener('DOMContentLoaded', init); }
   })();
+
+  // -----------------------------------------------------------------
+  // Cart Count Badge (added 2026-06-21)
+  // Mirrors Storesynk's cart line-item count (from the drawer's
+  // [sf-cart-count] element, which Storesynk reliably populates) onto a
+  // badge inside each header cart icon, styled identically to the wishlist
+  // badge via the shared .kp-icon-counter class. We never add an
+  // sf-cart-count node ourselves (avoids relying on Storesynk re-scanning
+  // injected nodes) - we only read the canonical one and mirror it.
+  // -----------------------------------------------------------------
+  (function initCartCountBadge() {
+    var CART_SEL = 'a[aria-label="Warenkorb"], a[href$="/cart"]';
+    function ensureBadge(link) {
+      var b = link.querySelector('.kp-icon-counter');
+      if (!b) {
+        b = document.createElement('span');
+        b.className = 'kp-icon-counter';
+        b.setAttribute('aria-hidden', 'true');
+        link.appendChild(b);
+      }
+      b.setAttribute('data-kp-cart-counter', '1');
+      return b;
+    }
+    function readCount() {
+      var src = document.querySelector('[sf-cart-count]');
+      if (!src) return 0;
+      var n = parseInt((src.textContent || '').replace(/[^0-9]/g, ''), 10);
+      return isNaN(n) ? 0 : n;
+    }
+    function sync() {
+      var n = readCount();
+      var links = document.querySelectorAll(CART_SEL);
+      for (var i = 0; i < links.length; i++) {
+        var b = ensureBadge(links[i]);
+        if (n > 0) { b.textContent = n > 99 ? '99+' : String(n); b.style.display = ''; }
+        else { b.textContent = ''; b.style.display = 'none'; }
+      }
+    }
+    function attachObserver() {
+      var src = document.querySelector('[sf-cart-count]');
+      if (!src) return false;
+      try {
+        new MutationObserver(sync).observe(src, { childList: true, characterData: true, subtree: true });
+      } catch (e) {}
+      return true;
+    }
+    function init() {
+      sync();
+      var tries = 0;
+      var t = setInterval(function () {
+        tries++;
+        sync();
+        if (attachObserver() || tries > 40) clearInterval(t);
+      }, 250);
+      document.addEventListener('sf-cart-updated', sync);
+      document.addEventListener('sf-cart-changed', sync);
+    }
+    if (document.readyState !== 'loading') { init(); }
+    else { document.addEventListener('DOMContentLoaded', init); }
+  })();
 })();
