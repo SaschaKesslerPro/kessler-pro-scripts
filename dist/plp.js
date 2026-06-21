@@ -2,6 +2,10 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.1.0 — robuste Cart-Verdrahtung (21.06.2026)
+ *   - Add-to-Cart deterministisch via fetchProduct(pid)->Variant->addToCart
+ *     (kein sf-product/refetch mehr -> keine Race-Condition, keine Shopyflow-Warnungen).
+ *
  * v2.0.0 — FULL REWRITE (21.06.2026)
  *   - Finsweet entfernt (cmsload/cmsfilter/cmssort raus).
  *   - Grid wird komplett client-seitig aus dist/plp-filterdata.json gerendert
@@ -116,8 +120,8 @@
     var price = eur(p.price);
     var badge = p.bestseller ? 'Bestseller' : '';
     return (
-      '<div role="listitem" class="product-card_wrapper w-dyn-item" data-kp-card="1" data-slug="' + esc(p.slug) + '">' +
-        '<div sf-product="' + esc(p.pid) + '" class="product-card_root">' +
+      '<div role="listitem" class="product-card_wrapper w-dyn-item" data-kp-card="1" data-slug="' + esc(p.slug) + '" data-pid="' + esc(p.pid) + '">' +
+        '<div class="product-card_root">' +
           '<div class="product-card_image-wrapper">' +
             '<img src="' + esc(p.img) + '" loading="lazy" alt="" class="product-card_image"/>' +
             '<div class="product-card_badge badge-sm">' + esc(badge) + '</div>' +
@@ -127,7 +131,7 @@
           '<div class="product-card_content card-d-pad">' +
             '<h3 class="product-card_title">' + esc(p.title) + '</h3>' +
             '<div class="product-card_rating-wrapper"><div class="w-embed"></div></div>' +
-            '<a sf-add-to-cart="1" href="#" class="product-card_cart-overlay w-inline-block">' + CART_SVG + '<div>Warenkorb</div></a>' +
+            '<a href="#" class="product-card_cart-overlay w-inline-block">' + CART_SVG + '<div>Warenkorb</div></a>' +
           '</div>' +
           '<a href="/products/' + esc(p.slug) + '" class="product-card_overlay-link w-inline-block"></a>' +
         '</div>' +
@@ -143,19 +147,50 @@
     items.innerHTML = html;
     NODE_BY_SLUG = {};
     $all('[data-kp-card]', items).forEach(function (n) { NODE_BY_SLUG[n.getAttribute('data-slug')] = n; });
-    wireShopyflow();
     try { document.dispatchEvent(new Event('kpw:change')); } catch (e) {}
   }
 
-  function wireShopyflow() {
-    var tries = 0;
-    (function attempt() {
-      if (window.Shopyflow && typeof window.Shopyflow.refetch === 'function') {
-        try { window.Shopyflow.refetch(); } catch (e) {}
-        return;
-      }
-      if (tries++ < 40) setTimeout(attempt, 250);
-    })();
+  // -----------------------------------------------------------------
+  // Cart: deterministisch via fetchProduct(pid) -> Variant -> addToCart
+  // (Shopyflow verdrahtet client-injizierte sf-product-Karten nicht zuverlaessig
+  //  -> wir umgehen den DOM-Scan/refetch komplett.)
+  // -----------------------------------------------------------------
+  var VARIANT_CACHE = {}; // pid -> numerische Variant-id | null (nicht im Storefront)
+
+  function variantFor(pid) {
+    if (Object.prototype.hasOwnProperty.call(VARIANT_CACHE, pid)) {
+      return Promise.resolve(VARIANT_CACHE[pid]);
+    }
+    if (!window.Shopyflow || typeof window.Shopyflow.fetchProduct !== 'function') {
+      return Promise.resolve(null);
+    }
+    return window.Shopyflow.fetchProduct(pid).then(function (fp) {
+      var v = fp && fp.variants && fp.variants[0];
+      var num = (v && v.id) ? String(v.id).split('/').pop() : null;
+      VARIANT_CACHE[pid] = num;
+      return num;
+    }).catch(function () { VARIANT_CACHE[pid] = null; return null; });
+  }
+
+  function setupCart() {
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.product-card_cart-overlay');
+      if (!btn) return;
+      var card = btn.closest('[data-kp-card]');
+      if (!card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.getAttribute('data-busy') === '1') return;
+      var pid = card.getAttribute('data-pid');
+      if (!pid) return;
+      btn.setAttribute('data-busy', '1');
+      variantFor(pid).then(function (num) {
+        if (!num) { btn.removeAttribute('data-busy'); return; } // nicht im Storefront -> no-op
+        return window.Shopyflow.addToCart({ lineItems: [{ merchandiseId: num, quantity: 1 }] })
+          .then(function () { try { window.Shopyflow.openCart(); } catch (e2) {} });
+      }).then(function () { btn.removeAttribute('data-busy'); })
+        .catch(function () { btn.removeAttribute('data-busy'); });
+    });
   }
 
   function buildIndex() {
@@ -486,6 +521,7 @@
         computeGlobalCounts();
         setupPriceSlider();
         wireEvents();
+        setupCart();
         apply();
       })
       .catch(function (err) {
