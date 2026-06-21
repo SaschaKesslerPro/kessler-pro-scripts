@@ -1,129 +1,76 @@
 /*!
  * kessler-pro-scripts / plp.js
- * Product Listing Page: filter drawer, sort, filter sections, cards, active filter pills.
+ * Product Listing Page — client-rendered grid + faceted filtering.
  *
- * v1.0.14 additions:
- *   - product-card_content padding-bottom 10px → 4px (Designer-locked override)
- *
- * v1.0.13 additions:
- *   - Wrap desktop-only drawer/grid rules in @media(min-width:992px) so body-class
- *     specifity (body:not(.is-drawer-open) .plp-grid {repeat(4,1fr)}) no longer
- *     overrides mobile media queries. Fixes 4-cards-on-mobile bug.
- *   - Mobile shop-inner: display:block (no sidebar grid swallowing card column)
- *   - Mobile card-wrapper: reset width/max-width/min-width/flex-shrink to undo
- *     Designer-locked main-breakpoint calc(25%-12px)/300px/240px/0 values
- *   - Desktop card-wrapper: same reset wrapped in min-width:992px media
- *   - Mobile grid: 1 col (per Sascha) instead of 2 col, gap 24/20
- *
- * v1.0.5 additions:
- *   - Filter section collapse: CSS for .plp-filter-section.is-closed (was missing
- *     after CMS conversion — toggle JS was firing but visually no effect)
- *   - Custom checkbox styling: solid black when checked, no native checkmark
- *
- * v1.0.1 additions:
- *   - Hide scrollbar on .plp-drawer-inner (Chrome/Safari/Firefox/IE)
- *   - Force .plp-page-h1 weight 300 with !important (beats default-h1 tag style)
- *
- * v1.0.0 baseline:
- *   - filter button active state (body.is-drawer-open)
- *   - clear-all click handler in tags module
+ * v2.0.0 — FULL REWRITE (21.06.2026)
+ *   - Finsweet entfernt (cmsload/cmsfilter/cmssort raus).
+ *   - Grid wird komplett client-seitig aus dist/plp-filterdata.json gerendert
+ *     (loest Webflow-100-Karten-Cap; voller Katalog, skaliert).
+ *     JSON wird FRISCH von @main geladen (stuendlich per GitHub Action regeneriert),
+ *     NICHT vom commit-gepinnten Bootstrap-Pfad -> neue CMS-Produkte erscheinen
+ *     automatisch.
+ *   - Add-to-Cart: Karten tragen sf-product + sf-add-to-cart="1"; nach dem Render
+ *     EIN Shopyflow.refetch() -> Shopyflow verdrahtet alle Karten nativ.
+ *   - Wunschliste: kp-wl-toggle + data-*; bindet per Delegation, kpw:change nach Render.
+ *   - Faceted Filter-Engine (OR innerhalb Sektion, AND ueber Sektionen):
+ *     Kategorie, Raeume, Farbe, Breite/Tiefe/Dicke (rund -> Durchmesser), Preis.
+ *   - Tote Optionen (0 Produkte global) ausgeblendet; Live-Counts je Option.
+ *   - Pills, Counter, Clear-All, Sort an echte Filterung gehaengt.
  */
-
 (function () {
   'use strict';
 
-  // -----------------------------------------------------------------
-  // External loaders
-  // -----------------------------------------------------------------
+  var DATA_URL =
+    'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json';
 
-  function loadScript(src) {
-    var s = document.createElement('script');
-    s.src = src;
-    s.async = true;
-    document.head.appendChild(s);
-  }
-
-  // Finsweet CMS Attributes (load, filter, sort)
-  window.fsAttributes = window.fsAttributes || [];
-  loadScript('https://cdn.jsdelivr.net/npm/@finsweet/attributes-cmsload@1/cmsload.js');
-  loadScript('https://cdn.jsdelivr.net/npm/@finsweet/attributes-cmsfilter@1/cmsfilter.js');
-  loadScript('https://cdn.jsdelivr.net/npm/@finsweet/attributes-cmssort@1/cmssort.js');
-
-  // -----------------------------------------------------------------
-  // CSS injection (formerly plpcss)
-  // -----------------------------------------------------------------
-
-  function injectStyle(css) {
+  function injectStyle(css, id) {
     var s = document.createElement('style');
-    s.id = 'plpcss';
+    s.id = id || 'plpcss';
     s.textContent = css;
     document.head.appendChild(s);
   }
 
   injectStyle(
-    /* Sort dropdown arrow */
     '#sort-select{background:#FAFAFA url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236A6A66\' stroke-width=\'1.6\'><path d=\'M6 9l6 6 6-6\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>") no-repeat right 10px center/14px}' +
-      /* v1.0.13: Desktop-only layout rules wrapped in @media(min-width:992px) so body-class specifity does not override mobile rules */
       '@media(min-width:992px){' +
         'body:not(.is-drawer-open) .plp-shop-inner{grid-template-columns:0 1fr!important;gap:0!important}' +
         'body:not(.is-drawer-open) .plp-drawer{opacity:0;pointer-events:none;visibility:hidden}' +
         'body.is-drawer-open .plp-shop-inner{grid-template-columns:360px 1fr!important;gap:32px!important}' +
         'body.is-drawer-open .plp-grid{grid-template-columns:repeat(3,1fr)!important}' +
         'body:not(.is-drawer-open) .plp-grid{grid-template-columns:repeat(4,1fr)!important}' +
-        /* v1.0.13: override Designer-locked main-breakpoint card-wrapper width/min/max/flex-shrink */
         '.product-card_wrapper{width:auto!important;max-width:none!important;min-width:0!important;flex-shrink:1!important;flex-basis:auto!important}' +
       '}' +
-      /* v1.0.14: card-content reduced bottom padding (Designer-locked at 10px) */
       '.product-card_content{padding-bottom:4px!important}' +
-      /* Empty/zero state hiding */
+      '.product-card_wrapper.is-hidden{display:none!important}' +
+      '.plp-filter-option.is-hidden,.w-dyn-item.is-hidden{display:none!important}' +
+      '.plp-filter-count{font-feature-settings:"tnum";color:#9a9a96}' +
       '.plp-tags-row:empty{display:none}' +
       '.plp-clear-all.is-hidden,.plp-filter-btn-num:empty,.plp-filter-btn-num.is-zero{display:none}' +
-      /* Card hover effects */
-      '.plp-card:hover .plp-card-quickadd{opacity:1;transform:translateY(0)}' +
-      '.plp-card-fav:hover{background:#fff;color:#0A0A0A}' +
-      /* Drawer button hovers */
       '.plp-drawer-close:hover{background:#F2F2F2;color:#0A0A0A}' +
       '.plp-drawer-apply:hover{background:#1a1a1a}' +
       '.plp-drawer-clear:hover{border-color:#0A0A0A;color:#0A0A0A}' +
-      /* Toolbar button hovers */
       '.plp-filter-btn:hover{background:#1a1a1a}' +
       '.plp-clear-all:hover{color:#0A0A0A}' +
       '.plp-tag-x:hover{color:#0A0A0A}' +
-      /* Filter button ACTIVE state (drawer open) — NEW */
       'body.is-drawer-open .plp-filter-btn{background:#FFFFFF;color:#0A0A0A;border:1px solid #0A0A0A}' +
       'body.is-drawer-open .plp-filter-btn-num{background:#0A0A0A;color:#F2F0EB}' +
-      /* Variant dot inner fill */
-      '.plp-variant-dot::after{content:"";position:absolute;inset:1px;border-radius:50%;background:inherit}' +
-      '.plp-variant-dot.is-active{border-color:#0A0A0A}' +
-      '.stars-empty{color:#D4D4D4}' +
-      /* Mobile breakpoint */
       '@media(max-width:991px){' +
-        /* v1.0.13: shop-inner becomes block on mobile (no sidebar grid) */
         '.plp-shop-inner{display:block!important;grid-template-columns:none!important;gap:0!important}' +
-        /* v1.0.13: reset card-wrapper sizing on mobile (cascades from main desktop calc/min/max) */
         '.product-card_wrapper{width:100%!important;max-width:none!important;min-width:0!important;flex-shrink:1!important;flex-basis:auto!important}' +
         '.plp-drawer{position:fixed!important;top:0!important;left:0;right:0;bottom:0;width:100%;max-height:100vh;background:#fff;z-index:9999;transform:translateX(-100%);transition:transform .3s;border-radius:0;display:block!important}' +
         'body.is-drawer-open .plp-drawer{transform:translateX(0)}' +
         'body.is-drawer-open{overflow:hidden}' +
         '.plp-drawer-inner{border:0;border-radius:0;height:100%;display:flex;flex-direction:column}' +
-        /* v1.0.13: 1 card per row on mobile (Sascha override of mockup 2-col) */
         '.plp-grid{grid-template-columns:1fr!important;gap:24px!important}' +
       '}' +
       '@media(max-width:479px){.plp-grid{grid-template-columns:1fr!important;gap:20px!important}}'
   );
 
-  // -----------------------------------------------------------------
-  // v1.0.1 additions: drawer scrollbar hide + H1 weight override
-  // -----------------------------------------------------------------
-
   injectStyle(
-    /* Hide drawer-inner scrollbar on all browsers */
     '.plp-drawer-inner{scrollbar-width:none;-ms-overflow-style:none}' +
       '.plp-drawer-inner::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
-      /* v1.0.7: also hide scrollbar on .plp-drawer parent + any scrolling children */
       '.plp-drawer,.plp-drawer-body,.plp-filter-list{scrollbar-width:none;-ms-overflow-style:none}' +
       '.plp-drawer::-webkit-scrollbar,.plp-drawer-body::-webkit-scrollbar,.plp-filter-list::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}' +
-      /* v1.0.8: price range slider */
       '.plp-filter-price-input,.plp-filter-price-sep{display:none!important}' +
       '.plp-price-slider{padding:8px 0;width:100%;box-sizing:border-box}' +
       '.plp-price-labels{display:flex;justify-content:space-between;margin-bottom:14px}' +
@@ -135,546 +82,420 @@
       '.plp-price-knob{position:absolute;top:50%;width:18px;height:18px;background:#fff;border:2px solid #0A0A0A;border-radius:50%;transform:translate(-50%,-50%);cursor:grab;touch-action:none;outline:none;transition:box-shadow .12s;box-sizing:border-box}' +
       '.plp-price-knob:hover,.plp-price-knob:focus-visible{box-shadow:0 0 0 6px rgba(10,10,10,0.08)}' +
       '.plp-price-knob.is-dragging{cursor:grabbing;box-shadow:0 0 0 8px rgba(10,10,10,0.12)}' +
-      /* Force light weight on H1 — beats default-h1 tag style */
       '.plp-page-h1{font-weight:300!important}'
   );
 
-  // -----------------------------------------------------------------
-  // v1.0.5 additions: filter section collapse + custom checkbox style
-  // -----------------------------------------------------------------
-
   injectStyle(
-    /* Filter section collapse: hide body when section is closed */
     '.plp-filter-section.is-closed .plp-filter-body{display:none}' +
-      /* Custom checkbox: solid black when checked, no native checkmark */
-      '.plp-filter-checkbox{' +
-        'appearance:none;-webkit-appearance:none;' +
-        'width:16px;height:16px;' +
-        'border:1.5px solid #999;border-radius:3px;' +
-        'background-color:#fff;' +
-        'cursor:pointer;flex-shrink:0;margin:0' +
-      '}' +
+      '.plp-filter-checkbox{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:1.5px solid #999;border-radius:3px;background-color:#fff;cursor:pointer;flex-shrink:0;margin:0}' +
       '.plp-filter-checkbox:checked{background-color:#0a0a0a;border-color:#0a0a0a}'
   );
 
-  // -----------------------------------------------------------------
-  // Drawer toggle (formerly plpdrawer)
-  // -----------------------------------------------------------------
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $all(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function eur(n) { if (n == null) return ''; return n.toFixed(2).replace('.', ',') + '\u00a0\u20ac'; }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function effW(p) { return p.breite != null ? p.breite : p.durchmesser; }
+  function effD(p) { return p.tiefe != null ? p.tiefe : p.durchmesser; }
 
-  (function initDrawer() {
-    var $ = function (sel) {
-      return document.querySelector(sel);
-    };
-    function open() {
-      document.body.classList.add('is-drawer-open');
-    }
-    function close() {
-      document.body.classList.remove('is-drawer-open');
-    }
-    function toggle() {
-      document.body.classList.toggle('is-drawer-open');
-    }
+  var HEART_SVG =
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block" class="inline-svg-0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+  var CART_SVG =
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="product-card_cart-overlay-icon inline-svg-0" style="display:block"><path d="M2 3h2.5l3.5 14h11l3.5-11H6.5"></path><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle></svg>';
 
-    function setup() {
-      var btn = $('#filter-btn');
-      var x = $('#drawer-close');
-      var apply = $('#drawer-apply');
-      var clear = $('#drawer-clear');
-      if (!btn) return;
+  var PRODUCTS = [];
+  var NODE_BY_SLUG = {};
+  var SECTIONS = [];
+  var PRICE = { min: 0, max: 500, from: 0, to: 500, reset: null };
+  var SORT = 'default';
 
-      var isMobile = function () {
-        return window.innerWidth <= 991;
-      };
-
-      if (!isMobile()) open();
-
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        toggle();
-      });
-
-      if (x) {
-        x.addEventListener('click', function (e) {
-          e.preventDefault();
-          close();
-        });
-      }
-
-      if (apply) {
-        apply.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (isMobile()) close();
-        });
-      }
-
-      if (clear) {
-        clear.addEventListener('click', function (e) {
-          e.preventDefault();
-          var allClear = $('#clear-all');
-          if (allClear) {
-            allClear.click();
-          } else {
-            document
-              .querySelectorAll(
-                '.plp-filter-section input[type=checkbox]:checked,.plp-filter-section input[type=radio]:checked'
-              )
-              .forEach(function (i) {
-                i.checked = false;
-                i.dispatchEvent(new Event('change', { bubbles: true }));
-              });
-          }
-        });
-      }
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && document.body.classList.contains('is-drawer-open')) close();
-      });
-
-      window.addEventListener('resize', function () {
-        if (!isMobile() && !document.body.classList.contains('is-drawer-open')) open();
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setup);
-    } else {
-      setup();
-    }
-  })();
-
-  // -----------------------------------------------------------------
-  // v1.0.8: Price range slider (dual-knob)
-  // Replaces the two .plp-filter-price-input fields with a visual slider.
-  // Original inputs stay in DOM (display:none) so Finsweet can still
-  // read/filter on them. Min/max/step come from data-min, data-max,
-  // data-step on .plp-filter-price-row (defaults: 0, 500, 5).
-  // -----------------------------------------------------------------
-
-  (function initPriceSlider() {
-    function setup() {
-      var row = document.querySelector('.plp-filter-price-row');
-      if (!row) return;
-      if (row.getAttribute('data-k-slider') === '1') return;
-      var inputs = row.querySelectorAll('.plp-filter-price-input');
-      if (inputs.length !== 2) return;
-      row.setAttribute('data-k-slider', '1');
-
-      var min = parseInt(row.getAttribute('data-min'), 10);
-      if (isNaN(min)) min = 0;
-      var max = parseInt(row.getAttribute('data-max'), 10);
-      if (isNaN(max)) max = 500;
-      var step = parseInt(row.getAttribute('data-step'), 10);
-      if (isNaN(step) || step < 1) step = 5;
-
-      var fromInput = inputs[0];
-      var toInput = inputs[1];
-
-      if (!fromInput.getAttribute('fs-cmsfilter-range')) {
-        fromInput.setAttribute('fs-cmsfilter-range', 'from');
-        fromInput.setAttribute('fs-cmsfilter-field', 'preis-numerisch');
-      }
-      if (!toInput.getAttribute('fs-cmsfilter-range')) {
-        toInput.setAttribute('fs-cmsfilter-range', 'to');
-        toInput.setAttribute('fs-cmsfilter-field', 'preis-numerisch');
-      }
-      fromInput.value = min;
-      toInput.value = max;
-
-      var slider = document.createElement('div');
-      slider.className = 'plp-price-slider';
-      slider.innerHTML =
-        '<div class="plp-price-labels">' +
-          '<div class="plp-price-label-group">' +
-            '<span class="plp-price-label-tag">Von</span>' +
-            '<span class="plp-price-label-val" data-from-val>\u20AC ' + min + '</span>' +
+  function cardHTML(p) {
+    var price = eur(p.price);
+    var badge = p.bestseller ? 'Bestseller' : '';
+    return (
+      '<div role="listitem" class="product-card_wrapper w-dyn-item" data-kp-card="1" data-slug="' + esc(p.slug) + '">' +
+        '<div sf-product="' + esc(p.pid) + '" class="product-card_root">' +
+          '<div class="product-card_image-wrapper">' +
+            '<img src="' + esc(p.img) + '" loading="lazy" alt="" class="product-card_image"/>' +
+            '<div class="product-card_badge badge-sm">' + esc(badge) + '</div>' +
+            '<a data-rating="" class="kp-wl-toggle w-button" data-price="' + esc(price) + '" data-handle="' + esc(p.slug) + '" href="#" data-kp-wl-add="1" data-name="' + esc(p.title) + '" aria-label="Zur Wunschliste hinzuf\u00fcgen" data-specs="">' + HEART_SVG + '</a>' +
+            '<div class="product-card_price"><p class="paragraph-4">' + esc(price) + '</p></div>' +
           '</div>' +
-          '<div class="plp-price-label-group plp-price-label-group--right">' +
-            '<span class="plp-price-label-tag">Bis</span>' +
-            '<span class="plp-price-label-val" data-to-val>\u20AC ' + max + '</span>' +
+          '<div class="product-card_content card-d-pad">' +
+            '<h3 class="product-card_title">' + esc(p.title) + '</h3>' +
+            '<div class="product-card_rating-wrapper"><div class="w-embed"></div></div>' +
+            '<a sf-add-to-cart="1" href="#" class="product-card_cart-overlay w-inline-block">' + CART_SVG + '<div>Warenkorb</div></a>' +
           '</div>' +
+          '<a href="/products/' + esc(p.slug) + '" class="product-card_overlay-link w-inline-block"></a>' +
         '</div>' +
-        '<div class="plp-price-track" data-track>' +
-          '<div class="plp-price-fill" data-fill></div>' +
-          '<div class="plp-price-knob" data-knob="from" tabindex="0" role="slider" aria-label="Mindestpreis"></div>' +
-          '<div class="plp-price-knob" data-knob="to" tabindex="0" role="slider" aria-label="H\u00F6chstpreis"></div>' +
-        '</div>';
-      row.insertBefore(slider, row.firstChild);
+      '</div>'
+    );
+  }
 
-      var track = slider.querySelector('[data-track]');
-      var fill = slider.querySelector('[data-fill]');
-      var knobFrom = slider.querySelector('[data-knob="from"]');
-      var knobTo = slider.querySelector('[data-knob="to"]');
-      var fromVal = slider.querySelector('[data-from-val]');
-      var toVal = slider.querySelector('[data-to-val]');
+  function renderGrid() {
+    var items = $('#plp-grid .w-dyn-items') || $('#plp-grid .plp-grid') || $('#plp-grid');
+    if (!items) return;
+    var html = '';
+    for (var i = 0; i < PRODUCTS.length; i++) html += cardHTML(PRODUCTS[i]);
+    items.innerHTML = html;
+    NODE_BY_SLUG = {};
+    $all('[data-kp-card]', items).forEach(function (n) { NODE_BY_SLUG[n.getAttribute('data-slug')] = n; });
+    wireShopyflow();
+    try { document.dispatchEvent(new Event('kpw:change')); } catch (e) {}
+  }
 
-      var values = { from: min, to: max };
-
-      function pct(v) { return ((v - min) / (max - min)) * 100; }
-      function valFromX(clientX, rect) {
-        var p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        var v = min + p * (max - min);
-        return Math.round(v / step) * step;
-      }
-
-      function render() {
-        var pFrom = pct(values.from);
-        var pTo = pct(values.to);
-        knobFrom.style.left = pFrom + '%';
-        knobTo.style.left = pTo + '%';
-        fill.style.left = pFrom + '%';
-        fill.style.right = (100 - pTo) + '%';
-        fromVal.textContent = '\u20AC ' + values.from;
-        toVal.textContent = '\u20AC ' + values.to;
-        knobFrom.setAttribute('aria-valuenow', values.from);
-        knobTo.setAttribute('aria-valuenow', values.to);
-      }
-
-      function commit() {
-        fromInput.value = values.from;
-        toInput.value = values.to;
-        fromInput.dispatchEvent(new Event('input', { bubbles: true }));
-        fromInput.dispatchEvent(new Event('change', { bubbles: true }));
-        toInput.dispatchEvent(new Event('input', { bubbles: true }));
-        toInput.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-
-      function startDrag(which) {
-        return function (e) {
-          e.preventDefault();
-          var knob = which === 'from' ? knobFrom : knobTo;
-          knob.classList.add('is-dragging');
-          var rect = track.getBoundingClientRect();
-          function move(ev) {
-            var x = ev.touches ? ev.touches[0].clientX : ev.clientX;
-            var v = valFromX(x, rect);
-            if (which === 'from') values.from = Math.min(v, values.to - step);
-            else values.to = Math.max(v, values.from + step);
-            render();
-          }
-          function end() {
-            knob.classList.remove('is-dragging');
-            document.removeEventListener('mousemove', move);
-            document.removeEventListener('touchmove', move);
-            document.removeEventListener('mouseup', end);
-            document.removeEventListener('touchend', end);
-            commit();
-          }
-          document.addEventListener('mousemove', move);
-          document.addEventListener('touchmove', move, { passive: false });
-          document.addEventListener('mouseup', end);
-          document.addEventListener('touchend', end);
-        };
-      }
-
-      function arrowKeys(which) {
-        return function (e) {
-          if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-          e.preventDefault();
-          var dir = e.key === 'ArrowLeft' ? -1 : 1;
-          var amount = e.shiftKey ? step * 10 : step;
-          if (which === 'from') values.from = Math.max(min, Math.min(values.to - step, values.from + dir * amount));
-          else values.to = Math.min(max, Math.max(values.from + step, values.to + dir * amount));
-          render();
-          commit();
-        };
-      }
-
-      knobFrom.addEventListener('mousedown', startDrag('from'));
-      knobFrom.addEventListener('touchstart', startDrag('from'), { passive: false });
-      knobTo.addEventListener('mousedown', startDrag('to'));
-      knobTo.addEventListener('touchstart', startDrag('to'), { passive: false });
-      knobFrom.addEventListener('keydown', arrowKeys('from'));
-      knobTo.addEventListener('keydown', arrowKeys('to'));
-
-      render();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setup);
-    } else {
-      setup();
-    }
-
-    var debounce = null;
-    new MutationObserver(function () {
-      clearTimeout(debounce);
-      debounce = setTimeout(setup, 200);
-    }).observe(document.body, { childList: true, subtree: true });
-  })();
-
-  // -----------------------------------------------------------------
-  // Sort dropdown + counter cleanup (formerly plpcleanup)
-  // -----------------------------------------------------------------
-
-  (function initCleanup() {
-    function setup() {
-      var sel = document.getElementById('sort-select');
-      if (sel && sel.children.length === 0) {
-        var opts = [
-          ['recommended', 'Empfohlen'],
-          ['name-asc', 'Name A\u2013Z'],
-          ['name-desc', 'Name Z\u2013A'],
-          ['price-asc', 'Preis aufsteigend'],
-          ['price-desc', 'Preis absteigend']
-        ];
-        opts.forEach(function (o) {
-          var op = document.createElement('option');
-          op.value = o[0];
-          op.textContent = o[1];
-          sel.appendChild(op);
-        });
-      }
-
-      var pag = document.querySelector('.w-pagination-wrapper');
-      if (pag) pag.style.display = 'none';
-
-      function updateCounter() {
-        var items = document.querySelectorAll('#plp-grid .w-dyn-item:not(.w-dyn-empty)');
-        var visible = 0;
-        items.forEach(function (it) {
-          if (it.offsetParent !== null) visible++;
-        });
-
-        var counter = document.querySelector('.plp-page-counter');
-        if (counter) {
-          var total = items.length;
-          counter.innerHTML =
-            '<b class="plp-page-counter-strong">' +
-            total +
-            '</b> Produkte verf\u00fcgbar \u00b7 <b class="plp-page-counter-strong">' +
-            visible +
-            '</b> ausgew\u00e4hlt nach Filter';
-        }
-
-        var btnNum = document.getElementById('filter-btn-num');
-        if (btnNum) {
-          var activeCount = document.querySelectorAll('.plp-filter-section input:checked').length;
-          btnNum.textContent = activeCount;
-          if (activeCount === 0) btnNum.classList.add('is-zero');
-          else btnNum.classList.remove('is-zero');
-        }
-      }
-
-      setTimeout(updateCounter, 500);
-      setTimeout(updateCounter, 1500);
-
-      document.addEventListener('change', function (e) {
-        if (e.target.matches('.plp-filter-section input')) setTimeout(updateCounter, 100);
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setup);
-    } else {
-      setup();
-    }
-  })();
-
-  // -----------------------------------------------------------------
-  // Filter section toggle (formerly plpfilters v2.0.0)
-  // -----------------------------------------------------------------
-
-  (function initFilterSections() {
-    function setup() {
-      // Initial state: sections 4 (Breite), 5 (Tiefe), 6 (Dicke) closed
-      var sections = document.querySelectorAll('.plp-filter-section');
-      sections.forEach(function (sec, idx) {
-        // Indexes 3, 4, 5 = sections 4, 5, 6
-        if (idx >= 3 && idx <= 5) {
-          sec.classList.add('is-closed');
-        }
-      });
-
-      // Toggle click on head
-      document.addEventListener('click', function (e) {
-        var head = e.target.closest('.plp-filter-head');
-        if (!head) return;
-        var section = head.closest('.plp-filter-section');
-        if (!section) return;
-        section.classList.toggle('is-closed');
-        var icon = head.querySelector('.plp-filter-head-icon');
-        if (icon) icon.textContent = section.classList.contains('is-closed') ? '+' : '\u2212';
-      });
-
-      // Counter per section
-      function updateSectionCounters() {
-        document.querySelectorAll('.plp-filter-section').forEach(function (sec) {
-          var counter = sec.querySelector('.plp-filter-head-counter');
-          if (!counter) return;
-          var checked = sec.querySelectorAll('input[type=checkbox]:checked').length;
-          counter.textContent = checked > 0 ? '(' + checked + ')' : '';
-        });
-      }
-
-      document.addEventListener('change', function (e) {
-        if (e.target.matches('.plp-filter-section input')) {
-          setTimeout(updateSectionCounters, 50);
-        }
-      });
-
-      setTimeout(updateSectionCounters, 200);
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setup);
-    } else {
-      setup();
-    }
-  })();
-
-  // -----------------------------------------------------------------
-  // Card variants + price conversion (formerly plpcards)
-  // -----------------------------------------------------------------
-
-  (function initCards() {
-    function init() {
-      // Title pipe-split into title + sub
-      document.querySelectorAll('.plp-card-title').forEach(function (el) {
-        var t = el.textContent;
-        if (t.indexOf('|') > 0) {
-          var parts = t.split('|');
-          el.textContent = parts[0].trim();
-          var sub = el.parentElement.querySelector('.plp-card-sub');
-          if (sub) sub.textContent = parts.slice(1).join(' \u00b7 ').trim();
-        }
-      });
-
-      // PLN → EUR price conversion
-      document.querySelectorAll('.plp-card-price').forEach(function (el) {
-        var t = el.textContent;
-        if (t.indexOf('z\u0142') >= 0) {
-          var m = t.match(/[\d.,]+/);
-          if (m) {
-            var pln = parseFloat(m[0].replace(',', '.'));
-            var eur = Math.round((pln / 4.3) * 100) / 100;
-            el.textContent = '\u20ac ' + eur.toFixed(2).replace('.', ',');
-          }
-        }
-      });
-
-      // Star render (5 stars, fill based on rating)
-      document.querySelectorAll('.plp-card-stars-glyph').forEach(function (el) {
-        if (el.dataset.rendered) return;
-        var rating = parseFloat(el.dataset.rating || el.textContent) || 4.5;
-        var full = Math.floor(rating);
-        var html = '';
-        for (var i = 0; i < 5; i++) {
-          html += i < full ? '\u2605' : '<span class="stars-empty">\u2605</span>';
-        }
-        el.innerHTML = html;
-        el.dataset.rendered = '1';
-      });
-
-      // Variant dot color
-      document.querySelectorAll('.plp-variant-dot').forEach(function (d) {
-        if (d.dataset.bg) d.style.background = d.dataset.bg;
-      });
-    }
-
-    document.addEventListener('click', function (e) {
-      var dot = e.target.closest('.plp-variant-dot');
-      if (dot) {
-        var card = dot.closest('.plp-card');
-        if (card) {
-          card.querySelectorAll('.plp-variant-dot').forEach(function (x) {
-            x.classList.remove('is-active');
-          });
-          dot.classList.add('is-active');
-          var img = dot.dataset.image;
-          var imgEl = card.querySelector('.plp-card-img');
-          if (img && imgEl) imgEl.src = img;
-        }
+  function wireShopyflow() {
+    var tries = 0;
+    (function attempt() {
+      if (window.Shopyflow && typeof window.Shopyflow.refetch === 'function') {
+        try { window.Shopyflow.refetch(); } catch (e) {}
         return;
       }
-      if (e.target.closest('.plp-card-quickadd') || e.target.closest('.plp-card-fav')) {
+      if (tries++ < 40) setTimeout(attempt, 250);
+    })();
+  }
+
+  function buildIndex() {
+    SECTIONS = [];
+    $all('.plp-filter-section').forEach(function (sec) {
+      var opts = $all('.plp-filter-option', sec);
+      var field = null;
+      opts.forEach(function (o) { var f = o.getAttribute('fs-cmsfilter-field'); if (f && !field) field = f; });
+      if (!field || !opts.length) return;
+      var optionEls = opts.map(function (o) {
+        var labelEl = $('.plp-filter-label', o);
+        return {
+          el: o,
+          checkbox: $('input[type=checkbox]', o),
+          countEl: $('.plp-filter-count', o),
+          labelEl: labelEl,
+          value: labelEl ? labelEl.textContent.trim() : '',
+          _global: 0
+        };
+      });
+      SECTIONS.push({ field: field, options: optionEls, headCounter: $('.plp-filter-head-counter', sec) });
+    });
+  }
+
+  function optMatch(field, value, p) {
+    switch (field) {
+      case 'kategorie': return p.kategorie === value;
+      case 'raume':     return p.raume.indexOf(value) >= 0;
+      case 'farbe':     return p.farben.indexOf(value) >= 0;
+      case 'breite-cm': return effW(p) === parseFloat(value);
+      case 'tiefe-cm':  return effD(p) === parseFloat(value);
+      case 'dicke-mm':  return p.dicke === parseFloat(value);
+      default:          return false;
+    }
+  }
+
+  function activeOf(section) {
+    var vals = [];
+    section.options.forEach(function (o) { if (o.checkbox && o.checkbox.checked) vals.push(o.value); });
+    return vals;
+  }
+
+  function passes(p, excludeSection, includePrice) {
+    for (var i = 0; i < SECTIONS.length; i++) {
+      var s = SECTIONS[i];
+      if (s === excludeSection) continue;
+      var act = activeOf(s);
+      if (!act.length) continue;
+      var ok = false;
+      for (var j = 0; j < act.length; j++) { if (optMatch(s.field, act[j], p)) { ok = true; break; } }
+      if (!ok) return false;
+    }
+    if (includePrice && (PRICE.from > PRICE.min || PRICE.to < PRICE.max)) {
+      if (p.price == null || p.price < PRICE.from || p.price > PRICE.to) return false;
+    }
+    return true;
+  }
+
+  function apply() {
+    var shown = 0;
+    for (var i = 0; i < PRODUCTS.length; i++) {
+      var p = PRODUCTS[i];
+      var node = NODE_BY_SLUG[p.slug];
+      if (!node) continue;
+      var vis = passes(p, null, true);
+      node.classList.toggle('is-hidden', !vis);
+      if (vis) shown++;
+    }
+    SECTIONS.forEach(function (s) {
+      s.options.forEach(function (o) {
+        var c = 0;
+        for (var k = 0; k < PRODUCTS.length; k++) {
+          var p = PRODUCTS[k];
+          if (optMatch(s.field, o.value, p) && passes(p, s, true)) c++;
+        }
+        if (o.countEl) o.countEl.textContent = c ? '(' + c + ')' : '';
+        o.el.classList.toggle('is-hidden', o._global === 0);
+        o.el.style.opacity = (c === 0 && o._global > 0) ? '0.4' : '';
+      });
+      var checked = s.options.filter(function (o) { return o.checkbox && o.checkbox.checked; }).length;
+      if (s.headCounter) s.headCounter.textContent = checked ? '(' + checked + ')' : '';
+    });
+    renderPills();
+    updateCounter(shown);
+    updateFilterBtnNum();
+    applySort();
+  }
+
+  function computeGlobalCounts() {
+    SECTIONS.forEach(function (s) {
+      s.options.forEach(function (o) {
+        var c = 0;
+        for (var k = 0; k < PRODUCTS.length; k++) { if (optMatch(s.field, o.value, PRODUCTS[k])) c++; }
+        o._global = c;
+      });
+    });
+  }
+
+  function updateCounter(shown) {
+    var el = $('.plp-page-counter');
+    if (!el) return;
+    var total = PRODUCTS.length;
+    el.textContent = (shown === total) ? total + ' Produkte' : shown + ' von ' + total + ' Produkten';
+  }
+
+  function updateFilterBtnNum() {
+    var num = $('#filter-btn-num');
+    if (!num) return;
+    var active = 0;
+    SECTIONS.forEach(function (s) { active += activeOf(s).length; });
+    if (PRICE.from > PRICE.min || PRICE.to < PRICE.max) active++;
+    num.textContent = active ? active : '';
+    num.classList.toggle('is-zero', active === 0);
+  }
+
+  function renderPills() {
+    var row = $('#tags-row');
+    if (!row) return;
+    row.innerHTML = '';
+    SECTIONS.forEach(function (s) {
+      s.options.forEach(function (o) {
+        if (!(o.checkbox && o.checkbox.checked)) return;
+        row.appendChild(pill(o.value, function () { o.checkbox.checked = false; apply(); }));
+      });
+    });
+    if (PRICE.from > PRICE.min || PRICE.to < PRICE.max) {
+      row.appendChild(pill(eur(PRICE.from) + '\u2013' + eur(PRICE.to), function () { if (PRICE.reset) PRICE.reset(); }));
+    }
+    var clear = $('#clear-all');
+    if (clear) clear.classList.toggle('is-hidden', row.children.length === 0);
+  }
+  function pill(text, onX) {
+    var tag = document.createElement('span');
+    tag.className = 'plp-tag';
+    tag.textContent = text;
+    var x = document.createElement('span');
+    x.className = 'plp-tag-x';
+    x.textContent = '\u00d7';
+    x.style.cursor = 'pointer';
+    x.addEventListener('click', function (e) { e.stopPropagation(); onX(); });
+    tag.appendChild(x);
+    return tag;
+  }
+
+  function clearAll() {
+    SECTIONS.forEach(function (s) {
+      s.options.forEach(function (o) { if (o.checkbox) o.checkbox.checked = false; });
+    });
+    if (PRICE.reset) PRICE.reset(true);
+    apply();
+  }
+
+  function applySort() {
+    if (SORT === 'default') return;
+    var items = $('#plp-grid .w-dyn-items') || $('#plp-grid .plp-grid');
+    if (!items) return;
+    var order = PRODUCTS.slice();
+    order.sort(function (a, b) {
+      if (SORT === 'price-asc') return (a.price || 0) - (b.price || 0);
+      if (SORT === 'price-desc') return (b.price || 0) - (a.price || 0);
+      if (SORT === 'name-asc') return a.title.localeCompare(b.title, 'de');
+      if (SORT === 'name-desc') return b.title.localeCompare(a.title, 'de');
+      return 0;
+    });
+    order.forEach(function (p) { var n = NODE_BY_SLUG[p.slug]; if (n) items.appendChild(n); });
+  }
+
+  function setupSort() {
+    var sel = $('#sort-select');
+    if (!sel) return;
+    var opts = [
+      ['default', 'Empfohlen'],
+      ['price-asc', 'Preis aufsteigend'],
+      ['price-desc', 'Preis absteigend'],
+      ['name-asc', 'Name A\u2013Z'],
+      ['name-desc', 'Name Z\u2013A']
+    ];
+    sel.innerHTML = '';
+    opts.forEach(function (o) {
+      var op = document.createElement('option');
+      op.value = o[0]; op.textContent = o[1];
+      sel.appendChild(op);
+    });
+    sel.addEventListener('change', function () { SORT = sel.value; apply(); });
+  }
+
+  function setupPriceSlider() {
+    var row = $('.plp-filter-price-row');
+    if (!row || row.getAttribute('data-k-slider') === '1') return;
+    row.setAttribute('data-k-slider', '1');
+    var prices = PRODUCTS.map(function (p) { return p.price; }).filter(function (v) { return v != null; });
+    if (!prices.length) return;
+    PRICE.min = Math.floor(Math.min.apply(null, prices) / 10) * 10;
+    PRICE.max = Math.ceil(Math.max.apply(null, prices) / 10) * 10;
+    PRICE.from = PRICE.min; PRICE.to = PRICE.max;
+    var step = 5;
+
+    var slider = document.createElement('div');
+    slider.className = 'plp-price-slider';
+    slider.innerHTML =
+      '<div class="plp-price-labels">' +
+        '<div class="plp-price-label-group"><span class="plp-price-label-tag">Von</span><span class="plp-price-label-val" data-from-val></span></div>' +
+        '<div class="plp-price-label-group plp-price-label-group--right"><span class="plp-price-label-tag">Bis</span><span class="plp-price-label-val" data-to-val></span></div>' +
+      '</div>' +
+      '<div class="plp-price-track" data-track>' +
+        '<div class="plp-price-fill" data-fill></div>' +
+        '<div class="plp-price-knob" data-knob="from" tabindex="0" role="slider" aria-label="Mindestpreis"></div>' +
+        '<div class="plp-price-knob" data-knob="to" tabindex="0" role="slider" aria-label="H\u00f6chstpreis"></div>' +
+      '</div>';
+    row.parentNode.insertBefore(slider, row.nextSibling);
+
+    var track = $('[data-track]', slider), fill = $('[data-fill]', slider);
+    var knobFrom = $('[data-knob="from"]', slider), knobTo = $('[data-knob="to"]', slider);
+    var fromVal = $('[data-from-val]', slider), toVal = $('[data-to-val]', slider);
+
+    function pct(v) { return ((v - PRICE.min) / (PRICE.max - PRICE.min)) * 100; }
+    function valFromX(x, rect) {
+      var pp = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+      var v = PRICE.min + pp * (PRICE.max - PRICE.min);
+      return Math.round(v / step) * step;
+    }
+    function render() {
+      var pf = pct(PRICE.from), pt = pct(PRICE.to);
+      knobFrom.style.left = pf + '%'; knobTo.style.left = pt + '%';
+      fill.style.left = pf + '%'; fill.style.width = (pt - pf) + '%';
+      fromVal.textContent = eur(PRICE.from); toVal.textContent = eur(PRICE.to);
+    }
+    function startDrag(which) {
+      return function (e) {
         e.preventDefault();
-        e.stopPropagation();
-      }
+        var knob = which === 'from' ? knobFrom : knobTo;
+        knob.classList.add('is-dragging');
+        var rect = track.getBoundingClientRect();
+        function move(ev) {
+          var x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+          var v = valFromX(x, rect);
+          if (which === 'from') PRICE.from = Math.min(v, PRICE.to - step);
+          else PRICE.to = Math.max(v, PRICE.from + step);
+          if (PRICE.from < PRICE.min) PRICE.from = PRICE.min;
+          if (PRICE.to > PRICE.max) PRICE.to = PRICE.max;
+          render();
+        }
+        function end() {
+          knob.classList.remove('is-dragging');
+          document.removeEventListener('mousemove', move);
+          document.removeEventListener('touchmove', move);
+          document.removeEventListener('mouseup', end);
+          document.removeEventListener('touchend', end);
+          apply();
+        }
+        document.addEventListener('mousemove', move);
+        document.addEventListener('touchmove', move, { passive: false });
+        document.addEventListener('mouseup', end);
+        document.addEventListener('touchend', end);
+      };
+    }
+    function arrowKeys(which) {
+      return function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        var dir = e.key === 'ArrowLeft' ? -1 : 1;
+        var amt = e.shiftKey ? step * 10 : step;
+        if (which === 'from') PRICE.from = Math.max(PRICE.min, Math.min(PRICE.to - step, PRICE.from + dir * amt));
+        else PRICE.to = Math.min(PRICE.max, Math.max(PRICE.from + step, PRICE.to + dir * amt));
+        render(); apply();
+      };
+    }
+    knobFrom.addEventListener('mousedown', startDrag('from'));
+    knobFrom.addEventListener('touchstart', startDrag('from'), { passive: false });
+    knobTo.addEventListener('mousedown', startDrag('to'));
+    knobTo.addEventListener('touchstart', startDrag('to'), { passive: false });
+    knobFrom.addEventListener('keydown', arrowKeys('from'));
+    knobTo.addEventListener('keydown', arrowKeys('to'));
+
+    PRICE.reset = function (silent) { PRICE.from = PRICE.min; PRICE.to = PRICE.max; render(); if (!silent) apply(); };
+    render();
+  }
+
+  function setupDrawer() {
+    var btn = $('#filter-btn'), x = $('#drawer-close'), apl = $('#drawer-apply'), clr = $('#drawer-clear');
+    function close() { document.body.classList.remove('is-drawer-open'); }
+    function toggle() { document.body.classList.toggle('is-drawer-open'); }
+    if (btn) btn.addEventListener('click', function (e) { e.preventDefault(); toggle(); });
+    if (x) x.addEventListener('click', function (e) { e.preventDefault(); close(); });
+    if (apl) apl.addEventListener('click', function (e) { e.preventDefault(); close(); });
+    if (clr) clr.addEventListener('click', function (e) { e.preventDefault(); clearAll(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  }
+
+  function setupSections() {
+    $all('.plp-filter-section').forEach(function (sec, idx) {
+      if (idx > 0 && !sec.querySelector('.plp-filter-price-row')) sec.classList.add('is-closed');
     });
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-
-    // Re-init when CMS items appear/change
-    var debounceTimer = null;
-    new MutationObserver(function () {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(init, 150);
-    }).observe(document.body, { childList: true, subtree: true });
-  })();
-
-  // -----------------------------------------------------------------
-  // Active filter tag pills (formerly plptags)
-  // Includes today's fix: clear-all handler
-  // -----------------------------------------------------------------
-
-  (function initTags() {
-    function renderTags() {
-      var row = document.getElementById('tags-row');
-      if (!row) return;
-      row.innerHTML = '';
-
-      document
-        .querySelectorAll('.plp-filter-section input[type=checkbox]:checked')
-        .forEach(function (cb) {
-          var labelContainer = cb.closest('label,.plp-filter-row');
-          var label = labelContainer
-            ? (labelContainer.querySelector('.plp-filter-label') || labelContainer).textContent.trim()
-            : cb.value;
-          if (!label) return;
-
-          var tag = document.createElement('span');
-          tag.className = 'plp-tag';
-          tag.textContent = label;
-
-          var x = document.createElement('span');
-          x.className = 'plp-tag-x';
-          x.textContent = '\u00d7';
-          x.style.cursor = 'pointer';
-          x.addEventListener('click', function (e) {
-            e.stopPropagation();
-            cb.checked = false;
-            cb.dispatchEvent(new Event('change', { bubbles: true }));
-          });
-
-          tag.appendChild(x);
-          row.appendChild(tag);
-        });
-
-      var clearLink = document.getElementById('clear-all');
-      if (clearLink) clearLink.classList.toggle('is-hidden', row.children.length === 0);
-    }
-
-    function clearAllFilters() {
-      document
-        .querySelectorAll('.plp-filter-section input[type=checkbox]:checked')
-        .forEach(function (cb) {
-          cb.checked = false;
-          cb.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-    }
-
-    document.addEventListener('change', function (e) {
-      if (e.target.matches && e.target.matches('.plp-filter-section input[type=checkbox]')) {
-        setTimeout(renderTags, 50);
-      }
-    });
-
-    // Clear-all click handler — NEW (was missing in plptags v1.0.0)
     document.addEventListener('click', function (e) {
-      if (e.target && e.target.id === 'clear-all') {
-        e.preventDefault();
-        clearAllFilters();
-      }
+      var head = e.target.closest('.plp-filter-head');
+      if (!head) return;
+      var sec = head.closest('.plp-filter-section');
+      if (!sec) return;
+      sec.classList.toggle('is-closed');
+      var icon = head.querySelector('.plp-filter-head-icon');
+      if (icon) icon.textContent = sec.classList.contains('is-closed') ? '+' : '\u2212';
     });
+  }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', renderTags);
-    } else {
-      setTimeout(renderTags, 200);
-    }
-  })();
+  function wireEvents() {
+    document.addEventListener('change', function (e) {
+      if (e.target.matches && e.target.matches('.plp-filter-section input[type=checkbox]')) apply();
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.id === 'clear-all') { e.preventDefault(); clearAll(); }
+    });
+    document.addEventListener('click', function (e) {
+      var wl = e.target.closest && e.target.closest('.kp-wl-toggle');
+      if (wl) e.preventDefault();
+    });
+  }
+
+  function boot() {
+    setupDrawer();
+    setupSections();
+    setupSort();
+    fetch(DATA_URL, { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        PRODUCTS = (data && data.products) || [];
+        renderGrid();
+        buildIndex();
+        computeGlobalCounts();
+        setupPriceSlider();
+        wireEvents();
+        apply();
+      })
+      .catch(function (err) {
+        if (window.console) console.warn('[plp] Filterdaten konnten nicht geladen werden:', err);
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
 })();
