@@ -130,8 +130,9 @@ for x in allit:
         'form': f.get('form'),
     })
 
+# Kein 'generated'-Zeitstempel im File: sonst aendert sich die JSON bei JEDEM Lauf
+# und die Action committet stuendlich ohne echte Katalog-Aenderung.
 out = {
-    'generated': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
     'source': 'Webflow Data API /items/live (Products Feeds %s)' % PRODUCTS_CID,
     'count': len(products),
     'products': products,
