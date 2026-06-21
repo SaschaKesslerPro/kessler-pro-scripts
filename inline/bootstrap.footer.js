@@ -3,7 +3,7 @@
  * Pasted INLINE in the Webflow footer as registered script "kesslerbootstrap".
  *
  * Loads the jsDelivr-hosted dist/*.js files (commit-hash pinned via V).
- * Current applied version: 1.0.92  (dist commit 47445262126540116874899faaf75dffd02965d4)
+ * Current applied version: 1.0.92  (dist commit 52d362da1fbbea40685adf95e0d2c4b2cad1fa14)
  *
  * To update after changing dist/: set V to the new dist commit hash,
  * re-register a new kesslerbootstrap version, and add_site_script (footer).
@@ -21,5 +21,5 @@
   if (document.querySelector('.kp-auth')) L('auth.js');
   if (document.querySelector('[data-header-version^="v2"]')) L('header.js');
   if (location.pathname.indexOf('/account') === 0 || document.querySelector('[data-kph-bind],[data-kph-list]')) L('hub.js');
-  if (document.querySelector('[data-kp-search],.header_scrolled-search,[data-mobile-trigger="search-open"]')) U('https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@52d362da1fbbea40685adf95e0d2c4b2cad1fa14/dist/search.js');
+  if (document.querySelector('[data-kp-search],.header_scrolled-search,[data-mobile-trigger="search-open"]')) U('https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@72256260d01c75cc89c76f9e4ccfe8bc3f84c968/dist/search.js');
 })();
