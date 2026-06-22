@@ -1,0 +1,23 @@
+name: Kessler Katalog-Korrektur
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run (nur Bericht) oder apply (schreibt)"
+        default: "dry-run"
+        type: choice
+        options: ["dry-run", "apply"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Korrektur
+        env:
+          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+          WEBFLOW_TOKEN: ${{ secrets.WEBFLOW_TOKEN }}
+          SHOP_DOMAIN: hyf2zr-7x.myshopify.com
+          MODE: ${{ inputs.mode }}
+        run: python tools/kessler_dryrun.py
