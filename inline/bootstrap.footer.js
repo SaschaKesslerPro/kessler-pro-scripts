@@ -3,14 +3,14 @@
  * Pasted INLINE in the Webflow footer as registered script "kesslerbootstrap".
  *
  * Loads the jsDelivr-hosted dist/*.js files (commit-hash pinned via V).
- * Current applied version: 1.0.92  (dist commit 52d362da1fbbea40685adf95e0d2c4b2cad1fa14)
+ * Current applied version: 1.0.93  (dist commit c0228995a6851ab12c3f06994d20f1205ebd20bd)
  *
  * To update after changing dist/: set V to the new dist commit hash,
  * re-register a new kesslerbootstrap version, and add_site_script (footer).
  * search.js is pinned to its own commit via U().
  */
 (function () {
-  var V = '@52d362da1fbbea40685adf95e0d2c4b2cad1fa14',
+  var V = '@c0228995a6851ab12c3f06994d20f1205ebd20bd',
       B = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts' + V + '/dist/';
   function L(f) { var s = document.createElement('script'); s.src = B + f; s.async = true; document.head.appendChild(s); }
   function U(u) { var s = document.createElement('script'); s.src = u; s.async = true; document.head.appendChild(s); }
