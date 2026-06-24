@@ -25,10 +25,11 @@ def api(m,u,b=None,tries=8):
     for t in range(tries):
         data=json.dumps(b).encode() if b else None
         r=urllib.request.Request(u,data=data,method=m,headers={"Authorization":"Bearer "+TOKEN,"accept":"application/json","content-type":"application/json"})
-        try: return json.load(urllib.request.urlopen(r)),None
+        try: return json.load(urllib.request.urlopen(r,timeout=60)),None
         except urllib.error.HTTPError as e:
-            if e.code in (429,502,503): time.sleep(2*(t+1)); continue
+            if e.code in (429,500,502,503,504): time.sleep(2*(t+1)); continue
             return None,str(e.code)
+        except urllib.error.URLError: time.sleep(2*(t+1)); continue
     return None,"err"
 
 def num(s):
@@ -45,9 +46,12 @@ def fetch_staged_primary():
     """preis-pln lebt staged (neues Feld) -> Staged-Liste lesen."""
     out={};off=0
     while True:
-        d,_=api("GET","https://api.webflow.com/v2/collections/%s/items?cmsLocaleId=%s&limit=100&offset=%d"%(CID,PRIMARY,off))
+        d,err=api("GET","https://api.webflow.com/v2/collections/%s/items?cmsLocaleId=%s&limit=100&offset=%d"%(CID,PRIMARY,off))
+        if d is None: raise RuntimeError("Webflow GET (staged) fehlgeschlagen: %s"%err)
         for it in d["items"]:
-            fd=it["fieldData"]; out[it["id"]]={"slug":fd["slug"],"preis_pln":fd.get("preis-pln")}
+            fd=it["fieldData"]
+            if fd["slug"] in SKIP_SLUGS: continue
+            out[it["id"]]={"slug":fd["slug"],"preis_pln":fd.get("preis-pln")}
         off+=100
         if off>=d["pagination"]["total"]: break
     return out
@@ -55,7 +59,8 @@ def fetch_staged_primary():
 def fetch_live(loc):
     out={};off=0
     while True:
-        d,_=api("GET","https://api.webflow.com/v2/collections/%s/items/live?cmsLocaleId=%s&limit=100&offset=%d"%(CID,loc,off))
+        d,err=api("GET","https://api.webflow.com/v2/collections/%s/items/live?cmsLocaleId=%s&limit=100&offset=%d"%(CID,loc,off))
+        if d is None: raise RuntimeError("Webflow GET (live) fehlgeschlagen: %s"%err)
         for it in d["items"]: out[it["id"]]=it["fieldData"].get("product-price")
         off+=100
         if off>=d["pagination"]["total"]: break
