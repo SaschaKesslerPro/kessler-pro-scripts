@@ -1,50 +1,41 @@
 #!/usr/bin/env python3
-"""Generiert dist/plp-filterdata.json: voller Katalog, Referenzen aufgeloest.
-Keyed by slug (Join-Key = WL-Button data-handle). Render- + Filterdaten.
-
-STANDALONE: holt alle Daten selbst ueber die Webflow Data API.
-  Token aus ENV  WEBFLOW_TOKEN  (Pflicht).
-  Nur stdlib (urllib) -> kein pip noetig (GitHub Action).
-  Ausgabe-Pfad: argv[1] oder 'dist/plp-filterdata.json'.
-"""
+"""Generiert dist/plp-filterdata.json + dist/search-index.json (voller Katalog)."""
 import json, re, datetime, sys, os, time, urllib.request, urllib.error
+from collections import Counter
 
 TOKEN = os.environ.get('WEBFLOW_TOKEN', '').strip()
 if not TOKEN:
     print('FEHLER: ENV WEBFLOW_TOKEN nicht gesetzt', file=sys.stderr); sys.exit(2)
 
 API = 'https://api.webflow.com/v2'
-PRODUCTS_CID = '69a2f0ad6b29b5d497cdb6e0'   # Products Feeds
-KAT_CID      = '69ba6227bbb6f39fea44efe2'   # Produktkategorien
-RAUM_CID     = '69f9a681c1db2b0f1a790344'   # Raeume
-VF_CID       = '69c2491c68418dd75f0d7753'   # verfuegbare-farben
+PRODUCTS_CID = '69a2f0ad6b29b5d497cdb6e0'
+KAT_CID      = '69ba6227bbb6f39fea44efe2'
+RAUM_CID     = '69f9a681c1db2b0f1a790344'
+VF_CID       = '69c2491c68418dd75f0d7753'
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'dist/plp-filterdata.json'
+SEARCH_OUT = os.path.join(os.path.dirname(OUT) or '.', 'search-index.json')
 
 def api_get(path):
     url = API + path
     for attempt in range(4):
-        req = urllib.request.Request(url, headers={
-            'Authorization': 'Bearer ' + TOKEN,
-            'accept': 'application/json',
-        })
+        req = urllib.request.Request(url, headers={'Authorization':'Bearer '+TOKEN,'accept':'application/json'})
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
-            if e.code in (429, 500, 502, 503) and attempt < 3:
-                time.sleep(2 * (attempt + 1)); continue
+            if e.code in (429,500,502,503) and attempt<3:
+                time.sleep(2*(attempt+1)); continue
             raise
         except urllib.error.URLError:
-            if attempt < 3:
-                time.sleep(2 * (attempt + 1)); continue
+            if attempt<3:
+                time.sleep(2*(attempt+1)); continue
             raise
-    raise RuntimeError('GET fehlgeschlagen: ' + path)
+    raise RuntimeError('GET fehlgeschlagen: '+path)
 
 def fetch_all_live(cid, loc=None):
-    """Alle veroeffentlichten Items paginiert holen (optional pro Locale)."""
     items, offset, limit = [], 0, 100
-    locq = ('&cmsLocaleId=' + loc) if loc else ''
+    locq = ('&cmsLocaleId='+loc) if loc else ''
     while True:
         d = api_get(f'/collections/{cid}/items/live?limit={limit}&offset={offset}{locq}')
         batch = d.get('items', [])
@@ -56,25 +47,34 @@ def fetch_all_live(cid, loc=None):
             break
     return items
 
-def fetch_ref(cid):
-    d = api_get(f'/collections/{cid}/items?limit=100')
-    out = {}
-    for x in d.get('items', []):
-        fdx = x.get('fieldData', {})
-        out[x['id']] = (fdx.get('name') or '').strip()
+def fetch_ref_full(cid):
+    out, offset, limit = {}, 0, 100
+    while True:
+        d = api_get(f'/collections/{cid}/items?limit={limit}&offset={offset}')
+        batch = d.get('items', [])
+        for x in batch:
+            fdx = x.get('fieldData', {})
+            out[x['id']] = {'name':(fdx.get('name') or '').strip(),'slug':(fdx.get('slug') or '').strip()}
+        pag = d.get('pagination', {})
+        total = pag.get('total', len(out))
+        offset += limit
+        if offset >= total or not batch:
+            break
     return out
 
 print('Lade Referenzen ...', file=sys.stderr)
-KAT  = fetch_ref(KAT_CID)
-RAUM = fetch_ref(RAUM_CID)
-VF   = fetch_ref(VF_CID)
+KAT_full  = fetch_ref_full(KAT_CID)
+RAUM_full = fetch_ref_full(RAUM_CID)
+VF_full   = fetch_ref_full(VF_CID)
+KAT  = {k:v['name'] for k,v in KAT_full.items()}
+RAUM = {k:v['name'] for k,v in RAUM_full.items()}
+VF   = {k:v['name'] for k,v in VF_full.items()}
 print(f'  Kategorien {len(KAT)} | Raeume {len(RAUM)} | Farben {len(VF)}', file=sys.stderr)
 
 print('Lade Produkte (live) ...', file=sys.stderr)
 allit = fetch_all_live(PRODUCTS_CID)
 print(f'  Produkte geladen: {len(allit)}', file=sys.stderr)
 
-# Sekundaere Locales fuer Titel + Preis (PL=zl, EN=EUR) — keyed by item id
 PL_LOC = '6907a534407b21d560df11e4'
 EN_LOC = '693d37e00fa97e8096629a1d'
 print('Lade Locales PL/EN ...', file=sys.stderr)
@@ -83,34 +83,32 @@ ENMAP = {x['id']: x.get('fieldData', {}) for x in fetch_all_live(PRODUCTS_CID, E
 print(f'  PL {len(PLMAP)} | EN {len(ENMAP)}', file=sys.stderr)
 
 def parse_num(s):
-    """Numerischer Wert in der jeweiligen Locale-Waehrung (KEINE Umrechnung)."""
     if not s: return None
     m = re.search(r'\d[\d.\s\u00a0\u202f]*,\d{2}', s) or re.search(r'\d[\d.]*', s)
     if not m: return None
-    t = m.group(0).replace('\u00a0', '').replace('\u202f', '').replace(' ', '').replace('.', '').replace(',', '.')
-    try: return round(float(t), 2)
+    t = m.group(0).replace('\u00a0','').replace('\u202f','').replace(' ','').replace('.','').replace(',','.')
+    try: return round(float(t),2)
     except: return None
 
 def fd(x): return x.get('fieldData', {})
-ROOM_ORDER = ['Büro', 'Werkstatt', 'Praxis', 'Gastro']
+ROOM_ORDER = ['Büro','Werkstatt','Praxis','Gastro']
 
 def parse_price(s):
     if not s: return None, None
     raw = s
     isPLN = ('zł' in s) or ('z\u0142' in s)
     m = re.search(r'\d[\d.\s\u00a0\u202f]*,\d{2}', s)
-    if not m:
-        m = re.search(r'\d[\d.]*', s)
+    if not m: m = re.search(r'\d[\d.]*', s)
     if not m: return None, raw
-    t = m.group(0).replace('\u00a0', '').replace('\u202f', '').replace(' ', '').replace('.', '').replace(',', '.')
+    t = m.group(0).replace('\u00a0','').replace('\u202f','').replace(' ','').replace('.','').replace(',','.')
     try: v = float(t)
     except: return None, raw
     if isPLN:
-        eur = v / 4.25            # PLN->EUR: dokumentierte Architektur /4.25, auf ,90 normiert
-        v = int(eur) + 0.90
-    return round(v, 2), raw
+        eur = v/4.25
+        v = int(eur)+0.90
+    return round(v,2), raw
 
-products, skipped = [], []
+products, skipped, search_products = [], [], []
 for x in allit:
     f = fd(x)
     slug = f.get('slug')
@@ -119,15 +117,18 @@ for x in allit:
     if slug == 'test-tischplatte':
         skipped.append(('test-item', slug)); continue
 
-    kat    = KAT.get(f.get('kategorie')) if f.get('kategorie') else None
-    raume  = [RAUM.get(r) for r in (f.get('raume') or []) if RAUM.get(r)]
+    kat_id   = f.get('kategorie')
+    kat      = KAT.get(kat_id) if kat_id else None
+    kat_slug = KAT_full.get(kat_id, {}).get('slug') if kat_id else None
+    raume_ids = f.get('raume') or []
+    raume  = [RAUM.get(r) for r in raume_ids if RAUM.get(r)]
     raume  = [r for r in ROOM_ORDER if r in raume]
+    raum_slugs = [RAUM_full[r]['slug'] for r in raume_ids if r in RAUM_full and RAUM_full[r].get('slug')]
     farben = [VF.get(c) for c in (f.get('verfugbare-farben') or []) if VF.get(c)]
     price, priceRaw = parse_price(f.get('product-price'))
     img = f.get('product-main-image') or {}
     imgurl = img.get('url') if isinstance(img, dict) else None
 
-    # Per-Locale: Titel + Preis (DE primaer, PL=zl, EN=EUR). Fallback auf DE.
     fpl = PLMAP.get(x['id'], {}); fen = ENMAP.get(x['id'], {})
     t_de = f.get('product-title') or ''
     t_pl = fpl.get('product-title') or t_de
@@ -137,41 +138,34 @@ for x in allit:
     pr_en = fen.get('product-price') or pr_de
 
     products.append({
-        'slug': slug,
-        'pid': f.get('product-id'),
-        'title': t_de,
-        'img': imgurl,
-        'price': price,
-        'priceRaw': priceRaw,
-        'titleByLoc': {'de': t_de, 'pl': t_pl, 'en': t_en},
-        'priceRawByLoc': {'de': pr_de, 'pl': pr_pl, 'en': pr_en},
-        'priceByLoc': {'de': parse_num(pr_de), 'pl': parse_num(pr_pl), 'en': parse_num(pr_en)},
-        'bestseller': bool(f.get('header-bestseller')),
-        'rating': f.get('bewertung'),
-        'reviews': f.get('anzahl-bewertungen'),
-        'kategorie': kat,
-        'raume': raume,
-        'farben': farben,
-        'breite': f.get('breite'),
-        'tiefe': f.get('tiefe'),
-        'dicke': f.get('dicke'),
-        'durchmesser': f.get('durchmesser-cm'),
-        'material': f.get('material'),
-        'form': f.get('form'),
+        'slug': slug,'pid': f.get('product-id'),'title': t_de,'img': imgurl,
+        'price': price,'priceRaw': priceRaw,
+        'titleByLoc': {'de':t_de,'pl':t_pl,'en':t_en},
+        'priceRawByLoc': {'de':pr_de,'pl':pr_pl,'en':pr_en},
+        'priceByLoc': {'de':parse_num(pr_de),'pl':parse_num(pr_pl),'en':parse_num(pr_en)},
+        'bestseller': bool(f.get('header-bestseller')),'rating': f.get('bewertung'),
+        'reviews': f.get('anzahl-bewertungen'),'kategorie': kat,'raume': raume,'farben': farben,
+        'breite': f.get('breite'),'tiefe': f.get('tiefe'),'dicke': f.get('dicke'),
+        'durchmesser': f.get('durchmesser-cm'),'material': f.get('material'),'form': f.get('form'),
     })
 
-# Kein 'generated'-Zeitstempel im File: sonst aendert sich die JSON bei JEDEM Lauf
-# und die Action committet stuendlich ohne echte Katalog-Aenderung.
-out = {
-    'source': 'Webflow Data API /items/live (Products Feeds %s)' % PRODUCTS_CID,
-    'count': len(products),
-    'products': products,
-}
-os.makedirs(os.path.dirname(OUT) or '.', exist_ok=True)
-with open(OUT, 'w') as fh:
-    json.dump(out, fh, ensure_ascii=False, separators=(',', ':'))
+    search_products.append({
+        'n': t_de,'s': slug,'p': pr_de,'c': kat,'cs': kat_slug,'sp': None,
+        'img': imgurl,'bs': 1 if f.get('header-bestseller') else 0,'rm': raum_slugs,'r': f.get('bewertung'),
+    })
 
-print(f'Produkte im Map: {len(products)} | uebersprungen: {skipped}', file=sys.stderr)
+out = {'source':'Webflow Data API /items/live (Products Feeds %s)'%PRODUCTS_CID,'count':len(products),'products':products}
+os.makedirs(os.path.dirname(OUT) or '.', exist_ok=True)
+with open(OUT,'w') as fh:
+    json.dump(out, fh, ensure_ascii=False, separators=(',',':'))
+
+catcount = Counter(p['cs'] for p in search_products if p.get('cs'))
+search_cats = [{'n':v['name'],'s':v['slug'],'k':catcount.get(v['slug'],0)} for v in KAT_full.values() if v.get('slug')]
+search_rooms = [{'n':v['name'],'s':v['slug'],'icon':None} for v in RAUM_full.values() if v.get('slug')]
+search_out = {'v':1,'products':search_products,'cats':search_cats,'rooms':search_rooms}
+with open(SEARCH_OUT,'w') as fh:
+    json.dump(search_out, fh, ensure_ascii=False, separators=(',',':'))
+
+print(f'Produkte im Map: {len(products)} | uebersprungen: {len(skipped)}', file=sys.stderr)
 print(f'Geschrieben: {OUT} ({os.path.getsize(OUT)} bytes)', file=sys.stderr)
-from collections import Counter
-print('Kategorie-Counts:', dict(Counter(p['kategorie'] for p in products)), file=sys.stderr)
+print(f'Geschrieben: {SEARCH_OUT} ({os.path.getsize(SEARCH_OUT)} bytes) | search {len(search_products)} | cats {len(search_cats)} | rooms {len(search_rooms)}', file=sys.stderr)
