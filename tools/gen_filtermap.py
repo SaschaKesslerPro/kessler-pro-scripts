@@ -41,11 +41,12 @@ def api_get(path):
             raise
     raise RuntimeError('GET fehlgeschlagen: ' + path)
 
-def fetch_all_live(cid):
-    """Alle veroeffentlichten Items paginiert holen."""
+def fetch_all_live(cid, loc=None):
+    """Alle veroeffentlichten Items paginiert holen (optional pro Locale)."""
     items, offset, limit = [], 0, 100
+    locq = ('&cmsLocaleId=' + loc) if loc else ''
     while True:
-        d = api_get(f'/collections/{cid}/items/live?limit={limit}&offset={offset}')
+        d = api_get(f'/collections/{cid}/items/live?limit={limit}&offset={offset}{locq}')
         batch = d.get('items', [])
         items.extend(batch)
         pag = d.get('pagination', {})
@@ -72,6 +73,23 @@ print(f'  Kategorien {len(KAT)} | Raeume {len(RAUM)} | Farben {len(VF)}', file=s
 print('Lade Produkte (live) ...', file=sys.stderr)
 allit = fetch_all_live(PRODUCTS_CID)
 print(f'  Produkte geladen: {len(allit)}', file=sys.stderr)
+
+# Sekundaere Locales fuer Titel + Preis (PL=zl, EN=EUR) — keyed by item id
+PL_LOC = '6907a534407b21d560df11e4'
+EN_LOC = '693d37e00fa97e8096629a1d'
+print('Lade Locales PL/EN ...', file=sys.stderr)
+PLMAP = {x['id']: x.get('fieldData', {}) for x in fetch_all_live(PRODUCTS_CID, PL_LOC)}
+ENMAP = {x['id']: x.get('fieldData', {}) for x in fetch_all_live(PRODUCTS_CID, EN_LOC)}
+print(f'  PL {len(PLMAP)} | EN {len(ENMAP)}', file=sys.stderr)
+
+def parse_num(s):
+    """Numerischer Wert in der jeweiligen Locale-Waehrung (KEINE Umrechnung)."""
+    if not s: return None
+    m = re.search(r'\d[\d.\s\u00a0\u202f]*,\d{2}', s) or re.search(r'\d[\d.]*', s)
+    if not m: return None
+    t = m.group(0).replace('\u00a0', '').replace('\u202f', '').replace(' ', '').replace('.', '').replace(',', '.')
+    try: return round(float(t), 2)
+    except: return None
 
 def fd(x): return x.get('fieldData', {})
 ROOM_ORDER = ['Büro', 'Werkstatt', 'Praxis', 'Gastro']
@@ -109,13 +127,25 @@ for x in allit:
     img = f.get('product-main-image') or {}
     imgurl = img.get('url') if isinstance(img, dict) else None
 
+    # Per-Locale: Titel + Preis (DE primaer, PL=zl, EN=EUR). Fallback auf DE.
+    fpl = PLMAP.get(x['id'], {}); fen = ENMAP.get(x['id'], {})
+    t_de = f.get('product-title') or ''
+    t_pl = fpl.get('product-title') or t_de
+    t_en = fen.get('product-title') or t_de
+    pr_de = f.get('product-price')
+    pr_pl = fpl.get('product-price') or pr_de
+    pr_en = fen.get('product-price') or pr_de
+
     products.append({
         'slug': slug,
         'pid': f.get('product-id'),
-        'title': f.get('product-title') or '',
+        'title': t_de,
         'img': imgurl,
         'price': price,
         'priceRaw': priceRaw,
+        'titleByLoc': {'de': t_de, 'pl': t_pl, 'en': t_en},
+        'priceRawByLoc': {'de': pr_de, 'pl': pr_pl, 'en': pr_en},
+        'priceByLoc': {'de': parse_num(pr_de), 'pl': parse_num(pr_pl), 'en': parse_num(pr_en)},
         'bestseller': bool(f.get('header-bestseller')),
         'rating': f.get('bewertung'),
         'reviews': f.get('anzahl-bewertungen'),
