@@ -17,6 +17,7 @@ TOKEN=os.environ.get("WEBFLOW_TOKEN","").strip()
 if not TOKEN: print("FEHLER: WEBFLOW_TOKEN fehlt",file=sys.stderr); sys.exit(2)
 DRY="--dry-run" in sys.argv
 CID="69a2f0ad6b29b5d497cdb6e0"
+SKIP_SLUGS={"test-tischplatte"}  # Test-Item: kein PL-Locale
 LOC={"DE":"67fea16e9758f16a33bef7a8","PL":"6907a534407b21d560df11e4","EN":"693d37e00fa97e8096629a1d"}
 PRIMARY=LOC["DE"]
 
