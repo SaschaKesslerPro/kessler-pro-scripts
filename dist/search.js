@@ -9,15 +9,16 @@
   if (window.__KP_SEARCH) return; window.__KP_SEARCH = true;
 
   /* ---- CONFIG ---------------------------------------------------------- */
+  function kpLP(){var m=(location.pathname||'').match(/^\/(pl-pl|en)(?=\/|$)/);return m?m[0]:'';}
   var CFG = {
     // Wird beim Integrieren auf den Commit-Hash gepinnt (jsDelivr).
     INDEX_URL: 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json',
     CACHE_KEY: 'kp_search_index_v1',
     MOUNT: '[data-kp-search]',
-    PDP: function (s) { return '/products/' + s; },
-    CAT: function (s) { return '/produktkategorien/' + s; },
-    ROOM: function (s) { return '/raume/' + s; },
-    RESULTS: function (q) { return '/produkte?q=' + encodeURIComponent(q); },
+    PDP: function (s) { return kpLP() + '/products/' + s; },
+    CAT: function (s) { return kpLP() + '/produktkategorien/' + s; },
+    ROOM: function (s) { return kpLP() + '/raume/' + s; },
+    RESULTS: function (q) { return kpLP() + '/produkte?q=' + encodeURIComponent(q); },
     MAX_PRODUCTS: 5,
     POPULAR: [] // optional; Variante A nutzt Räume/Kategorien statt Wortliste
   };
@@ -354,7 +355,7 @@
     if (activeRoom){ var rn = roomName(activeRoom); if (rn) params.push('raume=' + encodeURIComponent(rn)); }
     var cat = matchedCat(term);
     if (cat) params.push('kategorie=' + encodeURIComponent(cat.n));
-    return '/produkte' + (params.length ? '?' + params.join('&') : '');
+    return kpLP() + '/produkte' + (params.length ? '?' + params.join('&') : '');
   }
 
   function renderRooms(){
@@ -403,7 +404,7 @@
     if (term){
       var catHit = IDX.cats.filter(function(c){ return norm(c.n).indexOf(norm(term)) > -1; })[0];
       if (catHit && list.length < 3){
-        html += '<a class="kp-catjump" href="/produkte?kategorie='+encodeURIComponent(catHit.n)+'">'
+        html += '<a class="kp-catjump" href="'+kpLP()+'/produkte?kategorie='+encodeURIComponent(catHit.n)+'">'
           + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
           + 'Alle <b style="font-weight:600">'+esc(catHit.n)+'</b> ansehen<span class="kp-k">'+(catHit.k||0)+' Produkte →</span></a>';
       }

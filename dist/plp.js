@@ -106,6 +106,7 @@
     if (pth.indexOf('/en') === 0) return 'en';
     return 'de';
   })();
+  var LP = LOC === 'pl' ? '/pl-pl' : (LOC === 'en' ? '/en' : '');
   function money(n) { if (n == null) return ''; var s = n.toFixed(2).replace('.', ','); return LOC === 'pl' ? s + '\u00a0z\u0142' : s + '\u00a0\u20ac'; }
   function eur(n) { return money(n); }
   function esc(s) {
@@ -143,7 +144,7 @@
             '<div class="product-card_rating-wrapper"><div class="w-embed"></div></div>' +
             '<a href="#" class="product-card_cart-overlay w-inline-block">' + CART_SVG + '<div>Warenkorb</div></a>' +
           '</div>' +
-          '<a href="/products/' + esc(p.slug) + '" class="product-card_overlay-link w-inline-block"></a>' +
+          '<a href="' + LP + '/products/' + esc(p.slug) + '" class="product-card_overlay-link w-inline-block"></a>' +
         '</div>' +
       '</div>'
     );

@@ -596,7 +596,7 @@
       var card=tpl.cloneNode(true);
       delete card.dataset.kpTpl;
       card.style.display='';
-      card.setAttribute('href','/produkte/'+item.h);
+      card.setAttribute('href',((location.pathname.match(/^\/(pl-pl|en)(?=\/|$)/)||[''])[0])+'/products/'+item.h);
       var name=card.querySelector('.kp-product-name');
       if(name)name.textContent=item.n||'';
       var specs=card.querySelector('.kp-product-specs');

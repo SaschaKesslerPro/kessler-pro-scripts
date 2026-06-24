@@ -1473,7 +1473,7 @@
       // MVP-Stub: shopify-handle CMS-field aktuell null → echte Cart-Add nicht möglich.
       // Phase 9: shopyflow.cart.add({merchandiseId, quantity}) pro lineItem.
       alert('„Erneut bestellen" ist in Vorbereitung. Du findest unsere Produkte aktuell direkt im Shop \u2014 wir leiten dich weiter.');
-      location.href='/produkte';
+      location.href=((location.pathname.match(/^\/(pl-pl|en)(?=\/|$)/)||[''])[0])+'/produkte';
       log('action','reorder MVP-stub triggered',{orderName:order&&order.name});
     });
   }
