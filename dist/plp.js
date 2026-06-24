@@ -97,7 +97,17 @@
 
   function $(s, r) { return (r || document).querySelector(s); }
   function $all(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
-  function eur(n) { if (n == null) return ''; return n.toFixed(2).replace('.', ',') + '\u00a0\u20ac'; }
+  var LOC = (function () {
+    var l = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+    if (l.indexOf('pl') === 0) return 'pl';
+    if (l.indexOf('en') === 0) return 'en';
+    var pth = location.pathname.toLowerCase();
+    if (pth.indexOf('/pl-pl') === 0 || pth.indexOf('/pl/') === 0) return 'pl';
+    if (pth.indexOf('/en') === 0) return 'en';
+    return 'de';
+  })();
+  function money(n) { if (n == null) return ''; var s = n.toFixed(2).replace('.', ','); return LOC === 'pl' ? s + '\u00a0z\u0142' : s + '\u00a0\u20ac'; }
+  function eur(n) { return money(n); }
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -117,7 +127,7 @@
   var SORT = 'default';
 
   function cardHTML(p) {
-    var price = eur(p.price);
+    var price = p.priceRaw || money(p.price);
     var badge = p.bestseller ? 'Bestseller' : '';
     return (
       '<div role="listitem" class="product-card_wrapper w-dyn-item" data-kp-card="1" data-slug="' + esc(p.slug) + '" data-pid="' + esc(p.pid) + '">' +
@@ -516,6 +526,11 @@
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (data) {
         PRODUCTS = (data && data.products) || [];
+        PRODUCTS.forEach(function (p) {
+          if (p.titleByLoc) p.title = p.titleByLoc[LOC] || p.titleByLoc.de || p.title;
+          if (p.priceRawByLoc) p.priceRaw = p.priceRawByLoc[LOC] || p.priceRawByLoc.de || p.priceRaw;
+          if (p.priceByLoc) { var pv = p.priceByLoc[LOC]; p.price = (pv == null ? p.priceByLoc.de : pv); }
+        });
         renderGrid();
         buildIndex();
         computeGlobalCounts();
