@@ -71,6 +71,28 @@ RAUM = {k:v['name'] for k,v in RAUM_full.items()}
 VF   = {k:v['name'] for k,v in VF_full.items()}
 print(f'  Kategorien {len(KAT)} | Raeume {len(RAUM)} | Farben {len(VF)}', file=sys.stderr)
 
+# --- EIGENFARBE pro Produkt (fuer den PLP-Farbfilter) ---
+# Frueher = verfugbare-farben (Familien-Set) -> Filter "Schwarz" zeigte ganze Familien.
+# Jetzt = die tatsaechliche Farbe des Einzelprodukts, geparst aus dem Titel
+# (Segmente ab Pipe-Index 2; deckt Platten "...|Farbe|Dicke", Sperrholz "...|Dicke|Farbe"
+#  und Schreibtisch-Kombis "Platte / Rahmen" ab). Normalisiert auf die Farben-Collection-Labels.
+CANON_FARBEN = set(VF.values())
+FARBE_TOKEN_MAP = {
+    'Birke roh': 'Natur (Birke)', 'Natur': 'Natur (Birke)',
+    'Kiefer': 'Kiefer Weiß', 'Gebleichte Kiefer': 'Kiefer Weiß',
+    'Silber': 'Silbergrau',
+}
+def own_colors(title):
+    out = []
+    parts = [s.strip() for s in (title or '').split('|')]
+    for seg in parts[2:]:
+        for tok in seg.split('/'):
+            tok = tok.strip()
+            c = tok if tok in CANON_FARBEN else FARBE_TOKEN_MAP.get(tok)
+            if c and c not in out:
+                out.append(c)
+    return out
+
 print('Lade Produkte (live) ...', file=sys.stderr)
 allit = fetch_all_live(PRODUCTS_CID)
 print(f'  Produkte geladen: {len(allit)}', file=sys.stderr)
@@ -124,7 +146,8 @@ for x in allit:
     raume  = [RAUM.get(r) for r in raume_ids if RAUM.get(r)]
     raume  = [r for r in ROOM_ORDER if r in raume]
     raum_slugs = [RAUM_full[r]['slug'] for r in raume_ids if r in RAUM_full and RAUM_full[r].get('slug')]
-    farben = [VF.get(c) for c in (f.get('verfugbare-farben') or []) if VF.get(c)]
+    fam_farben = [VF.get(c) for c in (f.get('verfugbare-farben') or []) if VF.get(c)]
+    farben = own_colors(f.get('product-title') or '')
     price, priceRaw = parse_price(f.get('product-price'))
     img = f.get('product-main-image') or {}
     imgurl = img.get('url') if isinstance(img, dict) else None
@@ -144,7 +167,7 @@ for x in allit:
         'priceRawByLoc': {'de':pr_de,'pl':pr_pl,'en':pr_en},
         'priceByLoc': {'de':parse_num(pr_de),'pl':parse_num(pr_pl),'en':parse_num(pr_en)},
         'bestseller': bool(f.get('header-bestseller')),'rating': f.get('bewertung'),
-        'reviews': f.get('anzahl-bewertungen'),'kategorie': kat,'raume': raume,'farben': farben,
+        'reviews': f.get('anzahl-bewertungen'),'kategorie': kat,'raume': raume,'farben': farben,'verfugbarFarben': fam_farben,
         'breite': f.get('breite'),'tiefe': f.get('tiefe'),'dicke': f.get('dicke'),
         'durchmesser': f.get('durchmesser-cm'),'material': f.get('material'),'form': f.get('form'),
     })
