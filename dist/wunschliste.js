@@ -579,6 +579,42 @@
     el.innerHTML='\u2605\u2605\u2605\u2605\u2605 '+r.toFixed(1).replace('.0','');
   }
 
+  // --- Audit 9: product image lookup (slug -> img) from search-index.json ---
+  var IMG_MAP=null, IMG_PROMISE=null;
+  function selfBase(){
+    var s=document.querySelector('script[src*="/dist/wunschliste.js"]');
+    if(s&&s.src)return s.src.replace(/wunschliste\.js(?:\?.*)?$/,'');
+    return 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/';
+  }
+  function loadImgMap(){
+    if(IMG_PROMISE)return IMG_PROMISE;
+    IMG_PROMISE=fetch(selfBase()+'search-index.json').then(function(r){return r.json();}).then(function(d){
+      IMG_MAP={};
+      ((d&&d.products)||[]).forEach(function(p){ if(p&&p.s&&p.img)IMG_MAP[p.s]=p.img; });
+      return IMG_MAP;
+    }).catch(function(){ IMG_MAP={}; return IMG_MAP; });
+    return IMG_PROMISE;
+  }
+  function applyImage(imgEl,handle){
+    if(!imgEl||!IMG_MAP)return;
+    var url=IMG_MAP[handle];
+    if(!url)return;
+    Array.prototype.slice.call(imgEl.childNodes).forEach(function(n){
+      if(n.nodeType===3)imgEl.removeChild(n); // drop placeholder text label
+    });
+    imgEl.style.backgroundImage="url('"+url+"')";
+    imgEl.style.backgroundSize="cover";
+    imgEl.style.backgroundPosition="center";
+    imgEl.style.backgroundRepeat="no-repeat";
+  }
+  function applyAllImages(){
+    var grid=document.querySelector('.kp-wishlist-grid');
+    if(!grid||!IMG_MAP)return;
+    Array.prototype.slice.call(grid.querySelectorAll('.kp-product-card[data-kp-handle]')).forEach(function(card){
+      applyImage(card.querySelector('.kp-product-image'),card.getAttribute('data-kp-handle'));
+    });
+  }
+
   function renderPage(){
     var grid=document.querySelector('.kp-wishlist-grid');
     if(!grid)return;
@@ -596,6 +632,7 @@
       var card=tpl.cloneNode(true);
       delete card.dataset.kpTpl;
       card.style.display='';
+      card.setAttribute('data-kp-handle',item.h);
       card.setAttribute('href',((location.pathname.match(/^\/(pl-pl|en)(?=\/|$)/)||[''])[0])+'/products/'+item.h);
       var name=card.querySelector('.kp-product-name');
       if(name)name.textContent=item.n||'';
@@ -614,6 +651,8 @@
       }
       grid.appendChild(card);
     });
+    applyAllImages();
+    loadImgMap().then(applyAllImages);
   }
 
   function setCounter(){
