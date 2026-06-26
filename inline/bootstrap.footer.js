@@ -3,14 +3,14 @@
  * Pasted INLINE in the Webflow footer as registered script "kesslerbootstrap".
  *
  * Loads the jsDelivr-hosted dist/*.js files (commit-hash pinned via V).
- * Current applied version: 1.0.96  (dist commit 68bf559e832f8d468315d54177ecb8ec83734ace)
+ * Current applied version: 1.0.97  (dist commit fcf7a2d5889a236b2585b827ed99d346bc56d678)
  *
  * To update after changing dist/: set V to the new dist commit hash,
  * re-register a new kesslerbootstrap version, and add_site_script (footer).
  * search.js is pinned to its own commit via U().
  */
 (function () {
-  var V = '@962864e762b07e3436d517de6a47aed04b5bdc92',
+  var V = '@fcf7a2d5889a236b2585b827ed99d346bc56d678',
       B = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts' + V + '/dist/';
   function L(f) { var s = document.createElement('script'); s.src = B + f; s.async = true; document.head.appendChild(s); }
   function U(u) { var s = document.createElement('script'); s.src = u; s.async = true; document.head.appendChild(s); }
@@ -20,6 +20,7 @@
   if (document.querySelector('.product-grid_wrapper') && document.querySelector('.product-card_wrapper')) L('home.js');
   if (document.querySelector('.kp-auth')) L('auth.js');
   if (document.querySelector('[data-header-version^="v2"]')) L('header.js');
+  if (document.querySelector('.pdp_gallery-main')) L('pdp.js');
   if (location.pathname.indexOf('/account') === 0 || document.querySelector('[data-kph-bind],[data-kph-list]')) L('hub.js');
   if (document.querySelector('[data-kp-search],.header_scrolled-search,[data-mobile-trigger="search-open"]')) U('https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@962864e762b07e3436d517de6a47aed04b5bdc92/dist/search.js');
 })();
