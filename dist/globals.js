@@ -369,4 +369,33 @@
     if (document.readyState !== 'loading') { init(); }
     else { document.addEventListener('DOMContentLoaded', init); }
   })();
+
+  // -----------------------------------------------------------------
+  // Locale-relative interne Links (Footer/native URL-Links).
+  // Auf /pl-pl bzw. /en root-relative interne Links praefixen.
+  // Sprachumschalter (hreflang), bereits-korrekte und bare "/"-Toggles
+  // bleiben unangetastet.
+  // Restored (Audit 7) — regressed out of globals.js after commit f072fa4a.
+  // -----------------------------------------------------------------
+  (function () {
+    var m = (location.pathname || '').match(/^\/(pl-pl|en)(?=\/|$)/);
+    if (!m) return;
+    var pre = m[0];
+    function fix() {
+      var as = document.querySelectorAll('a[href^="/"]');
+      for (var i = 0; i < as.length; i++) {
+        var a = as[i];
+        if (a.hasAttribute('hreflang')) continue;
+        if (a.closest && a.closest('.locale-switcher_item')) continue;
+        var h = a.getAttribute('href');
+        if (!h || h === '/' || h.charAt(0) !== '/') continue;
+        if (h.indexOf('//') === 0) continue;
+        if (h.indexOf('/pl-pl') === 0 || h.indexOf('/en') === 0) continue;
+        a.setAttribute('href', pre + h);
+      }
+    }
+    if (document.readyState !== 'loading') { fix(); }
+    else { document.addEventListener('DOMContentLoaded', fix); }
+  })();
+
 })();
