@@ -403,4 +403,70 @@
     else { document.addEventListener('DOMContentLoaded', fix); }
   })();
 
+
+  // -----------------------------------------------------------------
+  // Audit 4: make cart-drawer items clickable -> product PDP.
+  // Storesynk cart rows (.cart-item-* [sf-cart-item]) carry no link;
+  // map the item title -> slug via search-index.json (DE/PL/EN titles).
+  // -----------------------------------------------------------------
+  (function initCartItemLinks() {
+    var INDEX = null, fetching = false;
+    function selfBase() {
+      var s = document.querySelector('script[src*="/dist/globals.js"]');
+      return (s && s.src) ? s.src.replace(/globals\.js(?:\?.*)?$/, '') :
+        'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/';
+    }
+    function norm(s) { return (s || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+    function lp() { return (location.pathname.match(/^\/(pl-pl|en)(?=\/|$)/) || [''])[0]; }
+    function loadIndex(cb) {
+      if (INDEX) { cb(); return; }
+      if (fetching) return;
+      fetching = true;
+      fetch(selfBase() + 'search-index.json').then(function (r) { return r.json(); }).then(function (d) {
+        INDEX = {};
+        (d.products || []).forEach(function (p) {
+          if (!p.s) return;
+          INDEX[norm(p.n)] = p.s;
+          if (p.nL) { if (p.nL.pl) INDEX[norm(p.nL.pl)] = p.s; if (p.nL.en) INDEX[norm(p.nL.en)] = p.s; }
+        });
+        cb();
+      }).catch(function () { fetching = false; });
+    }
+    var SKIP = { 'nazwa produktu': 1, 'product name': 1, 'produktname': 1, '': 1 };
+    function wire(item) {
+      if (item.getAttribute('data-kp-linked')) return;
+      var t = item.querySelector('.ci-title');
+      if (!t) return;
+      var key = norm(t.textContent);
+      if (SKIP[key]) return;
+      var slug = INDEX[key];
+      if (!slug) return;
+      item.setAttribute('data-kp-linked', '1');
+      var url = lp() + '/products/' + slug;
+      Array.prototype.slice.call(item.querySelectorAll('.ci-thumb, .ci-main')).forEach(function (el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function (e) {
+          if (e.target.closest('.ci-remove')) return;
+          window.location.href = url;
+        });
+      });
+    }
+    function wireAll() {
+      var pop = document.querySelector('.cart-popup');
+      if (!pop) return;
+      var items = pop.querySelectorAll('[sf-cart-item]');
+      if (!items.length) return;
+      loadIndex(function () { Array.prototype.slice.call(pop.querySelectorAll('[sf-cart-item]')).forEach(wire); });
+    }
+    var to;
+    function schedule() { clearTimeout(to); to = setTimeout(wireAll, 150); }
+    function start() {
+      var mo = new MutationObserver(schedule);
+      mo.observe(document.body, { childList: true, subtree: true });
+      schedule();
+    }
+    if (document.readyState !== 'loading') start();
+    else document.addEventListener('DOMContentLoaded', start);
+  })();
+
 })();
