@@ -2,11 +2,11 @@
  * kessler-pro-scripts / pdp.js
  * Product Detail Page — PDP-specific logic.
  *
- * Audit 11 — Gallery: thumbnail click drives the main Webflow slider
- * (clicked thumb becomes the main image). The slider's default nav
- * (.pdp_gallery-nav-hidden) is hidden via CSS; we drive the slider by
- * clicking its hidden nav dots, with an arrow-click fallback. The active
- * thumb gets an `.is-active` class for highlighting.
+ * Audit 11 — Gallery: clicking a thumbnail shows that image as the main image.
+ * The Webflow slider on the PDP does not respond to programmatic nav (dots/arrows
+ * are inert because the nav is hidden), so instead of driving the slider we swap
+ * the currently-displayed main <img> directly to the clicked thumbnail's image.
+ * The active thumb gets an `.is-active` class for highlighting.
  */
 
 (function () {
@@ -18,7 +18,6 @@
     document.head.appendChild(s);
   }
 
-  // Minimal affordance + active-state styling for the thumbnails.
   injectStyle(
     '.pdp_gallery-thumbs .pdp_thumb{cursor:pointer}' +
       '.pdp_gallery-thumbs .pdp_thumb.is-active{outline:2px solid #1E1E1E;outline-offset:-2px}'
@@ -34,31 +33,19 @@
     );
     if (thumbs.length < 2) return; // single image — nothing to switch
 
-    function activeDotIndex() {
-      var dots = Array.prototype.slice.call(
-        slider.querySelectorAll('.w-slider-dot')
-      );
-      for (var i = 0; i < dots.length; i++) {
-        if (dots[i].classList.contains('w-active')) return i;
-      }
-      return -1;
-    }
+    var slides = Array.prototype.slice.call(
+      slider.querySelectorAll('.w-slide')
+    );
 
-    function goTo(index) {
-      var dots = slider.querySelectorAll('.w-slider-dot');
-      if (dots.length && dots[index]) {
-        dots[index].click();
-        return;
+    // The <img> of the currently most-visible slide (fallback: first slide).
+    function mainImage() {
+      var best = null, bestOpacity = -1;
+      for (var i = 0; i < slides.length; i++) {
+        var o = parseFloat(getComputedStyle(slides[i]).opacity || '0');
+        if (o > bestOpacity) { bestOpacity = o; best = slides[i]; }
       }
-      // Fallback: step with the slider arrows from the current slide.
-      var current = activeDotIndex();
-      if (current === -1) return;
-      var steps = index - current;
-      var arrow = slider.querySelector(
-        steps > 0 ? '.w-slider-arrow-right' : '.w-slider-arrow-left'
-      );
-      if (!arrow) return;
-      for (var s = 0; s < Math.abs(steps); s++) arrow.click();
+      var holder = best || slides[0] || slider;
+      return holder ? holder.querySelector('img') : null;
     }
 
     function setActive(index) {
@@ -70,26 +57,22 @@
     thumbs.forEach(function (thumb, i) {
       thumb.addEventListener('click', function (e) {
         e.preventDefault();
-        goTo(i);
+        var src = thumb.querySelector('img');
+        var dest = mainImage();
+        if (src && dest) {
+          dest.src = src.src;
+          if (src.srcset) dest.srcset = src.srcset;
+          else dest.removeAttribute('srcset');
+          if (src.getAttribute('alt')) dest.alt = src.getAttribute('alt');
+        }
         setActive(i);
       });
     });
 
     setActive(0);
-
-    // Keep the thumb highlight in sync if the slider is moved another way.
-    var nav = slider.querySelector('.w-slider-nav');
-    if (nav) {
-      nav.addEventListener('click', function () {
-        var idx = activeDotIndex();
-        if (idx > -1) setActive(idx);
-      });
-    }
   }
 
-  function init() {
-    initGallery();
-  }
+  function init() { initGallery(); }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
