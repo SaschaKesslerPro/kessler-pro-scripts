@@ -31,6 +31,9 @@
     en:{ ph:'Search tabletops, desks, oak \u2026', search:'Search', clear:'Clear', remove:'Remove', close:'Close', recent:'Recent searches', clearHist:'Clear history', popular:'Popular', byRoom:'By room', cats:'Categories', best:'Bestsellers', hint:'\u2191 \u2193 navigate \u00b7 \u21b5 all results \u00b7 ESC close', toAllA:'See all', toAllB:'results', hits:'results', products:'products', allBefore:'View all ', allAfter:'', noResA:'\u2014 no results for \u201c', noResB:'\u201d. Try a material or size (e.g. \u201coak\u201d, \u201c25&nbsp;mm\u201d).' }
   };
   var T = STR[LOC] || STR.de;
+  function locName(o){ return (o && o.nL && o.nL[LOC]) || (o && o.n) || ''; }
+  function locPrice(p){ return (p && p.pL && p.pL[LOC]) || (p && p.p) || ''; }
+  function roomNameLoc(slug){ for (var i=0;i<IDX.rooms.length;i++){ if(IDX.rooms[i].s===slug) return locName(IDX.rooms[i]); } return null; }
 
   /* ---- DATA ------------------------------------------------------------ */
   var IDX = { products: [], cats: [], rooms: [] };
@@ -373,7 +376,7 @@
       var on = activeRoom === r.s;
       return '<div class="kp-rrow'+(on?' kp-on':'')+'" data-kp-room="'+esc(r.s)+'">'
         + '<svg class="kp-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg>'
-        + '<span class="kp-rn">'+esc(r.n)+'</span>'
+        + '<span class="kp-rn">'+esc(locName(r))+'</span>'
         + '<svg class="kp-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>';
     }).join('');
   }
@@ -381,7 +384,7 @@
     els.cats.innerHTML = IDX.cats.map(function(c){
       var hit = !term || norm(c.n).indexOf(norm(term)) > -1;
       return '<span class="kp-chip'+(term&&hit?' kp-on':'')+(term&&!hit?' kp-dim':'')+'" data-kp-set="'+esc(c.n)+'">'
-        + hl(c.n,term) + '<span class="kp-k">'+ (c.k||0) +'</span></span>';
+        + hl(locName(c),term) + '<span class="kp-k">'+ (c.k||0) +'</span></span>';
     }).join('');
   }
   function matchProducts(term){
@@ -399,15 +402,15 @@
   }
   function renderProducts(term){
     var list = matchProducts(term);
-    els.plabel.textContent = term ? 'Produkte' : (activeRoom ? roomName(activeRoom) : 'Bestseller');
+    els.plabel.textContent = term ? T.products : (activeRoom ? roomNameLoc(activeRoom) : T.best);
     var total = activeRoom ? IDX.products.filter(function(p){ return (p.rm||[]).indexOf(activeRoom) > -1; }).length : IDX.products.length;
     els.pmeta.textContent = term ? (list.length + ' ' + T.hits) : (total + ' ' + T.products);
     var html = list.slice(0, CFG.MAX_PRODUCTS).map(function(p, i){
       return '<a class="kp-prow kp-stg" href="'+CFG.PDP(p.s)+'" style="animation-delay:'+(i*22)+'ms" data-kp-nav>'
         + thumb(p)
-        + '<div><div class="kp-pname">'+hl(p.n,term)+'</div>'
+        + '<div><div class="kp-pname">'+hl(locName(p),term)+'</div>'
         + (p.sp ? '<div class="kp-pspec">'+esc(p.sp)+'</div>' : '')
-        + '<div class="kp-pprice">'+(p.p?esc(p.p):'')+'</div></div>'
+        + '<div class="kp-pprice">'+(locPrice(p)?esc(locPrice(p)):'')+'</div></div>'
         + '<svg class="kp-go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></a>';
     }).join('');
     if (term){
