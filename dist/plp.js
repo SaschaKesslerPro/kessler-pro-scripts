@@ -107,6 +107,8 @@
     return 'de';
   })();
   var LP = LOC === 'pl' ? '/pl-pl' : (LOC === 'en' ? '/en' : '');
+  // Audit 8b: PL/EN filter labels -> DE canonical (filterdata.json stores DE values)
+  var LOCMAP = {"pl": {"cats": {"Szafki medyczne": "Medizinschr\u00e4nke", "Akcesoria do rega\u0142\u00f3w": "Regalzubeh\u00f6r", "Sto\u0142y kompletne": "Komplett-Tische", "Stela\u017ce do sto\u0142\u00f3w": "Tischgestelle", "Blaty z p\u0142yty wi\u00f3rowej": "Tischplatte Spannplatte", "Blaty ze sklejki": "Tischplatte Sperrholz", "Sto\u0142y warsztatowe": "Werkb\u00e4nke"}, "rooms": {"Gastronomia": "Gastro", "Gabinet": "Praxis", "Warsztat": "Werkstatt", "Biuro": "B\u00fcro"}, "colors": {"Jasne drewno": "Helles Holz", "Sosna bia\u0142a": "Kiefer Wei\u00df", "Jesion": "Esche", "Natura (brzoza)": "Natur (Birke)", "Klon": "Ahorn", "Buk": "Buche", "D\u0105b Hickory": "Eiche Hickory", "D\u0105b Sonoma": "Eiche Sonoma", "Bia\u0142y": "Wei\u00df", "Srebrnoszary": "Silbergrau", "Szary": "Grau", "Antracyt": "Anthrazit", "Czarny": "Schwarz"}}, "en": {"cats": {"Medical cabinets": "Medizinschr\u00e4nke", "Shelving accessories": "Regalzubeh\u00f6r", "Complete desks": "Komplett-Tische", "Table frames": "Tischgestelle", "Chipboard tabletops": "Tischplatte Spannplatte", "Plywood tabletops": "Tischplatte Sperrholz", "Workbenches": "Werkb\u00e4nke"}, "rooms": {"Hospitality": "Gastro", "Practice": "Praxis", "Workshop": "Werkstatt", "Office": "B\u00fcro"}, "colors": {"Light wood": "Helles Holz", "White pine": "Kiefer Wei\u00df", "Ash": "Esche", "Natural (birch)": "Natur (Birke)", "Maple": "Ahorn", "Beech": "Buche", "Hickory oak": "Eiche Hickory", "Sonoma oak": "Eiche Sonoma", "White": "Wei\u00df", "Silver grey": "Silbergrau", "Grey": "Grau", "Anthracite": "Anthrazit", "Black": "Schwarz"}}};
   function money(n) { if (n == null) return ''; var s = n.toFixed(2).replace('.', ','); return LOC === 'pl' ? s + '\u00a0z\u0142' : s + '\u00a0\u20ac'; }
   function eur(n) { return money(n); }
   function esc(s) {
@@ -227,6 +229,10 @@
   }
 
   function optMatch(field, value, p) {
+    if (LOC !== 'de' && LOCMAP[LOC]) {
+      var _m = field === 'kategorie' ? LOCMAP[LOC].cats : field === 'raume' ? LOCMAP[LOC].rooms : field === 'farbe' ? LOCMAP[LOC].colors : null;
+      if (_m && _m[value] != null) value = _m[value];
+    }
     switch (field) {
       case 'kategorie': return p.kategorie === value;
       case 'raume':     return p.raume.indexOf(value) >= 0;
