@@ -13,7 +13,7 @@
   var CFG = {
     // Wird beim Integrieren auf den Commit-Hash gepinnt (jsDelivr).
     INDEX_URL: 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json',
-    CACHE_KEY: 'kp_search_index_v1',
+    CACHE_KEY: 'kp_search_index_v2',
     MOUNT: '[data-kp-search]',
     PDP: function (s) { return kpLP() + '/products/' + s; },
     CAT: function (s) { return kpLP() + '/produktkategorien/' + s; },
