@@ -588,7 +588,7 @@
   }
   function loadImgMap(){
     if(IMG_PROMISE)return IMG_PROMISE;
-    IMG_PROMISE=fetch('https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json').then(function(r){return r.json();}).then(function(d){
+    IMG_PROMISE=fetch(selfBase()+'search-index.json').then(function(r){return r.json();}).then(function(d){
       IMG_MAP={};
       ((d&&d.products)||[]).forEach(function(p){ if(p&&p.s&&p.img)IMG_MAP[p.s]=p.img; });
       return IMG_MAP;
