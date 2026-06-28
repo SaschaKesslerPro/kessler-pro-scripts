@@ -23,6 +23,15 @@
     POPULAR: [] // optional; Variante A nutzt Räume/Kategorien statt Wortliste
   };
 
+  /* ---- i18n (DE/PL/EN) ------------------------------------------------- */
+  var LOC = (function(){ var p=kpLP(); return p==='/pl-pl'?'pl':(p==='/en'?'en':'de'); })();
+  var STR = {
+    de:{ ph:'Suche nach Tischplatte, Schreibtisch, Eiche \u2026', search:'Suche', clear:'Leeren', remove:'Entfernen', close:'Schlie\u00dfen', recent:'Letzte Suchen', clearHist:'Verlauf l\u00f6schen', popular:'Beliebt', byRoom:'Nach Raum', cats:'Kategorien', best:'Bestseller', hint:'\u2191 \u2193 navigieren \u00b7 \u21b5 alle Treffer \u00b7 ESC schlie\u00dfen', toAllA:'Zu allen', toAllB:'Ergebnissen', hits:'Treffer', products:'Produkte', allBefore:'Alle ', allAfter:' ansehen', noResA:'\u2014 keine Treffer f\u00fcr \u201e', noResB:'\u201c. Versuch ein Material oder Ma\u00df (z.&nbsp;B. \u201eEiche\u201c, \u201e25&nbsp;mm\u201c).' },
+    pl:{ ph:'Szukaj blat\u00f3w, biurek, d\u0119bu \u2026', search:'Szukaj', clear:'Wyczy\u015b\u0107', remove:'Usu\u0144', close:'Zamknij', recent:'Ostatnie wyszukiwania', clearHist:'Wyczy\u015b\u0107 histori\u0119', popular:'Popularne', byRoom:'Wed\u0142ug pomieszczenia', cats:'Kategorie', best:'Bestsellery', hint:'\u2191 \u2193 nawiguj \u00b7 \u21b5 wszystkie wyniki \u00b7 ESC zamknij', toAllA:'Zobacz wszystkie', toAllB:'wynik\u00f3w', hits:'wynik\u00f3w', products:'produkt\u00f3w', allBefore:'Zobacz wszystkie ', allAfter:'', noResA:'\u2014 brak wynik\u00f3w dla \u201e', noResB:'\u201c. Spr\u00f3buj materia\u0142 lub wymiar (np. \u201ed\u0105b\u201c, \u201e25&nbsp;mm\u201c).' },
+    en:{ ph:'Search tabletops, desks, oak \u2026', search:'Search', clear:'Clear', remove:'Remove', close:'Close', recent:'Recent searches', clearHist:'Clear history', popular:'Popular', byRoom:'By room', cats:'Categories', best:'Bestsellers', hint:'\u2191 \u2193 navigate \u00b7 \u21b5 all results \u00b7 ESC close', toAllA:'See all', toAllB:'results', hits:'results', products:'products', allBefore:'View all ', allAfter:'', noResA:'\u2014 no results for \u201c', noResB:'\u201d. Try a material or size (e.g. \u201coak\u201d, \u201c25&nbsp;mm\u201d).' }
+  };
+  var T = STR[LOC] || STR.de;
+
   /* ---- DATA ------------------------------------------------------------ */
   var IDX = { products: [], cats: [], rooms: [] };
 
@@ -154,17 +163,17 @@
     } else {
       var rec = recentGet();
       if (rec.length){
-        html += '<div class="kp-sg-sec"><p class="kp-sg-h">Letzte Suchen'
-              + '<button type="button" class="kp-sg-clear" data-kp-recclear>Verlauf löschen</button></p>';
+        html += '<div class="kp-sg-sec"><p class="kp-sg-h">' + T.recent + ''
+              + '<button type="button" class="kp-sg-clear" data-kp-recclear>' + T.clearHist + '</button></p>';
         html += rec.map(function(t){
           return '<div class="kp-sgrow kp-rec" data-kp-sgterm="'+esc(t)+'">'+ICON_CLOCK
                + '<span class="kp-sgt">'+esc(t)+'</span>'
-               + '<button type="button" class="kp-recx" data-kp-recx="'+esc(t)+'" aria-label="Entfernen">&times;</button></div>';
+               + '<button type="button" class="kp-recx" data-kp-recx="'+esc(t)+'" aria-label="' + T.remove + '">&times;</button></div>';
         }).join('');
         html += '</div>';
       }
       if (POPULAR.length){
-        html += '<div class="kp-sg-sec"><p class="kp-sg-h">Beliebt</p><div class="kp-chips2">';
+        html += '<div class="kp-sg-sec"><p class="kp-sg-h">' + T.popular + '</p><div class="kp-chips2">';
         html += POPULAR.map(function(t){
           return '<button type="button" class="kp-sgchip" data-kp-sgterm="'+esc(t)+'">'+ICON_TREND+esc(t)+'</button>';
         }).join('');
@@ -292,21 +301,21 @@
   var FIELD_HTML =
       '<div class="kp-field">'
     + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#1E1E1E" stroke-width="1.7"/><path d="M20 20l-3.4-3.4" stroke="#1E1E1E" stroke-width="1.7" stroke-linecap="round"/></svg>'
-    + '<input type="text" placeholder="Suche nach Tischplatte, Schreibtisch, Eiche …" autocomplete="off" aria-label="Suche">'
+    + '<input type="text" placeholder="' + T.ph + '" autocomplete="off" aria-label="' + T.search + '">'
     + '<span class="kp-kbd">/</span>'
-    + '<button class="kp-clear" aria-label="Leeren"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>'
+    + '<button class="kp-clear" aria-label="' + T.clear + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>'
     + '</div>';
 
   function buildPanel(){
     var panel = document.createElement('div'); panel.className = 'kp-panel';
     panel.innerHTML =
         '<div class="kp-cols">'
-      +   '<div class="kp-col kp-c1"><p class="kp-eyebrow">Nach Raum</p><div data-kp-rooms></div>'
-      +     '<p class="kp-eyebrow" style="margin-top:26px">Kategorien</p><div class="kp-chips" data-kp-cats></div></div>'
-      +   '<div class="kp-col kp-c2"><p class="kp-eyebrow"><span data-kp-plabel>Bestseller</span><span class="kp-meta" data-kp-pmeta></span></p><div data-kp-products></div></div>'
+      +   '<div class="kp-col kp-c1"><p class="kp-eyebrow">' + T.byRoom + '</p><div data-kp-rooms></div>'
+      +     '<p class="kp-eyebrow" style="margin-top:26px">' + T.cats + '</p><div class="kp-chips" data-kp-cats></div></div>'
+      +   '<div class="kp-col kp-c2"><p class="kp-eyebrow"><span data-kp-plabel>' + T.best + '</span><span class="kp-meta" data-kp-pmeta></span></p><div data-kp-products></div></div>'
       + '</div>'
-      + '<div class="kp-foot"><span class="kp-hint">↑ ↓ navigieren · ↵ alle Treffer · ESC schließen</span>'
-      +   '<a data-kp-all><span class="kp-u">Zu allen <span data-kp-count>0</span> Ergebnissen</span> →</a></div>';
+      + '<div class="kp-foot"><span class="kp-hint">' + T.hint + '</span>'
+      +   '<a data-kp-all><span class="kp-u">' + T.toAllA + ' <span data-kp-count>0</span> ' + T.toAllB + '</span> →</a></div>';
     var scrim = document.createElement('div'); scrim.className = 'kp-scrim';
     document.body.appendChild(scrim); document.body.appendChild(panel);
     els.panel = panel; els.scrim = scrim;
@@ -392,7 +401,7 @@
     var list = matchProducts(term);
     els.plabel.textContent = term ? 'Produkte' : (activeRoom ? roomName(activeRoom) : 'Bestseller');
     var total = activeRoom ? IDX.products.filter(function(p){ return (p.rm||[]).indexOf(activeRoom) > -1; }).length : IDX.products.length;
-    els.pmeta.textContent = term ? (list.length + ' Treffer') : (total + ' Produkte');
+    els.pmeta.textContent = term ? (list.length + ' ' + T.hits) : (total + ' ' + T.products);
     var html = list.slice(0, CFG.MAX_PRODUCTS).map(function(p, i){
       return '<a class="kp-prow kp-stg" href="'+CFG.PDP(p.s)+'" style="animation-delay:'+(i*22)+'ms" data-kp-nav>'
         + thumb(p)
@@ -406,10 +415,10 @@
       if (catHit && list.length < 3){
         html += '<a class="kp-catjump" href="'+kpLP()+'/produkte?kategorie='+encodeURIComponent(catHit.n)+'">'
           + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
-          + 'Alle <b style="font-weight:600">'+esc(catHit.n)+'</b> ansehen<span class="kp-k">'+(catHit.k||0)+' Produkte →</span></a>';
+          + T.allBefore + '<b style="font-weight:600">'+esc(catHit.n)+'</b>' + T.allAfter + '<span class="kp-k">'+(catHit.k||0)+' ' + T.products + ' →</span></a>';
       }
     }
-    if (!html) html = '<div class="kp-muted">— keine Treffer für „'+esc(term)+'". Versuch ein Material oder Maß (z.&nbsp;B. „Eiche", „25 mm").</div>';
+    if (!html) html = '<div class="kp-muted">' + T.noResA + ''+esc(term)+'' + T.noResB + '</div>';
     els.products.innerHTML = html;
     nav = [].slice.call(els.products.querySelectorAll('.kp-prow'));
   }
@@ -447,7 +456,7 @@
     var sheet = document.createElement('div'); sheet.className = 'kp-sheet';
     var top = document.createElement('div'); top.className = 'kp-sheet-top';
     var fieldWrap = document.createElement('div'); fieldWrap.className = 'kp-search'; fieldWrap.innerHTML = FIELD_HTML;
-    var closeBtn = document.createElement('button'); closeBtn.className = 'kp-sheet-close'; closeBtn.setAttribute('aria-label', 'Schließen'); closeBtn.innerHTML = '&times;';
+    var closeBtn = document.createElement('button'); closeBtn.className = 'kp-sheet-close'; closeBtn.setAttribute('aria-label', T.close); closeBtn.innerHTML = '&times;';
     top.appendChild(fieldWrap); top.appendChild(closeBtn);
     var body = document.createElement('div'); body.className = 'kp-sheet-body';
     var sg = document.createElement('div'); sg.className = 'kp-sg'; sg.setAttribute('data-kp-suggest','');
