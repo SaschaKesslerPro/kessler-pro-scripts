@@ -583,7 +583,9 @@
       var cached = sessionStorage.getItem(CFG.CACHE_KEY);
       if (cached){ applyIndex(JSON.parse(cached)); render(); }
     } catch(e){}
-    return fetch(CFG.INDEX_URL, { credentials:'omit' })
+    var __self=(document.querySelector('script[src*="/dist/search.js"]')||{}).src||'';
+    var __idx=__self?__self.replace(/search\.js(?:\?.*)?$/,'search-index.json'):CFG.INDEX_URL;
+    return fetch(__idx, { credentials:'omit' })
       .then(function(r){ if(!r.ok) throw new Error('index '+r.status); return r.json(); })
       .then(function(data){
         applyIndex(data);
