@@ -637,12 +637,20 @@
       var name=card.querySelector('.kp-product-name');
       if(name)name.textContent=item.n||'';
       var specs=card.querySelector('.kp-product-specs');
-      if(specs)specs.textContent=item.s||'';
+      if(specs){
+        specs.textContent='';
+        (item.n||'').split('|').map(function(x){return x.trim();}).filter(Boolean).slice(1).forEach(function(seg){
+          var chip=document.createElement('span');chip.className='kp-wl-chip';chip.textContent=seg;specs.appendChild(chip);
+        });
+      }
       var price=card.querySelector('.kp-product-price');
       if(price)price.textContent=item.p||'';
       setStars(card.querySelector('.kp-product-stars'),item.r);
       var removeBtn=card.querySelector('.kp-product-image-remove');
       if(removeBtn){
+        removeBtn.textContent='\u2665';
+        removeBtn.setAttribute('aria-label','Aus Wunschliste entfernen');
+        card.appendChild(removeBtn);
         removeBtn.addEventListener('click',function(e){
           e.preventDefault();
           e.stopPropagation();
