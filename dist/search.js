@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.18
+   Kessler PRO — search.js  v1.0.19
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Mobile V2: Vorschläge (abgeleitet) + Verlauf + Beliebt, leichte Fuzzy-Logik.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
@@ -46,7 +46,12 @@
   };
 
   /* ---- HELPERS --------------------------------------------------------- */
-  function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function norm(s){
+    s = (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    // Maße vereinheitlichen: "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
+    s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g,'$1 x $2');
+    return s.replace(/\s+/g,' ');
+  }
   function esc(s){ return (s||'').toString().replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function hl(t, term){
     t = t || '';
@@ -367,6 +372,7 @@
     if (activeRoom){ var rn = roomName(activeRoom); if (rn) params.push('raume=' + encodeURIComponent(rn)); }
     var cat = matchedCat(term);
     if (cat) params.push('kategorie=' + encodeURIComponent(cat.n));
+    else if (term) params.push('q=' + encodeURIComponent(term));
     return kpLP() + '/produkte' + (params.length ? '?' + params.join('&') : '');
   }
 
@@ -629,6 +635,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.18', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+  window.KPSearch = { version: '1.0.19', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
                       _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();
