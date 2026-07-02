@@ -47,9 +47,11 @@
 
   /* ---- HELPERS --------------------------------------------------------- */
   function norm(s){
-    s = (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    s = (s||'').toString().toLowerCase().replace(/\u00df/g,'ss').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     // Maße vereinheitlichen: "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
     s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g,'$1 x $2');
+    // Zahl+Einheit trennen: "50cm" -> "50 cm", "21mm" -> "21 mm"
+    s = s.replace(/(\d)(cm|mm|m)\b/g,'$1 $2');
     return s.replace(/\s+/g,' ');
   }
   function esc(s){ return (s||'').toString().replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -107,6 +109,24 @@
     var prev = [], i, j; for (j=0;j<=n;j++) prev[j]=j;
     for (i=1;i<=m;i++){ var cur=[i]; for (j=1;j<=n;j++){ var cost=a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1; cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+cost); } prev=cur; }
     return prev[n];
+  }
+  // Token-Matching: jede Suchwortgruppe muss (Substring ODER Tippfehler-tolerant) im Ziel vorkommen.
+  function tokenMatch(hay, q){
+    var toks = q.split(' '), i, j, t, hw;
+    for (i=0;i<toks.length;i++){
+      t = toks[i]; if (!t) continue;
+      if (hay.indexOf(t) > -1) continue;
+      if (t.length >= 4){
+        hw = hay.split(' ');
+        var ok = false;
+        for (j=0;j<hw.length;j++){
+          if (hw[j].length >= 3 && Math.abs(hw[j].length - t.length) <= 2 && lev(t, hw[j]) <= 1){ ok = true; break; }
+        }
+        if (ok) continue;
+      }
+      return false;
+    }
+    return true;
   }
   function fuzzyHit(nt, e){
     if (nt.length < 4) return false;
@@ -404,7 +424,7 @@
       return bs;
     }
     var n = norm(term);
-    return base.filter(function(p){ return norm((p.n||'')+' '+(p.c||'')+' '+(p.sp||'')).indexOf(n) > -1; });
+    return base.filter(function(p){ return tokenMatch(norm((p.n||'')+' '+(p.c||'')+' '+(p.sp||'')), n); });
   }
   function renderProducts(term){
     var list = matchProducts(term);
@@ -635,6 +655,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.19', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+  window.KPSearch = { version: '1.0.20', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
                       _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();
