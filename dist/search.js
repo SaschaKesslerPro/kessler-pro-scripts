@@ -55,6 +55,7 @@
   /* ---- HELPERS --------------------------------------------------------- */
   function norm(s){
     s = (s||'').toString().toLowerCase().replace(/\u00df/g,'ss').replace(/\u0142/g,'l').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    s = s.replace(/ae/g,'a').replace(/oe/g,'o').replace(/ue/g,'u');
     // Maße vereinheitlichen: "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
     s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g,'$1 x $2');
     // Zahl+Einheit trennen: "50cm" -> "50 cm", "21mm" -> "21 mm"
@@ -668,6 +669,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.21', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+  window.KPSearch = { version: '1.0.22', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
                       _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();
