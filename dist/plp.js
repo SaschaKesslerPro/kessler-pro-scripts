@@ -2,7 +2,7 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
- * v2.2.1 — Suche-Handoff, Form-Filter, Maß-tolerante Suche (02.07.2026)
+ * v2.2.2 — Suche-Handoff, Form-Filter, Maß-tolerante Suche (02.07.2026)
  *   - URL-Parameter werden gelesen: ?q= (Textfilter), ?kategorie=, ?raume=,
  *     ?farbe=, ?form= — Checkboxen werden vorbelegt, q filtert Titel.
  *   - Neue Filter-Sektion "Form" (Rechteckig/Rund), client-seitig injiziert,
@@ -131,7 +131,7 @@
   // Maß-tolerante Normalisierung: lowercase, Diakritika weg,
   // "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
   function normQ(s) {
-    s = String(s == null ? '' : s).toLowerCase().replace(/\u00df/g, 'ss');
+    s = String(s == null ? '' : s).toLowerCase().replace(/\u00df/g, 'ss').replace(/\u0142/g, 'l');
     try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
     s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g, '$1 x $2');
     s = s.replace(/(\d)(cm|mm|m)\b/g, '$1 $2');
