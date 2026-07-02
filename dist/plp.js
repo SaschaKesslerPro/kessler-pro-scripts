@@ -2,6 +2,16 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.2.0 — Suche-Handoff, Form-Filter, Maß-tolerante Suche (02.07.2026)
+ *   - URL-Parameter werden gelesen: ?q= (Textfilter), ?kategorie=, ?raume=,
+ *     ?farbe=, ?form= — Checkboxen werden vorbelegt, q filtert Titel.
+ *   - Neue Filter-Sektion "Form" (Rechteckig/Rund), client-seitig injiziert,
+ *     lokalisiert DE/PL/EN. Daten kommen aus p.form (rechteckig|rund).
+ *   - LOCMAP-Kategorien aktualisiert (Möbelplatten/Multiplex — Umbenennung 30.06.).
+ *   - Maß-Normalisierung: "100x50", "100 x50", "100×50" matchen alle "100 × 50".
+ *   - Kategorie-/Raum-Template-Support: /produktkategorien/{slug} bzw.
+ *     /raume/{slug} (auch PL/EN-Pfade) belegen den passenden Filter vor.
+ *
  * v2.1.0 — robuste Cart-Verdrahtung (21.06.2026)
  *   - Add-to-Cart deterministisch via fetchProduct(pid)->Variant->addToCart
  *     (kein sf-product/refetch mehr -> keine Race-Condition, keine Shopyflow-Warnungen).
@@ -108,7 +118,7 @@
   })();
   var LP = LOC === 'pl' ? '/pl-pl' : (LOC === 'en' ? '/en' : '');
   // Audit 8b: PL/EN filter labels -> DE canonical (filterdata.json stores DE values)
-  var LOCMAP = {"pl": {"cats": {"Szafki medyczne": "Medizinschr\u00e4nke", "Akcesoria do rega\u0142\u00f3w": "Regalzubeh\u00f6r", "Sto\u0142y kompletne": "Komplett-Tische", "Stela\u017ce do sto\u0142\u00f3w": "Tischgestelle", "Blaty z p\u0142yty wi\u00f3rowej": "Tischplatte Spannplatte", "Blaty ze sklejki": "Tischplatte Sperrholz", "Sto\u0142y warsztatowe": "Werkb\u00e4nke"}, "rooms": {"Gastronomia": "Gastro", "Gabinet": "Praxis", "Warsztat": "Werkstatt", "Biuro": "B\u00fcro"}, "colors": {"Jasne drewno": "Helles Holz", "Sosna bia\u0142a": "Kiefer Wei\u00df", "Jesion": "Esche", "Natura (brzoza)": "Natur (Birke)", "Klon": "Ahorn", "Buk": "Buche", "D\u0105b Hickory": "Eiche Hickory", "D\u0105b Sonoma": "Eiche Sonoma", "Bia\u0142y": "Wei\u00df", "Srebrnoszary": "Silbergrau", "Szary": "Grau", "Antracyt": "Anthrazit", "Czarny": "Schwarz"}}, "en": {"cats": {"Medical cabinets": "Medizinschr\u00e4nke", "Shelving accessories": "Regalzubeh\u00f6r", "Complete desks": "Komplett-Tische", "Table frames": "Tischgestelle", "Chipboard tabletops": "Tischplatte Spannplatte", "Plywood tabletops": "Tischplatte Sperrholz", "Workbenches": "Werkb\u00e4nke"}, "rooms": {"Hospitality": "Gastro", "Practice": "Praxis", "Workshop": "Werkstatt", "Office": "B\u00fcro"}, "colors": {"Light wood": "Helles Holz", "White pine": "Kiefer Wei\u00df", "Ash": "Esche", "Natural (birch)": "Natur (Birke)", "Maple": "Ahorn", "Beech": "Buche", "Hickory oak": "Eiche Hickory", "Sonoma oak": "Eiche Sonoma", "White": "Wei\u00df", "Silver grey": "Silbergrau", "Grey": "Grau", "Anthracite": "Anthrazit", "Black": "Schwarz"}}};
+  var LOCMAP = {"pl": {"cats": {"Szafki medyczne": "Medizinschr\u00e4nke", "Akcesoria do rega\u0142\u00f3w": "Regalzubeh\u00f6r", "Sto\u0142y kompletne": "Komplett-Tische", "Stela\u017ce do sto\u0142\u00f3w": "Tischgestelle", "P\u0142yty meblowe": "M\u00f6belplatten", "Multiplex": "Multiplex", "Sto\u0142y warsztatowe": "Werkb\u00e4nke", "Blaty z p\u0142yty wi\u00f3rowej": "M\u00f6belplatten", "Blaty ze sklejki": "Multiplex"}, "rooms": {"Gastronomia": "Gastro", "Gabinet": "Praxis", "Warsztat": "Werkstatt", "Biuro": "B\u00fcro"}, "colors": {"Jasne drewno": "Helles Holz", "Sosna bia\u0142a": "Kiefer Wei\u00df", "Jesion": "Esche", "Natura (brzoza)": "Natur (Birke)", "Klon": "Ahorn", "Buk": "Buche", "D\u0105b Hickory": "Eiche Hickory", "D\u0105b Sonoma": "Eiche Sonoma", "Bia\u0142y": "Wei\u00df", "Srebrnoszary": "Silbergrau", "Szary": "Grau", "Antracyt": "Anthrazit", "Czarny": "Schwarz"}, "form": {"Prostok\u0105tne": "rechteckig", "Okr\u0105g\u0142e": "rund"}}, "en": {"cats": {"Medical cabinets": "Medizinschr\u00e4nke", "Shelving accessories": "Regalzubeh\u00f6r", "Complete desks": "Komplett-Tische", "Table frames": "Tischgestelle", "Furniture boards": "M\u00f6belplatten", "Multiplex": "Multiplex", "Workbenches": "Werkb\u00e4nke", "Chipboard tabletops": "M\u00f6belplatten", "Plywood tabletops": "Multiplex"}, "rooms": {"Hospitality": "Gastro", "Practice": "Praxis", "Workshop": "Werkstatt", "Office": "B\u00fcro"}, "colors": {"Light wood": "Helles Holz", "White pine": "Kiefer Wei\u00df", "Ash": "Esche", "Natural (birch)": "Natur (Birke)", "Maple": "Ahorn", "Beech": "Buche", "Hickory oak": "Eiche Hickory", "Sonoma oak": "Eiche Sonoma", "White": "Wei\u00df", "Silver grey": "Silbergrau", "Grey": "Grau", "Anthracite": "Anthrazit", "Black": "Schwarz"}, "form": {"Rectangular": "rechteckig", "Round": "rund"}}, "de": {"form": {"Rechteckig": "rechteckig", "Rund": "rund"}}};
   function money(n) { if (n == null) return ''; var s = n.toFixed(2).replace('.', ','); return LOC === 'pl' ? s + '\u00a0z\u0142' : s + '\u00a0\u20ac'; }
   function eur(n) { return money(n); }
   function esc(s) {
@@ -117,6 +127,66 @@
   }
   function effW(p) { return p.breite != null ? p.breite : p.durchmesser; }
   function effD(p) { return p.tiefe != null ? p.tiefe : p.durchmesser; }
+
+  // Maß-tolerante Normalisierung: lowercase, Diakritika weg,
+  // "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
+  function normQ(s) {
+    s = String(s == null ? '' : s).toLowerCase();
+    try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+    s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g, '$1 x $2');
+    return s.replace(/\s+/g, ' ').trim();
+  }
+  // Option-Label (beliebige Locale) -> kanonischer DE-Datenwert
+  function canonical(field, value) {
+    var maps = LOCMAP[LOC] || {};
+    var m = field === 'kategorie' ? maps.cats : field === 'raume' ? maps.rooms : field === 'farbe' ? maps.colors : field === 'form' ? maps.form : null;
+    if (m && m[value] != null) return m[value];
+    if (field === 'form') {
+      var all = { 'rechteckig': 'rechteckig', 'rund': 'rund' };
+      var f;
+      for (f in LOCMAP) { if (LOCMAP[f].form && LOCMAP[f].form[value] != null) return LOCMAP[f].form[value]; }
+      if (all[String(value).toLowerCase()]) return all[String(value).toLowerCase()];
+    }
+    // Fremd-Locale-Werte (z. B. DE-Kategoriename aus der Suche auf PL-Seite)
+    var l;
+    for (l in LOCMAP) {
+      var mm = field === 'kategorie' ? LOCMAP[l].cats : field === 'raume' ? LOCMAP[l].rooms : field === 'farbe' ? LOCMAP[l].colors : null;
+      if (mm && mm[value] != null) return mm[value];
+    }
+    return value;
+  }
+  var QUERY = '';
+  var PRESETS = { kategorie: [], raume: [], farbe: [], form: [] };
+  var CATSLUG = { 'moebelplatten': 'M\u00f6belplatten', 'tischplatte-spannplatte': 'M\u00f6belplatten', 'multiplex': 'Multiplex', 'tischplatte-sperrholz': 'Multiplex', 'komplett-tische': 'Komplett-Tische', 'tischgestelle': 'Tischgestelle', 'werkbaenke': 'Werkb\u00e4nke', 'regalzubehoer': 'Regalzubeh\u00f6r', 'medizinschraenke': 'Medizinschr\u00e4nke' };
+  var ROOMSLUG = { 'buero': 'B\u00fcro', 'werkstatt': 'Werkstatt', 'praxis': 'Praxis', 'gastro': 'Gastro' };
+  function readParams() {
+    try {
+      var sp = new URLSearchParams(location.search);
+      QUERY = (sp.get('q') || '').trim();
+      ['kategorie', 'raume', 'farbe', 'form'].forEach(function (f) {
+        sp.getAll(f).forEach(function (v) {
+          v.split(',').forEach(function (x) { x = x.trim(); if (x) PRESETS[f].push(canonical(f, x)); });
+        });
+      });
+    } catch (e) {}
+    // Kategorie-/Raum-Template: Filter aus dem Pfad vorbelegen
+    var m = location.pathname.match(/\/produktkategorien\/([^\/?#]+)/);
+    if (m && CATSLUG[m[1]]) PRESETS.kategorie.push(CATSLUG[m[1]]);
+    m = location.pathname.match(/\/raume\/([^\/?#]+)/);
+    if (m && ROOMSLUG[m[1]]) PRESETS.raume.push(ROOMSLUG[m[1]]);
+  }
+  function applyPresets() {
+    var any = false;
+    SECTIONS.forEach(function (s) {
+      var wanted = PRESETS[s.field] || [];
+      if (!wanted.length) return;
+      s.options.forEach(function (o) {
+        if (!o.checkbox) return;
+        if (wanted.indexOf(canonical(s.field, o.value)) >= 0) { o.checkbox.checked = true; any = true; }
+      });
+    });
+    return any;
+  }
 
   var HEART_SVG =
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block" class="inline-svg-0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
@@ -206,6 +276,34 @@
     });
   }
 
+  var FORM_I18N = {
+    de: { head: 'Form', opts: [['Rechteckig', 'rechteckig'], ['Rund', 'rund']] },
+    pl: { head: 'Kszta\u0142t', opts: [['Prostok\u0105tne', 'rechteckig'], ['Okr\u0105g\u0142e', 'rund']] },
+    en: { head: 'Shape', opts: [['Rectangular', 'rechteckig'], ['Round', 'rund']] }
+  };
+  function injectFormSection() {
+    if ($('[fs-cmsfilter-field=form]')) return; // schon vorhanden
+    var anchor = null;
+    $all('.plp-filter-section').forEach(function (sec) {
+      if (!anchor && $('[fs-cmsfilter-field=kategorie]', sec)) anchor = sec;
+    });
+    if (!anchor) return;
+    var t = FORM_I18N[LOC] || FORM_I18N.de;
+    var sec = document.createElement('div');
+    sec.className = 'plp-filter-section is-closed';
+    var optHTML = t.opts.map(function (o) {
+      return '<div role="listitem" class="w-dyn-item"><label fs-cmsfilter-field="form" class="plp-filter-option">' +
+        '<input type="checkbox" class="plp-filter-checkbox"/>' +
+        '<div class="plp-filter-label">' + o[0] + '</div>' +
+        '<div class="plp-filter-count"> </div></label></div>';
+    }).join('');
+    sec.innerHTML =
+      '<div class="plp-filter-head"><div class="plp-filter-head-label">' + t.head + '</div>' +
+      '<div class="plp-filter-head-meta"><div class="plp-filter-head-counter"> </div><div class="plp-filter-head-icon">+</div></div></div>' +
+      '<div class="plp-filter-body"><div class="w-dyn-list"><div role="list" class="w-dyn-items">' + optHTML + '</div></div></div>';
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+  }
+
   function buildIndex() {
     SECTIONS = [];
     $all('.plp-filter-section').forEach(function (sec) {
@@ -229,11 +327,9 @@
   }
 
   function optMatch(field, value, p) {
-    if (LOC !== 'de' && LOCMAP[LOC]) {
-      var _m = field === 'kategorie' ? LOCMAP[LOC].cats : field === 'raume' ? LOCMAP[LOC].rooms : field === 'farbe' ? LOCMAP[LOC].colors : null;
-      if (_m && _m[value] != null) value = _m[value];
-    }
+    value = canonical(field, value);
     switch (field) {
+      case 'form':      return (p.form || '') === value;
       case 'kategorie': return p.kategorie === value;
       case 'raume':     return p.raume.indexOf(value) >= 0;
       case 'farbe':     return p.farben.indexOf(value) >= 0;
@@ -263,7 +359,20 @@
     if (includePrice && (PRICE.from > PRICE.min || PRICE.to < PRICE.max)) {
       if (p.price == null || p.price < PRICE.from || p.price > PRICE.to) return false;
     }
+    if (QUERY) {
+      if (normQ(p.title).indexOf(normQ(QUERY)) < 0) return false;
+    }
     return true;
+  }
+  function clearQuery() {
+    QUERY = '';
+    try {
+      var sp = new URLSearchParams(location.search);
+      sp.delete('q');
+      var qs = sp.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+    } catch (e) {}
+    apply();
   }
 
   function apply() {
@@ -319,6 +428,7 @@
     var active = 0;
     SECTIONS.forEach(function (s) { active += activeOf(s).length; });
     if (PRICE.from > PRICE.min || PRICE.to < PRICE.max) active++;
+    if (QUERY) active++;
     num.textContent = active ? active : '';
     num.classList.toggle('is-zero', active === 0);
   }
@@ -333,6 +443,9 @@
         row.appendChild(pill(o.value, function () { o.checkbox.checked = false; apply(); }));
       });
     });
+    if (QUERY) {
+      row.appendChild(pill('\u201e' + QUERY + '\u201c', clearQuery));
+    }
     if (PRICE.from > PRICE.min || PRICE.to < PRICE.max) {
       row.appendChild(pill(eur(PRICE.from) + '\u2013' + eur(PRICE.to), function () { if (PRICE.reset) PRICE.reset(); }));
     }
@@ -357,6 +470,7 @@
       s.options.forEach(function (o) { if (o.checkbox) o.checkbox.checked = false; });
     });
     if (PRICE.reset) PRICE.reset(true);
+    if (QUERY) { clearQuery(); return; }
     apply();
   }
 
@@ -539,11 +653,14 @@
           if (p.priceByLoc) { var pv = p.priceByLoc[LOC]; p.price = (pv == null ? p.priceByLoc.de : pv); }
         });
         renderGrid();
+        readParams();
+        injectFormSection();
         buildIndex();
         computeGlobalCounts();
         setupPriceSlider();
         wireEvents();
         setupCart();
+        applyPresets();
         apply();
       })
       .catch(function (err) {
