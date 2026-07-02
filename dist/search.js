@@ -31,6 +31,13 @@
     en:{ ph:'Search tabletops, desks, oak \u2026', search:'Search', clear:'Clear', remove:'Remove', close:'Close', recent:'Recent searches', clearHist:'Clear history', popular:'Popular', byRoom:'By room', cats:'Categories', best:'Bestsellers', hint:'\u2191 \u2193 navigate \u00b7 \u21b5 all results \u00b7 ESC close', toAllA:'See all', toAllB:'results', hits:'results', products:'products', allBefore:'View all ', allAfter:'', noResA:'\u2014 no results for \u201c', noResB:'\u201d. Try a material or size (e.g. \u201coak\u201d, \u201c25&nbsp;mm\u201d).' }
   };
   var T = STR[LOC] || STR.de;
+  // Suchtext ueber ALLE Sprachvarianten (de + nL.pl + nL.en) -> Matching locale-uebergreifend
+  function allNames(o){
+    if (!o) return '';
+    var out = o.n || '';
+    if (o.nL) for (var k in o.nL) if (o.nL[k]) out += ' ' + o.nL[k];
+    return out;
+  }
   function locName(o){ return (o && o.nL && o.nL[LOC]) || (o && o.n) || ''; }
   function locPrice(p){ return (p && p.pL && p.pL[LOC]) || (p && p.p) || ''; }
   function roomNameLoc(slug){ for (var i=0;i<IDX.rooms.length;i++){ if(IDX.rooms[i].s===slug) return locName(IDX.rooms[i]); } return null; }
@@ -47,7 +54,7 @@
 
   /* ---- HELPERS --------------------------------------------------------- */
   function norm(s){
-    s = (s||'').toString().toLowerCase().replace(/\u00df/g,'ss').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    s = (s||'').toString().toLowerCase().replace(/\u00df/g,'ss').replace(/\u0142/g,'l').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     // Maße vereinheitlichen: "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
     s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g,'$1 x $2');
     // Zahl+Einheit trennen: "50cm" -> "50 cm", "21mm" -> "21 mm"
@@ -86,16 +93,16 @@
     }
     // product-name tokens (the words people actually type)
     IDX.products.forEach(function(p){
-      var raw = (p.n||'').replace(/[^0-9A-Za-zÄÖÜäöüß]+/g,' ').split(' ');
+      var raw = (locName(p)+' '+(p.n||'')).replace(/[^0-9A-Za-z\u00C0-\u024F]+/g,' ').split(' ');
       raw.forEach(function(tok){ add(tok, 1); });
     });
     // full category names (force-kept) + their tokens — high weight so they surface
     IDX.cats.forEach(function(c){
-      add(c.n, 40, true);
-      (c.n||'').replace(/[^0-9A-Za-zÄÖÜäöüß]+/g,' ').split(' ').forEach(function(t){ add(t, 8); });
+      add(locName(c), 40, true); if (locName(c) !== c.n) add(c.n, 20, true);
+      (locName(c)+' '+(c.n||'')).replace(/[^0-9A-Za-z\u00C0-\u024F]+/g,' ').split(' ').forEach(function(t){ add(t, 8); });
     });
     // room names (force-kept)
-    IDX.rooms.forEach(function(r){ add(r.n, 12, true); });
+    IDX.rooms.forEach(function(r){ add(locName(r), 12, true); });
 
     VOCAB = Object.keys(map).map(function(k){ return map[k]; });
     POPULAR = VOCAB.slice().sort(function(a,b){ return b.c - a.c || a.d.length - b.d.length; })
@@ -111,6 +118,12 @@
     return prev[n];
   }
   // Token-Matching: jede Suchwortgruppe muss (Substring ODER Tippfehler-tolerant) im Ziel vorkommen.
+  var __catNames = null;
+  function catNamesFor(cs){
+    if (!cs) return '';
+    if (!__catNames){ __catNames = {}; (IDX.cats||[]).forEach(function(c){ __catNames[c.s] = allNames(c); }); }
+    return __catNames[cs] || '';
+  }
   function tokenMatch(hay, q){
     var toks = q.split(' '), i, j, t, hw;
     for (i=0;i<toks.length;i++){
@@ -383,8 +396,8 @@
   // Deep-link into the PLP's Finsweet CMS Filter via its field query params (kategorie/raume).
   function matchedCat(term){
     if (!term) return null;
-    return IDX.cats.filter(function(c){ return norm(c.n) === norm(term); })[0]
-        || IDX.cats.filter(function(c){ return norm(c.n).indexOf(norm(term)) > -1; })[0] || null;
+    return IDX.cats.filter(function(c){ return norm(c.n) === norm(term) || (c.nL && Object.keys(c.nL).some(function(k){ return norm(c.nL[k]||'') === norm(term); })); })[0]
+        || IDX.cats.filter(function(c){ return norm(allNames(c)).indexOf(norm(term)) > -1; })[0] || null;
   }
   function resultsURL(){
     var term = els.input.value.trim();
@@ -408,7 +421,7 @@
   }
   function renderCats(term){
     els.cats.innerHTML = IDX.cats.map(function(c){
-      var hit = !term || norm(c.n).indexOf(norm(term)) > -1;
+      var hit = !term || norm(allNames(c)).indexOf(norm(term)) > -1;
       return '<span class="kp-chip'+(term&&hit?' kp-on':'')+(term&&!hit?' kp-dim':'')+'" data-kp-set="'+esc(c.n)+'">'
         + hl(locName(c),term) + '<span class="kp-k">'+ (c.k||0) +'</span></span>';
     }).join('');
@@ -424,7 +437,7 @@
       return bs;
     }
     var n = norm(term);
-    return base.filter(function(p){ return tokenMatch(norm((p.n||'')+' '+(p.c||'')+' '+(p.sp||'')), n); });
+    return base.filter(function(p){ return tokenMatch(norm(allNames(p)+' '+(p.c||'')+' '+catNamesFor(p.cs)+' '+(p.sp||'')), n); });
   }
   function renderProducts(term){
     var list = matchProducts(term);
@@ -440,7 +453,7 @@
         + '<svg class="kp-go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></a>';
     }).join('');
     if (term){
-      var catHit = IDX.cats.filter(function(c){ return norm(c.n).indexOf(norm(term)) > -1; })[0];
+      var catHit = IDX.cats.filter(function(c){ return norm(allNames(c)).indexOf(norm(term)) > -1; })[0];
       if (catHit && list.length < 3){
         html += '<a class="kp-catjump" href="'+kpLP()+'/produkte?kategorie='+encodeURIComponent(catHit.n)+'">'
           + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
@@ -655,6 +668,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.20', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+  window.KPSearch = { version: '1.0.21', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
                       _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();
