@@ -2,7 +2,7 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
- * v2.2.0 — Suche-Handoff, Form-Filter, Maß-tolerante Suche (02.07.2026)
+ * v2.2.1 — Suche-Handoff, Form-Filter, Maß-tolerante Suche (02.07.2026)
  *   - URL-Parameter werden gelesen: ?q= (Textfilter), ?kategorie=, ?raume=,
  *     ?farbe=, ?form= — Checkboxen werden vorbelegt, q filtert Titel.
  *   - Neue Filter-Sektion "Form" (Rechteckig/Rund), client-seitig injiziert,
@@ -131,10 +131,35 @@
   // Maß-tolerante Normalisierung: lowercase, Diakritika weg,
   // "100x50" / "100 x50" / "100×50" / "100*50" -> "100 x 50"
   function normQ(s) {
-    s = String(s == null ? '' : s).toLowerCase();
+    s = String(s == null ? '' : s).toLowerCase().replace(/\u00df/g, 'ss');
     try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
     s = s.replace(/(\d)\s*[x\u00d7*]\s*(\d)/g, '$1 x $2');
+    s = s.replace(/(\d)(cm|mm|m)\b/g, '$1 $2');
     return s.replace(/\s+/g, ' ').trim();
+  }
+  function levQ(a, b){
+    if (a === b) return 0;
+    var m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+    var prev = [], i, j; for (j = 0; j <= n; j++) prev[j] = j;
+    for (i = 1; i <= m; i++){ var cur = [i]; for (j = 1; j <= n; j++){ var c = a.charCodeAt(i-1) === b.charCodeAt(j-1) ? 0 : 1; cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+c); } prev = cur; }
+    return prev[n];
+  }
+  function tokenMatchQ(hay, q){
+    var toks = q.split(' '), i, j, t, hw;
+    for (i = 0; i < toks.length; i++){
+      t = toks[i]; if (!t) continue;
+      if (hay.indexOf(t) > -1) continue;
+      if (t.length >= 4){
+        hw = hay.split(' ');
+        var ok = false;
+        for (j = 0; j < hw.length; j++){
+          if (hw[j].length >= 3 && Math.abs(hw[j].length - t.length) <= 2 && levQ(t, hw[j]) <= 1){ ok = true; break; }
+        }
+        if (ok) continue;
+      }
+      return false;
+    }
+    return true;
   }
   // Option-Label (beliebige Locale) -> kanonischer DE-Datenwert
   function canonical(field, value) {
@@ -360,7 +385,7 @@
       if (p.price == null || p.price < PRICE.from || p.price > PRICE.to) return false;
     }
     if (QUERY) {
-      if (normQ(p.title).indexOf(normQ(QUERY)) < 0) return false;
+      if (!tokenMatchQ(normQ(p.title), normQ(QUERY))) return false;
     }
     return true;
   }
