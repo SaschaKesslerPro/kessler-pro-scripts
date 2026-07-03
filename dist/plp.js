@@ -2,6 +2,14 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.5.0 — Facetten-Bridge für alle Filteroptionen (03.07.2026)
+ *   - Suchanfragen mappen jetzt auf ALLE Facetten, nicht nur Maße:
+ *     „AxB" → Breite+Tiefe, „N mm" → Dicke, Wort-Tokens → Farbe/Form/
+ *     Kategorie/Räume (exakt, Präfix ab 6 Zeichen, Tippfehler lev≤1 ab 6).
+ *   - Mischanfragen: „tischplatte 50x50 schwarz" → Facetten Breite 50 +
+ *     Tiefe 50 + Farbe Schwarz, Rest („tischplatte") bleibt Titelsuche.
+ *   - Mehrere Options-Treffer je Sektion = OR („eiche" → beide Eiche-Dekore).
+ *   - Gelockte Sektion (Kategorie-/Raum-Template) wird übersprungen.
  * v2.4.0 — Maß-Suche → Facetten-Bridge (03.07.2026)
  *   - Suchanfragen wie „50x50" / „50 x 50" / „50×50" (optional mit cm/mm)
  *     werden nicht mehr als loser Titel-Textfilter angewandt (matchte jede
@@ -220,7 +228,6 @@
     return value;
   }
   var QUERY = '';
-  var DIMQ = null; // erkanntes Maß aus der Suche, z. B. { a:50, b:50 } → Breite/Tiefe
   var PRESETS = { kategorie: [], raume: [], farbe: [], form: [] };
   var CATSLUG = { 'moebelplatten': 'M\u00f6belplatten', 'tischplatte-spannplatte': 'M\u00f6belplatten', 'multiplex': 'Multiplex', 'tischplatte-sperrholz': 'Multiplex', 'komplett-tische': 'Komplett-Tische', 'tischgestelle': 'Tischgestelle', 'werkbaenke': 'Werkb\u00e4nke', 'regalzubehoer': 'Regalzubeh\u00f6r', 'medizinschraenke': 'Medizinschr\u00e4nke' };
   var ROOMSLUG = { 'buero': 'B\u00fcro', 'werkstatt': 'Werkstatt', 'praxis': 'Praxis', 'gastro': 'Gastro' };
@@ -236,13 +243,6 @@
     try {
       var sp = new URLSearchParams(location.search);
       QUERY = (sp.get('q') || '').trim();
-      DIMQ = null;
-      if (QUERY) {
-        // Ganze Anfrage ist ein Maß „AxB" (optional mit Einheit)? → später zu Facetten.
-        var _nqd = normQ(QUERY);
-        var _dm = _nqd.match(/^(\d+(?:[.,]\d+)?)\s*x\s*(\d+(?:[.,]\d+)?)(?:\s*(?:cm|mm|m))?$/);
-        if (_dm) DIMQ = { a: parseFloat(_dm[1].replace(',', '.')), b: parseFloat(_dm[2].replace(',', '.')) };
-      }
       ['kategorie', 'raume', 'farbe', 'form'].forEach(function (f) {
         sp.getAll(f).forEach(function (v) {
           v.split(',').forEach(function (x) { x = x.trim(); if (x) PRESETS[f].push(canonical(f, x)); });
@@ -434,16 +434,17 @@
     });
   }
 
-  // Maß-Suche („50x50") in Facetten Breite (cm) + Tiefe (cm) übersetzen.
+  // Facetten-Bridge (v2.5.0): Suchanfrage in Facetten übersetzen — für ALLE Sektionen.
+  //   1) „AxB" (irgendwo in der Anfrage, optional Einheit) → Breite (cm) + Tiefe (cm)
+  //   2) „N mm" → Dicke (mm)
+  //   3) Wort-Tokens → Optionen von Farbe/Form/Kategorie/Räume (exakt, Präfix ≥6, Tippfehler lev≤1 ≥6)
+  // Konsumierte Teile verschwinden aus der Titel-Textsuche; der Rest bleibt QUERY.
   // Läuft nach buildIndex (SECTIONS vorhanden), bevor gefiltert wird.
-  function resolveDimQuery() {
-    if (!DIMQ) return;
-    var wSec = null, dSec = null, i;
-    for (i = 0; i < SECTIONS.length; i++) {
-      if (SECTIONS[i].field === 'breite-cm') wSec = SECTIONS[i];
-      else if (SECTIONS[i].field === 'tiefe-cm') dSec = SECTIONS[i];
-    }
-    if (!wSec || !dSec) { DIMQ = null; return; } // keine Maß-Facetten → Textsuche behalten
+  function resolveFacetQuery() {
+    if (!QUERY) return;
+    var q = normQ(QUERY), consumed = false;
+    var secBy = {}, i;
+    for (i = 0; i < SECTIONS.length; i++) secBy[SECTIONS[i].field] = SECTIONS[i];
     function findOpt(sec, num) {
       for (var j = 0; j < sec.options.length; j++) {
         var o = sec.options[j];
@@ -451,24 +452,69 @@
       }
       return null;
     }
-    var wa = findOpt(wSec, DIMQ.a), db = findOpt(dSec, DIMQ.b);
-    // Asymmetrisches Maß in umgekehrter Orientierung versuchen (z. B. „50x130" → 130×50)
-    if ((!wa || !db) && DIMQ.a !== DIMQ.b) {
-      var wb = findOpt(wSec, DIMQ.b), da = findOpt(dSec, DIMQ.a);
-      if (wb && da) { wa = wb; db = da; }
+    function check(list) {
+      for (var j = 0; j < list.length; j++) if (list[j].checkbox) list[j].checkbox.checked = true;
+      if (list.length) consumed = true;
     }
-    if (wa && db) {
-      wa.checkbox.checked = true;
-      db.checkbox.checked = true;
-      QUERY = ''; // nicht zusätzlich als Titel-Textsuche anwenden
-      try { // q aus der URL entfernen → Chips repräsentieren die Facetten
+    // 1) Maß „A x B" (normQ hat bereits zu "A x B" normalisiert und Einheiten abgetrennt)
+    var dm = q.match(/(\d+(?:[.,]\d+)?) x (\d+(?:[.,]\d+)?)( (?:cm|mm|m)\b)?/);
+    if (dm && secBy['breite-cm'] && secBy['tiefe-cm']) {
+      var a = parseFloat(dm[1].replace(',', '.')), b = parseFloat(dm[2].replace(',', '.'));
+      var wa = findOpt(secBy['breite-cm'], a), db = findOpt(secBy['tiefe-cm'], b);
+      // Asymmetrisches Maß in umgekehrter Orientierung versuchen (z. B. „50x130" → 130×50)
+      if ((!wa || !db) && a !== b) {
+        var wb = findOpt(secBy['breite-cm'], b), da = findOpt(secBy['tiefe-cm'], a);
+        if (wb && da) { wa = wb; db = da; }
+      }
+      if (wa && db) { check([wa, db]); q = q.replace(dm[0], ' '); }
+    }
+    // 2) Stärke „N mm"
+    var sm = q.match(/(\d+(?:[.,]\d+)?) mm\b/);
+    if (sm && secBy['dicke-mm']) {
+      var so = findOpt(secBy['dicke-mm'], parseFloat(sm[1].replace(',', '.')));
+      if (so) { check([so]); q = q.replace(sm[0], ' '); }
+    }
+    // 3) Wort-Tokens gegen Optionen der übrigen Sektionen (erste Sektion mit Treffern gewinnt;
+    //    mehrere Treffer innerhalb der Sektion = OR, z. B. „eiche" → Eiche Hickory + Eiche Sonoma)
+    var toks = q.replace(/\s+/g, ' ').trim();
+    toks = toks ? toks.split(' ') : [];
+    var left = [], t, k;
+    for (k = 0; k < toks.length; k++) {
+      t = toks[k];
+      if (!t) continue;
+      if (/^\d/.test(t) || t === 'x' || t === 'cm' || t === 'mm' || t === 'm') { left.push(t); continue; }
+      var hits = null;
+      for (i = 0; i < SECTIONS.length && !hits; i++) {
+        var s = SECTIONS[i];
+        if (s.field === 'breite-cm' || s.field === 'tiefe-cm' || s.field === 'dicke-mm') continue;
+        if (LOCK && s.field === LOCK.field) continue;
+        var matched = [];
+        for (var oj = 0; oj < s.options.length; oj++) {
+          var o = s.options[oj];
+          if (!o.checkbox) continue;
+          var ot = normQ(o.value).split(' ');
+          for (var tj = 0; tj < ot.length; tj++) {
+            var w = ot[tj];
+            if (w === t ||
+                (t.length >= 6 && w.indexOf(t) === 0) ||
+                (t.length >= 6 && Math.abs(w.length - t.length) <= 2 && levQ(t, w) <= 1)) {
+              matched.push(o); break;
+            }
+          }
+        }
+        if (matched.length) hits = matched;
+      }
+      if (hits) check(hits); else left.push(t);
+    }
+    QUERY = left.join(' ');
+    if (consumed && !QUERY) {
+      try { // q komplett zu Facetten geworden → aus URL entfernen, Chips repräsentieren die Filter
         var sp = new URLSearchParams(location.search);
         sp.delete('q');
         var qs = sp.toString();
         history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
       } catch (e) {}
     }
-    DIMQ = null;
   }
 
   function optMatch(field, value, p) {
@@ -852,7 +898,7 @@
         readParams();
         injectFormSection();
         buildIndex();
-        resolveDimQuery();
+        resolveFacetQuery();
         computeGlobalCounts();
         setupPriceSlider();
         wireEvents();
