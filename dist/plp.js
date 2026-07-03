@@ -2,6 +2,15 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.3.1 — Leere Sektionen aus, Empty-States (03.07.2026)
+ *   - Filter-Sektionen, deren Optionen in der Grundmenge alle 0 Produkte haben
+ *     (z. B. Form/Maße bei Tischgestellen), werden komplett ausgeblendet.
+ *   - Empty-State „Bald verfügbar" wenn die Kategorie 0 Produkte hat
+ *     (Medizinschränke/Regalzubehör); Toolbar+Drawer werden versteckt,
+ *     Hero-Count zeigt „Bald verfügbar". CTA → /produkte.
+ *   - Empty-State „Keine Produkte gefunden" wenn Filter 0 Treffer liefern,
+ *     mit „Filter zurücksetzen"-Button. Beide lokalisiert DE/PL/EN.
+ *
  * v2.3.0 — Lock-Modus für Kategorie-/Raum-Templates (03.07.2026)
  *   - Auf /produktkategorien/{slug} bzw. /raume/{slug} wird die Kategorie/der
  *     Raum HART gelockt: Grundmenge = nur diese Produkte (Counts, Preis-Slider,
@@ -244,6 +253,19 @@
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="product-card_cart-overlay-icon inline-svg-0" style="display:block"><path d="M2 3h2.5l3.5 14h11l3.5-11H6.5"></path><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle></svg>';
 
   var PRODUCTS = [];
+  var EMPTY_I18N = {
+    de: { soonH: 'Bald verf\u00fcgbar', soonP: 'Die Produkte dieser Kategorie sind noch nicht verf\u00fcgbar. Schau bald wieder vorbei.', soonBtn: 'Alle Produkte ansehen', noneH: 'Keine Produkte gefunden', noneP: 'F\u00fcr diese Filterauswahl gibt es keine Produkte.', noneBtn: 'Filter zur\u00fccksetzen', soonCount: 'Bald verf\u00fcgbar' },
+    pl: { soonH: 'Wkr\u00f3tce dost\u0119pne', soonP: 'Produkty z tej kategorii nie s\u0105 jeszcze dost\u0119pne. Zajrzyj wkr\u00f3tce ponownie.', soonBtn: 'Zobacz wszystkie produkty', noneH: 'Nie znaleziono produkt\u00f3w', noneP: 'Brak produkt\u00f3w dla wybranych filtr\u00f3w.', noneBtn: 'Wyczy\u015b\u0107 filtry', soonCount: 'Wkr\u00f3tce dost\u0119pne' },
+    en: { soonH: 'Coming soon', soonP: 'Products in this category are not yet available. Check back soon.', soonBtn: 'View all products', noneH: 'No products found', noneP: 'No products match your filter selection.', noneBtn: 'Reset filters', soonCount: 'Coming soon' }
+  };
+  injectStyle(
+    '.plp-empty{grid-column:1/-1;text-align:center;padding:80px 24px;border:1px solid #E5E5E5;border-radius:8px;background:#FAFAFA}' +
+    '.plp-empty-h{font-size:22px;font-weight:500;color:#0A0A0A;margin:0 0 8px}' +
+    '.plp-empty-p{color:#6A6A66;margin:0 0 24px;font-size:15px;line-height:1.5}' +
+    '.plp-empty-btn{display:inline-block;background:#0A0A0A;color:#F2F0EB;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;cursor:pointer;border:0}' +
+    '.plp-empty-btn:hover{background:#1a1a1a}',
+    'plpemptycss'
+  );
   var NODE_BY_SLUG = {};
   var SECTIONS = [];
   var PRICE = { min: 0, max: 500, from: 0, to: 500, reset: null };
@@ -275,6 +297,17 @@
   function renderGrid() {
     var items = $('#plp-grid .w-dyn-items') || $('#plp-grid .plp-grid') || $('#plp-grid');
     if (!items) return;
+    if (!PRODUCTS.length) {
+      var t = EMPTY_I18N[LOC] || EMPTY_I18N.de;
+      items.innerHTML =
+        '<div class="plp-empty"><div class="plp-empty-h">' + t.soonH + '</div>' +
+        '<p class="plp-empty-p">' + t.soonP + '</p>' +
+        '<a class="plp-empty-btn" href="' + LP + '/produkte">' + t.soonBtn + '</a></div>';
+      var tb = $('.plp-toolbar'); if (tb) tb.style.display = 'none';
+      var dr = $('#plp-drawer'); if (dr) dr.style.display = 'none';
+      NODE_BY_SLUG = {};
+      return;
+    }
     var html = '';
     for (var i = 0; i < PRODUCTS.length; i++) html += cardHTML(PRODUCTS[i]);
     items.innerHTML = html;
@@ -373,7 +406,7 @@
           _global: 0
         };
       });
-      SECTIONS.push({ field: field, options: optionEls, headCounter: $('.plp-filter-head-counter', sec) });
+      SECTIONS.push({ field: field, options: optionEls, headCounter: $('.plp-filter-head-counter', sec), el: sec });
     });
   }
 
@@ -426,6 +459,25 @@
     apply();
   }
 
+  function toggleFilterEmpty(show) {
+    var items = $('#plp-grid .w-dyn-items') || $('#plp-grid .plp-grid') || $('#plp-grid');
+    if (!items) return;
+    var node = $('#plp-filter-empty', items);
+    if (show && !node) {
+      var t = EMPTY_I18N[LOC] || EMPTY_I18N.de;
+      node = document.createElement('div');
+      node.id = 'plp-filter-empty';
+      node.className = 'plp-empty';
+      node.innerHTML =
+        '<div class="plp-empty-h">' + t.noneH + '</div>' +
+        '<p class="plp-empty-p">' + t.noneP + '</p>' +
+        '<button type="button" class="plp-empty-btn" data-plp-empty-clear>' + t.noneBtn + '</button>';
+      node.querySelector('[data-plp-empty-clear]').addEventListener('click', function () { clearAll(); });
+      items.insertBefore(node, items.firstChild);
+    }
+    if (node) node.style.display = show ? '' : 'none';
+  }
+
   function apply() {
     var shown = 0;
     for (var i = 0; i < PRODUCTS.length; i++) {
@@ -450,6 +502,7 @@
       var checked = s.options.filter(function (o) { return o.checkbox && o.checkbox.checked; }).length;
       if (s.headCounter) s.headCounter.textContent = checked ? '(' + checked + ')' : '';
     });
+    toggleFilterEmpty(shown === 0 && PRODUCTS.length > 0);
     renderPills();
     updateCounter(shown);
     updateFilterBtnNum();
@@ -463,6 +516,12 @@
         for (var k = 0; k < PRODUCTS.length; k++) { if (optMatch(s.field, o.value, PRODUCTS[k])) c++; }
         o._global = c;
       });
+      // Sektion komplett ausblenden, wenn keine Option in der Grundmenge Produkte hat
+      if (s.el) {
+        var alive = false;
+        for (var i = 0; i < s.options.length; i++) { if (s.options[i]._global > 0) { alive = true; break; } }
+        s.el.style.display = alive ? '' : 'none';
+      }
     });
   }
 
@@ -490,6 +549,7 @@
   function updateHeroCount() {
     var el = $('.cat-hero-count') || $('.raum-hero-count');
     if (!el) return;
+    if (!PRODUCTS.length) { var t = EMPTY_I18N[LOC] || EMPTY_I18N.de; el.textContent = t.soonCount; return; }
     el.textContent = PRODUCTS.length + ' ' + prodWord(PRODUCTS.length);
   }
 
