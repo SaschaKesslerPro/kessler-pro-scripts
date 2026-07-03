@@ -2,6 +2,17 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.4.0 — Maß-Suche → Facetten-Bridge (03.07.2026)
+ *   - Suchanfragen wie „50x50" / „50 x 50" / „50×50" (optional mit cm/mm)
+ *     werden nicht mehr als loser Titel-Textfilter angewandt (matchte jede
+ *     „50" im Titel → 130×50-Tische), sondern setzen die Facetten
+ *     Breite (cm) + Tiefe (cm) auf die passenden Werte. „50x50" wählt jetzt
+ *     Breite=50 & Tiefe=50 (21 echte Treffer inkl. runde Ø50) statt 107.
+ *   - Swap-Fallback für asymmetrische Maße (z. B. „50x130" → 130×50), wenn
+ *     die direkte Orientierung keine Option hat. Existiert keine passende
+ *     Facette, bleibt es bei der bisherigen Textsuche. q wird aus der URL
+ *     entfernt, sobald es in Facetten übersetzt wurde (Chips = Facetten).
+ *
  * v2.3.2 — Fix Empty-State-Layout (03.07.2026)
  *   - „Bald verfügbar"-State: Drawer wird NICHT mehr display:none gesetzt
  *     (nahm das aside aus dem Grid-Flow → #plp-grid rutschte in die
@@ -209,6 +220,7 @@
     return value;
   }
   var QUERY = '';
+  var DIMQ = null; // erkanntes Maß aus der Suche, z. B. { a:50, b:50 } → Breite/Tiefe
   var PRESETS = { kategorie: [], raume: [], farbe: [], form: [] };
   var CATSLUG = { 'moebelplatten': 'M\u00f6belplatten', 'tischplatte-spannplatte': 'M\u00f6belplatten', 'multiplex': 'Multiplex', 'tischplatte-sperrholz': 'Multiplex', 'komplett-tische': 'Komplett-Tische', 'tischgestelle': 'Tischgestelle', 'werkbaenke': 'Werkb\u00e4nke', 'regalzubehoer': 'Regalzubeh\u00f6r', 'medizinschraenke': 'Medizinschr\u00e4nke' };
   var ROOMSLUG = { 'buero': 'B\u00fcro', 'werkstatt': 'Werkstatt', 'praxis': 'Praxis', 'gastro': 'Gastro' };
@@ -224,6 +236,13 @@
     try {
       var sp = new URLSearchParams(location.search);
       QUERY = (sp.get('q') || '').trim();
+      DIMQ = null;
+      if (QUERY) {
+        // Ganze Anfrage ist ein Maß „AxB" (optional mit Einheit)? → später zu Facetten.
+        var _nqd = normQ(QUERY);
+        var _dm = _nqd.match(/^(\d+(?:[.,]\d+)?)\s*x\s*(\d+(?:[.,]\d+)?)(?:\s*(?:cm|mm|m))?$/);
+        if (_dm) DIMQ = { a: parseFloat(_dm[1].replace(',', '.')), b: parseFloat(_dm[2].replace(',', '.')) };
+      }
       ['kategorie', 'raume', 'farbe', 'form'].forEach(function (f) {
         sp.getAll(f).forEach(function (v) {
           v.split(',').forEach(function (x) { x = x.trim(); if (x) PRESETS[f].push(canonical(f, x)); });
@@ -413,6 +432,43 @@
       });
       SECTIONS.push({ field: field, options: optionEls, headCounter: $('.plp-filter-head-counter', sec), el: sec });
     });
+  }
+
+  // Maß-Suche („50x50") in Facetten Breite (cm) + Tiefe (cm) übersetzen.
+  // Läuft nach buildIndex (SECTIONS vorhanden), bevor gefiltert wird.
+  function resolveDimQuery() {
+    if (!DIMQ) return;
+    var wSec = null, dSec = null, i;
+    for (i = 0; i < SECTIONS.length; i++) {
+      if (SECTIONS[i].field === 'breite-cm') wSec = SECTIONS[i];
+      else if (SECTIONS[i].field === 'tiefe-cm') dSec = SECTIONS[i];
+    }
+    if (!wSec || !dSec) { DIMQ = null; return; } // keine Maß-Facetten → Textsuche behalten
+    function findOpt(sec, num) {
+      for (var j = 0; j < sec.options.length; j++) {
+        var o = sec.options[j];
+        if (o.checkbox && parseFloat(o.value) === num) return o;
+      }
+      return null;
+    }
+    var wa = findOpt(wSec, DIMQ.a), db = findOpt(dSec, DIMQ.b);
+    // Asymmetrisches Maß in umgekehrter Orientierung versuchen (z. B. „50x130" → 130×50)
+    if ((!wa || !db) && DIMQ.a !== DIMQ.b) {
+      var wb = findOpt(wSec, DIMQ.b), da = findOpt(dSec, DIMQ.a);
+      if (wb && da) { wa = wb; db = da; }
+    }
+    if (wa && db) {
+      wa.checkbox.checked = true;
+      db.checkbox.checked = true;
+      QUERY = ''; // nicht zusätzlich als Titel-Textsuche anwenden
+      try { // q aus der URL entfernen → Chips repräsentieren die Facetten
+        var sp = new URLSearchParams(location.search);
+        sp.delete('q');
+        var qs = sp.toString();
+        history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+      } catch (e) {}
+    }
+    DIMQ = null;
   }
 
   function optMatch(field, value, p) {
@@ -796,6 +852,7 @@
         readParams();
         injectFormSection();
         buildIndex();
+        resolveDimQuery();
         computeGlobalCounts();
         setupPriceSlider();
         wireEvents();
