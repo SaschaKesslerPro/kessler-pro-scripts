@@ -2,6 +2,12 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.3.2 — Fix Empty-State-Layout (03.07.2026)
+ *   - „Bald verfügbar"-State: Drawer wird NICHT mehr display:none gesetzt
+ *     (nahm das aside aus dem Grid-Flow → #plp-grid rutschte in die
+ *     0px-Drawer-Spalte und wurde zerquetscht). Drawer ist bei geschlossenem
+ *     Zustand ohnehin unsichtbar; nur die Toolbar wird versteckt.
+ *
  * v2.3.1 — Leere Sektionen aus, Empty-States (03.07.2026)
  *   - Filter-Sektionen, deren Optionen in der Grundmenge alle 0 Produkte haben
  *     (z. B. Form/Maße bei Tischgestellen), werden komplett ausgeblendet.
@@ -304,7 +310,6 @@
         '<p class="plp-empty-p">' + t.soonP + '</p>' +
         '<a class="plp-empty-btn" href="' + LP + '/produkte">' + t.soonBtn + '</a></div>';
       var tb = $('.plp-toolbar'); if (tb) tb.style.display = 'none';
-      var dr = $('#plp-drawer'); if (dr) dr.style.display = 'none';
       NODE_BY_SLUG = {};
       return;
     }
