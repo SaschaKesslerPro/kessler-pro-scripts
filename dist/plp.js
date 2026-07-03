@@ -2,6 +2,18 @@
  * kessler-pro-scripts / plp.js
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
+ * v2.3.0 — Lock-Modus für Kategorie-/Raum-Templates (03.07.2026)
+ *   - Auf /produktkategorien/{slug} bzw. /raume/{slug} wird die Kategorie/der
+ *     Raum HART gelockt: Grundmenge = nur diese Produkte (Counts, Preis-Slider,
+ *     tote Optionen alles kategorie-scoped), die zugehörige Filter-Sektion im
+ *     Drawer wird ausgeblendet (keine Checkbox, keine Pill, zählt nicht in
+ *     den Filter-Button). Löst zugleich den Webflow-100-Karten-Cap auf den
+ *     Kategorieseiten (Möbelplatten: 246 statt 85).
+ *   - Hero-Count (.cat-hero-count / .raum-hero-count) wird live auf die echte
+ *     Produktzahl gesetzt.
+ *   - Produkt-Counter lokalisiert (Produkte / produkty·produktów / products,
+ *     inkl. polnischer Pluralregeln; "von"/"z"/"of").
+ *
  * v2.2.3 — Suche-Handoff, Form-Filter, Maß-tolerante Suche (02.07.2026)
  *   - URL-Parameter werden gelesen: ?q= (Textfilter), ?kategorie=, ?raume=,
  *     ?farbe=, ?form= — Checkboxen werden vorbelegt, q filtert Titel.
@@ -185,6 +197,14 @@
   var PRESETS = { kategorie: [], raume: [], farbe: [], form: [] };
   var CATSLUG = { 'moebelplatten': 'M\u00f6belplatten', 'tischplatte-spannplatte': 'M\u00f6belplatten', 'multiplex': 'Multiplex', 'tischplatte-sperrholz': 'Multiplex', 'komplett-tische': 'Komplett-Tische', 'tischgestelle': 'Tischgestelle', 'werkbaenke': 'Werkb\u00e4nke', 'regalzubehoer': 'Regalzubeh\u00f6r', 'medizinschraenke': 'Medizinschr\u00e4nke' };
   var ROOMSLUG = { 'buero': 'B\u00fcro', 'werkstatt': 'Werkstatt', 'praxis': 'Praxis', 'gastro': 'Gastro' };
+  // Lock-Modus: auf Kategorie-/Raum-Templates ist das Facet fest, Sektion versteckt.
+  var LOCK = (function () {
+    var m = location.pathname.match(/\/produktkategorien\/([^\/?#]+)/);
+    if (m && CATSLUG[m[1]]) return { field: 'kategorie', value: CATSLUG[m[1]] };
+    m = location.pathname.match(/\/raume\/([^\/?#]+)/);
+    if (m && ROOMSLUG[m[1]]) return { field: 'raume', value: ROOMSLUG[m[1]] };
+    return null;
+  })();
   function readParams() {
     try {
       var sp = new URLSearchParams(location.search);
@@ -195,11 +215,15 @@
         });
       });
     } catch (e) {}
-    // Kategorie-/Raum-Template: Filter aus dem Pfad vorbelegen
-    var m = location.pathname.match(/\/produktkategorien\/([^\/?#]+)/);
-    if (m && CATSLUG[m[1]]) PRESETS.kategorie.push(CATSLUG[m[1]]);
-    m = location.pathname.match(/\/raume\/([^\/?#]+)/);
-    if (m && ROOMSLUG[m[1]]) PRESETS.raume.push(ROOMSLUG[m[1]]);
+    // Kategorie-/Raum-Template ohne Filter-UI (Alt-Verhalten): Filter vorbelegen.
+    // Mit Lock-Modus (Filter-UI vorhanden) übernimmt LOCK die Grundmenge.
+    if (!LOCK) {
+      var m = location.pathname.match(/\/produktkategorien\/([^\/?#]+)/);
+      if (m && CATSLUG[m[1]]) PRESETS.kategorie.push(CATSLUG[m[1]]);
+      m = location.pathname.match(/\/raume\/([^\/?#]+)/);
+      if (m && ROOMSLUG[m[1]]) PRESETS.raume.push(ROOMSLUG[m[1]]);
+    }
+    if (LOCK) PRESETS[LOCK.field] = [];
   }
   function applyPresets() {
     var any = false;
@@ -337,6 +361,7 @@
       var field = null;
       opts.forEach(function (o) { var f = o.getAttribute('fs-cmsfilter-field'); if (f && !field) field = f; });
       if (!field || !opts.length) return;
+      if (LOCK && field === LOCK.field) { sec.style.display = 'none'; return; }
       var optionEls = opts.map(function (o) {
         var labelEl = $('.plp-filter-label', o);
         return {
@@ -441,11 +466,31 @@
     });
   }
 
+  function prodWord(n) {
+    if (LOC === 'pl') {
+      if (n === 1) return 'produkt';
+      var d = n % 10, h = n % 100;
+      if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'produkty';
+      return 'produkt\u00f3w';
+    }
+    if (LOC === 'en') return n === 1 ? 'product' : 'products';
+    return n === 1 ? 'Produkt' : 'Produkte';
+  }
   function updateCounter(shown) {
     var el = $('.plp-page-counter');
     if (!el) return;
     var total = PRODUCTS.length;
-    el.textContent = (shown === total) ? total + ' Produkte' : shown + ' von ' + total + ' Produkten';
+    var of = LOC === 'pl' ? ' z ' : (LOC === 'en' ? ' of ' : ' von ');
+    var w = prodWord(total);
+    if (LOC === 'de' && shown !== total && total !== 1) w = 'Produkten';
+    el.textContent = (shown === total)
+      ? total + ' ' + w
+      : shown + of + total + ' ' + w;
+  }
+  function updateHeroCount() {
+    var el = $('.cat-hero-count') || $('.raum-hero-count');
+    if (!el) return;
+    el.textContent = PRODUCTS.length + ' ' + prodWord(PRODUCTS.length);
   }
 
   function updateFilterBtnNum() {
@@ -678,6 +723,10 @@
           if (p.priceRawByLoc) p.priceRaw = p.priceRawByLoc[LOC] || p.priceRawByLoc.de || p.priceRaw;
           if (p.priceByLoc) { var pv = p.priceByLoc[LOC]; p.price = (pv == null ? p.priceByLoc.de : pv); }
         });
+        if (LOCK) {
+          PRODUCTS = PRODUCTS.filter(function (p) { return optMatch(LOCK.field, LOCK.value, p); });
+        }
+        updateHeroCount();
         renderGrid();
         readParams();
         injectFormSection();
