@@ -1,5 +1,10 @@
 /*!
- * Kessler PRO · hub.js v1.7.3
+ * Kessler PRO · hub.js v1.7.4
+ *
+ * v1.7.4 (Δ gegen v1.7.3):
+ *   - Security-Audit-Fix: escGql() escaped jetzt auch \n und \r (und entfernt
+ *     übrige Steuerzeichen). Vorher erzeugte ein Zeilenumbruch in einem
+ *     Adress-/Namensfeld einen GraphQL-Syntaxfehler → Speichern schlug still fehl.
  *
  * v1.7.3 (Δ gegen v1.7.2):
  *   - P3: orderDetailUrl prefers human-readable o.name ("KP-2026-1004") over
@@ -1520,7 +1525,12 @@
   }
 
   function escGql(s){
-    return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+    return String(s)
+      .replace(/\\/g,'\\\\')
+      .replace(/"/g,'\\"')
+      .replace(/\n/g,'\\n')
+      .replace(/\r/g,'')
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'');
   }
 
   function mutCustomerUpdate(token,firstName,lastName){
