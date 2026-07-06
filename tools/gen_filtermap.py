@@ -174,6 +174,8 @@ for x in allit:
 
     search_products.append({
         'n': t_de,'s': slug,'p': pr_de,'c': kat,'cs': kat_slug,'sp': None,
+        'nL': {'de':t_de,'pl':t_pl,'en':t_en},
+        'pL': {'de':pr_de,'pl':pr_pl,'en':pr_en},
         'img': imgurl,'bs': 1 if f.get('header-bestseller') else 0,'rm': raum_slugs,'r': f.get('bewertung'),
     })
 
