@@ -45,6 +45,9 @@
     document.head.appendChild(s);
   }
 
+  // PDP-Prozess-Bilder: korrekter Bildausschnitt (Default war oben-links -> zeigte Decke)
+  injectStyle('.pdp_mat-img{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}');
+
   // Scrollbar-hide for product-grid carousel
   injectStyle(
     '.product-grid_wrapper{-ms-overflow-style:none!important;scrollbar-width:none!important}' +
