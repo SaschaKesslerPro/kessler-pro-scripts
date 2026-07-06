@@ -48,6 +48,14 @@
   // PDP-Prozess-Bilder: korrekter Bildausschnitt (Default war oben-links -> zeigte Decke)
   injectStyle('.pdp_mat-img,.pdp_quote-img{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}');
 
+  // PDP-Empfehlungen ("Das könnte dir auch gefallen"): native Recs-Liste als Grid begrenzen
+  injectStyle(
+    '.pdp_recs-head ~ .w-dyn-list .w-dyn-items{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}' +
+    '.pdp_recs-head ~ .w-dyn-list .w-dyn-item{width:100%;min-width:0}' +
+    '@media (max-width:991px){.pdp_recs-head ~ .w-dyn-list .w-dyn-items{grid-template-columns:repeat(3,1fr)}}' +
+    '@media (max-width:767px){.pdp_recs-head ~ .w-dyn-list .w-dyn-items{grid-template-columns:repeat(2,1fr);gap:12px}}'
+  );
+
   // Scrollbar-hide for product-grid carousel
   injectStyle(
     '.product-grid_wrapper{-ms-overflow-style:none!important;scrollbar-width:none!important}' +
