@@ -71,6 +71,23 @@ RAUM = {k:v['name'] for k,v in RAUM_full.items()}
 VF   = {k:v['name'] for k,v in VF_full.items()}
 print(f'  Kategorien {len(KAT)} | Raeume {len(RAUM)} | Farben {len(VF)}', file=sys.stderr)
 
+# Locale-Namen (PL/EN) fuer Kategorien + Raeume (Such-Index nL)
+PL_LOC='6907a534407b21d560df11e4'; EN_LOC='693d37e00fa97e8096629a1d'
+def fetch_ref_locale(cid, loc):
+    out, offset, limit = {}, 0, 100
+    while True:
+        d = api_get(f'/collections/{cid}/items?limit={limit}&offset={offset}&cmsLocaleId={loc}')
+        batch = d.get('items', [])
+        for x in batch:
+            fdx = x.get('fieldData', {})
+            out[x['id']] = (fdx.get('name') or '').strip()
+        if offset + limit >= d.get('pagination',{}).get('total', len(out)) or not batch: break
+        offset += limit
+    return out
+KAT_PL  = fetch_ref_locale(KAT_CID, PL_LOC);  KAT_EN  = fetch_ref_locale(KAT_CID, EN_LOC)
+RAUM_PL = fetch_ref_locale(RAUM_CID, PL_LOC); RAUM_EN = fetch_ref_locale(RAUM_CID, EN_LOC)
+print(f'  Locale-Namen: KAT pl {len(KAT_PL)}/en {len(KAT_EN)} | RAUM pl {len(RAUM_PL)}/en {len(RAUM_EN)}', file=sys.stderr)
+
 # --- EIGENFARBE pro Produkt (fuer den PLP-Farbfilter) ---
 # Frueher = verfugbare-farben (Familien-Set) -> Filter "Schwarz" zeigte ganze Familien.
 # Jetzt = die tatsaechliche Farbe des Einzelprodukts, geparst aus dem Titel
@@ -185,8 +202,12 @@ with open(OUT,'w') as fh:
     json.dump(out, fh, ensure_ascii=False, separators=(',',':'))
 
 catcount = Counter(p['cs'] for p in search_products if p.get('cs'))
-search_cats = [{'n':v['name'],'s':v['slug'],'k':catcount.get(v['slug'],0)} for v in KAT_full.values() if v.get('slug')]
-search_rooms = [{'n':v['name'],'s':v['slug'],'icon':None} for v in RAUM_full.values() if v.get('slug')]
+search_cats = [{'n':v['name'],'s':v['slug'],'k':catcount.get(v['slug'],0),
+                'nL':{'de':v['name'],'pl':KAT_PL.get(k) or v['name'],'en':KAT_EN.get(k) or v['name']}}
+               for k,v in KAT_full.items() if v.get('slug')]
+search_rooms = [{'n':v['name'],'s':v['slug'],'icon':None,
+                 'nL':{'de':v['name'],'pl':RAUM_PL.get(k) or v['name'],'en':RAUM_EN.get(k) or v['name']}}
+                for k,v in RAUM_full.items() if v.get('slug')]
 search_out = {'v':1,'products':search_products,'cats':search_cats,'rooms':search_rooms}
 with open(SEARCH_OUT,'w') as fh:
     json.dump(search_out, fh, ensure_ascii=False, separators=(',',':'))
