@@ -481,3 +481,34 @@
   })();
 
 })();
+
+/* --- KP Analytics Bridge v1.0 (GA4 dataLayer, 11.07.2026) ---
+ * kpDL(name, ecommerce?, extra?) pusht GA4-konforme Events in den dataLayer.
+ * Consent-Handling uebernimmt GTM/Consent Mode — hier wird IMMER gepusht. */
+(function(){
+  if(window.kpDL)return;
+  window.dataLayer=window.dataLayer||[];
+  window.kpDL=function(name,ecom,extra){
+    try{
+      if(ecom)window.dataLayer.push({ecommerce:null});
+      var e={event:name};
+      if(extra)for(var k in extra)e[k]=extra[k];
+      if(ecom)e.ecommerce=ecom;
+      window.dataLayer.push(e);
+    }catch(err){}
+  };
+  window.kpCurrency=function(){
+    try{var c=localStorage.getItem('_sf-currency');
+      if(c){c=String(c).replace(/["']/g,'').trim();if(/^[A-Z]{3}$/.test(c))return c;}
+    }catch(e){}
+    return location.pathname.indexOf('/pl-pl')===0?'PLN':'EUR';
+  };
+  window.kpParsePrice=function(s){
+    if(typeof s==='number')return s;
+    if(!s)return 0;
+    s=String(s).replace(/[^\d.,]/g,'');
+    if(s.indexOf(',')>-1&&s.indexOf('.')>-1)s=s.replace(/\./g,'').replace(',','.');
+    else s=s.replace(',','.');
+    var f=parseFloat(s);return isNaN(f)?0:f;
+  };
+})();
