@@ -1,5 +1,7 @@
 /*!
  * kessler-pro-scripts / pdp.js
+ *
+ * v1.1.0 — GA4-Events: view_item, add_to_cart (11.07.2026)
  * Product Detail Page — PDP-specific logic.
  *
  * Audit 11 — Gallery: clicking a thumbnail shows that image as the main image.
@@ -72,7 +74,29 @@
     setActive(0);
   }
 
-  function init() { initGallery(); }
+  function initTracking() {
+    if (!window.kpDL) { setTimeout(initTracking, 400); return; }
+    try {
+      var pidEl = document.querySelector('[sf-product]');
+      var pid = pidEl ? String(pidEl.getAttribute('sf-product')) : (location.pathname.split('/').pop() || '');
+      var h1 = document.querySelector('h1.pdp_title') || document.querySelector('h1');
+      var name = h1 ? h1.textContent.trim() : document.title;
+      var prEl = document.querySelector('.pdp_price');
+      var price = prEl && window.kpParsePrice ? window.kpParsePrice(prEl.textContent) : 0;
+      if (!window.__kpViewItem) {
+        window.__kpViewItem = true;
+        window.kpDL('view_item', { currency: window.kpCurrency ? window.kpCurrency() : 'EUR', value: price, items: [{ item_id: pid, item_name: name, price: price, quantity: 1 }] });
+      }
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest && e.target.closest('[sf-add-to-cart]');
+        if (!btn || btn.closest('[data-kp-card]')) return; // Karten-Add macht plp.js
+        var pr2 = prEl && window.kpParsePrice ? window.kpParsePrice(prEl.textContent) : price;
+        window.kpDL('add_to_cart', { currency: window.kpCurrency ? window.kpCurrency() : 'EUR', value: pr2, items: [{ item_id: pid, item_name: name, price: pr2, quantity: 1 }] });
+      }, true);
+    } catch (eT) {}
+  }
+
+  function init() { initGallery(); initTracking(); }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
