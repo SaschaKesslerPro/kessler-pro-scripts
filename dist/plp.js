@@ -1,5 +1,7 @@
 /*!
  * kessler-pro-scripts / plp.js
+ *
+ * v2.6.0 — GA4-Events: view_item_list (dedupe je Grundmenge), select_item, add_to_cart Quick-Add (11.07.2026)
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
  * v2.5.0 — Facetten-Bridge für alle Filteroptionen (03.07.2026)
@@ -338,6 +340,23 @@
     NODE_BY_SLUG = {};
     $all('[data-kp-card]', items).forEach(function (n) { NODE_BY_SLUG[n.getAttribute('data-slug')] = n; });
     try { document.dispatchEvent(new Event('kpw:change')); } catch (e) {}
+    // GA4: view_item_list (nur bei geaenderter Grundmenge, nicht je Re-Render)
+    try {
+      if (window.kpDL) {
+        var lm = location.pathname.match(/\/(produktkategorien|raume)\/([^\/?#]+)/);
+        var listId = lm ? lm[1] + ':' + lm[2] : 'produkte';
+        var sig = listId + '|' + PRODUCTS.length + '|' + (PRODUCTS[0] ? PRODUCTS[0].slug : '');
+        if (window.__kpListSig !== sig) {
+          window.__kpListSig = sig;
+          window.kpDL('view_item_list', {
+            item_list_id: listId,
+            items: PRODUCTS.slice(0, 12).map(function (p, i) {
+              return { item_id: String(p.pid || p.slug), item_name: p.title, price: p.price, index: i, quantity: 1 };
+            })
+          });
+        }
+      }
+    } catch (eTrack) {}
   }
 
   // -----------------------------------------------------------------
@@ -362,6 +381,20 @@
     }).catch(function () { VARIANT_CACHE[pid] = null; return null; });
   }
 
+  function setupTracking() {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('.product-card_overlay-link');
+      if (!a || !window.kpDL) return;
+      var card = a.closest('[data-kp-card]');
+      if (!card) return;
+      try {
+        var t = (card.querySelector('.product-card_title') || {}).textContent || '';
+        var pr = window.kpParsePrice ? window.kpParsePrice((card.querySelector('.product-card_price') || {}).textContent || '') : 0;
+        window.kpDL('select_item', { items: [{ item_id: String(card.getAttribute('data-pid') || card.getAttribute('data-slug')), item_name: t.trim(), price: pr, quantity: 1 }] });
+      } catch (eT) {}
+    }, true);
+  }
+
   function setupCart() {
     document.addEventListener('click', function (e) {
       var btn = e.target.closest && e.target.closest('.product-card_cart-overlay');
@@ -377,7 +410,17 @@
       variantFor(pid).then(function (num) {
         if (!num) { btn.removeAttribute('data-busy'); return; } // nicht im Storefront -> no-op
         return window.Shopyflow.addToCart({ lineItems: [{ merchandiseId: num, quantity: 1 }] })
-          .then(function () { try { window.Shopyflow.openCart(); } catch (e2) {} });
+          .then(function () {
+            try { window.Shopyflow.openCart(); } catch (e2) {}
+            // GA4: add_to_cart (Karten-Quick-Add)
+            try {
+              if (window.kpDL) {
+                var t = (card.querySelector('.product-card_title') || {}).textContent || '';
+                var pr = window.kpParsePrice ? window.kpParsePrice((card.querySelector('.product-card_price') || {}).textContent || '') : 0;
+                window.kpDL('add_to_cart', { currency: window.kpCurrency ? window.kpCurrency() : 'EUR', value: pr, items: [{ item_id: String(pid), item_name: t.trim(), price: pr, quantity: 1 }] });
+              }
+            } catch (e3) {}
+          });
       }).then(function () { btn.removeAttribute('data-busy'); })
         .catch(function () { btn.removeAttribute('data-busy'); });
     });
@@ -903,6 +946,7 @@
         setupPriceSlider();
         wireEvents();
         setupCart();
+        setupTracking();
         applyPresets();
         apply();
       })
