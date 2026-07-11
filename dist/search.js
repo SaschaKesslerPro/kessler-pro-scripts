@@ -566,7 +566,7 @@
       f.clear.addEventListener('click', function(){ setActive(f); mirror(''); ai=-1; render(); f.input.focus(); });
       if (f.sheet){
         f.input.addEventListener('keydown', function(e){
-          if (e.key === 'Enter' && (f.input.value.trim() || activeRoom)){ recentAdd(f.input.value.trim()); window.location.href = resultsURL(); }
+          if (e.key === 'Enter' && (f.input.value.trim() || activeRoom)){ recentAdd(f.input.value.trim()); try{if(window.kpDL)window.kpDL('search',null,{search_term:f.input.value.trim()});}catch(eT){} window.location.href = resultsURL(); }
           if (e.key === 'Escape'){ if (f.input.value){ mirror(''); ai=-1; render(); } else closeSheet(); }
         });
       }
@@ -596,7 +596,7 @@
       if (e.key === 'ArrowUp'){ e.preventDefault(); ai=Math.max(ai-1, -1); highlight(); }
       if (e.key === 'Enter'){
         if (ai > -1 && nav[ai]){ window.location.href = nav[ai].getAttribute('href'); }
-        else if (els.input.value.trim() || activeRoom){ window.location.href = resultsURL(); }
+        else if (els.input.value.trim() || activeRoom){ try{if(window.kpDL)window.kpDL('search',null,{search_term:els.input.value.trim()});}catch(eT){} window.location.href = resultsURL(); }
       }
     });
     // room = toggle filter · category chip = set text filter (panel is on <body>)
