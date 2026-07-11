@@ -137,6 +137,13 @@
     filtered.unshift(item);
     write(filtered);
     log('item','added',{h:item.h});
+    try{
+      if(window.kpDL)window.kpDL('add_to_wishlist',{
+        currency:window.kpCurrency?window.kpCurrency():'EUR',
+        value:(item.p&&window.kpParsePrice)?window.kpParsePrice(item.p):0,
+        items:[{item_id:String(item.h),item_name:item.n||item.h,price:(item.p&&window.kpParsePrice)?window.kpParsePrice(item.p):0,quantity:1}]
+      });
+    }catch(eT){}
     emit();
     queueSync();
     return true;
