@@ -512,3 +512,36 @@
     var f=parseFloat(s);return isNaN(f)?0:f;
   };
 })();
+
+/* --- KP generate_lead v1.0 (12.07.2026) ---
+ * Pusht generate_lead in den dataLayer, wenn ein Webflow-Formular
+ * erfolgreich abgesendet wurde (.w-form-done wird sichtbar).
+ * Grund: Webflow submitted via AJAX (preventDefault) -> GTMs nativer
+ * Form-Submit-Listener mit Validierungspruefung matcht nie zuverlaessig.
+ * Erfolgszustand = reCAPTCHA bestanden + Server-OK -> saubere Leads. */
+(function(){
+  function visible(el){
+    if(!el)return false;
+    var cs=window.getComputedStyle(el);
+    return cs.display!=='none'&&cs.visibility!=='hidden'&&el.offsetParent!==null;
+  }
+  function push(done){
+    if(done.getAttribute('data-kp-lead'))return;
+    done.setAttribute('data-kp-lead','1');
+    var wrap=done.closest('.w-form'),form=wrap?wrap.querySelector('form'):null;
+    var name=(form&&(form.getAttribute('data-name')||form.getAttribute('name')))||'Formular';
+    if(window.kpDL)window.kpDL('generate_lead',null,{form_name:name});
+  }
+  function scan(){
+    var els=document.querySelectorAll('.w-form-done');
+    for(var i=0;i<els.length;i++){if(visible(els[i]))push(els[i]);}
+  }
+  function start(){
+    if(!document.querySelector('.w-form-done'))return;
+    var mo=new MutationObserver(scan);
+    mo.observe(document.body,{attributes:true,attributeFilter:['style','class'],subtree:true,childList:true});
+    scan();
+  }
+  if(document.readyState!=='loading')start();
+  else document.addEventListener('DOMContentLoaded',start);
+})();
