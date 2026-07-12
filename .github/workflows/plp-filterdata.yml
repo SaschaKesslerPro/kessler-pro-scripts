@@ -1,7 +1,7 @@
 name: PLP Filterdaten
 
-# Regeneriert dist/plp-filterdata.json aus der Webflow Data API.
-# Stuendlich + manuell ausloesbar. plp.js laedt diese Datei frisch von @main.
+# Regeneriert dist/plp-filterdata.json + search-index.json + Merchant-Feeds
+# aus der Webflow Data API. Stuendlich + manuell ausloesbar.
 
 on:
   schedule:
@@ -27,6 +27,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Generate Merchant-Center-Feeds
+        env:
+          WEBFLOW_TOKEN: ${{ secrets.WEBFLOW_TOKEN }}
+        run: python tools/gen_merchant_feed.py dist
+
       - name: Generate dist/plp-filterdata.json
         env:
           WEBFLOW_TOKEN: ${{ secrets.WEBFLOW_TOKEN }}
@@ -37,12 +42,12 @@ jobs:
         run: |
           git config user.name "kessler-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add dist/plp-filterdata.json
+          git add dist/
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Keine Aenderung an plp-filterdata.json."
+            echo "Keine Aenderung."
           else
-            git commit -m "chore(plp): regenerate filterdata [skip ci]"
+            git commit -m "chore: regenerate feeds + filterdata [skip ci]"
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -51,3 +56,4 @@ jobs:
         if: steps.commit.outputs.changed == 'true'
         run: |
           curl -sf "https://purge.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json" || true
+          curl -sf "https://purge.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json" || true
