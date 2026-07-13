@@ -672,7 +672,7 @@
 
   function setCounter(){
     var n=count();
-    document.querySelectorAll('[data-mobile-icon="wishlist"] .kp-icon-counter, .kp-wishlist-counter').forEach(function(c){
+    document.querySelectorAll('[data-mobile-icon="wishlist"] .kp-icon-counter, .kp-wishlist-counter, [data-kpw-count]').forEach(function(c){
       c.textContent=n||'';
     });
   }
