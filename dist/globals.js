@@ -340,7 +340,7 @@
       if (!el) return;
       var n = '';
       try { n = localStorage.getItem('kp_cust_name') || ''; } catch (e) {}
-      el.textContent = n ? ' · ' + n : '';
+      el.textContent = 'Angemeldet' + (n ? ' · ' + n : '');
     }
 
     function setOpen(open) {
