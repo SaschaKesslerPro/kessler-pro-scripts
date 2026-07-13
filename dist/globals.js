@@ -295,6 +295,19 @@
         '@keyframes kpM2Fade{from{opacity:.4}to{opacity:1}}'
     );
 
+    // Cleanup (v2.0.2): Alt-Fragmente aus dem API-Rebuild entfernen —
+    // erst kleine Einheiten, dann Panels (sonst fliegen Eltern mit).
+    // Endgültige Entfernung im Designer: Phase-4-Cleanup.
+    var PH = 'This is some text inside of a div block';
+    [].forEach.call(ov.querySelectorAll('.m2-x'), function (el) { el.remove(); });
+    [].forEach.call(
+      ov.querySelectorAll('.m2-l2-head, .m2-hint, .m2-account-box, .m2-back-bar'),
+      function (el) { if (el.textContent.indexOf(PH) !== -1) el.remove(); }
+    );
+    [].forEach.call(ov.querySelectorAll('.m2-panel'), function (el) {
+      if (el.textContent.indexOf(PH) !== -1) el.remove();
+    });
+
     var stack = ov.querySelector('.m2-stack');
     var backdrop = ov.querySelector('.m2-backdrop');
     var backBar = ov.querySelector('[data-m2-back]');
