@@ -386,6 +386,7 @@
         return null;
       }
       var latest=latestOrder(c);
+      try{localStorage.setItem('kp_cust_name',((c.firstName||'')+' '+(c.lastName||'')).trim());}catch(e){}
       log('parse','customer ok',{
         fields:Object.keys(c),
         firstName:c.firstName,
