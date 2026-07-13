@@ -1,6 +1,9 @@
 /*!
  * kessler-pro-scripts / globals.js
  * Site-wide functionality: header, reviews, recently-viewed, etc.
+ * v2.0.0 (13.07.2026): KP Mobile Sheet v2 (Bottom Sheet) — ersetzt den
+ *   Side-Drawer, sobald [data-m2="overlay"] im DOM existiert. Altes
+ *   Drawer-Modul deaktiviert sich dann selbst (Cutover-Schalter).
  */
 
 (function () {
@@ -218,7 +221,9 @@
 
     var Q = w.querySelector.bind(w);
     var A = w.querySelectorAll.bind(w);
-    var ov = Q('.header_mobile-overlay');
+    // v2.0.0: neues Bottom-Sheet vorhanden? -> alter Drawer inaktiv (ov=null),
+    // Scroll-Logik unten läuft weiter.
+    var ov = document.querySelector('[data-m2="overlay"]') ? null : Q('.header_mobile-overlay');
     var bg = Q('.header_mobile-burger');
     var mr = Q('.header_mobile-row');
 
@@ -270,6 +275,147 @@
       window.addEventListener('scroll', checkScroll, { passive: true });
       checkScroll();
     }
+  })();
+
+  // -----------------------------------------------------------------
+  // Header: KP Mobile Sheet v2 (Bottom Sheet) — v2.0.0
+  // Aktiv nur, wenn [data-m2="overlay"] existiert (Cutover-Schalter).
+  // Zustände: closed | main | produkte | inspiration | service
+  // -----------------------------------------------------------------
+
+  (function initKpMobileSheetV2() {
+    var ov = document.querySelector('[data-m2="overlay"]');
+    if (!ov) return;
+
+    injectStyle(
+      // Mockup 1a: L2-Panels ohne Drag-Handle (Back-Bar übernimmt Kopf)
+      '.m2-sheet.is-l2 .m2-handle{display:none}' +
+        // Panel-Wechsel: sanfter Content-Fade
+        '.m2-panel.is-active{animation:kpM2Fade .18s ease}' +
+        '@keyframes kpM2Fade{from{opacity:.4}to{opacity:1}}'
+    );
+
+    var stack = ov.querySelector('.m2-stack');
+    var backdrop = ov.querySelector('.m2-backdrop');
+    var backBar = ov.querySelector('[data-m2-back]');
+    var sheet = ov.querySelector('.m2-sheet');
+    var body = ov.querySelector('.m2-body');
+    var panels = ov.querySelectorAll('[data-m2-panel]');
+    var burger = document.querySelector('.header_mobile-burger');
+    var lastFocus = null;
+    var totalsDone = false;
+
+    function showPanel(key) {
+      [].forEach.call(panels, function (p) {
+        p.classList.toggle('is-active', p.getAttribute('data-m2-panel') === key);
+      });
+      var isL2 = key !== 'main';
+      if (backBar) backBar.classList.toggle('is-visible', isL2);
+      if (sheet) sheet.classList.toggle('is-l2', isL2);
+      if (body) body.scrollTop = 0;
+    }
+
+    // "379 Artikel"-Summen live aus den gerenderten CMS-Counts
+    function computeTotals() {
+      if (totalsDone) return;
+      var counts = ov.querySelectorAll('.m2-cat-count');
+      if (!counts.length) return;
+      var sum = 0;
+      [].forEach.call(counts, function (c) {
+        sum += parseInt((c.textContent || '').replace(/\D/g, ''), 10) || 0;
+      });
+      if (!sum) return;
+      // Letzte Zahl im String ersetzen (lokalisierungssicher):
+      var patchLast = function (el) {
+        el.textContent = el.textContent.replace(/(\d+)(?!.*\d)/, String(sum));
+      };
+      [].forEach.call(ov.querySelectorAll('[data-m2-meta="produkte"]'), patchLast);
+      [].forEach.call(ov.querySelectorAll('[data-m2-count="produkte"]'), patchLast);
+      totalsDone = true;
+    }
+
+    // "Angemeldet · Vorname Nachname" — Name aus hub.js-Cache (kp_cust_name)
+    function fillName() {
+      var el = ov.querySelector('[data-m2-name]');
+      if (!el) return;
+      var n = '';
+      try { n = localStorage.getItem('kp_cust_name') || ''; } catch (e) {}
+      el.textContent = n ? ' · ' + n : '';
+    }
+
+    function setOpen(open) {
+      ov.classList.toggle('is-open', open);
+      if (backdrop) backdrop.classList.toggle('is-open', open);
+      if (stack) stack.classList.toggle('is-open', open);
+      ov.setAttribute('aria-hidden', open ? 'false' : 'true');
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open) {
+        lastFocus = document.activeElement;
+        showPanel('main');
+        computeTotals();
+        fillName();
+        if (sheet) {
+          sheet.setAttribute('tabindex', '-1');
+          sheet.focus({ preventScroll: true });
+        }
+      } else if (lastFocus && lastFocus.focus) {
+        try { lastFocus.focus({ preventScroll: true }); } catch (e) {}
+        lastFocus = null;
+      }
+    }
+
+    if (burger) {
+      burger.addEventListener('click', function (e) {
+        e.preventDefault();
+        setOpen(true);
+      });
+    }
+
+    // Delegierte Klicks im Overlay
+    ov.addEventListener('click', function (e) {
+      var t;
+      if (e.target.closest('[data-m2-close]')) {
+        e.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (e.target.closest('[data-m2-back]')) {
+        e.preventDefault();
+        showPanel('main');
+        return;
+      }
+      t = e.target.closest('[data-m2-open]');
+      if (t) {
+        e.preventDefault();
+        showPanel(t.getAttribute('data-m2-open'));
+        return;
+      }
+      // Suche im Sheet: search.js öffnet das Overlay (eigener Handler),
+      // wir schließen nur das Sheet darunter.
+      if (e.target.closest('[data-mobile-trigger="search-open"]')) {
+        setOpen(false);
+        return;
+      }
+      // Echte Navigation: Sheet schließen, Link läuft nativ weiter
+      if (e.target.closest('a[href]:not([href="#"])')) {
+        setOpen(false);
+      }
+    });
+
+    // Tastatur: ESC schließt, Enter/Space auf role=button öffnet Panel
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && ov.classList.contains('is-open')) {
+        setOpen(false);
+        return;
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.getAttribute) {
+        var k = e.target.getAttribute('data-m2-open');
+        if (k) {
+          e.preventDefault();
+          showPanel(k);
+        }
+      }
+    });
   })();
 
   // -----------------------------------------------------------------
