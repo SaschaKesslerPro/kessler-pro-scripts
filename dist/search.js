@@ -490,7 +490,7 @@
     els.panel.style.left = left + 'px';
     els.panel.style.top = (r.bottom + 12) + 'px';
   }
-  function open(){ if (isOpen) return; isOpen = true; positionPanel(); els.panel.classList.add('kp-open'); els.scrim.classList.add('kp-open'); }
+  function open(){ ensureIndex(); if (isOpen) return; isOpen = true; positionPanel(); els.panel.classList.add('kp-open'); els.scrim.classList.add('kp-open'); }
   function close(){ isOpen = false; els.panel.classList.remove('kp-open'); els.scrim.classList.remove('kp-open'); }
 
   /* ---- MOBILE FULL-SCREEN SHEET (reuses the same panel) ---------------- */
@@ -519,6 +519,7 @@
     });
   }
   function openSheet(){
+    ensureIndex();
     if (sheetOpen || !SHEET) return; sheetOpen = true;
     activeRoom = null; ai = -1;
     SHEET.body.appendChild(els.panel);                 // move the shared panel into the sheet
@@ -561,7 +562,7 @@
 
   function wire(){
     FIELDS.forEach(function(f){
-      f.input.addEventListener('focus', function(){ setActive(f); if (!f.sheet) open(); });
+      f.input.addEventListener('focus', function(){ ensureIndex(); setActive(f); if (!f.sheet) open(); });
       f.input.addEventListener('input', function(){ setActive(f); mirror(f.input.value); ai=-1; render(); });
       f.clear.addEventListener('click', function(){ setActive(f); mirror(''); ai=-1; render(); f.input.focus(); });
       if (f.sheet){
@@ -631,21 +632,24 @@
     buildVocab();
   }
   function loadIndex(){
-    try {
-      var cached = sessionStorage.getItem(CFG.CACHE_KEY);
-      if (cached){ applyIndex(JSON.parse(cached)); render(); }
-    } catch(e){}
     var __self=(document.querySelector('script[src*="/dist/search.js"]')||{}).src||'';
     var __idx=__self?__self.replace(/search\.js(?:\?.*)?$/,'search-index.json'):CFG.INDEX_URL;
+    var __key=CFG.CACHE_KEY+'::'+__idx; // versioniert per Commit-Pin — neuer Deploy = neuer Key
+    try {
+      var cached = sessionStorage.getItem(__key);
+      if (cached){ applyIndex(JSON.parse(cached)); render(); return Promise.resolve(); }
+    } catch(e){}
     return fetch(__idx, { credentials:'omit' })
       .then(function(r){ if(!r.ok) throw new Error('index '+r.status); return r.json(); })
       .then(function(data){
         applyIndex(data);
-        try { sessionStorage.setItem(CFG.CACHE_KEY, JSON.stringify(data)); } catch(e){}
+        try { sessionStorage.setItem(__key, JSON.stringify(data)); } catch(e){}
         render();
       })
       .catch(function(err){ console.warn('[kp-search] index load failed', err); });
   }
+  var idxRequested = false;
+  function ensureIndex(){ if (idxRequested) return; idxRequested = true; loadIndex(); }
 
   /* ---- INIT ------------------------------------------------------------ */
   function init(){
@@ -661,7 +665,7 @@
     setActive(FIELDS[0]);
     wire();
     render();      // renders empty-state from cache (if any) immediately
-    loadIndex();   // then refreshes from network
+    // Index lazy: erst bei erster Such-Interaktion (ensureIndex in open/openSheet/focus)
     equalize();
     [120, 400, 900].forEach(function(ms){ setTimeout(equalize, ms); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
@@ -669,6 +673,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KPSearch = { version: '1.0.22', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
+  window.KPSearch = { version: '1.0.23', reload: loadIndex, _idx: IDX, center: function(){ equalize(); },
                       _suggest: function(t){ return suggest(t); }, _popular: function(){ return POPULAR; }, _recent: recentGet };
 })();

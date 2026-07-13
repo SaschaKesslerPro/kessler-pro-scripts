@@ -2,6 +2,7 @@
  * kessler-pro-scripts / plp.js
  *
  * v2.6.0 — GA4-Events: view_item_list (dedupe je Grundmenge), select_item, add_to_cart Quick-Add (11.07.2026)
+ * v2.6.1 — Perf: Filterdaten commit-gepinnt + cachebar (kein no-store mehr) (13.07.2026)
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
  * v2.5.0 — Facetten-Bridge für alle Filteroptionen (03.07.2026)
@@ -82,8 +83,13 @@
 (function () {
   'use strict';
 
-  var DATA_URL =
-    'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json';
+  var DATA_URL = (function(){
+    // Commit-gepinnte URL aus eigener Script-src ableiten (immutable → voll cachebar);
+    // Fallback @main nur, wenn plp.js nicht via jsDelivr-Pin geladen wurde.
+    var self = (document.querySelector('script[src*="/dist/plp.js"]')||{}).src||'';
+    return self ? self.replace(/plp\.js(?:\?.*)?$/,'plp-filterdata.json')
+                : 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json';
+  })();
 
   function injectStyle(css, id) {
     var s = document.createElement('style');
@@ -924,7 +930,7 @@
     setupDrawer();
     setupSections();
     setupSort();
-    fetch(DATA_URL, { cache: 'no-store' })
+    fetch(DATA_URL, { credentials: 'omit' })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (data) {
         PRODUCTS = (data && data.products) || [];
