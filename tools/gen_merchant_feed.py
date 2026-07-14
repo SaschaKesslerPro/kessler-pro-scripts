@@ -52,6 +52,20 @@ GCAT = {
 
 FARBEN = {}  # Option-ID -> Name, wird in main() aus der Collection geladen
 
+# Farbnamen DE -> PL fuer den PL-Feed
+FARBEN_PL = {
+    'Weiß': 'Biały',
+    'Schwarz': 'Czarny',
+    'Grau': 'Szary',
+    'Ahorn': 'Klon',
+    'Buche': 'Buk',
+    'Eiche': 'Dąb',
+    'Esche': 'Jesion',
+    'Kiefer': 'Sosna',
+    'Helles Holz': 'Jasne drewno',
+}
+
+
 
 
 def api(path):
@@ -159,6 +173,8 @@ def item_xml(f, loc, cur, prefix, price_field):
     if mat:
         lines.append('    <g:material>%s</g:material>' % escape(mat[:200]))
     col = FARBEN.get(f.get('farbe') or '')
+    if col and loc == 'pl':
+        col = FARBEN_PL.get(col, col)
     if col:
         lines.append('    <g:color>%s</g:color>' % escape(col))
     fam = (f.get('produkt-familie') or '').strip()
