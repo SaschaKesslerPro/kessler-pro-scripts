@@ -38,6 +38,21 @@ CATS = {
     'b734': {'de': 'Compact-Tischplatten', 'pl': 'Blaty Compact'},
 }
 
+# Google-Taxonomie-IDs (locale-unabhaengig)
+GCAT = {
+    '3d58': 6910,  # Table Tops
+    '3d56': 6910,  # Table Tops
+    'b734': 6910,  # Table Tops
+    '3d5c': 6392,  # Furniture > Tables
+    '3d5a': 6911,  # Table Legs
+    '3d54': 3919,  # Work Benches
+    '3d5e': 8023,  # Shelving Accessories
+    '3d60': 5170,  # Medical Cabinets
+}
+
+FARBEN = {}  # Option-ID -> Name, wird in main() aus der Collection geladen
+
+
 
 def api(path):
     tok = os.environ.get('WEBFLOW_TOKEN', '').strip()
@@ -78,11 +93,30 @@ def price(raw, cur):
     return '%.2f %s' % (v, cur)
 
 
+def strip_html(s):
+    s = re.sub(r'<[^>]+>', ' ', str(s or ''))
+    return re.sub(r'\s+', ' ', s).strip()
+
+
 def item_xml(f, loc, cur, prefix, price_field):
     slug = f.get('slug')
     pid = f.get('product-id') or slug
     title = (f.get('name') or '').strip()
-    desc = (f.get('kurzbeschreibung') or f.get('meta-description') or title).strip()
+    desc = strip_html(f.get('product-description')) \
+        or (f.get('kurzbeschreibung') or f.get('meta-description') or title).strip()
+    extra = []
+    mat = (f.get('material') or '').strip()
+    if mat and mat.lower() not in desc.lower():
+        extra.append(('Material: %s.' if loc == 'de' else 'Materiał: %s.') % mat)
+    masse = (f.get('masse-text') or '').strip()
+    if masse and masse not in desc:
+        extra.append(('Maße: %s.' if loc == 'de' else 'Wymiary: %s.') % masse)
+    gew = f.get('gewicht-kg-2')
+    if gew:
+        extra.append(('Gewicht: %s kg.' if loc == 'de' else 'Waga: %s kg.')
+                     % str(gew).replace('.', ','))
+    if extra:
+        desc = (desc + ' ' + ' '.join(extra)).strip()
     img = f.get('product-main-image') or {}
     img_url = img.get('url') if isinstance(img, dict) else img
     pr = price(f.get(price_field), cur)
@@ -109,14 +143,43 @@ def item_xml(f, loc, cur, prefix, price_field):
         lines.append('    <g:identifier_exists>no</g:identifier_exists>')
     if ptype:
         lines.append('    <g:product_type>%s</g:product_type>' % escape(ptype))
+    if kat in GCAT:
+        lines.append('    <g:google_product_category>%d</g:google_product_category>' % GCAT[kat])
+    gallery = f.get('product-gallery-images') or []
+    extra_imgs = [g.get('url') for g in gallery if isinstance(g, dict) and g.get('url')]
+    if not extra_imgs:
+        for k in ('product-2-image', 'product-3-image', 'product-4-image', 'product-5-image'):
+            v = f.get(k) or {}
+            u = v.get('url') if isinstance(v, dict) else v
+            if u:
+                extra_imgs.append(u)
+    for u in [u for u in extra_imgs if u != img_url][:10]:
+        lines.append('    <g:additional_image_link>%s</g:additional_image_link>' % escape(u))
+    mat = (f.get('material') or '').strip()
+    if mat:
+        lines.append('    <g:material>%s</g:material>' % escape(mat[:200]))
+    col = FARBEN.get(f.get('farbe') or '')
+    if col:
+        lines.append('    <g:color>%s</g:color>' % escape(col))
+    fam = (f.get('produkt-familie') or '').strip()
+    if fam:
+        lines.append('    <g:item_group_id>%s</g:item_group_id>' % escape(fam[:50]))
+    gew = f.get('gewicht-kg-2')
+    if gew:
+        lines.append('    <g:shipping_weight>%s kg</g:shipping_weight>' % gew)
     lines.append('  </item>')
     return '\n'.join(lines)
 
 
-def build(items, loc, cur, prefix, price_field, title, out_path):
+def build(items, loc, cur, prefix, price_field, title, out_path, fallback=None):
     body, skipped = [], 0
     for it in items:
-        x = item_xml(it.get('fieldData', {}), loc, cur, prefix, price_field)
+        f = dict(it.get('fieldData', {}))
+        fb = (fallback or {}).get(it.get('id'), {})
+        for k in ('ean', 'gewicht-kg-2', 'farbe', 'produkt-familie'):
+            if not f.get(k) and fb.get(k):
+                f[k] = fb[k]
+        x = item_xml(f, loc, cur, prefix, price_field)
         if x:
             body.append(x)
         else:
@@ -141,14 +204,20 @@ def build(items, loc, cur, prefix, price_field, title, out_path):
 
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else 'dist'
+    coll = api('/collections/' + COLL_PRODUCTS)
+    for fld in coll.get('fields', []):
+        if fld.get('slug') == 'farbe':
+            for o in fld.get('validations', {}).get('options', []):
+                FARBEN[o['id']] = o['name']
     de = fetch_items()
     pl = fetch_items(LOCALE_PL)
     build(de, 'de', 'EUR', '', 'product-price',
           'Kessler PRO — Produkte (DE/EUR)',
           os.path.join(out, 'merchant-feed-de.xml'))
+    de_by_id = {it.get('id'): it.get('fieldData', {}) for it in de}
     build(pl, 'pl', 'PLN', '/pl-pl', 'preis-pln',
           'Kessler PRO — Produkty (PL/PLN)',
-          os.path.join(out, 'merchant-feed-pl.xml'))
+          os.path.join(out, 'merchant-feed-pl.xml'), fallback=de_by_id)
 
 
 if __name__ == '__main__':
