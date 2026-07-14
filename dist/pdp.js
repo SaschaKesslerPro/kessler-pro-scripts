@@ -2,6 +2,7 @@
  * kessler-pro-scripts / pdp.js
  *
  * v1.1.0 — GA4-Events: view_item, add_to_cart (11.07.2026)
+ * v1.2.0 — Galerie: Placeholder-Thumbs + Duplikat-Thumbs (gleiche URL wie Hauptbild) ausblenden (14.07.2026)
  * Product Detail Page — PDP-specific logic.
  *
  * Audit 11 — Gallery: clicking a thumbnail shows that image as the main image.
@@ -22,8 +23,26 @@
 
   injectStyle(
     '.pdp_gallery-thumbs .pdp_thumb{cursor:pointer}' +
-      '.pdp_gallery-thumbs .pdp_thumb.is-active{outline:2px solid #1E1E1E;outline-offset:-2px}'
+      '.pdp_gallery-thumbs .pdp_thumb.is-active{outline:2px solid #1E1E1E;outline-offset:-2px}' +
+      '.pdp_gallery-thumbs .pdp_thumb:has(img[src*="placeholder."]){display:none}' +
+      '.pdp_gallery-main img[src*="placeholder."]{display:none}'
   );
+
+  // Duplikat-Thumbs entfernen (gleiche src mehrfach, z. B. Hauptbild doppelt in den Daten)
+  function dedupeThumbs() {
+    var wrap = document.querySelector('.pdp_gallery-thumbs');
+    if (!wrap) return;
+    var seen = {};
+    Array.prototype.slice.call(wrap.querySelectorAll('.pdp_thumb')).forEach(function (t) {
+      var img = t.querySelector('img');
+      var src = img && img.getAttribute('src') || '';
+      if (!src || src.indexOf('placeholder.') !== -1) return;
+      if (seen[src]) t.style.display = 'none';
+      seen[src] = 1;
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dedupeThumbs);
+  else dedupeThumbs();
 
   function initGallery() {
     var slider = document.querySelector('.pdp_gallery-main');
