@@ -1,0 +1,21 @@
+name: CDN Cache Warmer
+# Haelt Webflow-Edge-Caches warm (kalter TTFB 2,4-4,6s vs. warm 0,15s).
+on:
+  schedule:
+    - cron: '13 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Warm all sitemap URLs
+        run: |
+          set -e
+          curl -s https://www.kessler-pro.com/sitemap.xml \
+            | grep -oP '(?<=<loc>)[^<]+' > urls.txt
+          echo "URLs: $(wc -l < urls.txt)"
+          xargs -P 8 -n 1 -a urls.txt -I{} \
+            curl -s -o /dev/null -w "%{http_code} {}\n" \
+            -A "KesslerCacheWarmer/1.0" --max-time 30 {} || true
