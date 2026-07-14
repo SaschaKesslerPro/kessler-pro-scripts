@@ -3,6 +3,7 @@
  *
  * v2.6.0 — GA4-Events: view_item_list (dedupe je Grundmenge), select_item, add_to_cart Quick-Add (11.07.2026)
  * v2.6.1 — Perf: Filterdaten commit-gepinnt + cachebar (kein no-store mehr) (13.07.2026)
+ * v2.6.2 — i18n: Sortier-Optionen, Preis-Slider Von/Bis + aria, localeCompare je Locale (14.07.2026)
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
  * v2.5.0 — Facetten-Bridge für alle Filteroptionen (03.07.2026)
@@ -290,6 +291,11 @@
     de: { soonH: 'Bald verf\u00fcgbar', soonP: 'Die Produkte dieser Kategorie sind noch nicht verf\u00fcgbar. Schau bald wieder vorbei.', soonBtn: 'Alle Produkte ansehen', noneH: 'Keine Produkte gefunden', noneP: 'F\u00fcr diese Filterauswahl gibt es keine Produkte.', noneBtn: 'Filter zur\u00fccksetzen', soonCount: 'Bald verf\u00fcgbar' },
     pl: { soonH: 'Wkr\u00f3tce dost\u0119pne', soonP: 'Produkty z tej kategorii nie s\u0105 jeszcze dost\u0119pne. Zajrzyj wkr\u00f3tce ponownie.', soonBtn: 'Zobacz wszystkie produkty', noneH: 'Nie znaleziono produkt\u00f3w', noneP: 'Brak produkt\u00f3w dla wybranych filtr\u00f3w.', noneBtn: 'Wyczy\u015b\u0107 filtry', soonCount: 'Wkr\u00f3tce dost\u0119pne' },
     en: { soonH: 'Coming soon', soonP: 'Products in this category are not yet available. Check back soon.', soonBtn: 'View all products', noneH: 'No products found', noneP: 'No products match your filter selection.', noneBtn: 'Reset filters', soonCount: 'Coming soon' }
+  };
+  var SORT_I18N = {
+    de: { def: 'Empfohlen', pa: 'Preis aufsteigend', pd: 'Preis absteigend', na: 'Name A\u2013Z', nd: 'Name Z\u2013A', von: 'Von', bis: 'Bis', amin: 'Mindestpreis', amax: 'H\u00f6chstpreis' },
+    pl: { def: 'Polecane', pa: 'Cena rosn\u0105co', pd: 'Cena malej\u0105co', na: 'Nazwa A\u2013Z', nd: 'Nazwa Z\u2013A', von: 'Od', bis: 'Do', amin: 'Cena minimalna', amax: 'Cena maksymalna' },
+    en: { def: 'Recommended', pa: 'Price: low to high', pd: 'Price: high to low', na: 'Name A\u2013Z', nd: 'Name Z\u2013A', von: 'From', bis: 'To', amin: 'Minimum price', amax: 'Maximum price' }
   };
   injectStyle(
     '.plp-empty{grid-column:1/-1;text-align:center;padding:80px 24px;border:1px solid #E5E5E5;border-radius:8px;background:#FAFAFA}' +
@@ -769,8 +775,8 @@
     order.sort(function (a, b) {
       if (SORT === 'price-asc') return (a.price || 0) - (b.price || 0);
       if (SORT === 'price-desc') return (b.price || 0) - (a.price || 0);
-      if (SORT === 'name-asc') return a.title.localeCompare(b.title, 'de');
-      if (SORT === 'name-desc') return b.title.localeCompare(a.title, 'de');
+      if (SORT === 'name-asc') return a.title.localeCompare(b.title, LOC);
+      if (SORT === 'name-desc') return b.title.localeCompare(a.title, LOC);
       return 0;
     });
     order.forEach(function (p) { var n = NODE_BY_SLUG[p.slug]; if (n) items.appendChild(n); });
@@ -779,12 +785,13 @@
   function setupSort() {
     var sel = $('#sort-select');
     if (!sel) return;
+    var ts = SORT_I18N[LOC] || SORT_I18N.de;
     var opts = [
-      ['default', 'Empfohlen'],
-      ['price-asc', 'Preis aufsteigend'],
-      ['price-desc', 'Preis absteigend'],
-      ['name-asc', 'Name A\u2013Z'],
-      ['name-desc', 'Name Z\u2013A']
+      ['default', ts.def],
+      ['price-asc', ts.pa],
+      ['price-desc', ts.pd],
+      ['name-asc', ts.na],
+      ['name-desc', ts.nd]
     ];
     sel.innerHTML = '';
     opts.forEach(function (o) {
@@ -810,8 +817,8 @@
     slider.className = 'plp-price-slider';
     slider.innerHTML =
       '<div class="plp-price-labels">' +
-        '<div class="plp-price-label-group"><span class="plp-price-label-tag">Von</span><span class="plp-price-label-val" data-from-val></span></div>' +
-        '<div class="plp-price-label-group plp-price-label-group--right"><span class="plp-price-label-tag">Bis</span><span class="plp-price-label-val" data-to-val></span></div>' +
+        '<div class="plp-price-label-group"><span class="plp-price-label-tag">' + esc((SORT_I18N[LOC] || SORT_I18N.de).von) + '</span><span class="plp-price-label-val" data-from-val></span></div>' +
+        '<div class="plp-price-label-group plp-price-label-group--right"><span class="plp-price-label-tag">' + esc((SORT_I18N[LOC] || SORT_I18N.de).bis) + '</span><span class="plp-price-label-val" data-to-val></span></div>' +
       '</div>' +
       '<div class="plp-price-track" data-track>' +
         '<div class="plp-price-fill" data-fill></div>' +
