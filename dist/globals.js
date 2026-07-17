@@ -616,7 +616,7 @@
       Array.prototype.slice.call(item.querySelectorAll('.ci-thumb, .ci-main')).forEach(function (el) {
         el.style.cursor = 'pointer';
         el.addEventListener('click', function (e) {
-          if (e.target.closest('.ci-remove')) return;
+          if (e.target.closest('.ci-remove, .ci-qty')) return;
           window.location.href = url;
         });
       });
