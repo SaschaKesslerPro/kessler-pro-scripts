@@ -2,97 +2,72 @@
  * kessler-pro-scripts / pdp.js
  *
  * v1.1.0 — GA4-Events: view_item, add_to_cart (11.07.2026)
- * v1.2.0 — Galerie: Placeholder-Thumbs + Duplikat-Thumbs (gleiche URL wie Hauptbild) ausblenden (14.07.2026)
+ * v1.2.0 — Galerie: Placeholder-Thumbs + Duplikat-Thumbs ausblenden (14.07.2026) [ENTFERNT in v1.3.0]
+ * v1.3.0 — Galerie neu gebaut (Collection List + Multi-Image-Feld + verkettete Lightboxen,
+ *          17.07.2026). Alte Slider/Thumb-Logik entfernt (Markup existiert nicht mehr).
+ *          NEU: Webflows verkettete Lightbox öffnet immer beim 1. Bild — Klick auf
+ *          Thumbnail N springt jetzt automatisch zum richtigen Bild.
  * Product Detail Page — PDP-specific logic.
- *
- * Audit 11 — Gallery: clicking a thumbnail shows that image as the main image.
- * The Webflow slider on the PDP does not respond to programmatic nav (dots/arrows
- * are inert because the nav is hidden), so instead of driving the slider we swap
- * the currently-displayed main <img> directly to the clicked thumbnail's image.
- * The active thumb gets an `.is-active` class for highlighting.
  */
 
 (function () {
   'use strict';
 
-  function injectStyle(css) {
-    var s = document.createElement('style');
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
+  // ---------------------------------------------------------------------
+  // Galerie: Klick auf dynamisches Thumbnail (Collection List, pro Bild
+  // eine Lightbox, alle über gemeinsamen Gruppennamen "product-gallery"
+  // verkettet) soll direkt beim angeklickten Bild starten. Webflow öffnet
+  // verkettete Lightboxen nativ immer bei Slide 1 — wir klicken danach
+  // programmatisch die "weiter"-Pfeile, bis der Index passt.
+  // ---------------------------------------------------------------------
+  function initDynamicGalleryJump() {
+    var thumbWrap = document.querySelector('.pdp_gallery-thumbs-dynamic');
+    if (!thumbWrap) return;
 
-  injectStyle(
-    '.pdp_gallery-thumbs .pdp_thumb{cursor:pointer}' +
-      '.pdp_gallery-thumbs .pdp_thumb.is-active{outline:2px solid #1E1E1E;outline-offset:-2px}' +
-      '.pdp_gallery-thumbs .pdp_thumb:has(img[src*="placeholder."]){display:none}' +
-      '.pdp_gallery-main img[src*="placeholder."]{display:none}'
-  );
-
-  // Duplikat-Thumbs entfernen (gleiche src mehrfach, z. B. Hauptbild doppelt in den Daten)
-  function dedupeThumbs() {
-    var wrap = document.querySelector('.pdp_gallery-thumbs');
-    if (!wrap) return;
-    var seen = {};
-    Array.prototype.slice.call(wrap.querySelectorAll('.pdp_thumb')).forEach(function (t) {
-      var img = t.querySelector('img');
-      var src = img && img.getAttribute('src') || '';
-      if (!src || src.indexOf('placeholder.') !== -1) return;
-      if (seen[src]) t.style.display = 'none';
-      seen[src] = 1;
-    });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dedupeThumbs);
-  else dedupeThumbs();
-
-  function initGallery() {
-    var slider = document.querySelector('.pdp_gallery-main');
-    var thumbWrap = document.querySelector('.pdp_gallery-thumbs');
-    if (!slider || !thumbWrap) return;
-
-    var thumbs = Array.prototype.slice.call(
-      thumbWrap.querySelectorAll('.pdp_thumb')
+    var thumbLinks = Array.prototype.slice.call(
+      thumbWrap.querySelectorAll('.pdp_gallery-thumb-dynamic a, .pdp_gallery-thumb-dynamic .w-lightbox')
     );
-    if (thumbs.length < 2) return; // single image — nothing to switch
+    if (!thumbLinks.length) return;
 
-    var slides = Array.prototype.slice.call(
-      slider.querySelectorAll('.w-slide')
-    );
-
-    // The <img> of the currently most-visible slide (fallback: first slide).
-    function mainImage() {
-      var best = null, bestOpacity = -1;
-      for (var i = 0; i < slides.length; i++) {
-        var o = parseFloat(getComputedStyle(slides[i]).opacity || '0');
-        if (o > bestOpacity) { bestOpacity = o; best = slides[i]; }
-      }
-      var holder = best || slides[0] || slider;
-      return holder ? holder.querySelector('img') : null;
-    }
-
-    function setActive(index) {
-      for (var i = 0; i < thumbs.length; i++) {
-        thumbs[i].classList.toggle('is-active', i === index);
-      }
-    }
-
-    thumbs.forEach(function (thumb, i) {
-      thumb.addEventListener('click', function (e) {
-        e.preventDefault();
-        var src = thumb.querySelector('img');
-        var dest = mainImage();
-        if (src && dest) {
-          dest.src = src.src;
-          if (src.srcset) dest.srcset = src.srcset;
-          else dest.removeAttribute('srcset');
-          if (src.getAttribute('alt')) dest.alt = src.getAttribute('alt');
-        }
-        setActive(i);
+    thumbLinks.forEach(function (link, index) {
+      link.addEventListener('click', function () {
+        if (index === 0) return; // erstes Bild ist schon korrekt, kein Sprung nötig
+        waitForLightbox(function (backdrop) {
+          jumpToSlide(backdrop, index);
+        });
       });
     });
-
-    setActive(0);
   }
 
+  function waitForLightbox(cb) {
+    var attempts = 0;
+    var poll = setInterval(function () {
+      attempts++;
+      var backdrop = document.querySelector('.w-lightbox-backdrop');
+      if (backdrop) {
+        clearInterval(poll);
+        cb(backdrop);
+      } else if (attempts > 40) {
+        clearInterval(poll); // ~2s Timeout, Lightbox kam nicht — stillschweigend abbrechen
+      }
+    }, 50);
+  }
+
+  function jumpToSlide(backdrop, targetIndex) {
+    var clicks = 0;
+    function clickNext() {
+      var nextBtn = backdrop.querySelector('.w-lightbox-right');
+      if (!nextBtn) return;
+      nextBtn.click();
+      clicks++;
+      if (clicks < targetIndex) setTimeout(clickNext, 120);
+    }
+    setTimeout(clickNext, 80); // kurze Pause, bis das Modal fertig gerendert ist
+  }
+
+  // ---------------------------------------------------------------------
+  // GA4: view_item + add_to_cart
+  // ---------------------------------------------------------------------
   function initTracking() {
     if (!window.kpDL) { setTimeout(initTracking, 400); return; }
     try {
@@ -115,7 +90,7 @@
     } catch (eT) {}
   }
 
-  function init() { initGallery(); initTracking(); }
+  function init() { initDynamicGalleryJump(); initTracking(); }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
