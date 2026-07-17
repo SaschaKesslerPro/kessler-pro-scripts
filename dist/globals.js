@@ -704,3 +704,33 @@
   if(document.readyState!=='loading')start();
   else document.addEventListener('DOMContentLoaded',start);
 })();
+
+  // -----------------------------------------------------------------
+  // Cart Qty-Stepper: sf-Attribute zur Laufzeit setzen (17.07.2026).
+  // Der Designer-API-Builder hat die Custom-Attribute beim Einfuegen
+  // der Stepper-Elemente gestrippt und Component-Kinder sind per API
+  // nicht adressierbar -> wir patchen die Attribute frueh im DOM
+  // (vor Shopyflow-Init) und halten sie per Observer auf Cart-Klonen.
+  // -----------------------------------------------------------------
+  (function initCartQtyAttrs() {
+    function patch() {
+      var qtys = document.querySelectorAll('.ci-qty');
+      for (var i = 0; i < qtys.length; i++) {
+        var q = qtys[i];
+        var btns = q.querySelectorAll('.ci-qty-btn');
+        var num = q.querySelector('.ci-qty-num');
+        if (btns[0] && !btns[0].hasAttribute('sf-change-quantity-dec')) btns[0].setAttribute('sf-change-quantity-dec', '1');
+        if (num && !num.hasAttribute('sf-show-quantity')) num.setAttribute('sf-show-quantity', '1');
+        if (btns[1] && !btns[1].hasAttribute('sf-change-quantity-inc')) btns[1].setAttribute('sf-change-quantity-inc', '1');
+      }
+    }
+    function init() {
+      patch();
+      try {
+        new MutationObserver(patch).observe(document.body, { childList: true, subtree: true });
+      } catch (e) {}
+    }
+    if (document.readyState !== 'loading') { init(); }
+    else { document.addEventListener('DOMContentLoaded', init); }
+  })();
+
