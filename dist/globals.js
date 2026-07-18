@@ -1,6 +1,8 @@
 /*!
  * kessler-pro-scripts / globals.js
  * Site-wide functionality: header, reviews, recently-viewed, etc.
+ * v2.1.0 (18.07.2026): KP Consent Bridge — Cookiebot->Shopify Customer Privacy
+ *   (Consent-Weitergabe an checkout.kessler-pro.com, kein doppelter Banner)
  * v2.0.0 (13.07.2026): KP Mobile Sheet v2 (Bottom Sheet) — ersetzt den
  *   Side-Drawer, sobald [data-m2="overlay"] im DOM existiert. Altes
  *   Drawer-Modul deaktiviert sich dann selbst (Cutover-Schalter).
@@ -732,5 +734,62 @@
     }
     if (document.readyState !== 'loading') { init(); }
     else { document.addEventListener('DOMContentLoaded', init); }
+  
+  // -----------------------------------------------------------------
+  // KP Consent Bridge v1 — Cookiebot -> Shopify Customer Privacy API
+  // Zweck: Consent von kessler-pro.com an den Shopify-Checkout
+  // (checkout.kessler-pro.com) durchreichen. Cookie _tracking_consent
+  // landet auf .kessler-pro.com -> Checkout zeigt keinen 2. Banner,
+  // Analytics-Events (purchase) feuern gemaess Nutzer-Entscheidung.
+  // -----------------------------------------------------------------
+  (function () {
+    var SF_TOKEN = '412ec64ed0b4546aa69f2ed2ee574441'; // public Storefront token (Headless-Channel)
+    var ROOT = 'kessler-pro.com';
+    var CHECKOUT = 'checkout.kessler-pro.com';
+    var API_SRC = 'https://cdn.shopify.com/shopifycloud/consent-tracking-api/v0.1/consent-tracking-api.js';
+    var lastApplied = '';
+
+    function currentConsent() {
+      var c = window.Cookiebot && window.Cookiebot.consent;
+      if (!c) return null;
+      return {
+        analytics: !!c.statistics,
+        marketing: !!c.marketing,
+        preferences: !!c.preferences,
+        sale_of_data: !!c.marketing
+      };
+    }
+
+    function push() {
+      var c = currentConsent();
+      if (!c) return;
+      var key = JSON.stringify(c);
+      if (key === lastApplied) return;
+      var run = function () {
+        try {
+          window.Shopify.customerPrivacy.setTrackingConsent({
+            analytics: c.analytics,
+            marketing: c.marketing,
+            preferences: c.preferences,
+            sale_of_data: c.sale_of_data,
+            headlessStorefront: true,
+            checkoutRootDomain: CHECKOUT,
+            storefrontRootDomain: ROOT,
+            storefrontAccessToken: SF_TOKEN
+          }, function () { lastApplied = key; });
+        } catch (e) { /* silent */ }
+      };
+      if (window.Shopify && window.Shopify.customerPrivacy) { run(); return; }
+      var s = document.createElement('script');
+      s.src = API_SRC; s.async = true; s.onload = run;
+      document.head.appendChild(s);
+    }
+
+    window.addEventListener('CookiebotOnConsentReady', push);
+    window.addEventListener('CookiebotOnAccept', push);
+    window.addEventListener('CookiebotOnDecline', push);
+    if (window.Cookiebot && window.Cookiebot.consent) push();
   })();
+
+})();
 
