@@ -90,7 +90,7 @@
     // Fallback @main nur, wenn plp.js nicht via jsDelivr-Pin geladen wurde.
     var self = (document.querySelector('script[src*="/dist/plp.js"]')||{}).src||'';
     return self ? self.replace(/plp\.js(?:\?.*)?$/,'plp-filterdata.json')
-                : 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json';
+                : 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json'+'?v='+Math.floor(Date.now()/3600000);
   })();
 
   function injectStyle(css, id) {
