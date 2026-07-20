@@ -12,8 +12,8 @@
   function kpLP(){var m=(location.pathname||'').match(/^\/(pl-pl|en)(?=\/|$)/);return m?m[0]:'';}
   var CFG = {
     // Wird beim Integrieren auf den Commit-Hash gepinnt (jsDelivr).
-    INDEX_URL: 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json',
-    CACHE_KEY: 'kp_search_index_v3',
+    INDEX_URL: 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json'+'?v='+Math.floor(Date.now()/3600000),
+    CACHE_KEY: 'kp_search_index_v4',
     MOUNT: '[data-kp-search]',
     PDP: function (s) { return kpLP() + '/products/' + s; },
     CAT: function (s) { return kpLP() + '/produktkategorien/' + s; },
