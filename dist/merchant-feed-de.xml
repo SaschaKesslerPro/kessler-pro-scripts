@@ -23,6 +23,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O130</g:item_group_id>
     <g:shipping_weight>22 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009233242</g:id>
@@ -43,6 +45,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O120</g:item_group_id>
     <g:shipping_weight>19 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009200474</g:id>
@@ -63,6 +67,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O110</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009134938</g:id>
@@ -83,6 +89,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O100</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009102170</g:id>
@@ -103,6 +111,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O80</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009069402</g:id>
@@ -123,6 +133,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O130</g:item_group_id>
     <g:shipping_weight>22 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009036634</g:id>
@@ -143,6 +155,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O120</g:item_group_id>
     <g:shipping_weight>19 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915009003866</g:id>
@@ -163,6 +177,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O110</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008938330</g:id>
@@ -183,6 +199,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O100</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008905562</g:id>
@@ -203,6 +221,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O80</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008872794</g:id>
@@ -223,6 +243,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008708954</g:id>
@@ -243,6 +265,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O110</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008774490</g:id>
@@ -263,6 +287,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O130</g:item_group_id>
     <g:shipping_weight>22 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008741722</g:id>
@@ -283,6 +309,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O120</g:item_group_id>
     <g:shipping_weight>19 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008676186</g:id>
@@ -302,6 +330,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O100</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008643418</g:id>
@@ -322,6 +352,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O80</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008577882</g:id>
@@ -342,6 +374,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008545114</g:id>
@@ -362,6 +396,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O130</g:item_group_id>
     <g:shipping_weight>22 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008512346</g:id>
@@ -382,6 +418,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O120</g:item_group_id>
     <g:shipping_weight>19 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008479578</g:id>
@@ -402,6 +440,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O110</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008446810</g:id>
@@ -422,6 +462,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O100</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008381274</g:id>
@@ -442,6 +484,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O80</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008348506</g:id>
@@ -462,6 +506,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008315738</g:id>
@@ -482,6 +528,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-130x80</g:item_group_id>
     <g:shipping_weight>18 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008282970</g:id>
@@ -502,6 +550,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-120x80</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008250202</g:id>
@@ -522,6 +572,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-110x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008217434</g:id>
@@ -542,6 +594,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-80x80</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008184666</g:id>
@@ -562,6 +616,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008119130</g:id>
@@ -582,6 +638,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-130x80</g:item_group_id>
     <g:shipping_weight>18 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008053594</g:id>
@@ -602,6 +660,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-120x80</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915008020826</g:id>
@@ -622,6 +682,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-110x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007955290</g:id>
@@ -642,6 +704,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-80x80</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007922522</g:id>
@@ -662,6 +726,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007889754</g:id>
@@ -682,6 +748,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-130x80</g:item_group_id>
     <g:shipping_weight>18 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007856986</g:id>
@@ -702,6 +770,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-120x80</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007791450</g:id>
@@ -722,6 +792,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-110x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007758682</g:id>
@@ -742,6 +814,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-80x80</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007693146</g:id>
@@ -762,6 +836,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007627610</g:id>
@@ -782,6 +858,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-130x80</g:item_group_id>
     <g:shipping_weight>18 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007594842</g:id>
@@ -802,6 +880,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-120x80</g:item_group_id>
     <g:shipping_weight>16 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007529306</g:id>
@@ -822,6 +902,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-110x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007463770</g:id>
@@ -842,6 +924,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-80x80</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10915007398234</g:id>
@@ -862,6 +946,8 @@
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013896538</g:id>
@@ -877,6 +963,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013863770</g:id>
@@ -892,6 +980,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013831002</g:id>
@@ -907,6 +997,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013798234</g:id>
@@ -922,6 +1014,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013765466</g:id>
@@ -937,6 +1031,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013732698</g:id>
@@ -952,6 +1048,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013699930</g:id>
@@ -967,6 +1065,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013667162</g:id>
@@ -982,6 +1082,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013634394</g:id>
@@ -997,6 +1099,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013601626</g:id>
@@ -1012,6 +1116,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013568858</g:id>
@@ -1027,6 +1133,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013536090</g:id>
@@ -1042,6 +1150,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013503322</g:id>
@@ -1057,6 +1167,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013470554</g:id>
@@ -1072,6 +1184,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Stahl pulverbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013437786</g:id>
@@ -1091,6 +1205,8 @@
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a27c298aaa2b0bcb42e6d_73552496099674.webp</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a27c298aaa2b0bcb42e7f_73552496230746.webp</g:additional_image_link>
     <g:material>Holzwerkstoff</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013405018</g:id>
@@ -1110,6 +1226,8 @@
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a31a091d98e8fe57d61da_73552470376794.webp</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a31a091d98e8fe57d61d7_73552470475098.webp</g:additional_image_link>
     <g:material>Holzwerkstoff</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013372250</g:id>
@@ -1129,6 +1247,8 @@
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a318e5a03d61f20a05496_73552472637786.webp</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a318e5a03d61f20a054b1_73552472768858.webp</g:additional_image_link>
     <g:material>Holzwerkstoff</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013339482</g:id>
@@ -1148,6 +1268,8 @@
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a317ca38081567ba50a02_73552473260378.webp</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a317ca38081567ba50a13_73552473391450.webp</g:additional_image_link>
     <g:material>Holzwerkstoff</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013306714</g:id>
@@ -1167,6 +1289,8 @@
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a316bc9c501567206a42a_73552473817434.webp</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a4a316bc9c501567206a43e_73552474046810.webp</g:additional_image_link>
     <g:material>Holzwerkstoff</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013273946</g:id>
@@ -1182,6 +1306,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Multiplex</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013241178</g:id>
@@ -1197,6 +1323,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Multiplex</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10911013208410</g:id>
@@ -1212,6 +1340,8 @@
     <g:product_type>Regalzubehör</g:product_type>
     <g:google_product_category>8023</g:google_product_category>
     <g:material>Multiplex</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498991962</g:id>
@@ -1227,6 +1357,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498959194</g:id>
@@ -1242,6 +1374,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498893658</g:id>
@@ -1257,6 +1391,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498860890</g:id>
@@ -1272,6 +1408,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498795354</g:id>
@@ -1287,6 +1425,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498762586</g:id>
@@ -1302,6 +1442,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498729818</g:id>
@@ -1317,6 +1459,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498664282</g:id>
@@ -1332,6 +1476,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498631514</g:id>
@@ -1347,6 +1493,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498565978</g:id>
@@ -1362,6 +1510,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498533210</g:id>
@@ -1377,6 +1527,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498467674</g:id>
@@ -1392,6 +1544,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>16.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>16.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498434906</g:id>
@@ -1407,6 +1561,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498402138</g:id>
@@ -1422,6 +1578,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498336602</g:id>
@@ -1437,6 +1595,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498303834</g:id>
@@ -1452,6 +1612,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498271066</g:id>
@@ -1467,6 +1629,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498205530</g:id>
@@ -1482,6 +1646,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498172762</g:id>
@@ -1497,6 +1663,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498107226</g:id>
@@ -1512,6 +1680,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498074458</g:id>
@@ -1527,6 +1697,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899498041690</g:id>
@@ -1542,6 +1714,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497976154</g:id>
@@ -1558,6 +1732,8 @@
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
     <g:color>Kiefer</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497910618</g:id>
@@ -1574,6 +1750,8 @@
     <g:google_product_category>3919</g:google_product_category>
     <g:material>Stahl / Holzwerkstoff</g:material>
     <g:color>Schwarz</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497877850</g:id>
@@ -1589,6 +1767,8 @@
     <g:product_type>Komplett-Tische</g:product_type>
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497812314</g:id>
@@ -1605,6 +1785,8 @@
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
     <g:color>Buche</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497746778</g:id>
@@ -1621,6 +1803,8 @@
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
     <g:color>Grau</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497681242</g:id>
@@ -1637,6 +1821,8 @@
     <g:google_product_category>3919</g:google_product_category>
     <g:material>Stahl / Holzwerkstoff</g:material>
     <g:color>Grau</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497615706</g:id>
@@ -1653,6 +1839,8 @@
     <g:google_product_category>6392</g:google_product_category>
     <g:material>Spanplatte melaminbeschichtet</g:material>
     <g:color>Ahorn</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497550170</g:id>
@@ -1669,6 +1857,8 @@
     <g:google_product_category>6911</g:google_product_category>
     <g:material>Stahl</g:material>
     <g:color>Grau</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497419098</g:id>
@@ -1685,6 +1875,8 @@
     <g:google_product_category>6911</g:google_product_category>
     <g:material>Stahl</g:material>
     <g:color>Weiß</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899497320794</g:id>
@@ -1701,6 +1893,8 @@
     <g:google_product_category>6911</g:google_product_category>
     <g:material>Stahl</g:material>
     <g:color>Schwarz</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899496665434</g:id>
@@ -1717,6 +1911,8 @@
     <g:google_product_category>3919</g:google_product_category>
     <g:material>Stahl / Holzwerkstoff</g:material>
     <g:color>Schwarz</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899496632666</g:id>
@@ -1733,6 +1929,8 @@
     <g:google_product_category>3919</g:google_product_category>
     <g:material>Stahl / Holzwerkstoff</g:material>
     <g:color>Weiß</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10899496567130</g:id>
@@ -1749,6 +1947,8 @@
     <g:google_product_category>3919</g:google_product_category>
     <g:material>Stahl / Holzwerkstoff</g:material>
     <g:color>Grau</g:color>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083621210</g:id>
@@ -1770,6 +1970,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-90x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083588442</g:id>
@@ -1788,6 +1990,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-90x60</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083522906</g:id>
@@ -1806,6 +2010,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-90x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083490138</g:id>
@@ -1827,6 +2033,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-90x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083424602</g:id>
@@ -1848,6 +2056,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-90x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083391834</g:id>
@@ -1869,6 +2079,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-80x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083326298</g:id>
@@ -1890,6 +2102,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-80x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083260762</g:id>
@@ -1911,6 +2125,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-80x40</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083227994</g:id>
@@ -1932,6 +2148,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-70x60</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894083064154</g:id>
@@ -1953,6 +2171,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-70x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082965850</g:id>
@@ -1974,6 +2194,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-60x60</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082900314</g:id>
@@ -1995,6 +2217,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-50x50</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082802010</g:id>
@@ -2016,6 +2240,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-120x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082703706</g:id>
@@ -2037,6 +2263,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-120x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082638170</g:id>
@@ -2058,6 +2286,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-100x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082605402</g:id>
@@ -2079,6 +2309,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-100x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082539866</g:id>
@@ -2100,6 +2332,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-21mm-100x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082474330</g:id>
@@ -2118,6 +2352,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-90x60</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082441562</g:id>
@@ -2136,6 +2372,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-90x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082376026</g:id>
@@ -2154,6 +2392,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-90x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082343258</g:id>
@@ -2172,6 +2412,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-80x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082310490</g:id>
@@ -2190,6 +2432,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-80x50</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082244954</g:id>
@@ -2211,6 +2455,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-80x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082212186</g:id>
@@ -2232,6 +2478,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-70x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082146650</g:id>
@@ -2250,6 +2498,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-70x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082081114</g:id>
@@ -2268,6 +2518,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082048346</g:id>
@@ -2286,6 +2538,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-50x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894082015578</g:id>
@@ -2304,6 +2558,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-120x60</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081950042</g:id>
@@ -2322,6 +2578,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-120x50</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081917274</g:id>
@@ -2340,6 +2598,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-100x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081884506</g:id>
@@ -2358,6 +2618,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-100x50</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081851738</g:id>
@@ -2376,6 +2638,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-25mm-100x40</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081818970</g:id>
@@ -2394,6 +2658,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081786202</g:id>
@@ -2412,6 +2678,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081720666</g:id>
@@ -2430,6 +2698,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081687898</g:id>
@@ -2448,6 +2718,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081622362</g:id>
@@ -2466,6 +2738,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081589594</g:id>
@@ -2484,6 +2758,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081556826</g:id>
@@ -2502,6 +2778,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081491290</g:id>
@@ -2520,6 +2798,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081458522</g:id>
@@ -2538,6 +2818,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081425754</g:id>
@@ -2556,6 +2838,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081360218</g:id>
@@ -2574,6 +2858,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081327450</g:id>
@@ -2592,6 +2878,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081294682</g:id>
@@ -2610,6 +2898,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081261914</g:id>
@@ -2628,6 +2918,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081229146</g:id>
@@ -2646,6 +2938,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081163610</g:id>
@@ -2664,6 +2958,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081130842</g:id>
@@ -2682,6 +2978,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081098074</g:id>
@@ -2700,6 +2998,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894081065306</g:id>
@@ -2718,6 +3018,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080967002</g:id>
@@ -2736,6 +3038,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080934234</g:id>
@@ -2754,6 +3058,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080901466</g:id>
@@ -2775,6 +3081,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080868698</g:id>
@@ -2793,6 +3101,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080835930</g:id>
@@ -2811,6 +3121,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080803162</g:id>
@@ -2829,6 +3141,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080770394</g:id>
@@ -2847,6 +3161,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080704858</g:id>
@@ -2865,6 +3181,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080672090</g:id>
@@ -2883,6 +3201,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080639322</g:id>
@@ -2901,6 +3221,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080606554</g:id>
@@ -2919,6 +3241,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080573786</g:id>
@@ -2937,6 +3261,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080541018</g:id>
@@ -2955,6 +3281,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080508250</g:id>
@@ -2973,6 +3301,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080475482</g:id>
@@ -2991,6 +3321,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080442714</g:id>
@@ -3009,6 +3341,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080409946</g:id>
@@ -3027,6 +3361,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080377178</g:id>
@@ -3045,6 +3381,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080344410</g:id>
@@ -3063,6 +3401,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080311642</g:id>
@@ -3081,6 +3421,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080278874</g:id>
@@ -3099,6 +3441,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080246106</g:id>
@@ -3117,6 +3461,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080213338</g:id>
@@ -3135,6 +3481,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080180570</g:id>
@@ -3153,6 +3501,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080147802</g:id>
@@ -3171,6 +3521,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080115034</g:id>
@@ -3189,6 +3541,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080082266</g:id>
@@ -3207,6 +3561,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080049498</g:id>
@@ -3228,6 +3584,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894080016730</g:id>
@@ -3249,6 +3607,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079983962</g:id>
@@ -3270,6 +3630,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079951194</g:id>
@@ -3291,6 +3653,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079885658</g:id>
@@ -3312,6 +3676,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079852890</g:id>
@@ -3333,6 +3699,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079820122</g:id>
@@ -3354,6 +3722,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079787354</g:id>
@@ -3375,6 +3745,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079754586</g:id>
@@ -3396,6 +3768,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079721818</g:id>
@@ -3417,6 +3791,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079689050</g:id>
@@ -3438,6 +3814,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079656282</g:id>
@@ -3459,6 +3837,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079590746</g:id>
@@ -3480,6 +3860,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079525210</g:id>
@@ -3501,6 +3883,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079459674</g:id>
@@ -3522,6 +3906,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079394138</g:id>
@@ -3543,6 +3929,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079361370</g:id>
@@ -3564,6 +3952,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079295834</g:id>
@@ -3585,6 +3975,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079263066</g:id>
@@ -3606,6 +3998,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079230298</g:id>
@@ -3627,6 +4021,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079131994</g:id>
@@ -3648,6 +4044,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079099226</g:id>
@@ -3669,6 +4067,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079033690</g:id>
@@ -3690,6 +4090,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894079000922</g:id>
@@ -3711,6 +4113,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078935386</g:id>
@@ -3732,6 +4136,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078902618</g:id>
@@ -3753,6 +4159,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078837082</g:id>
@@ -3774,6 +4182,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078804314</g:id>
@@ -3795,6 +4205,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078738778</g:id>
@@ -3816,6 +4228,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078706010</g:id>
@@ -3837,6 +4251,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078640474</g:id>
@@ -3858,6 +4274,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078574938</g:id>
@@ -3879,6 +4297,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078542170</g:id>
@@ -3900,6 +4320,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078509402</g:id>
@@ -3921,6 +4343,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078476634</g:id>
@@ -3942,6 +4366,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078443866</g:id>
@@ -3963,6 +4389,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078378330</g:id>
@@ -3984,6 +4412,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078312794</g:id>
@@ -4005,6 +4435,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078280026</g:id>
@@ -4026,6 +4458,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078247258</g:id>
@@ -4047,6 +4481,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078214490</g:id>
@@ -4068,6 +4504,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078181722</g:id>
@@ -4089,6 +4527,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078148954</g:id>
@@ -4110,6 +4550,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078083418</g:id>
@@ -4131,6 +4573,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078050650</g:id>
@@ -4152,6 +4596,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-90x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894078017882</g:id>
@@ -4173,6 +4619,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-90x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077985114</g:id>
@@ -4194,6 +4642,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-90x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077952346</g:id>
@@ -4215,6 +4665,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-80x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077919578</g:id>
@@ -4236,6 +4688,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-80x50</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077886810</g:id>
@@ -4257,6 +4711,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-80x40</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077854042</g:id>
@@ -4278,6 +4734,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-70x60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077821274</g:id>
@@ -4299,6 +4757,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-70x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077788506</g:id>
@@ -4320,6 +4780,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-60x60</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077755738</g:id>
@@ -4341,6 +4803,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-50x50</g:item_group_id>
     <g:shipping_weight>3 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077722970</g:id>
@@ -4362,6 +4826,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-120x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077690202</g:id>
@@ -4383,6 +4849,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-120x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077657434</g:id>
@@ -4404,6 +4872,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-100x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077624666</g:id>
@@ -4425,6 +4895,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-100x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077591898</g:id>
@@ -4446,6 +4918,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077559130</g:id>
@@ -4467,6 +4941,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077526362</g:id>
@@ -4488,6 +4964,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077493594</g:id>
@@ -4509,6 +4987,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077428058</g:id>
@@ -4530,6 +5010,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077395290</g:id>
@@ -4551,6 +5033,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077362522</g:id>
@@ -4572,6 +5056,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077329754</g:id>
@@ -4593,6 +5079,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077296986</g:id>
@@ -4614,6 +5102,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077264218</g:id>
@@ -4635,6 +5125,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077231450</g:id>
@@ -4656,6 +5148,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077198682</g:id>
@@ -4677,6 +5171,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077165914</g:id>
@@ -4698,6 +5194,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077133146</g:id>
@@ -4719,6 +5217,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077100378</g:id>
@@ -4740,6 +5240,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077067610</g:id>
@@ -4761,6 +5263,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O160</g:item_group_id>
     <g:shipping_weight>36 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>53.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>53.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077034842</g:id>
@@ -4782,6 +5286,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894077002074</g:id>
@@ -4803,6 +5309,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076969306</g:id>
@@ -4824,6 +5332,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076936538</g:id>
@@ -4845,6 +5355,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076903770</g:id>
@@ -4866,6 +5378,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076871002</g:id>
@@ -4887,6 +5401,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O139</g:item_group_id>
     <g:shipping_weight>27 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>34.90 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>34.90 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076838234</g:id>
@@ -4908,6 +5424,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076805466</g:id>
@@ -4929,6 +5447,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076772698</g:id>
@@ -4950,6 +5470,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076739930</g:id>
@@ -4971,6 +5493,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076707162</g:id>
@@ -4992,6 +5516,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076674394</g:id>
@@ -5013,6 +5539,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076641626</g:id>
@@ -5034,6 +5562,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076608858</g:id>
@@ -5055,6 +5585,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076576090</g:id>
@@ -5076,6 +5608,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076543322</g:id>
@@ -5097,6 +5631,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076510554</g:id>
@@ -5118,6 +5654,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076477786</g:id>
@@ -5139,6 +5677,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
     <g:shipping_weight>14 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076445018</g:id>
@@ -5160,6 +5700,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076412250</g:id>
@@ -5181,6 +5723,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076379482</g:id>
@@ -5202,6 +5746,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076346714</g:id>
@@ -5223,6 +5769,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076313946</g:id>
@@ -5244,6 +5792,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076281178</g:id>
@@ -5265,6 +5815,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O90</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076248410</g:id>
@@ -5286,6 +5838,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076215642</g:id>
@@ -5307,6 +5861,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076182874</g:id>
@@ -5328,6 +5884,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076150106</g:id>
@@ -5349,6 +5907,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076117338</g:id>
@@ -5370,6 +5930,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076084570</g:id>
@@ -5391,6 +5953,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076051802</g:id>
@@ -5412,6 +5976,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894076019034</g:id>
@@ -5433,6 +5999,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O80</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075953498</g:id>
@@ -5454,6 +6022,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075920730</g:id>
@@ -5475,6 +6045,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075887962</g:id>
@@ -5496,6 +6068,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075855194</g:id>
@@ -5517,6 +6091,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075822426</g:id>
@@ -5538,6 +6114,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075789658</g:id>
@@ -5559,6 +6137,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075756890</g:id>
@@ -5580,6 +6160,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O68</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075691354</g:id>
@@ -5601,6 +6183,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075658586</g:id>
@@ -5622,6 +6206,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075625818</g:id>
@@ -5643,6 +6229,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075593050</g:id>
@@ -5664,6 +6252,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075527514</g:id>
@@ -5685,6 +6275,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075494746</g:id>
@@ -5706,6 +6298,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O59</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075461978</g:id>
@@ -5727,6 +6321,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075429210</g:id>
@@ -5748,6 +6344,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075363674</g:id>
@@ -5769,6 +6367,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075330906</g:id>
@@ -5790,6 +6390,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075298138</g:id>
@@ -5811,6 +6413,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075265370</g:id>
@@ -5832,6 +6436,8 @@
     <g:color>Grau</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075199834</g:id>
@@ -5853,6 +6459,8 @@
     <g:color>Schwarz</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075167066</g:id>
@@ -5874,6 +6482,8 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075134298</g:id>
@@ -5895,6 +6505,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075068762</g:id>
@@ -5916,6 +6528,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O40</g:item_group_id>
     <g:shipping_weight>2 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894075003226</g:id>
@@ -5937,6 +6551,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-100x60</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074970458</g:id>
@@ -5958,6 +6574,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-90x50</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074937690</g:id>
@@ -5979,6 +6597,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-100x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074904922</g:id>
@@ -6000,6 +6620,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-90x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074839386</g:id>
@@ -6021,6 +6643,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-100x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074773850</g:id>
@@ -6042,6 +6666,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-90x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074741082</g:id>
@@ -6063,6 +6689,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-100x60</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074675546</g:id>
@@ -6084,6 +6712,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-90x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074642778</g:id>
@@ -6105,6 +6735,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-80x60</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074610010</g:id>
@@ -6126,6 +6758,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-80x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074511706</g:id>
@@ -6147,6 +6781,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-80x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074478938</g:id>
@@ -6168,6 +6804,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-80x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074446170</g:id>
@@ -6189,6 +6827,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-80x70</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074413402</g:id>
@@ -6210,6 +6850,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-70x60</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074347866</g:id>
@@ -6231,6 +6873,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-80x70</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074315098</g:id>
@@ -6252,6 +6896,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-70x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074282330</g:id>
@@ -6273,6 +6919,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-80x70</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074216794</g:id>
@@ -6294,6 +6942,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-70x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074184026</g:id>
@@ -6315,6 +6965,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-80x70</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074151258</g:id>
@@ -6336,6 +6988,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-70x60</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074118490</g:id>
@@ -6357,6 +7011,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-90x60</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074085722</g:id>
@@ -6378,6 +7034,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-80x49</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074052954</g:id>
@@ -6399,6 +7057,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-70x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894074020186</g:id>
@@ -6420,6 +7080,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-90x60</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073954650</g:id>
@@ -6441,6 +7103,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-80x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073921882</g:id>
@@ -6462,6 +7126,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-70x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073889114</g:id>
@@ -6483,6 +7149,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-90x60</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073856346</g:id>
@@ -6504,6 +7172,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-80x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073758042</g:id>
@@ -6525,6 +7195,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-70x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073692506</g:id>
@@ -6546,6 +7218,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-90x60</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073659738</g:id>
@@ -6564,6 +7238,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-80x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073626970</g:id>
@@ -6585,6 +7261,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-70x50</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073594202</g:id>
@@ -6606,6 +7284,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-120x50</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073561434</g:id>
@@ -6627,6 +7307,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-100x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073528666</g:id>
@@ -6648,6 +7330,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-90x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073463130</g:id>
@@ -6669,6 +7353,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-120x50</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073430362</g:id>
@@ -6690,6 +7376,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-100x40</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073364826</g:id>
@@ -6711,6 +7399,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-90x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073332058</g:id>
@@ -6732,6 +7422,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-120x50</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073299290</g:id>
@@ -6753,6 +7445,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-100x40</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073266522</g:id>
@@ -6774,6 +7468,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-90x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073233754</g:id>
@@ -6795,6 +7491,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-120x50</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073200986</g:id>
@@ -6816,6 +7514,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-100x40</g:item_group_id>
     <g:shipping_weight>7 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073168218</g:id>
@@ -6837,6 +7537,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-90x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073135450</g:id>
@@ -6858,6 +7560,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-120x60</g:item_group_id>
     <g:shipping_weight>12 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073069914</g:id>
@@ -6879,6 +7583,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-100x50</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073037146</g:id>
@@ -6900,6 +7606,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-80x40</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894073004378</g:id>
@@ -6921,6 +7629,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-120x60</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072971610</g:id>
@@ -6942,6 +7652,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-100x50</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072938842</g:id>
@@ -6963,6 +7675,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-80x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072906074</g:id>
@@ -6984,6 +7698,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-120x60</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072873306</g:id>
@@ -7005,6 +7721,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-100x50</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072840538</g:id>
@@ -7026,6 +7744,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-80x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072807770</g:id>
@@ -7047,6 +7767,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-120x60</g:item_group_id>
     <g:shipping_weight>13 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072775002</g:id>
@@ -7068,6 +7790,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-100x50</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072742234</g:id>
@@ -7089,6 +7813,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-80x40</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072709466</g:id>
@@ -7110,6 +7836,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-80x80</g:item_group_id>
     <g:shipping_weight>12 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072676698</g:id>
@@ -7131,6 +7859,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-70x70</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072643930</g:id>
@@ -7152,6 +7882,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072611162</g:id>
@@ -7173,6 +7905,8 @@
     <g:color>Kiefer</g:color>
     <g:item_group_id>PLATTE-25mm-50x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072578394</g:id>
@@ -7194,6 +7928,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072545626</g:id>
@@ -7215,6 +7951,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-80x80</g:item_group_id>
     <g:shipping_weight>12 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072512858</g:id>
@@ -7236,6 +7974,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-70x70</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072480090</g:id>
@@ -7257,6 +7997,8 @@
     <g:color>Ahorn</g:color>
     <g:item_group_id>PLATTE-25mm-50x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072447322</g:id>
@@ -7278,6 +8020,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-80x80</g:item_group_id>
     <g:shipping_weight>12 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072414554</g:id>
@@ -7299,6 +8043,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-70x70</g:item_group_id>
     <g:shipping_weight>9 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072381786</g:id>
@@ -7320,6 +8066,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072349018</g:id>
@@ -7341,6 +8089,8 @@
     <g:color>Buche</g:color>
     <g:item_group_id>PLATTE-25mm-50x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072316250</g:id>
@@ -7362,6 +8112,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-80x80</g:item_group_id>
     <g:shipping_weight>10 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072283482</g:id>
@@ -7383,6 +8135,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-70x70</g:item_group_id>
     <g:shipping_weight>8 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072250714</g:id>
@@ -7404,6 +8158,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-60x60</g:item_group_id>
     <g:shipping_weight>6 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
   <item>
     <g:id>10894072217946</g:id>
@@ -7425,6 +8181,8 @@
     <g:color>Helles Holz</g:color>
     <g:item_group_id>SPERRHOLZ-40mm-50x50</g:item_group_id>
     <g:shipping_weight>4 kg</g:shipping_weight>
+    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
+    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
 </channel>
 </rss>
