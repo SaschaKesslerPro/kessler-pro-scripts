@@ -183,6 +183,24 @@ def item_xml(f, loc, cur, prefix, price_field):
     gew = f.get('gewicht-kg-2')
     if gew:
         lines.append('    <g:shipping_weight>%s kg</g:shipping_weight>' % gew)
+    # Versandpreis: Sperrgut (laengste Seite >= 130 cm) nach Gewichtsstufe, sonst gratis.
+    # Muss der Shopify-Versandprofil-Logik entsprechen (Profil "Dostawa przesylka niestandardowa").
+    name_for_ship = (f.get('name') or '')
+    import re as _re
+    _dims = _re.findall(r'(\d+(?:[.,]\d+)?)\s*(?:[x\u00d7]|cm)', name_for_ship.replace('\u00d8', ''))
+    _longest = max([float(d.replace(',', '.')) for d in _dims], default=0)
+    _sperr = _longest >= 130
+    try:
+        _w = float(str(gew).replace(',', '.')) if gew else 0
+    except ValueError:
+        _w = 0
+    if cur == 'EUR':
+        _p = '0.00' if not _sperr else ('16.90' if _w <= 14 else '34.90' if _w <= 28 else '53.90' if _w <= 42 else '139.90')
+        for _c in ('DE', 'AT'):
+            lines.append('    <g:shipping><g:country>%s</g:country><g:price>%s EUR</g:price></g:shipping>' % (_c, _p))
+    else:
+        _p = '0.00' if not _sperr else ('72.50' if _w <= 14 else '149.00' if _w <= 28 else '229.00' if _w <= 42 else '600.00')
+        lines.append('    <g:shipping><g:country>PL</g:country><g:price>%s PLN</g:price></g:shipping>' % _p)
     lines.append('  </item>')
     return '\n'.join(lines)
 
