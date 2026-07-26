@@ -100,8 +100,8 @@ let SHOP = {};
 
 /* ═══════ Bilder (injiziert) ═══════ */
 const ASSET=(window.__KFG_BASE||'')+'/assets/kfg/';
-const TEX = Object.fromEntries(["weiss", "schwarz", "asche-grau", "kaszmir", "sosna-bielona", "ahorn", "buk", "sonoma-eiche", "eiche-artison", "sperrholz-natur", "marmor-weiss", "marmor-schwarz", "czarny", "hikora", "alaska-weiss", "szary", "eiche-kamienny"].map(k=>[k,ASSET+'top/'+k+'.webp']));
-const KANTE = Object.fromEntries(["schwarz_18", "schwarz_28", "schwarz_40", "asche-grau_18", "asche-grau_28", "kaszmir_18", "kaszmir_28", "kaszmir_36", "sosna-bielona_18", "sosna-bielona_28", "sosna-bielona_36", "ahorn_18", "ahorn_28", "ahorn_36", "buk_18", "buk_20", "buk_28", "buk_40", "sonoma-eiche_18", "sonoma-eiche_28", "sonoma-eiche_36", "eiche-artison_18", "eiche-artison_28", "eiche-artison_36", "weiss_36", "hikora_18", "hikora_36", "mpx_21", "mpx_40", "compact_12", "compact_weiss", "compact_asche-grau", "compact_marmor-weiss", "compact_marmor-schwarz", "compact_czarny", "alaska-weiss_36", "eiche-kamienny_18", "eiche-kamienny_36", "szary_28"].map(k=>[k,ASSET+'kante/'+k+'.webp']));
+const TEX = Object.fromEntries(["weiss", "schwarz", "kaszmir", "sosna-bielona", "ahorn", "buk", "sonoma-eiche", "eiche-artison", "sperrholz-natur", "marmor-weiss", "marmor-schwarz", "czarny", "hikora", "alaska-weiss", "szary", "eiche-kamienny"].map(k=>[k,ASSET+'top/'+k+'.webp']));
+const KANTE = Object.fromEntries(["schwarz_18", "schwarz_28", "schwarz_40", "szary_18", "kaszmir_18", "kaszmir_28", "kaszmir_36", "sosna-bielona_18", "sosna-bielona_28", "sosna-bielona_36", "ahorn_18", "ahorn_28", "ahorn_36", "buk_18", "buk_20", "buk_28", "buk_40", "sonoma-eiche_18", "sonoma-eiche_28", "sonoma-eiche_36", "eiche-artison_18", "eiche-artison_28", "eiche-artison_36", "weiss_36", "hikora_18", "hikora_36", "mpx_21", "mpx_40", "compact_12", "compact_weiss", "compact_szary", "compact_marmor-weiss", "compact_marmor-schwarz", "compact_czarny", "alaska-weiss_36", "eiche-kamienny_18", "eiche-kamienny_36", "szary_28"].map(k=>[k,ASSET+'kante/'+k+'.webp']));
 
 /* ═══════ Preismatrix (Produktions-Docx, zł brutto) ═══════ */
 const KURS = 4.3;                                   /* zł → € Fixkurs (Sascha-Entscheidung) */
@@ -121,7 +121,9 @@ const RULES = {
 
 const DEKOR_MOEBEL = [
   ['weiss','Weiß'],['alaska-weiss','Alaska Weiß'],['sosna-bielona','Kiefer Weiß'],['kaszmir','Kaschmir'],
-  ['asche-grau','Asche Grau'],['szary','Grau'],['schwarz','Schwarz'],
+  /* "Asche Grau" (Popiel) und "Grau" (Szary) sind dasselbe Dekor — die Draufsicht
+     im Archiv ist byte-identisch. Geführt wird der Shop-Name Grau (36 Lagerartikel). */
+  ['szary','Grau'],['schwarz','Schwarz'],
   ['ahorn','Ahorn'],['buk','Buche'],['sonoma-eiche','Eiche Sonoma'],['eiche-artison','Eiche Artison'],
   /* Eiche Kamienny und Eiche Hickory sind dasselbe Dekor unter zwei Namen
      (Senior: „to samo co dąb kamienny"; Draufsicht UND Kantenfoto sind identisch).
@@ -136,11 +138,11 @@ const MATERIALS = {
              thick:[['18','18 mm'],['25','25 mm'],['36','36 mm']], def:'25', dekore:DEKOR_MOEBEL, hasABS:true },
   compact: { name:'Compact / HPL', sub:'ab 89 € · 12 mm',
              thick:[['12','12 mm Vollkern']], def:'12',
-             dekore:[['weiss','Weiß'],['czarny','Schwarz'],['asche-grau','Asche Grau'],['marmor-weiss','Weißer Marmor'],['marmor-schwarz','Schwarzer Marmor']], hasABS:false },
+             dekore:[['weiss','Weiß'],['czarny','Schwarz'],['szary','Grau'],['marmor-weiss','Weißer Marmor'],['marmor-schwarz','Schwarzer Marmor']], hasABS:false },
   mpx:     { name:'Multiplex Birke', sub:'ab 49 € · 21/40 mm · alle Dekore',
              thick:[['21','21 mm'],['40','40 mm']], def:'21', dekore:[['sperrholz-natur','Birke natur']], hasABS:false }
 };
-const FLAT = {'weiss':'#f0eee9','schwarz':'#232120','asche-grau':'#b7b6b2','kaszmir':'#d9d2c4','sosna-bielona':'#ece5d6',
+const FLAT = {'weiss':'#f0eee9','schwarz':'#232120','szary':'#b7b6b2','kaszmir':'#d9d2c4','sosna-bielona':'#ece5d6',
   'ahorn':'#e9d1a8','buk':'#d9af7e','sonoma-eiche':'#c2a172','eiche-artison':'#a8815a','hikora':'#8f704a',
   'sperrholz-natur':'#e7d9ba','marmor-weiss':'#ebe9e4','marmor-schwarz':'#2b2926','czarny':'#232120'};
 const ABS_COL = {dekor:null, weiss:'#f0eee9', popiel:'#b7b6b2', dunkelgrau:'#6f6e6b', schwarz:'#232120',
@@ -616,7 +618,7 @@ function buildMats(){
     clampDims(); buildAll(); render();
   }));
 }
-const DEKOR_ALIAS = { 'eiche-kamienny':'hikora' };   /* zusammengefuehrte Dekore */
+const DEKOR_ALIAS = { 'eiche-kamienny':'hikora', 'asche-grau':'szary' };   /* zusammengefuehrte Dekore */
 function ensureDekor(){
   /* Schutz: haelt S.dekor immer innerhalb der aktuell gueltigen Liste.
      Vorher konnte der angezeigte Dekorname vom markierten Swatch abweichen. */
