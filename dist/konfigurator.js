@@ -114,7 +114,7 @@ const RATE = {                                      /* zł pro m² */
 };
 /* Fertigungsregeln (Senior): Radien + Maximalmaße */
 const RULES = {
-  dekor:   {maxL:270, maxB:200, maxD:160, minCorner:30, cornerNote:'Möbelplatte (ABS-Kante): Außenradien mind. R30 — kleinere Radien sind fertigungstechnisch nicht möglich.'},
+  dekor:   {maxL:270, maxB:200, maxD:160, minCorner:30, cornerNote:'Möbelplatte (ABS-Kante): Außenradien mind. R30. Kleinere Radien sind fertigungstechnisch nicht möglich.'},
   compact: {maxL:238, maxB:120, maxD:120, minCorner:0, cornerNote:''},
   mpx:     {maxL:238, maxB:120, maxD:120, minCorner:0, cornerNote:''}
 };
@@ -297,7 +297,7 @@ function drawStage(){
       :`<image href="${tex}" x="${cx-r*1.16}" y="${cy-r*1.16}" width="${2.32*r}" height="${2.32*r}" preserveAspectRatio="xMidYMid slice" clip-path="url(#plateClip)"/>`;
     inner+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#00000018"/>`;
     inner+=`<circle class="kfg_edge" data-i="0" cx="${cx}" cy="${cy}" r="${r}" fill="none"
-      stroke="${edgeCol(S.edges[0])}" stroke-width="5"><title>Kante — ${edgeLabel(S.edges[0])}</title></circle>`;
+      stroke="${edgeCol(S.edges[0])}" stroke-width="5"><title>Kante: ${edgeLabel(S.edges[0])}</title></circle>`;
     inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');
   } else if(S.form==='lform'){
     const aw=S.lf.aw*sc, ah=S.lf.ah*sc, ri=(S.mat==='dekor'?5:1)*sc;
@@ -334,7 +334,7 @@ function drawStage(){
                `M ${p6} ${arc(...p7)} L ${p8} ${arc(...p9)}`,`M ${p9} ${arc(...p10)} L ${p11} ${arc(...p0)}`];
     seg.forEach((dd,i)=>{
       inner+=`<path class="kfg_edge" data-i="${i}" d="${dd}" fill="none"
-        stroke="${edgeCol(S.edges[i])}" stroke-width="5" stroke-linecap="butt"><title>Kante ${'ABCD'[i]} — ${edgeLabel(S.edges[i])}</title></path>`;
+        stroke="${edgeCol(S.edges[i])}" stroke-width="5" stroke-linecap="butt"><title>Kante ${'ABCD'[i]}: ${edgeLabel(S.edges[i])}</title></path>`;
     });
     inner+=dimH(x,x+pw,y+ph+30,d.w+' cm')+dimV(x+pw+30,y,y+ph,d.h+' cm');
     if(S.form==='rect'&&S.corner>0) inner+=`<text class="dim-text" x="${x+8}" y="${y-10}">Ecken R${S.corner}</text>`;
@@ -353,11 +353,11 @@ function drawStage(){
       const committed=i<S.cuts.length;
       if(c2.t==='c'){
         inner+=`<circle class="kfg_cutshape" data-idx="${i}" cx="${x+c2.cx*sc}" cy="${y+c2.cy*sc}" r="${c2.d/2*sc}"
-          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>Ø ${c2.d} cm — ziehen zum Verschieben</title></circle>`;
+          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>Ø ${c2.d} cm, ziehen zum Verschieben</title></circle>`;
         inner+=`<text class="dim-text" x="${x+c2.cx*sc}" y="${y+c2.cy*sc+4}" text-anchor="middle" style="font-size:11px;pointer-events:none">${cutShort(c2)}</text>`;
       } else {
         inner+=`<rect class="kfg_cutshape" data-idx="${i}" x="${x+(c2.cx-c2.w/2)*sc}" y="${y+(c2.cy-c2.h/2)*sc}" width="${c2.w*sc}" height="${c2.h*sc}" rx="3"
-          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>${c2.w} × ${c2.h} cm — ziehen zum Verschieben</title></rect>`;
+          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>${c2.w} × ${c2.h} cm, ziehen zum Verschieben</title></rect>`;
         inner+=`<text class="dim-text" x="${x+c2.cx*sc}" y="${y+c2.cy*sc+4}" text-anchor="middle" style="font-size:11px;pointer-events:none">${cutShort(c2)}</text>`;
       }
       /* Abstandsmaße zur Kante: beim Ziehen dieses Ausschnitts oder in der Auftragszeichnung */
@@ -459,8 +459,8 @@ function drawDetail(){
     <span>${m.name}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.thickName}</span>
     <span>Kante: ${uniq.join(' · ')}${absTxt}</span>
     ${S.form==='rect'&&S.corner>0?`<span>Ecken: R${S.corner}</span>`:''}
-    <em>${ph.ref?(ph.mm===25||!ph.mm?`Abbildung zeigt die Kante in 25 mm — unabhängig von der gewählten Stärke. Gefertigt wird in ${c.thickName}.`:`Abbildung zeigt eine ${ph.mm}-mm-Aufnahme dieses Dekors — für dieses Dekor liegt noch keine 25-mm-Kantenaufnahme vor. Gefertigt wird in ${c.thickName}.`)
-      :`Kantenfoto ${c.thickName} — Originalaufnahme aus der Fertigung.`}</em>`;
+    <em>${ph.ref?(ph.mm===25||!ph.mm?`Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke. Gefertigt wird in ${c.thickName}.`:`Abbildung zeigt eine ${ph.mm}-mm-Aufnahme dieses Dekors. Für dieses Dekor liegt noch keine 25-mm-Kantenaufnahme vor. Gefertigt wird in ${c.thickName}.`)
+      :`Kantenfoto ${c.thickName}, Originalaufnahme aus der Fertigung.`}</em>`;
 }
 
 /* ═══════ 3D (three.js, lazy) ═══════ */
@@ -636,7 +636,7 @@ function buildDekore(){
   }));
   $('mpxSurfaceBlock').style.display=S.mat==='mpx'?'block':'none';
   const dn=$('dekorNote'); if(dn) dn.textContent = (S.mat==='mpx'&&S.mpxSurface==='hpl')
-    ? 'Auf Multiplex lässt sich jedes Laminat unserer Möbelplatten-Palette aufkleben — die Kante bleibt sichtbare Birkenschicht.'
+    ? 'Auf Multiplex lässt sich jedes Laminat unserer Möbelplatten-Palette aufkleben, die Kante bleibt sichtbare Birkenschicht.'
     : 'Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind für 18 und 25 mm verfügbar.';
   $('absColorBlock').style.display=S.mat==='dekor'?'block':'none';
 }
@@ -714,8 +714,8 @@ function clampDims(){
 function validate(){
   const r=rules(); let ok=true;
   const chk=(fid,eid,rid,v,min,max)=>{
-    $(rid).textContent=`${min} – ${max} cm`;
-    $(eid).textContent=`Bitte ${min}–${max} cm eingeben`;
+    $(rid).textContent=`${min} bis ${max} cm`;
+    $(eid).textContent=`Bitte ${min} bis ${max} cm eingeben`;
     const bad=!(v>=min&&v<=max); $(fid).classList.toggle('is-error',bad); if(bad)ok=false;
   };
   if(S.form==='rect'){ chk('fL','errL','rangeL',+S.L,10,r.maxL); chk('fB','errB','rangeB',+S.B,10,r.maxB); }
@@ -726,7 +726,7 @@ function validate(){
   }
   /* Radius-Regel Möbelplatte */
   if(S.form==='rect'&&S.mat==='dekor'&&S.corner>0&&S.corner<r.minCorner){
-    S.corner=r.minCorner; toast('Möbelplatte: Außenradius mind. R30 — angepasst'); buildCorner();
+    S.corner=r.minCorner; toast('Möbelplatte: Außenradius mind. R30, angepasst'); buildCorner();
   }
   return ok;
 }
@@ -734,8 +734,8 @@ function render(){
   if(!validate())return;
   const std=isStandard(), offer=needsOffer(), c=calc();
   $('badge').classList.toggle('is-sonder',!std);
-  $('badgeText').textContent=std?'Ab Lager — lieferbar in 3–5 Tagen'
-    :(offer?'Individuelle Fertigung — Angebot in 24 h':'CNC-Fertigung — Angebot in 24 h');
+  $('badgeText').textContent=std?'Ab Lager · lieferbar in 3 bis 5 Tagen'
+    :(offer?'Individuelle Fertigung · Angebot in 24 h':'CNC-Fertigung · Angebot in 24 h');
   const pv=offer?fmt(c.total)+' +':fmt(c.total);
   $('price').textContent=pv; $('priceBar').textContent=pv;
   $('priceLabel').textContent=std?'Dein Preis':(offer?'Preis ab (zzgl. Sonderarbeiten)':'Voraussichtlicher Preis');
@@ -747,7 +747,7 @@ function render(){
   const sur=S.mat==='mpx'?{natur:' · natur',hpl:' + HPL',lack:' · klarlackiert'}[S.mpxSurface]:'';
   const hit=shopHit();
   const rows=[[hit
-    ? `${MATERIALS[S.mat].name}${sur} · ${c.dekorName} · ${c.thickName} — Lagerartikel ${hit[2]||''}`
+    ? `${MATERIALS[S.mat].name}${sur} · ${c.dekorName} · ${c.thickName} · Lagerartikel ${hit[2]||''}`
     : `${MATERIALS[S.mat].name}${sur} · ${c.dekorName} · ${c.thickName} (${Math.round(areaM2()*100)/100} m² × ${rateZl()} zł)`, c.basis]];
   if(c.kante>0)rows.push([`Kantenbearbeitung`,c.kante]);
   if(c.ecken>0)rows.push([`Eckenrundung R${S.corner} (4× à ${fmt(CORNER_PRICE[S.corner]||4.9)})`,c.ecken]);
@@ -802,8 +802,8 @@ function endDraw(){
   if(dragCut){ dragCut=null; $('stage').classList.remove('is-dragging'); render(); return; }
   if(!S.draw||!tmpCut)return;
   if(tmpCut.x1!==null){ const c2=normCut(tmpCut);
-    if(c2.w>=3&&c2.h>=3){S.cuts.push(c2);toast('Ausschnitt '+fmtCut(c2)+' hinzugefügt — Preis im Angebot');}
-    else toast('Zu klein — mindestens 3 cm aufziehen'); }
+    if(c2.w>=3&&c2.h>=3){S.cuts.push(c2);toast('Ausschnitt '+fmtCut(c2)+' hinzugefügt, Preis im Angebot');}
+    else toast('Zu klein: mindestens 3 cm aufziehen'); }
   tmpCut=null; setDraw(null); render(); }
 window.addEventListener('mousemove',moveDraw);
 $('stage').addEventListener('touchmove',e=>{ if(!S.draw&&!dragCut)return;
@@ -857,7 +857,7 @@ document.querySelectorAll('.kfg_check input').forEach(i=>i.addEventListener('cha
 }));
 $('uploadZone').addEventListener('click',()=>$('uploadInput').click());
 $('uploadInput').addEventListener('change',()=>{
-  if($('uploadInput').files.length){$('uploadZone').querySelector('b').textContent='✓ '+$('uploadInput').files[0].name;toast('Skizze angehängt — geht mit der Anfrage raus')}
+  if($('uploadInput').files.length){$('uploadZone').querySelector('b').textContent='✓ '+$('uploadInput').files[0].name;toast('Skizze angehängt, geht mit der Anfrage raus')}
 });
 function openOrder(){
   FORCE_DISTS=true; drawStage();
@@ -872,7 +872,7 @@ function openOrder(){
   const edgeTxt=edges.length===1?edges[0]:S.edges.map((e,i)=>'ABCD'[i]+': '+edgeLabel(e)).join(' · ');
   const cutsTxt=(G?S.cuts:[]).map(c2=>{
     const f=v=>(''+(Math.round(v*10)/10)).replace('.',',');
-    return `${fmtCut(c2)} — Abstände: links ${f(c2.cx-c2.w/2)} · rechts ${f(G.w-(c2.cx+c2.w/2))} · hinten ${f(c2.cy-c2.h/2)} · vorn ${f(G.h-(c2.cy+c2.h/2))} cm`;
+    return `${fmtCut(c2)} · Abstände: links ${f(c2.cx-c2.w/2)} · rechts ${f(G.w-(c2.cx+c2.w/2))} · hinten ${f(c2.cy-c2.h/2)} · vorn ${f(G.h-(c2.cy+c2.h/2))} cm`;
   });
   const presets=[]; if(S.extras.bohr)presets.push('Montagebohrungen 4× Ø8');
   Object.keys(PRESETS).forEach(k=>{const n=presetCount(k); if(n)presets.push((n>1?n+'× ':'')+PRESETS[k].label);});
@@ -905,7 +905,7 @@ $('omClose').addEventListener('click',()=>$('orderModal').hidden=true);
 $('orderModal').addEventListener('click',e=>{if(e.target===$('orderModal'))$('orderModal').hidden=true});
 $('cta').addEventListener('click',openOrder);
 $('ctaBar').addEventListener('click',()=>$('cta').click());
-$('btnShare').addEventListener('click',()=>{navigator.clipboard&&navigator.clipboard.writeText(location.href);toast('Link kopiert — Konfiguration teilbar')});
+$('btnShare').addEventListener('click',()=>{navigator.clipboard&&navigator.clipboard.writeText(location.href);toast('Link kopiert, Konfiguration teilbar')});
 $('btnMail').addEventListener('click',()=>toast('Demo: E-Mail-Capture → Konfiguration + Preis als Mail (Lead)'));
 $('btnMuster').addEventListener('click',()=>toast('Demo: Musterbox als Shopify-Produkt in den Warenkorb'));
 
@@ -918,7 +918,7 @@ function addPreset(k){
   if(w>d.w-2||hh>d.h-2){toast(p.label+' passt nicht auf diese Plattengröße');return;}
   cx=Math.max(w/2,Math.min(d.w-w/2,cx)); cy=Math.max(hh/2,Math.min(d.h-hh/2,cy));
   S.cuts.push(p.t==='c'?{t:'c',preset:k,cx,cy,d:p.d,w:p.d,h:p.d}:{t:'r',preset:k,cx,cy,w:p.w,h:p.h});
-  toast(p.label+' hinzugefügt — auf der Platte verschiebbar'); render();
+  toast(p.label+' hinzugefügt, auf der Platte verschiebbar'); render();
 }
 function removePreset(k){
   for(let i=S.cuts.length-1;i>=0;i--) if(S.cuts[i].preset===k){S.cuts.splice(i,1);render();return;}
