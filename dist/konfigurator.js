@@ -123,7 +123,11 @@ const DEKOR_MOEBEL = [
   ['weiss','Weiß'],['alaska-weiss','Alaska Weiß'],['sosna-bielona','Kiefer Weiß'],['kaszmir','Kaschmir'],
   ['asche-grau','Asche Grau'],['szary','Grau'],['schwarz','Schwarz'],
   ['ahorn','Ahorn'],['buk','Buche'],['sonoma-eiche','Eiche Sonoma'],['eiche-artison','Eiche Artison'],
-  ['eiche-kamienny','Eiche Kamienny'],['hikora','Eiche Hickory']
+  /* Eiche Kamienny und Eiche Hickory sind dasselbe Dekor unter zwei Namen
+     (Senior: „to samo co dąb kamienny"; Draufsicht UND Kantenfoto sind identisch).
+     Geführt wird der Shop-Name Eiche Hickory — dort liegen auch die 39 Lagerartikel.
+     Alt-Schlüssel 'eiche-kamienny' wird in ensureDekor() umgebogen. */
+  ['hikora','Eiche Hickory']
 ];
 /* Auf Multiplex kann jedes Laminat der Möbelplatten-Palette aufgeklebt werden (Sascha 26.07.) */
 const DEKOR_HPL = DEKOR_MOEBEL;
@@ -612,9 +616,11 @@ function buildMats(){
     clampDims(); buildAll(); render();
   }));
 }
+const DEKOR_ALIAS = { 'eiche-kamienny':'hikora' };   /* zusammengefuehrte Dekore */
 function ensureDekor(){
   /* Schutz: haelt S.dekor immer innerhalb der aktuell gueltigen Liste.
      Vorher konnte der angezeigte Dekorname vom markierten Swatch abweichen. */
+  if(DEKOR_ALIAS[S.dekor]) S.dekor=DEKOR_ALIAS[S.dekor];
   const l=dekorList(); if(!l.length) return;
   if(!l.some(x=>x[0]===S.dekor)) S.dekor=l[0][0];
 }
