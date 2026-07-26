@@ -197,7 +197,10 @@ const PRESETS = {
 };
 
 /* ═══════ State ═══════ */
-const S = { mat:'dekor', dekor:'sonoma-eiche', mpxSurface:'natur', absColor:'dekor',
+/* Startkonfiguration: bewusst ein LAGERARTIKEL (Buche 120x60x25 = 47,95 EUR ab Lager).
+   Eiche Sonoma gibt es nur in 90x50 und 90x60 — der Konfigurator startete dadurch
+   im Angebots-Flow statt mit dem starken "Ab Lager"-Signal. */
+const S = { mat:'dekor', dekor:'buk', mpxSurface:'natur', absColor:'dekor',
             form:'rect', L:120, B:60, D:80, sw:{w:120,d:60,c:52}, lf:{L:180,B:120,aw:90,ah:60}, thick:'25',
             corner:0, edgeR:3, edges:['abs','abs','abs','abs'],
             extras:{bohr:false,custom:false}, cuts:[], draw:null, view:'2d' };
