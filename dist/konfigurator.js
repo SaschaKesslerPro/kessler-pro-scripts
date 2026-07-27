@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.6.7';
+  var VERSION = '1.6.8';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -1360,7 +1360,7 @@ function messeHeader(){
   });
   return Math.round(hb);
 }
-var _kfgStickyLaeuft=false, _kfgStufe=0, _kfgSpart=[0,0,0,0,0];
+var _kfgStickyLaeuft=false, _kfgStufe=0, _kfgSpart=[0,0,0,0,0], _kfgHeadMax=0;
 function updateSticky(){
   const el=$('stickyCol'); if(!el)return;
   _kfgStickyLaeuft=true;
@@ -1397,8 +1397,16 @@ function updateSticky(){
      Jetzt wird vom aktuellen Zustand aus nur noch eine Stufe hoch oder runter
      gegangen, mit Puffer gegen Hin-und-Her-Springen. */
   const det=$('detailCard');
-  const top=headerBottom()+12;
-  const platz=window.innerHeight-top-16;
+  const hb=headerBottom();
+  /* POSITION folgt dem Header, GROESSE nicht. Die Kessler-Kopfleiste schrumpft
+     beim Scrollen von ~210 auf ~93 px — wuerde die Groesse mitrechnen, wuchse
+     die Draufsicht beim Scrollen mit (Befund Sascha, 27.07.: "Wenn wir scrollen
+     sollte die Groesse gleich bleiben"). Gerechnet wird deshalb immer mit der
+     GROESSTEN bisher gesehenen Kopfleiste: die Spalte passt damit in jedem
+     Zustand, und unten bleibt hoechstens etwas Luft ueber. */
+  _kfgHeadMax=Math.max(_kfgHeadMax, hb);
+  const top=hb+12;
+  const platz=window.innerHeight-(_kfgHeadMax+12)-16;
   const stage=$('stage'), stage3=$('stage3d');
   /* Nur schreiben, wenn sich der Wert wirklich aendert — jeder ueberfluessige
      Stilzugriff erzwingt sonst ein neues Layout. */
@@ -1450,7 +1458,7 @@ function updateBottomBar(){
   const bar=document.querySelector('.kfg_bar');
   if(bar) bar.classList.remove('is-desk');
 }
-window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=setTimeout(()=>{_kfgHead=null;_kfgHeadEls=null;if(window.__kfgBeobachteHeader)window.__kfgBeobachteHeader();placeSummary();updateSticky();updateBottomBar();frame3D()},120)});
+window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=setTimeout(()=>{_kfgHead=null;_kfgHeadEls=null;_kfgHeadMax=0;if(window.__kfgBeobachteHeader)window.__kfgBeobachteHeader();placeSummary();updateSticky();updateBottomBar();frame3D()},120)});
 
 /* Die Hoehe der Spalte steht beim ersten Messen noch nicht fest: das Kantenbild
    ist dann meist noch nicht geladen und zaehlt mit 0 px. Deshalb wird nach dem
