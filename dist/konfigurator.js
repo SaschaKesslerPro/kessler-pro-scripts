@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.2.0';
+  var VERSION = '1.2.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -760,9 +760,12 @@ function buildCorner(){
 }
 /* Kleines Icon: Quadrat, bei dem genau die gemeinte Ecke gerundet ist */
 function cornerIcon(i,on){
-  const r=on?7:0, p=roundPath(2,2,16,16,[0,1,2,3].map(k=>k===i?r:0));
-  return `<svg viewBox="0 0 20 20" width="18" height="18" style="vertical-align:-4px;margin-right:6px">`
-    +`<path d="${p}" fill="${on?'#1E1E1E':'none'}" stroke="#1E1E1E" stroke-width="1.6"/></svg>`;
+  /* Das Icon zeigt IMMER die gemeinte Ecke gerundet — gefuellt = ausgewaehlt.
+     (Vorher war die Rundung nur bei Auswahl zu sehen, damit sahen alle
+      abgewaehlten Ecken gleich aus.) */
+  const p=roundPath(2,2,16,16,[0,1,2,3].map(k=>k===i?7:0));
+  return `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="vertical-align:-4px;margin-right:6px;flex:0 0 auto">`
+    +`<path d="${p}" fill="${on?'#1E1E1E':'#FFFFFF'}" stroke="#1E1E1E" stroke-width="1.7"/></svg>`;
 }
 function buildCornerSel(){
   const box=$('cornerSelBlock'), el=$('cornerSel'); if(!box||!el) return;
