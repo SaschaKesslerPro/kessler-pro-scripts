@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.6.0';
+  var VERSION = '1.6.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -1369,13 +1369,12 @@ function updateSticky(){
     if(maxStage >= 200){ setMax(maxStage+'px'); return true; }
     return false;
   };
-  /* Zuerst die Draufsicht verkleinern. Erst wenn das nicht reicht, wird die
-     Detailkarte zugeklappt — sonst verschwand das Kantenbild ohne Not
-     (Befund Sascha, 27.07.). */
-  if(!passtMit()){
-    if(det && !det.dataset.manual && det.open){ det.open=false; }
-    if(!passtMit()) setMax('');
-  }
+  /* Am Desktop wird die Detailkarte NIE automatisch zugeklappt: dort ist die
+     Aufklapp-Zeile ausgeblendet, eine geschlossene Karte waere nur ein leerer
+     weisser Balken — genau das sah Sascha als "Kantenbild verschwunden".
+     Reicht der Platz nicht, wird stattdessen unten auf is-split umgestellt
+     (nur die Vorschau bleibt stehen, die Preiskarte scrollt mit). */
+  if(!passtMit()) setMax('');
   const passt = el.offsetHeight <= window.innerHeight-top-16;
   /* Passt die ganze Spalte ins Fenster, bleibt sie wie bisher komplett stehen.
      Sonst wird nur die VORSCHAU festgehalten und die Preiskarte scrollt normal
