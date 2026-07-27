@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.6.2';
+  var VERSION = '1.6.3';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -1337,8 +1337,11 @@ function headerBottom(){
   });
   return Math.round(hb);
 }
+var _kfgStickyLaeuft=false;
 function updateSticky(){
   const el=$('stickyCol'); if(!el)return;
+  _kfgStickyLaeuft=true;
+  requestAnimationFrame(()=>{ _kfgStickyLaeuft=false; });
   if(window.innerWidth<980){
     /* Mobil: die Vorschaukarte selbst wandert mit (Wunsch Sascha 27.07.) —
        die fruehere Mini-Leiste entfaellt dafuer ganz. Die Draufsicht wird
@@ -1401,6 +1404,33 @@ function updateBottomBar(){
   if(bar) bar.classList.remove('is-desk');
 }
 window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=setTimeout(()=>{placeSummary();updateSticky();updateBottomBar();frame3D()},120)});
+
+/* Die Hoehe der Spalte steht beim ersten Messen noch nicht fest: das Kantenbild
+   ist dann meist noch nicht geladen und zaehlt mit 0 px. Genau deshalb hielt der
+   Konfigurator die Spalte faelschlich fuer passend, und der Warenkorb-Button lief
+   unten aus dem Bild (Befund Sascha, 27.07.). Es wird daher nachgemessen:
+   bei jeder Hoehenaenderung, nach dem Laden der Bilder und beim Scrollen
+   (der Site-Header faehrt ein und aus, die Startkante wandert also mit). */
+(function(){
+  let wartet=false;
+  const nachmessen=()=>{
+    if(wartet) return; wartet=true;
+    requestAnimationFrame(()=>{ wartet=false; updateSticky(); });
+  };
+  const col=$('stickyCol');
+  if(col && window.ResizeObserver){
+    new ResizeObserver(()=>{ if(!_kfgStickyLaeuft) nachmessen(); }).observe(col);
+  }
+  document.querySelectorAll('[data-kfg-root] img').forEach(im=>{
+    im.addEventListener('load', nachmessen);
+    im.addEventListener('error', nachmessen);
+  });
+  /* Scrollen nur gedrosselt: die Header-Messung kostet Layout. */
+  let sT; window.addEventListener('scroll', ()=>{
+    clearTimeout(sT); sT=setTimeout(nachmessen, 120);
+  }, {passive:true});
+  window.addEventListener('load', nachmessen);
+})();
 
 /* ═══════ Init ═══════ */
 
