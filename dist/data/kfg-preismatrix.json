@@ -1,104 +1,384 @@
 {
-  "_meta": {
-    "name": "Kessler PRO — Konfigurator Preismatrix",
-    "stand": "2026-07-26",
-    "quelle": "Preisliste der Produktion + Rückläufer Fragebogen 26.07.2026 (kessler-pro-docs/plans/Konfigurator-Antworten-Produktion.md)",
-    "hinweis": "Materialpreise in zł/m² (brutto). Bearbeitungszuschläge in EUR. Bei Lagergrößen gilt der Shop-Preis aus kfg-produktmatrix.json — diese Formel gilt nur für Sondermaße.",
-    "waehrung": { "basis": "PLN", "kurs_eur": 4.3, "rundung": "aufrunden auf ,90", "mindestpreis_eur": 25.90 }
+ "_meta": {
+  "name": "Kessler PRO — Konfigurator Preismatrix",
+  "stand": "2026-07-27",
+  "quelle": "Preisliste der Produktion + Rückläufer Fragebogen 26.07.2026 (kessler-pro-docs/plans/Konfigurator-Antworten-Produktion.md)",
+  "hinweis": "Materialpreise in zł/m² (brutto). Bearbeitungszuschläge in EUR. Bei Lagergrößen gilt der Shop-Preis aus kfg-produktmatrix.json — diese Formel gilt nur für Sondermaße.",
+  "waehrung": {
+   "basis": "PLN",
+   "kurs_eur": 4.3,
+   "rundung": "aufrunden auf ,90",
+   "mindestpreis_eur": 25.9
   },
-
-  "material": {
-    "dekor": {
-      "name": { "de": "Möbelplatte", "pl": "Płyta meblowa", "en": "Furniture board" },
-      "staerken_mm": [18, 25, 36],
-      "satz_zl_m2": { "18": 295, "25": 386, "36": 566 },
-      "dekore": ["weiss", "alaska-weiss", "sosna-bielona", "kaszmir", "asche-grau", "szary", "schwarz",
-                 "ahorn", "buk", "sonoma-eiche", "eiche-artison", "eiche-kamienny", "hikora"],
-      "kante_inklusive": "ABS 2 mm, Radius R2 serienmäßig"
+  "preisstand_bearbeitung": "Bearbeitungszuschläge am 27.07.2026 an den Wettbewerb angeglichen (Ziel: 5 % unter kolm.pl). Vergleich siehe kessler-pro-docs/plans/Konfigurator-Wettbewerb-KOLM.md. Freigabe Sascha; Gegenrechnung der Fräszeit durch die Produktion steht noch aus."
+ },
+ "material": {
+  "dekor": {
+   "name": {
+    "de": "Möbelplatte",
+    "pl": "Płyta meblowa",
+    "en": "Furniture board"
+   },
+   "staerken_mm": [
+    18,
+    25,
+    36
+   ],
+   "satz_zl_m2": {
+    "18": 295,
+    "25": 386,
+    "36": 566
+   },
+   "dekore": [
+    "weiss",
+    "alaska-weiss",
+    "sosna-bielona",
+    "kaszmir",
+    "asche-grau",
+    "szary",
+    "schwarz",
+    "ahorn",
+    "buk",
+    "sonoma-eiche",
+    "eiche-artison",
+    "eiche-kamienny",
+    "hikora"
+   ],
+   "kante_inklusive": "ABS 2 mm, Radius R2 serienmäßig"
+  },
+  "mpx": {
+   "name": {
+    "de": "Multiplex Birke",
+    "pl": "Sklejka brzozowa",
+    "en": "Birch plywood"
+   },
+   "staerken_mm": [
+    21,
+    40
+   ],
+   "oberflaechen": {
+    "natur": {
+     "label": "Birke natur",
+     "satz_zl_m2": {
+      "21": 446,
+      "40": 515
+     },
+     "dekore": [
+      "sperrholz-natur"
+     ]
     },
-    "mpx": {
-      "name": { "de": "Multiplex Birke", "pl": "Sklejka brzozowa", "en": "Birch plywood" },
-      "staerken_mm": [21, 40],
-      "oberflaechen": {
-        "natur":  { "label": "Birke natur", "satz_zl_m2": { "21": 446, "40": 515 }, "dekore": ["sperrholz-natur"] },
-        "hpl":    { "label": "HPL-Laminat", "satz_zl_m2": { "21": 600, "40": 700 },
-                    "abweichend": { "hikora": { "21": 650, "40": 750 } },
-                    "dekore": "wie material.dekor.dekore" },
-        "lack":   { "label": "Klarlack", "preis": "angebot" }
+    "hpl": {
+     "label": "HPL-Laminat",
+     "satz_zl_m2": {
+      "21": 600,
+      "40": 700
+     },
+     "abweichend": {
+      "hikora": {
+       "21": 650,
+       "40": 750
       }
+     },
+     "dekore": "wie material.dekor.dekore"
     },
-    "compact": {
-      "name": { "de": "Compact / HPL", "pl": "Płyta compact", "en": "Compact / HPL" },
-      "staerken_mm": [12],
-      "satz_zl_m2": { "standard": 990, "marmor": 1080 },
-      "marmor_dekore": ["marmor-weiss", "marmor-schwarz"],
-      "dekore": ["weiss", "czarny", "asche-grau", "marmor-weiss", "marmor-schwarz"]
+    "lack": {
+     "label": "Klarlack",
+     "preis": "angebot"
     }
+   }
   },
-
-  "kantenprofile": {
-    "dekor":   [{ "id": "abs", "label": "ABS-Kante 2 mm · R2", "eur_lfm": 0, "hinweis": "inklusive" }],
-    "mpx":     [{ "id": "fase", "label": "Leicht gefast", "eur_lfm": 0, "hinweis": "serienmäßig" },
-                { "id": "f45", "label": "Gefast 45°", "eur_lfm": 5 },
-                { "id": "halbrund", "label": "Halbrund", "eur_lfm": 8 }],
-    "compact": [{ "id": "roh", "label": "Geschliffen", "eur_lfm": 0, "hinweis": "serienmäßig" },
-                { "id": "fase", "label": "Gefast 45°", "eur_lfm": 7 },
-                { "id": "halbrund", "label": "Halbrund", "eur_lfm": 8 }]
-  },
-
-  "eckenradius_eur_je_ecke": { "30": 4.90, "50": 4.90, "100": 7.90 },
-
-  "ausschnitte_eur_stueck": {
-    "bohr":       { "label": "Montagebohrungen 4 × Ø8 mm", "preis": 9.90 },
-    "kabel":      { "label": "Kabeldurchlass Ø60 mm", "preis": 14.90, "form": "kreis", "d_cm": 6 },
-    "usb":        { "label": "USB-/Steckdosen-Ausschnitt", "preis": 24.90, "form": "rechteck", "w_cm": 26.5, "h_cm": 10 },
-    "spuele":     { "label": "Spülen-Ausschnitt", "preis": 79, "form": "rechteck", "w_cm": 78, "h_cm": 43 },
-    "induktion":  { "label": "Induktionsfeld-Ausschnitt", "preis": 79, "form": "rechteck", "w_cm": 56, "h_cm": 49 },
-    "frei":       { "label": "Freier Ausschnitt nach Skizze", "preis": "angebot" }
-  },
-
-  "abs_farben": [
-    { "id": "dekor", "label": "Dekorgleich", "hex": null, "staerken": "alle", "standard": true },
-    { "id": "weiss", "label": "Weiß", "hex": "#f0eee9", "staerken": "alle" },
-    { "id": "popiel", "label": "Asche Grau", "hex": "#b7b6b2", "staerken": "alle" },
-    { "id": "dunkelgrau", "label": "Dunkelgrau", "hex": "#6f6e6b", "staerken": "alle" },
-    { "id": "schwarz", "label": "Schwarz", "hex": "#232120", "staerken": "alle" },
-    { "id": "gruen", "label": "Grün", "hex": "#3d6b46", "staerken": [18, 25] },
-    { "id": "rot", "label": "Rot", "hex": "#8f2f2c", "staerken": [18, 25] },
-    { "id": "gelb", "label": "Gelb", "hex": "#c9a227", "staerken": [18, 25] },
-    { "id": "blau", "label": "Blau", "hex": "#2f4f7a", "staerken": [18, 25] }
-  ],
-
-  "fertigungsregeln": {
-    "dekor":   { "max_l_cm": 270, "max_b_cm": 200, "max_d_cm": 160, "min_cm": 10,
-                 "aussenradius_min_mm": 30, "innenradius_min_mm": 50 },
-    "mpx":     { "max_l_cm": 238, "max_b_cm": 120, "max_d_cm": 120, "min_cm": 10,
-                 "aussenradius_min_mm": 0, "innenradius_min_mm": 10 },
-    "compact": { "max_l_cm": 238, "max_b_cm": 120, "max_d_cm": 120, "min_cm": 10,
-                 "aussenradius_min_mm": 0, "innenradius_min_mm": 10 },
-    "_hinweis": "Mindestmaß laut Produktion technisch unbegrenzt; 10 cm ist ein UI-Minimum, kleiner läuft über die Anfrage."
-  },
-
-  "formen": {
-    "rect":  { "label": "Rechteck", "flow": "lager_oder_fertigung" },
-    "round": { "label": "Rund", "flow": "lager_oder_fertigung" },
-    "lform": { "label": "L-Form", "flow": "fertigung",
-               "innenradius_mm": { "dekor": 50, "mpx": 10, "compact": 10 } },
-    "szwal": { "label": "Nähmaschinen-Platte", "flow": "fertigung",
-               "kalkulation": "material.mpx.oberflaechen.hpl",
-               "hinweis": "Fertigung aus Sklejka + Laminat + ABS-Kante",
-               "standardmasse": { "breite_cm": [106, 120, 125], "tiefe_cm": [50, 55, 60],
-                                  "ausschnitt_breite_cm": [48, 52, 61.7], "ausschnitt_tiefe_cm": 18 },
-               "freie_masse": true }
-  },
-
-  "angebots_ausloeser": [
-    "form = lform", "form = szwal", "eckenradius > 0", "oberflaeche = lack",
-    "eigenes Bohrbild / Skizze", "frei gezeichneter Ausschnitt", "Maß nicht in kfg-produktmatrix.json"
-  ],
-
-  "versand": {
-    "lager": { "de": "Kostenloser DHL-Versand bis 120 cm", "hinweis": "Sperrgut-Profil greift ab Sonderformat" },
-    "sondermass": "Versandkosten sind im Angebot enthalten"
+  "compact": {
+   "name": {
+    "de": "Compact / HPL",
+    "pl": "Płyta compact",
+    "en": "Compact / HPL"
+   },
+   "staerken_mm": [
+    12
+   ],
+   "satz_zl_m2": {
+    "standard": 990,
+    "marmor": 1080
+   },
+   "marmor_dekore": [
+    "marmor-weiss",
+    "marmor-schwarz"
+   ],
+   "dekore": [
+    "weiss",
+    "czarny",
+    "asche-grau",
+    "marmor-weiss",
+    "marmor-schwarz"
+   ]
   }
+ },
+ "kantenprofile": {
+  "dekor": [
+   {
+    "id": "abs",
+    "label": "ABS-Kante 2 mm · R2",
+    "eur_lfm": 0,
+    "hinweis": "inklusive"
+   }
+  ],
+  "mpx": [
+   {
+    "id": "fase",
+    "label": "Leicht gefast",
+    "eur_lfm": 0,
+    "hinweis": "serienmäßig"
+   },
+   {
+    "id": "f45",
+    "label": "Gefast 45°",
+    "eur_lfm": 5
+   },
+   {
+    "id": "halbrund",
+    "label": "Halbrund",
+    "eur_lfm": 8
+   }
+  ],
+  "compact": [
+   {
+    "id": "roh",
+    "label": "Geschliffen",
+    "eur_lfm": 0,
+    "hinweis": "serienmäßig"
+   },
+   {
+    "id": "fase",
+    "label": "Gefast 45°",
+    "eur_lfm": 7
+   },
+   {
+    "id": "halbrund",
+    "label": "Halbrund",
+    "eur_lfm": 8
+   }
+  ]
+ },
+ "eckenradius_eur_je_ecke": {
+  "30": 3.8,
+  "50": 3.8,
+  "100": 7.9
+ },
+ "ausschnitte_eur_stueck": {
+  "bohr": {
+   "label": "Montagebohrungen 4 × Ø8 mm",
+   "preis": 9.9
+  },
+  "kabel": {
+   "label": "Kabeldurchlass Ø60 mm",
+   "preis": 14.9,
+   "form": "kreis",
+   "d_cm": 6
+  },
+  "kabel80": {
+   "label": "Kabeldurchlass Ø80 mm",
+   "preis": 16.9,
+   "form": "kreis",
+   "d_cm": 8
+  },
+  "armatur": {
+   "label": "Armaturenbohrung Ø35 mm",
+   "preis": 12.9,
+   "form": "kreis",
+   "d_cm": 3.5
+  },
+  "usb": {
+   "label": "USB-/Steckdosen-Ausschnitt",
+   "preis": 21.9,
+   "form": "rechteck",
+   "w_cm": 26.5,
+   "h_cm": 10
+  },
+  "spuele": {
+   "label": "Spülen-Ausschnitt",
+   "preis": 65.9,
+   "form": "rechteck",
+   "w_cm": 78,
+   "h_cm": 43
+  },
+  "induktion": {
+   "label": "Induktionsfeld-Ausschnitt",
+   "preis": 54.9,
+   "form": "rechteck",
+   "w_cm": 56,
+   "h_cm": 49
+  },
+  "frei": {
+   "label": "Freier Ausschnitt nach Skizze",
+   "preis": "angebot"
+  },
+  "kabelkanal": {
+   "label": "Kabelkanal fräsen (Nut auf der Unterseite)",
+   "preis": "angebot",
+   "form": "nut",
+   "breite_mm_standard": 60,
+   "lagen": [
+    "mitte",
+    "hinten",
+    "quer"
+   ],
+   "hinweis": "Satz je laufendem Meter und Frästiefe je Plattenstärke von der Produktion noch zu bestätigen (Stand 27.07.2026)."
+  }
+ },
+ "abs_farben": [
+  {
+   "id": "dekor",
+   "label": "Dekorgleich",
+   "hex": null,
+   "staerken": "alle",
+   "standard": true
+  },
+  {
+   "id": "weiss",
+   "label": "Weiß",
+   "hex": "#f0eee9",
+   "staerken": "alle"
+  },
+  {
+   "id": "popiel",
+   "label": "Asche Grau",
+   "hex": "#b7b6b2",
+   "staerken": "alle"
+  },
+  {
+   "id": "dunkelgrau",
+   "label": "Dunkelgrau",
+   "hex": "#6f6e6b",
+   "staerken": "alle"
+  },
+  {
+   "id": "schwarz",
+   "label": "Schwarz",
+   "hex": "#232120",
+   "staerken": "alle"
+  },
+  {
+   "id": "gruen",
+   "label": "Grün",
+   "hex": "#3d6b46",
+   "staerken": [
+    18,
+    25
+   ]
+  },
+  {
+   "id": "rot",
+   "label": "Rot",
+   "hex": "#8f2f2c",
+   "staerken": [
+    18,
+    25
+   ]
+  },
+  {
+   "id": "gelb",
+   "label": "Gelb",
+   "hex": "#c9a227",
+   "staerken": [
+    18,
+    25
+   ]
+  },
+  {
+   "id": "blau",
+   "label": "Blau",
+   "hex": "#2f4f7a",
+   "staerken": [
+    18,
+    25
+   ]
+  }
+ ],
+ "fertigungsregeln": {
+  "dekor": {
+   "max_l_cm": 270,
+   "max_b_cm": 200,
+   "max_d_cm": 160,
+   "min_cm": 10,
+   "aussenradius_min_mm": 30,
+   "innenradius_min_mm": 50
+  },
+  "mpx": {
+   "max_l_cm": 238,
+   "max_b_cm": 120,
+   "max_d_cm": 120,
+   "min_cm": 10,
+   "aussenradius_min_mm": 0,
+   "innenradius_min_mm": 10
+  },
+  "compact": {
+   "max_l_cm": 238,
+   "max_b_cm": 120,
+   "max_d_cm": 120,
+   "min_cm": 10,
+   "aussenradius_min_mm": 0,
+   "innenradius_min_mm": 10
+  },
+  "_hinweis": "Mindestmaß laut Produktion technisch unbegrenzt; 10 cm ist ein UI-Minimum, kleiner läuft über die Anfrage."
+ },
+ "formen": {
+  "rect": {
+   "label": "Rechteck",
+   "flow": "lager_oder_fertigung"
+  },
+  "round": {
+   "label": "Rund",
+   "flow": "lager_oder_fertigung"
+  },
+  "lform": {
+   "label": "L-Form",
+   "flow": "fertigung",
+   "innenradius_mm": {
+    "dekor": 50,
+    "mpx": 10,
+    "compact": 10
+   }
+  },
+  "szwal": {
+   "label": "Nähmaschinen-Platte",
+   "flow": "fertigung",
+   "kalkulation": "material.mpx.oberflaechen.hpl",
+   "hinweis": "Fertigung aus Sklejka + Laminat + ABS-Kante",
+   "standardmasse": {
+    "breite_cm": [
+     106,
+     120,
+     125
+    ],
+    "tiefe_cm": [
+     50,
+     55,
+     60
+    ],
+    "ausschnitt_breite_cm": [
+     48,
+     52,
+     61.7
+    ],
+    "ausschnitt_tiefe_cm": 18
+   },
+   "freie_masse": true
+  }
+ },
+ "angebots_ausloeser": [
+  "form = lform",
+  "form = szwal",
+  "eckenradius > 0",
+  "oberflaeche = lack",
+  "eigenes Bohrbild / Skizze",
+  "frei gezeichneter Ausschnitt",
+  "Maß nicht in kfg-produktmatrix.json"
+ ],
+ "versand": {
+  "lager": {
+   "de": "Kostenloser DHL-Versand bis 120 cm",
+   "hinweis": "Sperrgut-Profil greift ab Sonderformat"
+  },
+  "sondermass": "Versandkosten sind im Angebot enthalten"
+ }
 }
