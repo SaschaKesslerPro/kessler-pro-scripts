@@ -383,7 +383,7 @@
     "sondermass": "Versandkosten sind im Angebot enthalten"
   },
   "freie_bearbeitung": {
-    "_hinweis": "Sofortpreis nach Formel: Grundpreis + Zuschlag je laufendem Meter Schnittkante. Hergeleitet aus KOLM minus 5 % (Kreisausschnitt bis Ø650 = 43,97 EUR bei 2,04 lfm; bis Ø1300 = 66,06 EUR bei 4,08 lfm).",
+    "_hinweis": "Sofortpreis nach Formel: Grundpreis + Zuschlag je laufendem Meter Schnittkante. Hergeleitet aus KOLM minus 5 % (Kreisausschnitt bis Ø650 = 43,97 EUR bei 2,04 lfm; bis Ø1300 = 66,06 EUR bei 4,08 lfm). Ausklinkung am 27.07.2026 auf Wunsch Sascha wieder entfernt.",
     "ausschnitt_geschlossen": {
       "grundpreis_eur": 21.9,
       "je_lfm_eur": 10.8,
@@ -393,11 +393,6 @@
         "freie Kontur"
       ]
     },
-    "ausklinkung_kante": {
-      "grundpreis_eur": 14.9,
-      "je_lfm_eur": 10.8,
-      "_hinweis": "niedrigerer Grundpreis, weil der Fraeser von aussen anfaehrt und nicht eintauchen muss"
-    },
     "grenzen": {
       "mindestabstand_kante_mm": {
         "moebelplatte": 50,
@@ -405,7 +400,6 @@
         "compact": 30
       },
       "mindest_innenradius_mm": 5,
-      "ausklinkung_max_tiefe_anteil": 0.6,
       "_hinweis": "Ueber 60 % Tiefe erscheint ein Hinweis, gefertigt wird bis 90 % nach Ruecksprache."
     }
   },
@@ -448,6 +442,7 @@
     "beispiele": {
       "100 cm, 60x10 mm": 27.8,
       "122 cm, 120x10 mm Oberseite": 40.2
-    }
+    },
+    "_form": "Gerader Kanal: Mittelpunkt, Laenge, Richtung (laengs oder quer). Kein freies Zeichnen mehr (Wunsch Sascha 27.07.) - Bedienung wie bei den Ausschnitten ueber Felder plus Ziehen."
   }
 }
