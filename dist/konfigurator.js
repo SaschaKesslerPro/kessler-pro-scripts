@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.5.3';
+  var VERSION = '1.6.0';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -162,6 +162,7 @@ const CORNER_NAMES = ['hinten links','hinten rechts','vorne rechts','vorne links
 /* Radius JE ECKE in mm (0 = eckig). Preisstufen wie in der Preisliste:
    bis R50 = 4,90 € je Ecke, darueber = 7,90 € je Ecke. */
 function cornerLabel(){
+  if(S.form==='lform') return cornerR(0)>0?`R${cornerR(0)} · alle Außenecken`:'eckig';
   const on=[0,1,2,3].filter(i=>cornerR(i)>0);
   if(!on.length) return 'eckig';
   const uniq=[...new Set(on.map(cornerR))];
@@ -169,10 +170,20 @@ function cornerLabel(){
   return on.map(i=>`${CORNER_NAMES[i]} R${cornerR(i)}`).join(' · ');
 }
 function cornerPriceFor(r){ return r<=0?0:(r<=50?3.8:7.9); }
-function cornerR(i){ return S.form==='rect' ? Math.max(0, +S.cornerR[i]||0) : 0; }
-function cornerCount(){ return [0,1,2,3].filter(i=>cornerR(i)>0).length; }
+/* Rechteck und Naehmaschinen-Platte: Radius je Ecke einzeln.
+   L-Form: ein Radius fuer alle fuenf Aussenecken (die Innenecke bekommt
+   ohnehin automatisch R50 bzw. R10 nach Fertigungsregel). Rund: entfaellt. */
+function cornerFormOk(){ return S.form==='rect'||S.form==='szwal'||S.form==='lform'; }
+function cornerPerCorner(){ return S.form==='rect'||S.form==='szwal'; }
+function cornerR(i){
+  if(!cornerFormOk()) return 0;
+  if(!cornerPerCorner()) return Math.max(0, +S.cornerR[0]||0);   /* L-Form: einheitlich */
+  return Math.max(0, +S.cornerR[i]||0);
+}
+function cornerOuterCount(){ return S.form==='lform' ? 5 : 4; }
+function cornerCount(){ return S.form==='lform' ? (cornerR(0)>0?5:0) : [0,1,2,3].filter(i=>cornerR(i)>0).length; }
 function cornerOn(i){ return cornerR(i)>0; }
-function cornerSum(){ return [0,1,2,3].reduce((a,i)=>a+cornerPriceFor(cornerR(i)),0); }
+function cornerSum(){ return S.form==='lform' ? cornerPriceFor(cornerR(0))*5 : [0,1,2,3].reduce((a,i)=>a+cornerPriceFor(cornerR(i)),0); }
 function cornerMax(){ return Math.max(0,...[0,1,2,3].map(cornerR)); }
 /* Auf Fertigungsregeln und halbe Plattenmasse begrenzen */
 function clampCorner(r){
@@ -182,6 +193,7 @@ function clampCorner(r){
   return Math.min(r,Math.floor(lim));
 }
 function setAllCorners(r){ S.cornerR=[0,1,2,3].map(()=>clampCorner(r)); S.corner=cornerMax(); }
+function cornerFieldsVisible(){ return cornerPerCorner(); }
 /* Radius je Ecke in Pixeln des Aufrufers */
 function cornerRadii(scale, maxA, maxB){
   const cap=Math.min(maxA,maxB);
@@ -338,7 +350,12 @@ function drawStage(){
     inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');
   } else if(S.form==='lform'){
     const aw=S.lf.aw*sc, ah=S.lf.ah*sc, ri=(S.mat==='dekor'?5:1)*sc;
-    const pd=`M ${x} ${y} L ${x+pw-aw} ${y} L ${x+pw-aw} ${y+ah-ri} Q ${x+pw-aw} ${y+ah} ${x+pw-aw+ri} ${y+ah} L ${x+pw} ${y+ah} L ${x+pw} ${y+ph} L ${x} ${y+ph} Z`;
+    /* Aussenecken nach Wunsch abrunden; die Innenecke behaelt den
+       fertigungsbedingten Mindestradius (R50 Moebelplatte / R10 sonst). */
+    const rOut=Math.min(cornerR(0)/10*sc, pw/3, ph/3);
+    const ptsL=[[x,y],[x+pw-aw,y],[x+pw-aw,y+ah],[x+pw,y+ah],[x+pw,y+ph],[x,y+ph]];
+    const radL=[rOut,rOut,ri,rOut,rOut,rOut];
+    const pd=roundPoly(ptsL, radL);
     inner+=`<clipPath id="plateClip"><path d="${pd}"/></clipPath>`;
     inner+=isLack()?`<path d="${pd}" fill="#dcd9d2"/>`
       :`<image href="${tex}" x="${x-pw*0.08}" y="${y-ph*0.08}" width="${pw*1.16}" height="${ph*1.16}" preserveAspectRatio="xMidYMid slice" clip-path="url(#plateClip)"/>`;
@@ -539,6 +556,33 @@ function roundPath(x,y,w,h,r){
   if(a) p+=` A ${a} ${a} 0 0 1 ${x+a} ${y}`;
   return p+' Z';
 }
+/* Polygon mit gerundeten Ecken — fuer die L-Form, deren Kontur kein Rechteck ist.
+   r kann Zahl oder Array sein; konkave Ecken bekommen automatisch die andere
+   Bogenrichtung, damit die Innenecke nicht nach aussen beult. */
+function roundPoly(pts, r){
+  const n=pts.length, rad=Array.isArray(r)?r:pts.map(()=>r);
+  const seg=[];
+  for(let i=0;i<n;i++){
+    const p=pts[i], a=pts[(i-1+n)%n], b=pts[(i+1)%n];
+    const v1=[a[0]-p[0],a[1]-p[1]], v2=[b[0]-p[0],b[1]-p[1]];
+    const l1=Math.hypot(...v1)||1, l2=Math.hypot(...v2)||1;
+    const rr=Math.min(rad[i]||0, l1/2, l2/2);
+    const p1=[p[0]+v1[0]/l1*rr, p[1]+v1[1]/l1*rr];
+    const p2=[p[0]+v2[0]/l2*rr, p[1]+v2[1]/l2*rr];
+    const kreuz=v1[0]*v2[1]-v1[1]*v2[0];
+    /* Im SVG-Koordinatensystem (y nach unten) und bei im Uhrzeigersinn
+       angegebenen Punkten ist das Kreuzprodukt bei konvexen Ecken negativ. */
+    seg.push({p1,p2,rr,sweep:kreuz<0?1:0});
+  }
+  let d=`M ${seg[0].p2}`;
+  for(let i=1;i<=n;i++){
+    const cur=seg[i%n];
+    d+=` L ${cur.p1}`;
+    if(cur.rr>0.5) d+=` A ${cur.rr} ${cur.rr} 0 0 ${cur.sweep} ${cur.p2}`;
+    else d+=` L ${cur.p2}`;
+  }
+  return d+' Z';
+}
 /* Vier Kantensegmente; jedes startet/endet in der Mitte des jeweiligen Eckbogens */
 function edgeSegments(x,y,w,h,r){
   const k=Math.SQRT1_2, [a,b,c,d]=r.map(v=>Math.max(0,v));
@@ -613,6 +657,25 @@ function addPresetHoles(sh){
   if(S.extras.spuele) rect(0.08*Lc+39, Bc/2, 78, 43);
   if(S.extras.induktion) rect(Lc-6-28, Bc/2, 56, 49);
 }
+/* Polygon in eine THREE.Shape uebertragen, Ecken nach Radius verrundet */
+function polyToShape(sh, pts, rad){
+  const n=pts.length;
+  const t=pts.map((p,i)=>{
+    const a=pts[(i-1+n)%n], b=pts[(i+1)%n];
+    const v1=[a[0]-p[0],a[1]-p[1]], v2=[b[0]-p[0],b[1]-p[1]];
+    const l1=Math.hypot(v1[0],v1[1])||1, l2=Math.hypot(v2[0],v2[1])||1;
+    const r=Math.min(rad[i]||0, l1/2, l2/2);
+    return { p, r, p1:[p[0]+v1[0]/l1*r, p[1]+v1[1]/l1*r], p2:[p[0]+v2[0]/l2*r, p[1]+v2[1]/l2*r] };
+  });
+  sh.moveTo(t[0].p2[0], t[0].p2[1]);
+  for(let i=1;i<=n;i++){
+    const c=t[i%n];
+    sh.lineTo(c.p1[0], c.p1[1]);
+    if(c.r>0.005) sh.quadraticCurveTo(c.p[0], c.p[1], c.p2[0], c.p2[1]);
+    else sh.lineTo(c.p2[0], c.p2[1]);
+  }
+  sh.closePath();
+}
 function plateShape(){
   const d=dims(), w=d.w/10, h=d.h/10, sh=new THREE.Shape();
   if(S.form==='round'){ sh.absarc(0,0,w/2,0,Math.PI*2,false); return sh; }
@@ -633,9 +696,11 @@ function plateShape(){
   if(S.form==='lform'){
     const L2=S.lf.L/10,B2=S.lf.B/10,aw2=S.lf.aw/10,ah2=S.lf.ah/10,ri=(S.mat==='dekor'?0.5:0.1);
     const sh2=new THREE.Shape(), x2=-L2/2, y2=-B2/2;
-    sh2.moveTo(x2,y2); sh2.lineTo(x2+L2,y2); sh2.lineTo(x2+L2,y2+B2-ah2);
-    sh2.lineTo(x2+L2-aw2+ri,y2+B2-ah2); sh2.quadraticCurveTo(x2+L2-aw2,y2+B2-ah2,x2+L2-aw2,y2+B2-ah2+ri);
-    sh2.lineTo(x2+L2-aw2,y2+B2); sh2.lineTo(x2,y2+B2); sh2.closePath();
+    /* Aussenecken nach Wunsch, Innenecke mit dem Fertigungsradius */
+    const ro=Math.min(cornerR(0)/100, L2/3, B2/3);
+    polyToShape(sh2,
+      [[x2,y2],[x2+L2,y2],[x2+L2,y2+B2-ah2],[x2+L2-aw2,y2+B2-ah2],[x2+L2-aw2,y2+B2],[x2,y2+B2]],
+      [ro,ro,ro,ri,ro,ro]);
     addCutHoles(sh2);
     return sh2;
   }
@@ -785,8 +850,13 @@ function buildCorner(){
     buildCorner(); render();
   }));
   buildCornerSel();
-  $('cornerRule').style.display=r.minCorner>0?'block':'none';
-  $('cornerRule').textContent=r.cornerNote;
+  const note=$('cornerRule');
+  const lformNote = S.form==='lform'
+    ? 'L-Form: der Radius gilt für alle Außenecken. Die Innenecke wird nach Fertigungsregel automatisch verrundet.'
+    : '';
+  const txt=[lformNote, r.minCorner>0?r.cornerNote:''].filter(Boolean).join(' ');
+  note.style.display=txt?'block':'none';
+  note.textContent=txt;
 }
 /* Kleines Icon: Quadrat, bei dem genau die gemeinte Ecke gerundet ist */
 function radiusField(i,val,on){
@@ -805,7 +875,7 @@ function cornerIcon(i,on){
 }
 function buildCornerSel(){
   const box=$('cornerSelBlock'), el=$('cornerSel'); if(!box||!el) return;
-  const show=S.form==='rect';
+  const show=cornerFieldsVisible();
   box.style.display=show?'block':'none';
   if(!show) return;
   const all=cornerMax(), gleich=[0,1,2,3].every(i=>cornerR(i)===all);
@@ -1053,7 +1123,9 @@ document.querySelectorAll('#formChips .kfg_chip').forEach(b=>b.addEventListener(
   $('dimsRound').style.display=S.form==='round'?'grid':'none';
   $('dimsLform').style.display=S.form==='lform'?'grid':'none';
   $('dimsSzwal').style.display=S.form==='szwal'?'block':'none';
-  $('cornerBlock').style.display=S.form==='rect'?'block':'none';
+  /* Ecken jetzt auch bei Naehmaschinen-Platte und L-Form (Wunsch Sascha 27.07.) */
+  $('cornerBlock').style.display=cornerFormOk()?'block':'none';
+  buildCorner();          /* Chips + Radiusfelder an die neue Form anpassen */
   render();
 }));
 document.querySelectorAll('#mpxSurfaceChips .kfg_chip').forEach(b=>b.addEventListener('click',()=>{
@@ -1278,14 +1350,7 @@ function updateSticky(){
      solange der Platz fehlt, und wieder auf, sobald er da ist. Wer sie von Hand
      schliesst oder oeffnet, behaelt die Kontrolle (kfgDetailManual). */
   const det=$('detailCard');
-  if(det && !det.dataset.manual){
-    const zuHoch = el.offsetHeight > window.innerHeight-100;
-    if(zuHoch && det.open){ det.open=false; }
-    else if(!zuHoch && !det.open){
-      det.open=true;
-      if(el.offsetHeight > window.innerHeight-100) det.open=false;   /* sonst Flackern */
-    }
-  }
+  if(det && !det.dataset.manual && !det.open) det.open=true;   /* erst mal offen versuchen */
   /* Immer UNTER dem Header beginnen. Vorher wurde der Wert negativ, sobald der
      Block hoeher als das Fenster war — dann verschwand die Platte hinter dem
      Header (Befund Sascha, 27.07.). Reicht der Platz nicht, uebernimmt unten
@@ -1295,12 +1360,21 @@ function updateSticky(){
      Preiskarte gemeinsam unter den Header passen — dann bleibt die Spalte
      komplett stehen und es braucht keine eingeblendete Leiste. */
   const stage=$('stage'), stage3=$('stage3d'), sum=document.querySelector('.kfg_summary');
-  if(stage&&sum){
+  const setMax = v => { if(stage){ stage.style.maxHeight=v; if(stage3) stage3.style.maxHeight=v; } };
+  const passtMit = () => {
+    if(!stage||!sum) return true;
     const platz = window.innerHeight-top-16;
     const drumherum = el.offsetHeight - stage.getBoundingClientRect().height;
     const maxStage = Math.round(platz - drumherum);
-    const setMax = v => { stage.style.maxHeight = v; if(stage3) stage3.style.maxHeight = v; };
-    setMax(maxStage >= 200 ? maxStage+'px' : '');
+    if(maxStage >= 200){ setMax(maxStage+'px'); return true; }
+    return false;
+  };
+  /* Zuerst die Draufsicht verkleinern. Erst wenn das nicht reicht, wird die
+     Detailkarte zugeklappt — sonst verschwand das Kantenbild ohne Not
+     (Befund Sascha, 27.07.). */
+  if(!passtMit()){
+    if(det && !det.dataset.manual && det.open){ det.open=false; }
+    if(!passtMit()) setMax('');
   }
   const passt = el.offsetHeight <= window.innerHeight-top-16;
   /* Passt die ganze Spalte ins Fenster, bleibt sie wie bisher komplett stehen.
