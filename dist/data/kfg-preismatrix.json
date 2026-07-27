@@ -408,5 +408,46 @@
       "ausklinkung_max_tiefe_anteil": 0.6,
       "_hinweis": "Ueber 60 % Tiefe erscheint ein Hinweis, gefertigt wird bis 90 % nach Ruecksprache."
     }
+  },
+  "kabelkanal": {
+    "_hinweis": "Frei gefuehrter Kanal seit Konfigurator v1.8.0. KOLM bietet Kanaele nicht an, es gibt also keinen Vergleichswert. Abgeleitet aus der eigenen Fraesformel: eine Nut ist eine Tasche, der Fraeser raeumt sie in mehreren Bahnen aus statt einmal durchzutrennen. NOCH NICHT VON DER FERTIGUNG GEGENGERECHNET.",
+    "grundpreis_eur": 14.9,
+    "je_lfm_eur": 12.9,
+    "basis_nut": {
+      "breite_mm": 60,
+      "tiefe_mm": 10
+    },
+    "zuschlag_breite": {
+      "je_angefangene_mm": 30,
+      "eur_je_lfm": 3.9
+    },
+    "zuschlag_tiefe": {
+      "je_angefangene_mm": 5,
+      "eur_je_lfm": 2.9
+    },
+    "grenzen": {
+      "breite_mm": [
+        20,
+        200
+      ],
+      "max_tiefe_anteil_plattenstaerke": 0.6,
+      "_hinweis": "Bei 25 mm Platte also hoechstens 15 mm Frästiefe."
+    },
+    "optionen": {
+      "seite": [
+        "unten",
+        "oben"
+      ],
+      "enden": [
+        "beide geschlossen",
+        "Anfang an der Kante",
+        "Ende an der Kante",
+        "beide an der Kante"
+      ]
+    },
+    "beispiele": {
+      "100 cm, 60x10 mm": 27.8,
+      "122 cm, 120x10 mm Oberseite": 40.2
+    }
   }
 }
