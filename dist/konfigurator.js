@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.11.9';
+  var VERSION = '1.12.0';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -285,7 +285,7 @@ const S = { mat:'dekor', dekor:'buk', mpxSurface:'natur', absColor:'dekor',
 /* ═══════ Helpers ═══════ */
 const $=id=>document.getElementById(id);
 const fmt=v=>v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
-function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600)}
+function toast_roh(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600)}
 function rules(){ return RULES[S.mat]; }
 function baseEdge(){ return EDGEPROFILES[S.mat][0][0]; }
 function profileOf(id){ return EDGEPROFILES[S.mat].find(p=>p[0]===id)||EDGEPROFILES[S.mat][0]; }
@@ -350,7 +350,7 @@ function needsOffer(){ return S.extras.custom||isLack(); }
 function delivDate(){
   const d=new Date(); let n=0;
   while(n<4){ d.setDate(d.getDate()+1); if(d.getDay()!==0&&d.getDay()!==6)n++; }
-  return d.toLocaleDateString('de-DE',{day:'numeric',month:'long'});
+  return d.toLocaleDateString(KFG_LANG==='pl'?'pl-PL':KFG_LANG==='en'?'en-GB':'de-DE',{day:'numeric',month:'long'});
 }
 
 /* ═══════ 2D-SVG ═══════ */
@@ -510,6 +510,7 @@ function drawStage(){
     }
   } else G=null;
   svg.innerHTML=inner;
+  if(_kfgWB) uebersetze();
   svg.classList.toggle('is-drawing',!!S.draw);
   svg.querySelectorAll('.kfg_edge').forEach(e=>e.addEventListener('click',()=>cycleEdge(+e.dataset.i)));
   /* Ecke in der Vorschau anklicken = abrunden bzw. begradigen */
@@ -1178,7 +1179,7 @@ function render(){
   syncPresets();
   $('breakdown').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${typeof r[1]==='number'?fmt(r[1]):r[1]}</td></tr>`).join('')
     +`<tr class="total"><td>Gesamt inkl. MwSt.</td><td>${pv}</td></tr>`;
-  buildQuick(); drawStage(); updateMini(); updateSticky(); updateBottomBar(); buildCounts(); buildConf(); buildBarWhat(); syncURL();
+  buildQuick(); drawStage(); updateMini(); updateSticky(); updateBottomBar(); buildCounts(); buildConf(); buildBarWhat(); syncURL(); uebersetze();
 }
 /* Geteilte Links wiederherstellen — syncURL schreibt den Zustand in den Hash,
    bisher hat ihn aber niemand gelesen: "Konfiguration teilen" fuehrte zur Standard-
@@ -1818,6 +1819,115 @@ function messeHeader(){
   });
   return Math.round(hb);
 }
+/* ══════ Sprache ══════════════════════════════════════════════════════════
+   Die Seite laeuft unter /pl-pl/ bzw. /en/. Massgeblich ist das lang-Attribut
+   des Dokuments, der Pfad ist nur der Rueckfall — Webflow setzt lang zuverlaessig,
+   aber bei lokalen Spiegeln fehlt es manchmal. */
+var KFG_LANG = (function(){
+  const l=(document.documentElement.getAttribute('lang')||'').toLowerCase();
+  if(l.startsWith('pl')) return 'pl';
+  if(l.startsWith('en')) return 'en';
+  if(l.startsWith('de')) return 'de';
+  const p=location.pathname.toLowerCase();
+  if(p.startsWith('/pl-pl/')||p.startsWith('/pl/')) return 'pl';
+  if(p.startsWith('/en/')) return 'en';
+  return 'de';
+})();
+var _kfgWB=null, _kfgWM=null;          /* Woerterbuch und Muster */
+
+/* Ein Text wird zuerst als Ganzes gesucht. Nur wenn das misslingt, laufen die
+   Muster — sie fangen die Texte ab, die zur Laufzeit aus Zahlen entstehen
+   ("Bitte 30 bis 270 cm eingeben"). */
+function tr(txt){
+  if(!_kfgWB) return txt;
+  const k=txt.trim();
+  if(!k) return txt;
+  const u=trKern(k);
+  return u===k ? txt : txt.replace(k,u);
+}
+/* Vier Anlaeufe, in dieser Reihenfolge:
+   ① der Text als Ganzes
+   ② dasselbe mit normalisiertem geschuetztem Leerzeichen (im Markup steht
+      &nbsp;, im Woerterbuch ein normales Leerzeichen)
+   ③ ohne fuehrendes Symbol ("\u25ad Rechteck" -> "Rechteck")
+   ④ segmentweise an " \u00b7 " — die meisten zusammengesetzten Zeilen der
+      Oberflaeche sind mit diesem Trenner gebaut ("Moebelplatte \u00b7 25 mm") */
+function trKern(k){
+  let t=_kfgWB[k];
+  if(t!==undefined) return t;
+
+  const norm=k.replace(/\u00a0/g,' ');
+  if(norm!==k){ t=_kfgWB[norm]; if(t!==undefined) return t; }
+
+  const m=norm.match(/^([^\p{L}\p{N}]+\s*)(.+)$/u);
+  if(m){ t=_kfgWB[m[2]]; if(t!==undefined) return m[1]+t; }
+
+  if(_kfgWM) for(const [re,rp] of _kfgWM){
+    const m2=norm.match(re);
+    if(m2) return rp.replace(/\$(\d)/g, (_,i)=>{
+      const g=m2[+i]; if(g===undefined) return '';
+      return _kfgWB[g]!==undefined ? _kfgWB[g] : trSeg(g);
+    });
+  }
+
+  const seg=trSeg(norm);
+  if(seg!==norm) return seg;
+  return k;
+}
+/* Zerlegt an " \u00b7 " und uebersetzt jedes Stueck einzeln. Die Oberflaeche baut
+   fast alle zusammengesetzten Zeilen mit diesem Trenner. */
+function trSeg(txt){
+  if(!txt || !txt.includes(' \u00b7 ')) return txt;
+  let treffer=false;
+  const neu=txt.split(' \u00b7 ').map(p=>{
+    const q=p.trim();
+    let v=_kfgWB[q];
+    if(v===undefined){
+      const mm=q.match(/^([^\p{L}\p{N}]+\s*)(.+)$/u);
+      if(mm && _kfgWB[mm[2]]!==undefined) v=mm[1]+_kfgWB[mm[2]];
+    }
+    if(v!==undefined){ treffer=true; return v; }
+    return p;
+  });
+  return treffer ? neu.join(' \u00b7 ') : txt;
+}
+/* Laeuft ueber die fertigen Textknoten. Bewusst NUR unter [data-kfg-root] und
+   bewusst ohne MutationObserver: der wuerde bei jedem Neuzeichnen erneut
+   feuern und sich selbst triggern. */
+var ATTR_TR=['placeholder','aria-label','title','alt'];
+function uebersetze(){
+  if(!_kfgWB) return;
+  const root=document.querySelector('[data-kfg-root]'); if(!root) return;
+  const w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(n){
+      if(!n.nodeValue || !/[A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df]/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+      const p=n.parentNode;
+      if(p && (p.nodeName==='SCRIPT'||p.nodeName==='STYLE')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+  let n;
+  while((n=w.nextNode())){
+    const neu=tr(n.nodeValue);
+    if(neu!==n.nodeValue) n.nodeValue=neu;
+  }
+  root.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach(el=>{
+    ATTR_TR.forEach(a=>{
+      const v=el.getAttribute(a); if(!v) return;
+      const neu=tr(v); if(neu!==v) el.setAttribute(a,neu);
+    });
+  });
+}
+function ladeSprache(){
+  if(KFG_LANG==='de') return Promise.resolve();
+  return fetch((window.__KFG_BASE||'') + '/dist/data/kfg-i18n.json')
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      if(!d||!d[KFG_LANG]) return;
+      _kfgWB=d[KFG_LANG];
+      _kfgWM=(d.muster&&d.muster[KFG_LANG]||[]).map(([p,r])=>[new RegExp(p), r.replace(/\$(\d)/g,'$$$1')]);
+    })
+    .catch(()=>{});
+}
 var _kfgStickyLaeuft=false, _kfgStufe=0, _kfgSpart=[0,0,0,0,0], _kfgHeadMax=0;
 /* Die Buehne hat viewBox 0 0 600 444 und wird auf die Kartenbreite skaliert.
    Eine feste Schriftgroesse kommt deshalb je nach Geraet unterschiedlich gross
@@ -1976,6 +2086,8 @@ function kopfleisteZeigen(zeigen){
    mit und eine zweite Leiste waere doppelt (Sascha 27.07.). Wer aber unter dem
    Konfigurator liest, soll nicht hochscrollen muessen (Sascha 29.07.). */
 /* Der Fussbereich der Seite. Einmal suchen und merken - er wandert nicht. */
+/* Meldungen laufen an render() vorbei — deshalb hier direkt uebersetzen. */
+function toast(m){ return toast_roh(_kfgWB ? tr(m) : m); }
 var _kfgFuss;
 function fussEl(){
   if(_kfgFuss!==undefined) return _kfgFuss;
@@ -2011,7 +2123,7 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
    genau das machte die Seite ruckelig (Befund Sascha, 27.07.). */
 (function(){
   let sT;
-  const nachmessen=()=>{ clearTimeout(sT); sT=setTimeout(()=>{ updateSticky(); }, 80); };
+  const nachmessen=()=>{ clearTimeout(sT); sT=setTimeout(()=>{ updateSticky(); if(_kfgWB) uebersetze(); }, 80); };
   document.querySelectorAll('[data-kfg-root] img').forEach(im=>{
     im.addEventListener('load', nachmessen);
     im.addEventListener('error', nachmessen);
@@ -2047,6 +2159,10 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
 
   restoreFromHash();
   buildAll(); placeSummary(); render(); initMini(); initSteps();
+  /* Sprachdatei nachladen und einmal druebergehen. render() uebersetzt danach
+     bei jedem Neuzeichnen selbst. Bewusst NICHT blockierend: lieber kurz
+     deutsch als ein leeres Werkzeug, wenn die Datei haengt. */
+  ladeSprache().then(uebersetze);
 
   window.KFG = {
     version: VERSION,
