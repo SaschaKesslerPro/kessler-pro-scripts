@@ -1,4 +1,4 @@
-/*! Kessler PRO — Tischplatten-Konfigurator  v1.13.0
+/*! Kessler PRO — Tischplatten-Konfigurator  v1.13.1
  *  Rendert die komplette Konfigurator-UI in jeden Container mit [data-kfg-root].
  *  Daten: kfg-produktmatrix.json (Lagerartikel) · Bilder: assets/kfg/ — beide via jsDelivr.
  *  Public API: window.KFG = { version, getConfig(), setConfig(), reload(), _debug() }
@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.13.0';
+  var VERSION = '1.13.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -30,6 +30,13 @@
   var MATRIX_P = fetch(BASE + '/dist/data/kfg-produktmatrix.json', {cache:'default'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .catch(function(){ return null; });
+
+  /* Touch-Geraete: KEINE automatischen Scroll-Korrekturen. Auf iOS kaempfen
+     scrollBy/scrollTo/scrollIntoView gegen das Momentum-Scrolling des Nutzers —
+     die Seite ruckt „von selbst“, Taps waehrend der Smooth-Scrolls verpuffen
+     (Befund Sascha, 29.07. abends: „reagiert nicht, super instabil“).
+     Nutzerinitiierte Spruenge (Chips, miniJump, Zeichnen) bleiben erhalten. */
+  var KFG_TOUCH = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
 
   function boot(){
     var root = document.querySelector(ROOT_SEL);
@@ -1387,6 +1394,7 @@ function stepEl(n){ return $('kfgStep'+n); }
    werden"). Deshalb wird die Bildlage an einem Ankerpunkt festgehalten und
    danach nachgezogen. */
 function ohneSprung(anker, fn){
+  if(KFG_TOUCH){ fn(); return; }          /* Touch: keine Scroll-Nachfuehrung */
   const vor = anker ? anker.getBoundingClientRect().top : null;
   fn();
   if(vor!==null){
@@ -1400,6 +1408,7 @@ function ohneSprung(anker, fn){
    zurueckgeholt. Greift auch, wenn der Anker allein nicht reicht (etwa wenn
    das Layout unter dem Ankerpunkt zusammenfaellt). */
 function plattImBild(){
+  if(KFG_TOUCH) return;                    /* Touch: nie von selbst scrollen */
   const st=$('stage'); if(!st) return;
   const r=st.getBoundingClientRect(), vh=window.innerHeight;
   const sichtbar=Math.max(0, Math.min(r.bottom,vh)-Math.max(r.top,0));
@@ -1447,6 +1456,12 @@ function weiterZu(n){
   const sec=stepEl(n); if(!sec||sec.dataset.manual) return;
   if(sec.contains(document.activeElement)) return;   /* es wird gerade getippt */
   const nx=stepEl(n+1);
+  if(KFG_TOUCH){                            /* Touch: nichts klappt von selbst zu,
+                                               nichts scrollt — nur der naechste
+                                               Schritt oeffnet sich unterhalb. */
+    if(nx && !nx.dataset.manual && !nx.classList.contains('is-open')) stepOffen(n+1,true);
+    return;
+  }
   const anker=sec.querySelector('.kfg_step-head');
   ohneSprung(anker, ()=>{
     stepOffen(n,false);
