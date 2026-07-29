@@ -19,6 +19,13 @@ PL_EBENSO = (", podobnie wycięcie narożne i wycięcie w kształcie U: podaj je
 EN_EBENSO = (", as are a corner notch and a U-shaped cut out: please state them in step 05 under "
              "“Your own hole pattern / sketch”. Made from plywood, laminate and an ABS edge.")
 
+DE_SKIZZE = ('Beschreibe kurz, was du brauchst \u2014 z. B. \u201eEck-Ausklinkung '
+             '20\u00d715 cm hinten links\u201c.')
+PL_SKIZZE = ('Opisz krótko, czego potrzebujesz \u2014 np. \u201ewycięcie narożne '
+             '20\u00d715 cm z tyłu po lewej\u201d.')
+EN_SKIZZE = ('Briefly describe what you need \u2014 e.g. \u201ccorner notch '
+             '20\u00d715 cm at the back left\u201d.')
+
 # ── Format: deutsch: [polnisch, englisch] ───────────────────────────────────
 T = {
 # Vorschau und Preiskarte
@@ -264,12 +271,33 @@ T = {
 "hinten rechts": ["z tyłu po prawej", "back right"],
 "vorne rechts": ["z przodu po prawej", "front right"],
 "vorne links": ["z przodu po lewej", "front left"],
+# Nachtrag 29.07. — von /tmp/diff_lang.js gefunden
+"Gesamt inkl. MwSt.": ["Razem z VAT", "Total incl. VAT"],
+"Eckig": ["Ostry", "Square"],
+"alle Ecken": ["wszystkie narożniki", "all corners"],
+"alle vier": ["wszystkie cztery", "all four"],
+"gemischt": ["mieszane", "mixed"],
+"inklusive": ["w cenie", "included"],
+"Kanten je Seite": ["Krawędzie osobno dla każdego boku", "Edges set per side"],
+"Vorschau der konfigurierten Tischplatte": ["Podgląd skonfigurowanego blatu",
+                                            "Preview of the configured table top"],
+"Weniger": ["Mniej", "Fewer"],
+"Mehr": ["Więcej", "More"],
+"Schließen": ["Zamknij", "Close"],
+DE_SKIZZE: [PL_SKIZZE, EN_SKIZZE],
 DE_EBENSO: [PL_EBENSO, EN_EBENSO],
 }
 
 # ── Muster fuer Texte, die zur Laufzeit aus Zahlen gebaut werden ────────────
 # Reihenfolge zaehlt: das erste passende Muster gewinnt.
 P = [
+  [r"^Rechteck (.+)$", "Prostokąt $1", "Rectangle $1"],
+  [r"^Rund Ø (.+)$", "Okrągły Ø $1", "Round Ø $1"],
+  [r"^L-Form (.+)$", "Kształt L $1", "L-shape $1"],
+  [r"^Nähmaschinen-Platte (.+)$", "Blat do maszyny do szycia $1", "Sewing machine top $1"],
+  [r"^Radius (.+)$", "Promień $1", "Radius $1"],
+  [r"^Ecken (.+)$", "Narożniki $1", "Corners $1"],
+  [r"^ABS (.+)$", "ABS $1", "ABS $1"],
   [r"^Kante ([A-D]): (.+)$", "Krawędź $1: $2", "Edge $1: $2"],
   [r"^Kante: (.+)$", "Krawędź: $1", "Edge: $1"],
   [r"^Kante ([A-D])$", "Krawędź $1", "Edge $1"],

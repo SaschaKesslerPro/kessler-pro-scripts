@@ -6,8 +6,8 @@
    "pl",
    "en"
   ],
-  "anzahl": 184,
-  "muster": 24
+  "anzahl": 196,
+  "muster": 31
  },
  "pl": {
   "Ab Lager": "Z magazynu",
@@ -193,6 +193,18 @@
   "hinten rechts": "z tyłu po prawej",
   "vorne rechts": "z przodu po prawej",
   "vorne links": "z przodu po lewej",
+  "Gesamt inkl. MwSt.": "Razem z VAT",
+  "Eckig": "Ostry",
+  "alle Ecken": "wszystkie narożniki",
+  "alle vier": "wszystkie cztery",
+  "gemischt": "mieszane",
+  "inklusive": "w cenie",
+  "Kanten je Seite": "Krawędzie osobno dla każdego boku",
+  "Vorschau der konfigurierten Tischplatte": "Podgląd skonfigurowanego blatu",
+  "Weniger": "Mniej",
+  "Mehr": "Więcej",
+  "Schließen": "Zamknij",
+  "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Opisz krótko, czego potrzebujesz — np. „wycięcie narożne 20×15 cm z tyłu po lewej”.",
   ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", podobnie wycięcie narożne i wycięcie w kształcie U: podaj je w kroku 05 w polu „Własny układ otworów / szkic”. Produkcja ze sklejki, laminatu i obrzeża ABS."
  },
  "en": {
@@ -379,10 +391,50 @@
   "hinten rechts": "back right",
   "vorne rechts": "front right",
   "vorne links": "front left",
+  "Gesamt inkl. MwSt.": "Total incl. VAT",
+  "Eckig": "Square",
+  "alle Ecken": "all corners",
+  "alle vier": "all four",
+  "gemischt": "mixed",
+  "inklusive": "included",
+  "Kanten je Seite": "Edges set per side",
+  "Vorschau der konfigurierten Tischplatte": "Preview of the configured table top",
+  "Weniger": "Fewer",
+  "Mehr": "More",
+  "Schließen": "Close",
+  "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Briefly describe what you need — e.g. “corner notch 20×15 cm at the back left”.",
   ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", as are a corner notch and a U-shaped cut out: please state them in step 05 under “Your own hole pattern / sketch”. Made from plywood, laminate and an ABS edge."
  },
  "muster": {
   "pl": [
+   [
+    "^Rechteck (.+)$",
+    "Prostokąt $1"
+   ],
+   [
+    "^Rund Ø (.+)$",
+    "Okrągły Ø $1"
+   ],
+   [
+    "^L-Form (.+)$",
+    "Kształt L $1"
+   ],
+   [
+    "^Nähmaschinen-Platte (.+)$",
+    "Blat do maszyny do szycia $1"
+   ],
+   [
+    "^Radius (.+)$",
+    "Promień $1"
+   ],
+   [
+    "^Ecken (.+)$",
+    "Narożniki $1"
+   ],
+   [
+    "^ABS (.+)$",
+    "ABS $1"
+   ],
    [
     "^Kante ([A-D]): (.+)$",
     "Krawędź $1: $2"
@@ -481,6 +533,34 @@
    ]
   ],
   "en": [
+   [
+    "^Rechteck (.+)$",
+    "Rectangle $1"
+   ],
+   [
+    "^Rund Ø (.+)$",
+    "Round Ø $1"
+   ],
+   [
+    "^L-Form (.+)$",
+    "L-shape $1"
+   ],
+   [
+    "^Nähmaschinen-Platte (.+)$",
+    "Sewing machine top $1"
+   ],
+   [
+    "^Radius (.+)$",
+    "Radius $1"
+   ],
+   [
+    "^Ecken (.+)$",
+    "Corners $1"
+   ],
+   [
+    "^ABS (.+)$",
+    "ABS $1"
+   ],
    [
     "^Kante ([A-D]): (.+)$",
     "Edge $1: $2"
