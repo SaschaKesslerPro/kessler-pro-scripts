@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.12.1';
+  var VERSION = '1.12.2';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -617,6 +617,7 @@ function setDraw(v){
   if(v&&S.form==='round'){toast('Zeichnen aktuell nur bei eckigen Formen');return;}
   if(v&&S.view==='3d'){setView('2d');}
   S.draw=v;
+  if(typeof zeichenGriff==='function') zeichenGriff(!!v);
   document.querySelectorAll('[data-draw]').forEach(b=>b.classList.toggle('is-active',b.dataset.draw===v));
   $('drawHint').style.display=v?'block':'none';
   $('stage').classList.toggle('is-drawing',!!v);
@@ -672,7 +673,11 @@ function syncEdgeChips(){
 /* ═══════ Detailansicht (Kanten-Foto) ═══════ */
 function drawDetail(){
   const img=$('detailImg'); if(!img)return;
-  const ph=edgePhoto(); img.src=ph.src;
+  const ph=edgePhoto();
+  /* NUR bei echter Aenderung zuweisen: eine erneute Zuweisung desselben Werts
+     startet in Chrome trotzdem einen Ladevorgang und feuert 'load'. Darueber
+     lief die Dauerschleife (Befund 29.07.). */
+  if(img.getAttribute('src')!==ph.src) img.setAttribute('src', ph.src);
   const c=calc(), m=MATERIALS[S.mat];
   const uniq=[...new Set((S.form==='round'?[S.edges[0]]:S.edges).map(edgeLabel))];
   const absNm=(ABS_STOCK.find(a=>a[0]===S.absColor)||[])[1];
@@ -1458,6 +1463,7 @@ function startDraw(e){ if(!G)return;
     if(t&&+t.dataset.idx<S.cuts.length){
       const [px,py]=svgPt(e), c2=S.cuts[+t.dataset.idx];
       dragCut={i:+t.dataset.idx, ox:(px-G.x)/G.sc-c2.cx, oy:(py-G.y)/G.sc-c2.cy};
+      if(typeof zeichenGriff==='function') zeichenGriff(true);
       $('stage').classList.add('is-dragging');
       e.preventDefault();
     }
@@ -1486,22 +1492,52 @@ function moveDraw(e){
   if(!S.draw||!tmpCut)return;
   const [px,py]=svgPt(e); tmpCut.x1=(px-G.x)/G.sc; tmpCut.y1=(py-G.y)/G.sc; drawStage(); }
 function endDraw(){
-  if(dragCut){ dragCut=null; $('stage').classList.remove('is-dragging'); render(); return; }
+  /* Ausstehende gedrosselte Bewegung nachziehen: sonst liegt beim Loslassen
+     noch die letzte Position im Wartezustand und der Ausschnitt waere leer. */
+  if(typeof _mvWartet!=='undefined' && _mvWartet && _mvLetzt){ _mvWartet=false; moveDraw(_mvLetzt); }
+  _mvLetzt=null;
+  if(dragCut){ dragCut=null; zeichenGriff(!!S.draw); $('stage').classList.remove('is-dragging'); render(); return; }
   if(S.draw==='p') return;                      /* Polygon endet per Doppelklick */
   if(!S.draw||!tmpCut)return;
   if(tmpCut.x1!==null){ const c2=normCut(tmpCut);
     if(c2.w>=3&&c2.h>=3){S.cuts.push(c2);toast('Ausschnitt '+fmtCut(c2)+' hinzugefügt · '+fmt(cutPrice(c2)));}
     else toast('Zu klein: mindestens 3 cm aufziehen'); }
   tmpCut=null; setDraw(null); render(); }
-window.addEventListener('mousemove',moveDraw);
-$('stage').addEventListener('touchmove',e=>{ if(!S.draw&&!dragCut)return;
-  const t=e.touches[0]; moveDraw({clientX:t.clientX,clientY:t.clientY}); e.preventDefault(); },{passive:false});
+/* Frueher hing moveDraw an window.pointermove, window.mousemove UND
+   stage.pointermove. Ein Finger loest pointermove und touchmove zusammen aus —
+   auf 20 Bewegungen kamen so 66 Neuaufbauten der Buehne (Messung 29.07.).
+   Jetzt: pointermove als einzige Quelle, gedrosselt auf ein Bild. */
+var _mvWartet=false, _mvLetzt=null;
+function moveDrawGedrosselt(e){
+  if(!S.draw && !dragCut) return;
+  _mvLetzt={clientX:e.clientX, clientY:e.clientY};
+  if(_mvWartet) return;
+  _mvWartet=true;
+  requestAnimationFrame(()=>{ _mvWartet=false; if(_mvLetzt) moveDraw(_mvLetzt); });
+}
+window.addEventListener('pointermove',moveDrawGedrosselt,{passive:true});
 window.addEventListener('touchend',endDraw);
-window.addEventListener('pointermove',moveDraw);
 window.addEventListener('mouseup',endDraw);
-$('stage').addEventListener('pointermove',e=>{ if(!S.draw||!tmpCut)return;
-  const [px,py]=svgPt(e); tmpCut.x1=(px-G.x)/G.sc; tmpCut.y1=(py-G.y)/G.sc; drawStage(); });
 window.addEventListener('pointerup',endDraw);
+
+/* ④ Der touchmove-Griff muss nicht-passiv sein, damit er das Mitscrollen
+   unterdruecken kann, solange man zeichnet. Dauerhaft angemeldet zwang er den
+   Browser aber bei JEDER Wischgeste ueber der Platte, erst das Skript zu
+   fragen — die Vorschau nimmt mobil den halben Schirm ein. Er haengt jetzt
+   nur noch dran, solange tatsaechlich gezeichnet oder geschoben wird. */
+function _touchZeichnen(e){
+  if(!S.draw && !dragCut) return;
+  const t=e.touches[0]; if(!t) return;
+  moveDrawGedrosselt({clientX:t.clientX, clientY:t.clientY});
+  e.preventDefault();
+}
+var _touchAn=false;
+function zeichenGriff(an){
+  const st=$('stage'); if(!st || an===_touchAn) return;
+  _touchAn=an;
+  if(an) st.addEventListener('touchmove',_touchZeichnen,{passive:false});
+  else   st.removeEventListener('touchmove',_touchZeichnen,{passive:false});
+}
 $('btn2d').addEventListener('click',()=>setView('2d'));
 $('btn3d').addEventListener('click',()=>setView('3d'));
 document.querySelectorAll('#formChips .kfg_chip').forEach(b=>b.addEventListener('click',()=>{
@@ -1938,14 +1974,22 @@ var _kfgStickyLaeuft=false, _kfgStufe=0, _kfgSpart=[0,0,0,0,0], _kfgHeadMax=0;
    Desktop: das Bild ist dort kleiner, die Zahl steht naeher am Auge und war
    auch mit 14 px noch schwer zu lesen (Ruckmeldung Sascha 29.07.). */
 var DIM_ZIEL = 15;
-var _dimFS = 16;                        /* aktuelle Schriftgroesse in Nutzereinheiten */
+var _dimFS = 0;   /* 0 = noch nie gemessen, siehe dimSkala() */                        /* aktuelle Schriftgroesse in Nutzereinheiten */
 function dimSkala(){
   const st=$('stage'); if(!st) return;
   const b=st.getBoundingClientRect().width;
   if(b<40) return;                      /* noch nicht gezeichnet */
   const m=b/600;                        /* Abbildungsmassstab */
   const ziel=window.innerWidth<980 ? DIM_ZIEL+3 : DIM_ZIEL;
-  _dimFS = Math.round(ziel/m*10)/10;
+  const neu = Math.round(ziel/m*10)/10;
+  /* Frueher wurde hier bedingungslos neu gezeichnet. Da updateSticky() dimSkala
+     bei jedem Durchlauf aufruft und drawStage ueber drawDetail wieder ein
+     Ladeereignis ausloeste, lief der Konfigurator dauerhaft im Kreis
+     (85 Neuaufbauten in 10 Sekunden Leerlauf, Befund 29.07.). Ausserdem baute
+     render() die Buehne dadurch zweimal auf: einmal direkt, einmal hierueber.
+     Jetzt wird nur gezeichnet, wenn sich die Masszahl wirklich aendert. */
+  if(neu===_dimFS) return;
+  _dimFS = neu;
   st.style.setProperty('--dim-fs', _dimFS+'px');
   st.style.setProperty('--dim-halo', Math.round(3.6/m*10)/10+'px');
   if(typeof drawStage==='function' && G) drawStage();   /* Abstaende haengen an _dimFS */
