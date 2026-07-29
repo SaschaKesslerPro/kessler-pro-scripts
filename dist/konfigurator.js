@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.11.4';
+  var VERSION = '1.11.5';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -1977,6 +1977,12 @@ function kopfleisteZeigen(zeigen){
    Bild gescrollt ist. Solange es sichtbar ist, wandert die Preiskarte ohnehin
    mit und eine zweite Leiste waere doppelt (Sascha 27.07.). Wer aber unter dem
    Konfigurator liest, soll nicht hochscrollen muessen (Sascha 29.07.). */
+/* Der Fussbereich der Seite. Einmal suchen und merken - er wandert nicht. */
+var _kfgFuss;
+function fussEl(){
+  if(_kfgFuss!==undefined) return _kfgFuss;
+  return (_kfgFuss = document.querySelector('footer.footer-wrapper, footer, .footer-wrapper') || null);
+}
 function updateBottomBar(){
   const bar=document.querySelector('.kfg_bar');
   if(!bar) return;
@@ -1988,7 +1994,16 @@ function updateBottomBar(){
   const r=wurzel.getBoundingClientRect();
   /* Unterkante ueber dem oberen Bildrand = wir sind darunter. 40 px Puffer,
      damit die Leiste an der Grenze nicht flackert. */
-  bar.classList.toggle('is-on', r.bottom < 40);
+  const an = r.bottom < 40;
+  bar.classList.toggle('is-on', an);
+  /* Die Leiste darf den Fussbereich nicht ueberdecken (Wunsch Sascha 29.07.):
+     sobald er ins Bild kommt, setzt sie sich auf seine Oberkante statt am
+     unteren Bildrand kleben zu bleiben. */
+  if(!an){ if(bar.style.bottom) bar.style.bottom=''; return; }
+  const f=fussEl();
+  const unten = f ? Math.max(0, Math.round(window.innerHeight - f.getBoundingClientRect().top)) : 0;
+  const neu = unten ? unten+'px' : '';
+  if(bar.style.bottom!==neu) bar.style.bottom=neu;
 }
 window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=setTimeout(()=>{_kfgHead=null;_kfgHeadEls=null;_kfgHeadMax=0;if(window.__kfgBeobachteHeader)window.__kfgBeobachteHeader();placeSummary();updateSticky();updateBottomBar();frame3D()},120)});
 
