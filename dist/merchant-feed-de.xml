@@ -3,7 +3,7 @@
 <channel>
   <title>Kessler PRO — Produkte (DE/EUR)</title>
   <link>https://www.kessler-pro.com</link>
-  <description>Kessler PRO Produktfeed (generiert 2026-07-29 02:01 UTC)</description>
+  <description>Kessler PRO Produktfeed (generiert 2026-07-29 05:45 UTC)</description>
   <item>
     <g:id>10915009331546</g:id>
     <g:title>Compact-Tischplatte rund | Ø 130 cm | Schwarzer Marmor | 12 mm</g:title>
@@ -5517,29 +5517,6 @@
     <g:color>Eiche</g:color>
     <g:item_group_id>PLATTE-RUND-25mm-O120</g:item_group_id>
     <g:shipping_weight>20 kg</g:shipping_weight>
-    <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
-    <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
-  </item>
-  <item>
-    <g:id>10894076674394</g:id>
-    <g:title>Tischplatte rund | Ø 100 cm | Grau | 25 mm</g:title>
-    <g:description>Die runde Tischplatte in Grau misst Ø 100 cm bei 25 mm Stärke und ist in unserer Manufaktur auf den täglichen Einsatz ausgelegt. Die melaminbeschichtete Oberfläche ist kratzfest, pflegeleicht und feuchtigkeitsbeständig; die umlaufende ABS-Kante (2 mm) schützt stoßfest vor dem Absplittern. Gefertigt in Polen mit Holzverarbeitung seit 1897, ideal für Bistro- und Esstische ebenso wie fürs Büro, kombinierbar mit gängigen Tischgestellen. Material: Spanplatte melaminbeschichtet. Gewicht: 14 kg.</g:description>
-    <g:link>https://www.kessler-pro.com/products/tischplatte-rund-100-cm-grau-25-mm-2209</g:link>
-    <g:image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e18602918592c1d2c355f_5908453741806_1.jpeg</g:image_link>
-    <g:price>112.90 EUR</g:price>
-    <g:availability>in_stock</g:availability>
-    <g:condition>new</g:condition>
-    <g:brand>Kessler PRO</g:brand>
-    <g:gtin>5908453742209</g:gtin>
-    <g:product_type>Möbelplatten</g:product_type>
-    <g:google_product_category>6910</g:google_product_category>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e18602918592c1d2c358c_5908453741806_2.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e18602918592c1d2c3580_5908453741806_3.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e18602918592c1d2c3574_5908453741806_4.jpeg</g:additional_image_link>
-    <g:material>Spanplatte melaminbeschichtet</g:material>
-    <g:color>Grau</g:color>
-    <g:item_group_id>PLATTE-RUND-25mm-O100</g:item_group_id>
-    <g:shipping_weight>14 kg</g:shipping_weight>
     <g:shipping><g:country>DE</g:country><g:price>0.00 EUR</g:price></g:shipping>
     <g:shipping><g:country>AT</g:country><g:price>0.00 EUR</g:price></g:shipping>
   </item>
