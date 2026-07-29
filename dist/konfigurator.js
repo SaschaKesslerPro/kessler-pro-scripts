@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.11.8';
+  var VERSION = '1.11.9';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -1962,13 +1962,11 @@ function kopfleisteZeigen(zeigen){
     requestAnimationFrame(()=>{
       tick=false;
       const y=Math.max(0, window.scrollY||0);
-      const runter = y > _kfgLetztY + 4;
-      const hoch    = y < _kfgLetztY - 4;
-      if(runter||hoch) _kfgLetztY=y;
       updateBottomBar();
-      if(y<80){ kopfleisteZeigen(true); return; }   /* ganz oben immer sichtbar */
-      if(runter) kopfleisteZeigen(false);
-      else if(hoch) kopfleisteZeigen(true);
+      /* Die Kopfleiste kommt NUR ganz oben zurueck, nicht bei jedem Hochwischen
+         (Befund Sascha 29.07.: "das nervt"). Auf dieser Seite hat sie unterwegs
+         nichts zu suchen — gesucht wird im Konfigurator, nicht im Menue. */
+      kopfleisteZeigen(y < 80);
     });
   }, {passive:true});
 })();
