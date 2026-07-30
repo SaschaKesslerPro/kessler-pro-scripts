@@ -15,7 +15,8 @@
   "sosna-bielona": "top/sosna-bielona.webp",
   "sperrholz-natur": "top/sperrholz-natur.webp",
   "szary": "top/szary.webp",
-  "weiss": "top/weiss.webp"
+  "weiss": "top/weiss.webp",
+  "sz-gewebe": "top/sz-gewebe.webp"
  },
  "kante": {
   "ahorn": "kante/ahorn.webp",
@@ -62,6 +63,7 @@
   "sosna-bielona_18": "kante/sosna-bielona_18.webp",
   "sosna-bielona_28": "kante/sosna-bielona_28.webp",
   "sosna-bielona_36": "kante/sosna-bielona_36.webp",
-  "szary": "kante/szary.webp"
+  "szary": "kante/szary.webp",
+  "szwal_21": "kante/szwal_21.webp"
  }
 }

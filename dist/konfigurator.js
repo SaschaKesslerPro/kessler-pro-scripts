@@ -1,4 +1,4 @@
-/*! Kessler PRO — Tischplatten-Konfigurator  v1.16.1
+/*! Kessler PRO — Tischplatten-Konfigurator  v1.16.2
  *  Rendert die komplette Konfigurator-UI in jeden Container mit [data-kfg-root].
  *  Daten: kfg-produktmatrix.json (Lagerartikel) · Bilder: assets/kfg/ — beide via jsDelivr.
  *  Public API: window.KFG = { version, getConfig(), setConfig(), reload(), _debug() }
@@ -7,7 +7,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.16.1';
+  var VERSION = '1.16.2';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -120,7 +120,7 @@ let SHOP = {};
 
 /* ═══════ Bilder (injiziert) ═══════ */
 const ASSET=(window.__KFG_BASE||'')+'/assets/kfg/';
-const TEX = Object.fromEntries(["weiss", "schwarz", "kaszmir", "sosna-bielona", "ahorn", "buk", "sonoma-eiche", "eiche-artison", "sperrholz-natur", "marmor-weiss", "marmor-schwarz", "czarny", "hikora", "alaska-weiss", "szary", "eiche-kamienny"].map(k=>[k,ASSET+'top/'+k+'.webp']));
+const TEX = Object.fromEntries(["weiss", "schwarz", "kaszmir", "sosna-bielona", "ahorn", "buk", "sonoma-eiche", "eiche-artison", "sperrholz-natur", "marmor-weiss", "marmor-schwarz", "czarny", "hikora", "alaska-weiss", "szary", "eiche-kamienny", "sz-gewebe"].map(k=>[k,ASSET+'top/'+k+'.webp']));
 /* 128-px-Thumbs fuer das Dekor-Raster — die Vollformate (TEX) laedt nur noch die
    Buehne fuer das GEWAEHLTE Dekor. Vorher zogen 11 Draufsichten ~440 KB als
    60-px-Kacheln (Audit 29.07., Fix 3). */
@@ -162,7 +162,7 @@ function texVorladen(){
     ensureTex(k, function(){ setTimeout(next, 250); });
   })();
 }
-const KANTE = Object.fromEntries(["schwarz_18", "schwarz_28", "schwarz_40", "szary_18", "kaszmir_18", "kaszmir_28", "kaszmir_36", "sosna-bielona_18", "sosna-bielona_28", "sosna-bielona_36", "ahorn_18", "ahorn_28", "ahorn_36", "buk_18", "buk_20", "buk_28", "buk_40", "sonoma-eiche_18", "sonoma-eiche_28", "sonoma-eiche_36", "eiche-artison_18", "eiche-artison_28", "eiche-artison_36", "weiss_36", "hikora_18", "hikora_36", "mpx_21", "mpx_40", "compact_12", "compact_weiss", "compact_szary", "compact_marmor-weiss", "compact_marmor-schwarz", "compact_czarny", "alaska-weiss_36", "eiche-kamienny_18", "eiche-kamienny_36", "szary_28"].map(k=>[k,ASSET+'kante/'+k+'.webp']));
+const KANTE = Object.fromEntries(["szwal_21", "schwarz_18", "schwarz_28", "schwarz_40", "szary_18", "kaszmir_18", "kaszmir_28", "kaszmir_36", "sosna-bielona_18", "sosna-bielona_28", "sosna-bielona_36", "ahorn_18", "ahorn_28", "ahorn_36", "buk_18", "buk_20", "buk_28", "buk_40", "sonoma-eiche_18", "sonoma-eiche_28", "sonoma-eiche_36", "eiche-artison_18", "eiche-artison_28", "eiche-artison_36", "weiss_36", "hikora_18", "hikora_36", "mpx_21", "mpx_40", "compact_12", "compact_weiss", "compact_szary", "compact_marmor-weiss", "compact_marmor-schwarz", "compact_czarny", "alaska-weiss_36", "eiche-kamienny_18", "eiche-kamienny_36", "szary_28"].map(k=>[k,ASSET+'kante/'+k+'.webp']));
 
 /* ═══════ Preismatrix (Produktions-Docx, zł brutto) ═══════ */
 const KURS = 4.25;                                  /* zł → € wie Katalogregel (Sascha, 30.07.) */
@@ -200,7 +200,9 @@ const DEKOR_HPL = DEKOR_MOEBEL;
    nicht — bis dahin leihen wir die farblich naechstliegende aus dem Archiv. */
 const DEKOR_SZWAL = [['sz-weiss','Weiß'],['sz-gewebe','Gewebestruktur Weiß'],
                      ['sz-grau','Grau'],['sz-schwarz','Schwarz']];
-const SZWAL_TEX = {'sz-weiss':'weiss','sz-gewebe':'weiss','sz-grau':'szary','sz-schwarz':'schwarz'};
+/* 'sz-gewebe' hat seit v1.16.2 eine eigene Aufnahme (Fotos Sascha 30.07.),
+   die drei uebrigen leihen sich weiter die farblich naechstliegende. */
+const SZWAL_TEX = {'sz-weiss':'weiss','sz-grau':'szary','sz-schwarz':'schwarz'};
 Object.keys(SZWAL_TEX).forEach(function(k){
   TEX[k]=TEX[SZWAL_TEX[k]]; TEX_THUMB[k]=TEX_THUMB[SZWAL_TEX[k]];
 });
@@ -527,6 +529,31 @@ function drawStage(){
     let clip=`<path d="${pdRect}"/>`;
     inner+=`<clipPath id="plateClip">${clip}</clipPath>`;
     inner+=`<image href="${tex}" x="${x-pw*0.08}" y="${y-ph*0.08}" width="${pw*1.16}" height="${ph*1.16}" preserveAspectRatio="xMidYMid slice" clip-path="url(#plateClip)"/>`;
+    /* Massband an der Vorderkante — gelasert oder als Aufkleberkante; beide
+       sitzen an derselben Stelle, deshalb dieselbe Zeichnung (Fotos 30.07.). */
+    if(S.mat==='szwal' && S.massband!=='none'){
+      const yB=y+ph-Math.max(5,1.6*sc);
+      const lang=Math.max(5,0.9*sc), kurz=Math.max(2.5,0.45*sc);
+      const schritt = 1*sc>=2.2 ? 1 : (5*sc>=2.2 ? 5 : 10);
+      let st='';
+      for(let cm=0; cm<=Math.floor(d.w)+0.001; cm+=schritt){
+        const px=x+cm*sc, gross=Math.round(cm)%10===0;
+        st+=`<line x1="${px}" y1="${yB}" x2="${px}" y2="${yB-(gross?lang:kurz)}"
+          stroke="#1E1E1E" stroke-width="${gross?1:0.6}" opacity="${gross?'.85':'.45'}"/>`;
+      }
+      /* Beschriftung nur so dicht, dass die Zahlen sich nicht beruehren */
+      const beschr=Math.max(10, Math.ceil(26/Math.max(1,10*sc))*10);
+      for(let cm=0; cm<=Math.floor(d.w)+0.001; cm+=beschr){
+        /* Erste und letzte Zahl nach innen ziehen, sonst haengen sie ueber der
+           Kante und werden vom Plattenrand angeschnitten. */
+        const letzte = cm+beschr > Math.floor(d.w);
+        const anker = cm===0 ? 'start' : (letzte ? 'end' : 'middle');
+        const dx = cm===0 ? 2 : (letzte ? -2 : 0);
+        st+=`<text class="dim-text" x="${x+cm*sc+dx}" y="${yB-lang-2}" text-anchor="${anker}"
+          style="font-size:9px;font-weight:500;stroke-width:2px">${cm}</text>`;
+      }
+      inner+=`<g style="pointer-events:none">${st}</g>`;
+    }
     inner+=`<path d="${pdRect}" fill="none" stroke="#00000018"/>`;
     /* Kanten als konturfolgende Pfade — jede Kante traegt die Haelfte der beiden
        angrenzenden Eckbogen, jetzt mit individuellem Radius je Ecke. */
