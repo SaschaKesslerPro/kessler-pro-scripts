@@ -1,13 +1,13 @@
 {
  "_meta": {
   "name": "Kessler PRO — Konfigurator, Sprachdatei",
-  "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen.",
+  "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft.",
   "sprachen": [
    "pl",
    "en"
   ],
-  "anzahl": 196,
-  "muster": 31
+  "anzahl": 226,
+  "muster": 35
  },
  "pl": {
   "Ab Lager": "Z magazynu",
@@ -205,7 +205,37 @@
   "Mehr": "Więcej",
   "Schließen": "Zamknij",
   "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Opisz krótko, czego potrzebujesz — np. „wycięcie narożne 20×15 cm z tyłu po lewej”.",
-  ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", podobnie wycięcie narożne i wycięcie w kształcie U: podaj je w kroku 05 w polu „Własny układ otworów / szkic”. Produkcja ze sklejki, laminatu i obrzeża ABS."
+  ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", podobnie wycięcie narożne i wycięcie w kształcie U: podaj je w kroku 05 w polu „Własny układ otworów / szkic”. Produkcja ze sklejki, laminatu i obrzeża ABS.",
+  "Nähtischplatte": "Blat pod maszynę do szycia",
+  "ab 89 € · 21 mm · 4 Farben": "od 89 € · 21 mm · 4 kolory",
+  "Gewebestruktur Weiß": "Biały ze strukturą tkaniny",
+  "Nicht gefräst": "Bez frezowania",
+  "Gefräst 45°": "Frezowana 45°",
+  "+ 5 €/lfm": "+ 5 €/mb",
+  "+ 10 €/lfm": "+ 10 €/mb",
+  "+ 16 €/lfm": "+ 16 €/mb",
+  "Kante natur, aber lackiert": "Krawędź naturalna, ale lakierowana",
+  "unsere Lackierung, seidenmatt — schützt die offene Schichtkante": "nasz lakier, satynowy — chroni odsłoniętą krawędź warstwową",
+  "Kante lackiert": "Krawędź lakierowana",
+  "Maßband an der Vorderkante": "Miarka na przedniej krawędzi",
+  "Kein Maßband": "Bez miarki",
+  "Maßband gelasert": "Miarka wypalana laserem",
+  "Aufkleberkante": "Miarka naklejana",
+  "+ 15 €": "+ 15 €",
+  "+ 10 €": "+ 10 €",
+  "Ausschnitt für die Maschine": "Wycięcie pod maszynę",
+  "Maße musst du keine angeben — sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Nie musisz podawać wymiarów — wystarczy, że napiszesz, jaka maszyna ma zostać wpuszczona, wycięcie dopasujemy my. Miejsce ustalasz sam: przesuń wycięcie w podglądzie, odległości od wszystkich czterech krawędzi pokazują się obok.",
+  "Nähmaschine — Hersteller und Modell": "Maszyna do szycia — producent i model",
+  "z. B. Bernina 770 QE oder Juki TL-2200": "np. Bernina 770 QE lub Juki TL-2200",
+  "Maschinen-Ausschnitt hinzufügen": "Dodaj wycięcie pod maszynę",
+  "Maschinen-Ausschnitt entfernen": "Usuń wycięcie pod maszynę",
+  "im Plattenpreis": "w cenie blatu",
+  "Maßband": "Miarka",
+  "Nähmaschine": "Maszyna do szycia",
+  "— vom Kunden noch nicht angegeben —": "— klient jeszcze nie podał —",
+  "Sichtbare Schichtkante: nicht gefräst, gefräst 45° oder halbrund — der Preis gilt je laufendem Meter Kante. Alternativ eine ABS-Kante in der gewünschten Farbe. Jede Fräsvariante ist auch lackiert möglich; wir haben genau eine Lackierung.": "Widoczna krawędź warstwowa: bez frezowania, frezowana 45° albo półokrągła — cena za metr bieżący krawędzi. Alternatywnie obrzeże ABS w wybranym kolorze. Każdy wariant frezowania jest dostępny także lakierowany; mamy dokładnie jeden lakier.",
+  "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "z VAT, darmowa wysyłka do 110 × 50 cm",
+  "Versand bis 110 × 50 cm gratis": "Wysyłka do 110 × 50 cm gratis"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -403,10 +433,56 @@
   "Mehr": "More",
   "Schließen": "Close",
   "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Briefly describe what you need — e.g. “corner notch 20×15 cm at the back left”.",
-  ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", as are a corner notch and a U-shaped cut out: please state them in step 05 under “Your own hole pattern / sketch”. Made from plywood, laminate and an ABS edge."
+  ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", as are a corner notch and a U-shaped cut out: please state them in step 05 under “Your own hole pattern / sketch”. Made from plywood, laminate and an ABS edge.",
+  "Nähtischplatte": "Sewing table top",
+  "ab 89 € · 21 mm · 4 Farben": "from €89 · 21 mm · 4 colours",
+  "Gewebestruktur Weiß": "White, woven texture",
+  "Nicht gefräst": "Not milled",
+  "Gefräst 45°": "Milled 45°",
+  "+ 5 €/lfm": "+ €5/lin. m",
+  "+ 10 €/lfm": "+ €10/lin. m",
+  "+ 16 €/lfm": "+ €16/lin. m",
+  "Kante natur, aber lackiert": "Natural edge, lacquered",
+  "unsere Lackierung, seidenmatt — schützt die offene Schichtkante": "our lacquer, satin matt — protects the exposed layered edge",
+  "Kante lackiert": "Edge lacquered",
+  "Maßband an der Vorderkante": "Measuring tape on the front edge",
+  "Kein Maßband": "No measuring tape",
+  "Maßband gelasert": "Laser-etched measuring tape",
+  "Aufkleberkante": "Adhesive tape strip",
+  "+ 15 €": "+ 15 €",
+  "+ 10 €": "+ 10 €",
+  "Ausschnitt für die Maschine": "Cut-out for the machine",
+  "Maße musst du keine angeben — sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "You do not need to give any dimensions — just tell us which machine will be recessed and we will fit the cut-out. You decide where it sits: drag it in the preview, the distances to all four edges are shown next to it.",
+  "Nähmaschine — Hersteller und Modell": "Sewing machine — make and model",
+  "z. B. Bernina 770 QE oder Juki TL-2200": "e.g. Bernina 770 QE or Juki TL-2200",
+  "Maschinen-Ausschnitt hinzufügen": "Add machine cut-out",
+  "Maschinen-Ausschnitt entfernen": "Remove machine cut-out",
+  "im Plattenpreis": "included in the top price",
+  "Maßband": "Measuring tape",
+  "Nähmaschine": "Sewing machine",
+  "— vom Kunden noch nicht angegeben —": "— not yet given by the customer —",
+  "Sichtbare Schichtkante: nicht gefräst, gefräst 45° oder halbrund — der Preis gilt je laufendem Meter Kante. Alternativ eine ABS-Kante in der gewünschten Farbe. Jede Fräsvariante ist auch lackiert möglich; wir haben genau eine Lackierung.": "Visible layered edge: not milled, milled 45° or half-round — priced per linear metre of edge. Alternatively an ABS edge in the colour of your choice. Every milling variant is also available lacquered; we have exactly one lacquer.",
+  "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "incl. VAT, free shipping up to 110 × 50 cm",
+  "Versand bis 110 × 50 cm gratis": "Free shipping up to 110 × 50 cm"
  },
  "muster": {
   "pl": [
+   [
+    "^Maschine (.+)$",
+    "Maszyna $1"
+   ],
+   [
+    "^Größe (.+) — Richtwert, wir passen ihn an deine Maschine an\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+    "Wymiar $1 — wartość orientacyjna, dopasujemy go do Twojej maszyny. Odległości: lewo $2 · prawo $3 · tył $4 · przód $5 cm"
+   ],
+   [
+    "^Maschine: (.+)$",
+    "Maszyna: $1"
+   ],
+   [
+    "^Nähtischplatte (.+)$",
+    "Blat pod maszynę do szycia $1"
+   ],
    [
     "^Rechteck (.+)$",
     "Prostokąt $1"
@@ -533,6 +609,22 @@
    ]
   ],
   "en": [
+   [
+    "^Maschine (.+)$",
+    "Machine $1"
+   ],
+   [
+    "^Größe (.+) — Richtwert, wir passen ihn an deine Maschine an\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+    "Size $1 — guide value, we adapt it to your machine. Distances: left $2 · right $3 · back $4 · front $5 cm"
+   ],
+   [
+    "^Maschine: (.+)$",
+    "Machine: $1"
+   ],
+   [
+    "^Nähtischplatte (.+)$",
+    "Sewing table top $1"
+   ],
    [
     "^Rechteck (.+)$",
     "Rectangle $1"
