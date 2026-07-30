@@ -183,13 +183,21 @@ def item_xml(f, loc, cur, prefix, price_field):
     gew = f.get('gewicht-kg-2')
     if gew:
         lines.append('    <g:shipping_weight>%s kg</g:shipping_weight>' % gew)
-    # Versandpreis: Sperrgut (laengste Seite >= 130 cm) nach Gewichtsstufe, sonst gratis.
-    # Muss der Shopify-Versandprofil-Logik entsprechen (Profil "Dostawa przesylka niestandardowa").
+    # Versandpreis. MUSS der Shopify-Versandprofil-Zuordnung entsprechen
+    # (Profil "Dostawa przesylka niestandardowa" = Sperrgut).
+    # Regel seit 30.07.2026: gratis nur bis 110 x 50 cm.
+    # Runde Platten sind eine bewusste Ausnahme: gratis bis Ø 110, ab Ø 120 Sperrgut.
     name_for_ship = (f.get('name') or '')
     import re as _re
-    _dims = _re.findall(r'(\d+(?:[.,]\d+)?)\s*(?:[x\u00d7]|cm)', name_for_ship.replace('\u00d8', ''))
-    _longest = max([float(d.replace(',', '.')) for d in _dims], default=0)
-    _sperr = _longest >= 130
+    _rd = _re.search(r'\u00d8\s*(\d+(?:[.,]\d+)?)', name_for_ship)
+    if _rd:
+        _sperr = float(_rd.group(1).replace(',', '.')) >= 120
+    else:
+        _dims = _re.findall(r'(\d+(?:[.,]\d+)?)\s*(?=\s*[x\u00d7]|\s*cm)', name_for_ship)
+        _vals = sorted((float(d.replace(',', '.')) for d in _dims), reverse=True)
+        _lang = _vals[0] if _vals else 0
+        _kurz = _vals[1] if len(_vals) > 1 else 0
+        _sperr = (_lang > 110) or (_kurz > 50)
     try:
         _w = float(str(gew).replace(',', '.')) if gew else 0
     except ValueError:
