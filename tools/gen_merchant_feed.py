@@ -34,7 +34,7 @@ CATS = {
     '3d5a': {'de': 'Tischgestelle', 'pl': 'Stelaże do stołów'},
     '3d54': {'de': 'Werkbänke', 'pl': 'Stoły warsztatowe'},
     '3d5e': {'de': 'Regalzubehör', 'pl': 'Akcesoria do regałów'},
-    '3d60': {'de': 'Medizinschränke', 'pl': 'Szafki medyczne'},
+    '3d60': {'de': 'Medizinische Nachttische', 'pl': 'Medyczne stoliki przyłóżkowe'},
     'b734': {'de': 'Compact-Tischplatten', 'pl': 'Blaty Compact'},
 }
 
