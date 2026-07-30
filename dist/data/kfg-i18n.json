@@ -6,8 +6,8 @@
    "pl",
    "en"
   ],
-  "anzahl": 226,
-  "muster": 35
+  "anzahl": 230,
+  "muster": 37
  },
  "pl": {
   "Ab Lager": "Z magazynu",
@@ -233,9 +233,13 @@
   "Maßband": "Miarka",
   "Nähmaschine": "Maszyna do szycia",
   "— vom Kunden noch nicht angegeben —": "— klient jeszcze nie podał —",
-  "Sichtbare Schichtkante: nicht gefräst, gefräst 45° oder halbrund — der Preis gilt je laufendem Meter Kante. Alternativ eine ABS-Kante in der gewünschten Farbe. Jede Fräsvariante ist auch lackiert möglich; wir haben genau eine Lackierung.": "Widoczna krawędź warstwowa: bez frezowania, frezowana 45° albo półokrągła — cena za metr bieżący krawędzi. Alternatywnie obrzeże ABS w wybranym kolorze. Każdy wariant frezowania jest dostępny także lakierowany; mamy dokładnie jeden lakier.",
   "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "z VAT, darmowa wysyłka do 110 × 50 cm",
-  "Versand bis 110 × 50 cm gratis": "Wysyłka do 110 × 50 cm gratis"
+  "Versand bis 110 × 50 cm gratis": "Wysyłka do 110 × 50 cm gratis",
+  "Kantenbearbeitung": "Obróbka krawędzi",
+  "Kantenbearbeitung, lackiert": "Obróbka krawędzi, lakierowana",
+  "+ 8 €/lfm": "+ 8 €/mb",
+  "auf Anfrage": "na zapytanie",
+  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Widoczna krawędź warstwowa: bez frezowania w standardzie, frezowana 45° kosztuje 5 €/mb, półokrągła 8 €/mb. Lakierowane to 5, 10 i 16 €/mb — mamy dokładnie jeden lakier. Alternatywnie obrzeże ABS w wybranym kolorze."
  },
  "en": {
   "Ab Lager": "From stock",
@@ -461,9 +465,13 @@
   "Maßband": "Measuring tape",
   "Nähmaschine": "Sewing machine",
   "— vom Kunden noch nicht angegeben —": "— not yet given by the customer —",
-  "Sichtbare Schichtkante: nicht gefräst, gefräst 45° oder halbrund — der Preis gilt je laufendem Meter Kante. Alternativ eine ABS-Kante in der gewünschten Farbe. Jede Fräsvariante ist auch lackiert möglich; wir haben genau eine Lackierung.": "Visible layered edge: not milled, milled 45° or half-round — priced per linear metre of edge. Alternatively an ABS edge in the colour of your choice. Every milling variant is also available lacquered; we have exactly one lacquer.",
   "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "incl. VAT, free shipping up to 110 × 50 cm",
-  "Versand bis 110 × 50 cm gratis": "Free shipping up to 110 × 50 cm"
+  "Versand bis 110 × 50 cm gratis": "Free shipping up to 110 × 50 cm",
+  "Kantenbearbeitung": "Edge finishing",
+  "Kantenbearbeitung, lackiert": "Edge finishing, lacquered",
+  "+ 8 €/lfm": "+ €8/lin. m",
+  "auf Anfrage": "on request",
+  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Visible layered edge: not milled as standard, milled 45° costs €5/lin. m, half-round €8/lin. m. Lacquered it is €5, €10 and €16/lin. m — we have exactly one lacquer. Alternatively an ABS edge in the colour of your choice."
  },
  "muster": {
   "pl": [
@@ -606,6 +614,14 @@
    [
     "^Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke\\. Gefertigt wird in (.+)\\.$",
     "Ilustracja pokazuje krawędź w 25 mm, niezależnie od wybranej grubości. Produkujemy w $1."
+   ],
+   [
+    "^\\+ (\\d+(?:,\\d+)?) €/lfm$",
+    "+ $1 €/mb"
+   ],
+   [
+    "^(\\d+(?:,\\d+)?) €/lfm$",
+    "$1 €/mb"
    ]
   ],
   "en": [
@@ -748,6 +764,14 @@
    [
     "^Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke\\. Gefertigt wird in (.+)\\.$",
     "The image shows the edge at 25 mm, regardless of the thickness chosen. Yours is made in $1."
+   ],
+   [
+    "^\\+ (\\d+(?:,\\d+)?) €/lfm$",
+    "+ €$1/lin. m"
+   ],
+   [
+    "^(\\d+(?:,\\d+)?) €/lfm$",
+    "€$1/lin. m"
    ]
   ]
  }
