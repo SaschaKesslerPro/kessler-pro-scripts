@@ -6,7 +6,7 @@
  * v2.6.2 — i18n: Sortier-Optionen, Preis-Slider Von/Bis + aria, localeCompare je Locale (14.07.2026)
  * v2.6.3 — Fix: Compact-Tischplatten in CATSLUG + LOCMAP (Kategorieseite zeigte alle Produkte) (18.07.2026)
  * v2.6.4 — Perf: stündlicher Cache-Buster an @main-JSON-URLs (20.07.2026)
- * v2.6.5 — Nachttische: Kategorie Medizinschränke→Nachttische in CATSLUG (+nachttische-Alias) & LOCMAP (Szafki nocne/Bedside Tables) (24.07.2026)
+ * v2.6.6 — Nachttische: Kategorie Medizinschränke→Nachttische in CATSLUG (+nachttische-Alias) & LOCMAP (Szafki nocne/Bedside Tables) (24.07.2026)
  * Product Listing Page — client-rendered grid + faceted filtering.
  *
  * v2.5.0 — Facetten-Bridge für alle Filteroptionen (03.07.2026)
@@ -92,7 +92,7 @@
     // Fallback @main nur, wenn plp.js nicht via jsDelivr-Pin geladen wurde.
     var self = (document.querySelector('script[src*="/dist/plp.js"]')||{}).src||'';
     return self ? self.replace(/plp\.js(?:\?.*)?$/,'plp-filterdata.json')
-                : 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json'+'?v='+Math.floor(Date.now()/3600000);
+                : 'https://raw.githubusercontent.com/SaschaKesslerPro/kessler-pro-scripts/main/dist/plp-filterdata.json'+'?v='+Math.floor(Date.now()/3600000);
   })();
 
   function injectStyle(css, id) {

@@ -1,5 +1,5 @@
 /* ============================================================
-   Kessler PRO — search.js  v1.0.19
+   Kessler PRO — search.js  v1.0.20
    Instant-Suche (Variante A · Stöbern). Onest-only, 8px.
    Mobile V2: Vorschläge (abgeleitet) + Verlauf + Beliebt, leichte Fuzzy-Logik.
    Quelle: search-index.json (jsDelivr) · sessionStorage-Cache.
@@ -12,7 +12,7 @@
   function kpLP(){var m=(location.pathname||'').match(/^\/(pl-pl|en)(?=\/|$)/);return m?m[0]:'';}
   var CFG = {
     // Wird beim Integrieren auf den Commit-Hash gepinnt (jsDelivr).
-    INDEX_URL: 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json'+'?v='+Math.floor(Date.now()/3600000),
+    INDEX_URL: 'https://raw.githubusercontent.com/SaschaKesslerPro/kessler-pro-scripts/main/dist/search-index.json'+'?v='+Math.floor(Date.now()/3600000),
     CACHE_KEY: 'kp_search_index_v4',
     MOUNT: '[data-kp-search]',
     PDP: function (s) { return kpLP() + '/products/' + s; },
