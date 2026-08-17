@@ -1,6 +1,8 @@
 /*!
  * kessler-pro-scripts / plp.js
  *
+ * v2.7.0 — GA4-Konsistenz: item_name ueber kpNorm vereinheitlicht,
+ *          currency aus dem Preistext statt localStorage-Fallback (17.08.2026)
  * v2.6.0 — GA4-Events: view_item_list (dedupe je Grundmenge), select_item, add_to_cart Quick-Add (11.07.2026)
  * v2.6.1 — Perf: Filterdaten commit-gepinnt + cachebar (kein no-store mehr) (13.07.2026)
  * v2.6.2 — i18n: Sortier-Optionen, Preis-Slider Von/Bis + aria, localeCompare je Locale (14.07.2026)
@@ -405,7 +407,7 @@
       try {
         var t = (card.querySelector('.product-card_title') || {}).textContent || '';
         var pr = window.kpParsePrice ? window.kpParsePrice((card.querySelector('.product-card_price') || {}).textContent || '') : 0;
-        window.kpDL('select_item', { items: [{ item_id: String(card.getAttribute('data-pid') || card.getAttribute('data-slug')), item_name: t.trim(), price: pr, quantity: 1 }] });
+        window.kpDL('select_item', { items: [{ item_id: String(card.getAttribute('data-pid') || card.getAttribute('data-slug')), item_name: (window.kpNorm ? window.kpNorm(t) : t.trim()), price: pr, quantity: 1 }] });
       } catch (eT) {}
     }, true);
   }
@@ -431,8 +433,10 @@
             try {
               if (window.kpDL) {
                 var t = (card.querySelector('.product-card_title') || {}).textContent || '';
-                var pr = window.kpParsePrice ? window.kpParsePrice((card.querySelector('.product-card_price') || {}).textContent || '') : 0;
-                window.kpDL('add_to_cart', { currency: window.kpCurrency ? window.kpCurrency() : 'EUR', value: pr, items: [{ item_id: String(pid), item_name: t.trim(), price: pr, quantity: 1 }] });
+                var prTxt = (card.querySelector('.product-card_price') || {}).textContent || '';
+                var pr = window.kpParsePrice ? window.kpParsePrice(prTxt) : 0;
+                var cur = window.kpCurrencyFrom ? window.kpCurrencyFrom(prTxt) : (window.kpCurrency ? window.kpCurrency() : 'EUR');
+                window.kpDL('add_to_cart', { currency: cur, value: pr, items: [{ item_id: String(pid), item_name: (window.kpNorm ? window.kpNorm(t) : t.trim()), price: pr, quantity: 1 }] });
               }
             } catch (e3) {}
           });

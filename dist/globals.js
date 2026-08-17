@@ -664,6 +664,38 @@
     }catch(e){}
     return location.pathname.indexOf('/pl-pl')===0?'PLN':'EUR';
   };
+  /* Waehrung aus dem Preistext ableiten, aus dem auch der value geparst wird.
+   * Verhindert, dass ein PLN-Betrag als EUR gemeldet wird (Faktor ~4,2 zu hoch),
+   * wenn localStorage noch nicht gesetzt ist. Fallback: kpCurrency(). */
+  window.kpCurrencyFrom=function(text){
+    try{
+      var s=String(text||'');
+      if(/z\u0142|PLN/i.test(s))return'PLN';
+      if(/\u20ac|EUR/i.test(s))return'EUR';
+    }catch(e){}
+    return window.kpCurrency?window.kpCurrency():'EUR';
+  };
+  /* Artikelnamen vereinheitlichen: NBSP/schmale Leerzeichen -> Space,
+   * Mehrfach-Whitespace zusammenziehen, Unicode normalisieren.
+   * Grund: PLP liest .product-card_title, PDP liest h1.pdp_title — identische
+   * Namen gingen in GA4 als zwei getrennte Zeilen ein. */
+  window.kpNorm=function(s){
+    try{
+      s=String(s==null?'':s);
+      if(s.normalize)s=s.normalize('NFC');
+      s=s.replace(/[\u00a0\u2007\u202f\u200b\u200d\ufeff]/g,' ');
+      return s.replace(/\s+/g,' ').trim();
+    }catch(e){return String(s||'').trim();}
+  };
+  /* Einfache Entprellung: true beim ersten Aufruf je key, danach false
+   * innerhalb von ms. Verhindert Doppelzaehlung bei Doppelklick. */
+  window.kpOnce=function(key,ms){
+    try{
+      var now=Date.now();var m=window.__kpOnce||(window.__kpOnce={});
+      if(m[key]&&now-m[key]<(ms||1200))return false;
+      m[key]=now;return true;
+    }catch(e){return true;}
+  };
   window.kpParsePrice=function(s){
     if(typeof s==='number')return s;
     if(!s)return 0;

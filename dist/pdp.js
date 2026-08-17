@@ -1,6 +1,8 @@
 /*!
  * kessler-pro-scripts / pdp.js
  *
+ * v1.4.0 — GA4-Konsistenz: document.title-Fallback entfernt, item_name ueber kpNorm,
+ *          currency aus Preistext, add_to_cart entprellt (kpOnce 1200ms) (17.08.2026)
  * v1.1.0 — GA4-Events: view_item, add_to_cart (11.07.2026)
  * v1.2.0 — Galerie: Placeholder-Thumbs + Duplikat-Thumbs ausblenden (14.07.2026) [ENTFERNT in v1.3.0]
  * v1.3.0 — Galerie neu gebaut (Collection List + Multi-Image-Feld + verkettete Lightboxen,
@@ -74,18 +76,30 @@
       var pidEl = document.querySelector('[sf-product]');
       var pid = pidEl ? String(pidEl.getAttribute('sf-product')) : (location.pathname.split('/').pop() || '');
       var h1 = document.querySelector('h1.pdp_title') || document.querySelector('h1');
-      var name = h1 ? h1.textContent.trim() : document.title;
+      // Kein document.title-Fallback mehr: der traegt den Seitentitel-Zusatz
+      // ("| Kessler PRO") mit und spaltet das Produkt in GA4 in zwei Zeilen.
+      var rawName = h1 ? h1.textContent : '';
+      var name = window.kpNorm ? window.kpNorm(rawName) : String(rawName).trim();
       var prEl = document.querySelector('.pdp_price');
-      var price = prEl && window.kpParsePrice ? window.kpParsePrice(prEl.textContent) : 0;
+      var prTxt = prEl ? prEl.textContent : '';
+      var price = window.kpParsePrice ? window.kpParsePrice(prTxt) : 0;
+      var cur = function (t) {
+        return window.kpCurrencyFrom ? window.kpCurrencyFrom(t)
+             : (window.kpCurrency ? window.kpCurrency() : 'EUR');
+      };
       if (!window.__kpViewItem) {
         window.__kpViewItem = true;
-        window.kpDL('view_item', { currency: window.kpCurrency ? window.kpCurrency() : 'EUR', value: price, items: [{ item_id: pid, item_name: name, price: price, quantity: 1 }] });
+        window.kpDL('view_item', { currency: cur(prTxt), value: price, items: [{ item_id: pid, item_name: name, price: price, quantity: 1 }] });
       }
       document.addEventListener('click', function (e) {
         var btn = e.target.closest && e.target.closest('[sf-add-to-cart]');
         if (!btn || btn.closest('[data-kp-card]')) return; // Karten-Add macht plp.js
-        var pr2 = prEl && window.kpParsePrice ? window.kpParsePrice(prEl.textContent) : price;
-        window.kpDL('add_to_cart', { currency: window.kpCurrency ? window.kpCurrency() : 'EUR', value: pr2, items: [{ item_id: pid, item_name: name, price: pr2, quantity: 1 }] });
+        // Entprellung: Doppelklick auf denselben Artikel zaehlt einmal.
+        // plp.js schuetzt sich ueber data-busy, hier gab es bislang nichts.
+        if (window.kpOnce && !window.kpOnce('atc:' + pid, 1200)) return;
+        var t2 = prEl ? prEl.textContent : prTxt;
+        var pr2 = window.kpParsePrice ? window.kpParsePrice(t2) : price;
+        window.kpDL('add_to_cart', { currency: cur(t2), value: pr2, items: [{ item_id: pid, item_name: name, price: pr2, quantity: 1 }] });
       }, true);
     } catch (eT) {}
   }
