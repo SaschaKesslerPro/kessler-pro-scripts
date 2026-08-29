@@ -65,7 +65,58 @@ FARBEN_PL = {
     'Helles Holz': 'Jasne drewno',
 }
 
+# --- Preisquelle: Shopify (seit 29.08.2026) --------------------------------
+# Der Preis kommt NICHT mehr aus den CMS-Feldern, sondern direkt aus Shopify.
+# Grund: die CMS-Felder werden nur stuendlich gespiegelt; ein Verzug dort
+# erzeugt sonst eine Preisabweichung zwischen Feed und Landingpage, und genau
+# das meldet Merchant Center als Verstoss. Webflow liefert weiterhin Titel,
+# Bilder, Beschreibung und Attribute.
+# Faellt Shopify aus, greift der alte CMS-Wert als Rueckfallebene, damit der
+# Feed nie ohne Preis dasteht.
+SHOP = 'hyf2zr-7x.myshopify.com'
+SF_VERSION = '2024-10'
+SF_TOKEN = os.environ.get(
+    'SHOPIFY_STOREFRONT_TOKEN', '412ec64ed0b4546aa69f2ed2ee574441').strip()
+SHOP_PRICES = {'de': {}, 'pl': {}}   # loc -> {handle: float}
+PRICE_SRC = {'shopify': 0, 'cms': 0}
 
+
+def shopify_prices(country):
+    """handle -> Preis (float) im Markt des angegebenen Landes."""
+    import time
+    out, cursor = {}, None
+    q = ('query($n:Int!,$a:String) @inContext(country: %s) {'
+         '  products(first:$n, after:$a) {'
+         '    pageInfo { hasNextPage endCursor }'
+         '    edges { node { handle variants(first:1) { edges { node {'
+         '      price { amount } } } } } } } }' % country)
+    while True:
+        body = json.dumps({'query': q, 'variables': {'n': 250, 'a': cursor}}).encode()
+        d = None
+        for t in range(5):
+            req = urllib.request.Request(
+                'https://%s/api/%s/graphql.json' % (SHOP, SF_VERSION), data=body,
+                headers={'X-Shopify-Storefront-Access-Token': SF_TOKEN,
+                         'Content-Type': 'application/json'})
+            try:
+                d = json.load(urllib.request.urlopen(req, timeout=60))
+                break
+            except Exception:
+                time.sleep(2 * (t + 1))
+        if d is None or 'errors' in d:
+            print('WARNUNG: Shopify-Preise (%s) nicht abrufbar — CMS-Werte werden '
+                  'als Rueckfallebene benutzt' % country, file=sys.stderr)
+            return {}
+        conn = d['data']['products']
+        for e in conn['edges']:
+            n = e['node']
+            v = n['variants']['edges']
+            if v:
+                out[n['handle']] = float(v[0]['node']['price']['amount'])
+        if not conn['pageInfo']['hasNextPage']:
+            break
+        cursor = conn['pageInfo']['endCursor']
+    return out
 
 
 def api(path):
@@ -133,7 +184,14 @@ def item_xml(f, loc, cur, prefix, price_field):
         desc = (desc + ' ' + ' '.join(extra)).strip()
     img = f.get('product-main-image') or {}
     img_url = img.get('url') if isinstance(img, dict) else img
-    pr = price(f.get(price_field), cur)
+    sp = SHOP_PRICES.get(loc, {}).get(slug)
+    if sp and sp > 0:
+        pr = '%.2f %s' % (sp, cur)
+        PRICE_SRC['shopify'] += 1
+    else:
+        pr = price(f.get(price_field), cur)
+        if pr:
+            PRICE_SRC['cms'] += 1
     if not (slug and title and img_url and pr):
         return None
     kat = (f.get('kategorie') or '')[-4:]
@@ -251,6 +309,10 @@ def main():
         if fld.get('slug') == 'farbe':
             for o in fld.get('validations', {}).get('options', []):
                 FARBEN[o['id']] = o['name']
+    SHOP_PRICES['de'] = shopify_prices('DE')
+    SHOP_PRICES['pl'] = shopify_prices('PL')
+    print('Shopify-Preise geladen: %d DE (EUR), %d PL (PLN)'
+          % (len(SHOP_PRICES['de']), len(SHOP_PRICES['pl'])))
     de = fetch_items()
     pl = fetch_items(LOCALE_PL)
     build(de, 'de', 'EUR', '', 'product-price',
@@ -260,6 +322,11 @@ def main():
     build(pl, 'pl', 'PLN', '/pl-pl', 'preis-pln',
           'Kessler PRO — Produkty (PL/PLN)',
           os.path.join(out, 'merchant-feed-pl.xml'), fallback=de_by_id)
+    print('Preisherkunft: %d aus Shopify, %d aus dem CMS (Rueckfallebene)'
+          % (PRICE_SRC['shopify'], PRICE_SRC['cms']))
+    if PRICE_SRC['cms']:
+        print('HINWEIS: %d Preise kamen nicht aus Shopify. Pruefen, ob der Slug '
+              'dem Shopify-Handle entspricht.' % PRICE_SRC['cms'], file=sys.stderr)
 
 
 if __name__ == '__main__':
