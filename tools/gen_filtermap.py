@@ -132,19 +132,66 @@ def parse_num(s):
 def fd(x): return x.get('fieldData', {})
 ROOM_ORDER = ['Büro','Werkstatt','Praxis','Gastro']
 
+# --- Preisquelle: Shopify (seit 29.08.2026) --------------------------------
+# Preise kommen direkt aus Shopify, nicht mehr aus den CMS-Feldern. Die frueher
+# hier stehende Umrechnung EUR = zl / 4,25 ist ersatzlos entfernt: DE- und
+# PL-Preise sind seit der Marktpreis-Runde eigenstaendig festgelegt und stehen
+# in keinem festen Wechselkursverhaeltnis mehr zueinander.
+# Faellt Shopify aus, greift der CMS-Wert als Rueckfallebene.
+SHOP = 'hyf2zr-7x.myshopify.com'
+SF_VERSION = '2024-10'
+SF_TOKEN = os.environ.get('SHOPIFY_STOREFRONT_TOKEN',
+                          '412ec64ed0b4546aa69f2ed2ee574441').strip()
+
+def shopify_prices(country):
+    """handle -> Preis (float) im Markt des angegebenen Landes."""
+    out, cursor = {}, None
+    q = ('query($n:Int!,$a:String) @inContext(country: %s) {'
+         '  products(first:$n, after:$a) {'
+         '    pageInfo { hasNextPage endCursor }'
+         '    edges { node { handle variants(first:1) { edges { node {'
+         '      price { amount } } } } } } } }' % country)
+    while True:
+        body = json.dumps({'query': q, 'variables': {'n': 250, 'a': cursor}}).encode()
+        d = None
+        for t in range(5):
+            req = urllib.request.Request(
+                'https://%s/api/%s/graphql.json' % (SHOP, SF_VERSION), data=body,
+                headers={'X-Shopify-Storefront-Access-Token': SF_TOKEN,
+                         'Content-Type': 'application/json'})
+            try:
+                d = json.load(urllib.request.urlopen(req, timeout=60)); break
+            except Exception:
+                time.sleep(2*(t+1))
+        if d is None or 'errors' in d:
+            print('WARNUNG: Shopify-Preise (%s) nicht abrufbar — CMS-Werte als '
+                  'Rueckfallebene' % country, file=sys.stderr)
+            return {}
+        conn = d['data']['products']
+        for e in conn['edges']:
+            n = e['node']; v = n['variants']['edges']
+            if v: out[n['handle']] = float(v[0]['node']['price']['amount'])
+        if not conn['pageInfo']['hasNextPage']: break
+        cursor = conn['pageInfo']['endCursor']
+    return out
+
+def money(v, cur):
+    return '{:.2f}'.format(v).replace('.', ',') + (' \u20ac' if cur == 'EUR' else ' z\u0142')
+
+SHOP_EUR = shopify_prices('DE')
+SHOP_PLN = shopify_prices('PL')
+print('Shopify-Preise: %d DE (EUR), %d PL (PLN)' % (len(SHOP_EUR), len(SHOP_PLN)),
+      file=sys.stderr)
+
 def parse_price(s):
     if not s: return None, None
     raw = s
-    isPLN = ('zł' in s) or ('z\u0142' in s)
     m = re.search(r'\d[\d.\s\u00a0\u202f]*,\d{2}', s)
     if not m: m = re.search(r'\d[\d.]*', s)
     if not m: return None, raw
     t = m.group(0).replace('\u00a0','').replace('\u202f','').replace(' ','').replace('.','').replace(',','.')
     try: v = float(t)
     except: return None, raw
-    if isPLN:
-        eur = v/4.25
-        v = int(eur)+0.90
     return round(v,2), raw
 
 products, skipped, search_products = [], [], []
@@ -165,7 +212,12 @@ for x in allit:
     raum_slugs = [RAUM_full[r]['slug'] for r in raume_ids if r in RAUM_full and RAUM_full[r].get('slug')]
     fam_farben = [VF.get(c) for c in (f.get('verfugbare-farben') or []) if VF.get(c)]
     farben = own_colors(f.get('product-title') or '')
-    price, priceRaw = parse_price(f.get('product-price'))
+    sp_eur = SHOP_EUR.get(slug)
+    sp_pln = SHOP_PLN.get(slug)
+    if sp_eur:
+        price, priceRaw = round(sp_eur, 2), money(sp_eur, 'EUR')
+    else:
+        price, priceRaw = parse_price(f.get('product-price'))
     img = f.get('product-main-image') or {}
     imgurl = img.get('url') if isinstance(img, dict) else None
 
@@ -173,9 +225,9 @@ for x in allit:
     t_de = f.get('product-title') or ''
     t_pl = fpl.get('product-title') or t_de
     t_en = fen.get('product-title') or t_de
-    pr_de = f.get('product-price')
-    pr_pl = fpl.get('product-price') or pr_de
-    pr_en = fen.get('product-price') or pr_de
+    pr_de = money(sp_eur, 'EUR') if sp_eur else f.get('product-price')
+    pr_pl = money(sp_pln, 'PLN') if sp_pln else (fpl.get('product-price') or pr_de)
+    pr_en = pr_de if sp_eur else (fen.get('product-price') or pr_de)
 
     products.append({
         'slug': slug,'pid': f.get('product-id'),'title': t_de,'img': imgurl,
@@ -196,7 +248,7 @@ for x in allit:
         'img': imgurl,'bs': 1 if f.get('header-bestseller') else 0,'rm': raum_slugs,'r': f.get('bewertung'),
     })
 
-out = {'source':'Webflow Data API /items/live (Products Feeds %s)'%PRODUCTS_CID,'count':len(products),'products':products}
+out = {'source':'Webflow Data API /items/live (Products Feeds %s) + Preise aus Shopify Storefront @inContext'%PRODUCTS_CID,'count':len(products),'products':products}
 os.makedirs(os.path.dirname(OUT) or '.', exist_ok=True)
 with open(OUT,'w') as fh:
     json.dump(out, fh, ensure_ascii=False, separators=(',',':'))
