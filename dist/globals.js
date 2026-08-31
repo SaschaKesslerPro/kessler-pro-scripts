@@ -584,9 +584,9 @@
   (function initCartItemLinks() {
     var INDEX = null, fetching = false;
     function selfBase() {
-      var s = document.querySelector('script[src*="/dist/globals.js"]');
-      return (s && s.src) ? s.src.replace(/globals\.js(?:\?.*)?$/, '') :
-        'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/';
+      // WICHTIG (31.08.2026): Datendateien immer von @main, nie aus dem
+      // gepinnten Skript-Commit. Siehe Kommentar in plp.js.
+      return 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/';
     }
     function norm(s) { return (s || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
     function lp() { return (location.pathname.match(/^\/(pl-pl|en)(?=\/|$)/) || [''])[0]; }
