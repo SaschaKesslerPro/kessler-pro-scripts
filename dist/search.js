@@ -632,8 +632,10 @@
     buildVocab();
   }
   function loadIndex(){
-    var __self=(document.querySelector('script[src*="/dist/search.js"]')||{}).src||'';
-    var __idx=__self?__self.replace(/search\.js(?:\?.*)?$/,'search-index.json'):CFG.INDEX_URL;
+    // WICHTIG (31.08.2026): Index immer von @main, nie aus dem gepinnten
+    // Skript-Commit. Siehe Kommentar in plp.js.
+    var __idx='https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/search-index.json'
+              +'?v='+Math.floor(Date.now()/3600000);
     var __key=CFG.CACHE_KEY+'::'+__idx; // versioniert per Commit-Pin — neuer Deploy = neuer Key
     try {
       var cached = sessionStorage.getItem(__key);
