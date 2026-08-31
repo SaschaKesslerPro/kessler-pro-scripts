@@ -589,8 +589,8 @@
   // --- Audit 9: product image lookup (slug -> img) from search-index.json ---
   var IMG_MAP=null, IMG_PROMISE=null;
   function selfBase(){
-    var s=document.querySelector('script[src*="/dist/wunschliste.js"]');
-    if(s&&s.src)return s.src.replace(/wunschliste\.js(?:\?.*)?$/,'');
+    // WICHTIG (31.08.2026): Datendateien immer von @main, nie aus dem
+    // gepinnten Skript-Commit. Siehe Kommentar in plp.js.
     return 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/';
   }
   function loadImgMap(){
