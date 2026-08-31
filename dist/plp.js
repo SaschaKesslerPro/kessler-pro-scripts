@@ -90,11 +90,16 @@
   'use strict';
 
   var DATA_URL = (function(){
-    // Commit-gepinnte URL aus eigener Script-src ableiten (immutable → voll cachebar);
-    // Fallback @main nur, wenn plp.js nicht via jsDelivr-Pin geladen wurde.
-    var self = (document.querySelector('script[src*="/dist/plp.js"]')||{}).src||'';
-    return self ? self.replace(/plp\.js(?:\?.*)?$/,'plp-filterdata.json')
-                : 'https://raw.githubusercontent.com/SaschaKesslerPro/kessler-pro-scripts/main/dist/plp-filterdata.json'+'?v='+Math.floor(Date.now()/3600000);
+    // WICHTIG (31.08.2026): Die Datendatei wird IMMER von @main geladen, niemals
+    // aus dem Commit, auf den das Skript gepinnt ist.
+    // Vorher wurde die URL aus der eigenen script-src abgeleitet ("plp.js" ->
+    // "plp-filterdata.json"). Das war als Cache-Gewinn gedacht, hat aber dazu
+    // gefuehrt, dass das Grid den Datenstand des gepinnten Skript-Commits zeigte.
+    // Nach der Preisumstellung standen dadurch im Grid noch die alten Preise,
+    // waehrend PDP und Warenkorb bereits die neuen zeigten.
+    // Skriptversionen bleiben gepinnt, die Daten folgen stuendlich.
+    return 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@main/dist/plp-filterdata.json'
+           + '?v=' + Math.floor(Date.now()/3600000);
   })();
 
   function injectStyle(css, id) {
