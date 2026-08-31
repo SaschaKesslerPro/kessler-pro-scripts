@@ -1,7 +1,8 @@
 name: PLP Filterdaten
 
-# Regeneriert dist/plp-filterdata.json + search-index.json + Merchant-Feeds
-# aus der Webflow Data API. Stuendlich + manuell ausloesbar.
+# Spiegelt zuerst die Shopify-Preise ins Webflow-CMS und regeneriert danach
+# dist/plp-filterdata.json + search-index.json + Merchant-Feeds.
+# Stuendlich + manuell ausloesbar.
 
 on:
   schedule:
@@ -26,6 +27,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      # Quelle der Wahrheit ist Shopify. Dieser Schritt schreibt product-price,
+      # schema-preis und preis-pln je Locale ins CMS. Muss VOR der Feed-
+      # Erzeugung laufen, sonst bauen die Feeds auf veralteten CMS-Werten auf.
+      - name: Shopify-Preise ins Webflow-CMS spiegeln
+        env:
+          WEBFLOW_TOKEN: ${{ secrets.WEBFLOW_TOKEN }}
+        run: python tools/sync_prices.py
 
       - name: Generate Merchant-Center-Feeds
         env:
