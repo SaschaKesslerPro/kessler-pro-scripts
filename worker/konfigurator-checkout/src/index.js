@@ -18,7 +18,7 @@
    Seit 02.09.2026 ausserdem die Zeichnungs-Pipeline (src/zeichnungen.js):
      POST /webhook/orders          Shopify orders/paid -> Zeichnungen (Kunde, Werkstatt PL, DXF),
                                    Ablage in KV, Tag + Notiz in Shopify, Mail an shop@ und Kunde
-     GET  /z/<token>/<datei>       Datei ausliefern (PDF/DXF/SVG)
+     GET  /z/<token>/<datei>       Datei ausliefern (PDF/DXF/SVG; …-zeichnung.png wird aus dem SVG gerendert)
      GET|POST /freigabe/<token>    Kunde bestaetigt die Masse oder meldet eine Aenderung
      POST /setup/webhooks?key=     Webhook-Abo in Shopify anlegen (key = SETUP_KEY)
      POST /nachlauf?key=&order=    Bestehende Bestellung (Nummer/Name) durch die Pipeline schicken
@@ -162,7 +162,7 @@ async function datei(env, token, name){
   const d = await dateiLaden(env, a, name);
   if(!d) return new Response('nicht gefunden', { status:404 });
   const ext = name.split('.').pop();
-  return new Response(d, { headers:{ 'Content-Type': TYP[ext] || 'application/octet-stream', 'Content-Disposition': `${ext==='dxf' ? 'attachment' : 'inline'}; filename="${name}"`, 'Cache-Control':'private, max-age=300', 'X-Robots-Tag':'noindex' } });
+  return new Response(d, { headers:{ 'Content-Type': TYP[ext] || 'application/octet-stream', 'Content-Disposition': `${ext==='dxf' ? 'attachment' : 'inline'}; filename="${name}"`, 'Cache-Control': ext === 'png' ? 'public, max-age=86400' : 'private, max-age=300', 'X-Robots-Tag':'noindex' } });
 }
 async function freigabe(req, env, token, url){
   const a = await auftragLaden(env, token);

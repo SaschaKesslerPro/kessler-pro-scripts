@@ -20,6 +20,7 @@ function kvMock(){
     _m: m,
     async get(k, typ){ const v = m.get(k); if (v == null) return null; if (typ === 'json') return JSON.parse(v); if (typ === 'arrayBuffer') return v instanceof Uint8Array ? v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength) : new TextEncoder().encode(v).buffer; return v; },
     async put(k, v, o){ m.set(k, v); meta.set(k, o); },
+    async delete(k){ m.delete(k); meta.delete(k); },
     async list({ prefix, cursor }){ return { keys: [...m.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })), list_complete: true }; },
   };
 }

@@ -81,7 +81,7 @@ export const TEXTE = {
   de: {
     kunde_betreff: (n) => `Deine Zeichnung zur Bestellung ${n} — bitte Maße prüfen`,
     kunde_hallo: (name) => `Hallo${name ? ' ' + name : ''},`,
-    kunde_intro: 'vielen Dank für deine Bestellung. Bevor wir mit der Fertigung beginnen, bekommst du von uns die technische Zeichnung deiner Platte zur Prüfung — sie hängt an dieser E-Mail und ist unten verlinkt.',
+    kunde_intro: 'vielen Dank für deine Bestellung. Bevor wir mit der Fertigung beginnen, bekommst du von uns die technische Zeichnung deiner Platte zur Prüfung — unten als Bild, als PDF im Anhang.',
     kunde_bitte: 'Bitte schau dir Maße, Kanten, Ausschnitte und Radien in Ruhe an.',
     kunde_ok: 'Maße bestätigen',
     kunde_aend: 'Änderung melden',
@@ -97,7 +97,7 @@ export const TEXTE = {
   pl: {
     kunde_betreff: (n) => `Rysunek do zamówienia ${n} — prosimy o sprawdzenie wymiarów`,
     kunde_hallo: (name) => `Dzień dobry${name ? ' ' + name : ''},`,
-    kunde_intro: 'dziękujemy za zamówienie. Zanim rozpoczniemy produkcję, przesyłamy rysunek techniczny blatu do sprawdzenia — jest w załączniku i pod linkiem poniżej.',
+    kunde_intro: 'dziękujemy za zamówienie. Zanim rozpoczniemy produkcję, przesyłamy rysunek techniczny blatu do sprawdzenia — poniżej jako obraz, w załączniku jako PDF.',
     kunde_bitte: 'Prosimy spokojnie sprawdzić wymiary, krawędzie, wycięcia i promienie.',
     kunde_ok: 'Potwierdzam wymiary',
     kunde_aend: 'Zgłaszam zmianę',
@@ -113,7 +113,7 @@ export const TEXTE = {
   en: {
     kunde_betreff: (n) => `Your drawing for order ${n} — please check the dimensions`,
     kunde_hallo: (name) => `Hello${name ? ' ' + name : ''},`,
-    kunde_intro: 'thank you for your order. Before we start production you receive the technical drawing of your top for review — attached to this e-mail and linked below.',
+    kunde_intro: 'thank you for your order. Before we start production you receive the technical drawing of your top for review — shown below, attached as a PDF.',
     kunde_bitte: 'Please take a moment to check dimensions, edges, cut-outs and radii.',
     kunde_ok: 'Confirm dimensions',
     kunde_aend: 'Request a change',
@@ -128,45 +128,115 @@ export const TEXTE = {
   },
 };
 
-const RAHMEN = (inhalt) => `<div style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1e1e1e;max-width:620px">
-<p style="font-size:20px;font-weight:700;margin:0 0 16px">KESSLER PRO</p>${inhalt}</div>`;
-const KNOPF = (url, text, dunkel) => `<a href="${url}" style="display:inline-block;padding:12px 20px;margin:4px 8px 4px 0;border-radius:6px;text-decoration:none;font-weight:600;${dunkel ? 'background:#1e1e1e;color:#fff' : 'background:#eee;color:#1e1e1e;border:1px solid #ccc'}">${text}</a>`;
+/* ── Layout „B · Ink block" (Designrunde 02.09.2026) ─────────────────────────
+   600 px, Tabellen + Inline-Stile, Onest mit Systemfallback. Dunkler Kopf
+   #17191B mit weissem Logo, Brief auf Weiss, Fuss mit Rechtszeile. Farben aus
+   DESIGN.md; auf Dunkel: Linie #3A3D41, Text #CFCBC3. */
+const LOGO_WEISS  = 'https://cdn.prod.website-files.com/67fea16d9758f16a33bef722/6a9881f22718bfe956c27554_kp-logo-email-white.png';
+const SCHRIFT = "Onest,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+const RECHT = 'Kessler-Polska Sp. z o.o. · ul. Okrężna 14B · 57-100 Strzelin · Poland · +48 74 810 24 80 · <a href="https://kessler-pro.com" style="color:#6D6A63">kessler-pro.com</a>';
+const FUSS = {
+  de: 'Antworte einfach auf diese E-Mail — sie erreicht uns unter shop@kessler-pro.com.',
+  pl: 'Wystarczy odpowiedzieć na tę wiadomość — trafi do nas na shop@kessler-pro.com.',
+  en: 'Reply to this e-mail — it reaches us at shop@kessler-pro.com.',
+};
+const KOPF = {
+  de: { zeichnung:'Technische Zeichnung', bestellung:'Bestellung', intern:'Intern' },
+  pl: { zeichnung:'Rysunek techniczny',   bestellung:'Zamówienie', intern:'Wewnętrznie' },
+  en: { zeichnung:'Technical drawing',    bestellung:'Order',      intern:'Internal' },
+};
+
+/** Ganze Mail: Kopf (dunkel) + Inhalt (weiss) + Fuss. `kopf` = Zeile unter dem Logo. */
+function RAHMEN(inhalt, opt = {}){
+  const spr = opt.sprache || 'de';
+  const K = KOPF[spr] || KOPF.de;
+  const zeile = opt.kopf || `${K.zeichnung} &nbsp;·&nbsp; ${K.bestellung} <span style="color:#FFFFFF;font-weight:500">${esc(opt.nummer||'')}</span>`;
+  return `<!doctype html><html lang="${spr}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(opt.titel||'Kessler PRO')}</title></head>
+<body style="margin:0;padding:0;background:#F2F0EB;-webkit-text-size-adjust:100%">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2F0EB"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;border-collapse:collapse;font-family:${SCHRIFT};color:#1E1E1E">
+  <tr><td align="center" style="background:#17191B;padding:32px 32px 24px;border-radius:8px 8px 0 0">
+    <img src="${LOGO_WEISS}" width="150" height="50" alt="Kessler PRO" style="display:block;width:150px;height:50px;border:0;margin:0 auto 20px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #3A3D41;padding-top:12px;font-size:14px;line-height:1.5;color:#CFCBC3;text-align:center">${zeile}</td></tr></table>
+  </td></tr>
+  <tr><td style="background:#FFFFFF;padding:40px 32px 8px;font-size:16px;line-height:1.5">${inhalt}</td></tr>
+  <tr><td style="background:#FFFFFF;padding:24px 32px 32px;border-radius:0 0 8px 8px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #E5E5E5;padding-top:16px;font-size:12px;line-height:1.6;color:#6D6A63">
+      ${opt.fuss === false ? '' : (FUSS[spr] || FUSS.de) + '<br>'}${RECHT}
+    </td></tr></table>
+  </td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+const H1 = (t) => `<p style="margin:0 0 8px;font-size:26px;line-height:1.05;letter-spacing:-.02em;font-weight:700">${t}</p>`;
+const P  = (t, farbe = '#4A4A46', rand = '0 0 24px') => `<p style="margin:${rand};font-size:16px;line-height:1.5;color:${farbe}">${t}</p>`;
+const KLEIN = (t, rand = '16px 0 0') => `<p style="margin:${rand};font-size:14px;line-height:1.5;color:#6D6A63">${t}</p>`;
+const KNOPF = (url, text, dunkel) => dunkel
+  ? `<a href="${url}" style="display:inline-block;background:#1E1E1E;color:#FFFFFF;text-decoration:none;font-size:16px;font-weight:500;line-height:48px;padding:0 24px;border-radius:8px">${text}</a>`
+  : `<a href="${url}" style="display:inline-block;border:1px solid #1E1E1E;color:#1E1E1E;text-decoration:none;font-size:16px;font-weight:500;line-height:46px;padding:0 24px;border-radius:8px">${text}</a>`;
+/* Knoepfe untereinander: nebeneinander passen zwei nicht in 320 px Handybreite. */
+const KNOEPFE = (a, b) => `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="padding:0 0 8px">${a}</td></tr>${b ? `<tr><td style="padding:0 0 8px">${b}</td></tr>` : ''}</table>`;
+const ZEILE = (k, v, letzte) => `<tr><td style="padding:8px 12px 8px 0;border-top:1px solid #E5E5E5;${letzte?'border-bottom:1px solid #E5E5E5;':''}color:#6D6A63;width:34%;vertical-align:top">${k}</td><td style="padding:8px 0;border-top:1px solid #E5E5E5;${letzte?'border-bottom:1px solid #E5E5E5;':''}vertical-align:top">${v}</td></tr>`;
+const TABELLE = (zeilen) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 24px;font-size:14px;line-height:1.5">${zeilen}</table>`;
+const BILD = (urlBild, urlPdf, alt) => `<a href="${urlPdf}" style="display:block;border:1px solid #D8D4CC;border-radius:8px;overflow:hidden;background:#FFFFFF"><img src="${urlBild}" width="534" alt="${esc(alt)}" style="display:block;width:100%;height:auto;border:0"></a>`;
+const bildName = (dateien) => dateien.png || String(dateien.svg||'').replace(/\.svg$/, '.png');
+const vorname = (auftrag) => esc(String(auftrag.kunde||'').split(' ')[0] || '');
+
+const TITEL = {
+  de: { kunde:'Bitte prüfe deine Zeichnung.', zeichnung:'Zeichnung', pdf:'PDF öffnen', frei:'Maße bestätigt — danke.', aend:'Änderungswunsch erhalten.', hinweis:'Zeichnung prüfen und freigeben' },
+  pl: { kunde:'Prosimy o sprawdzenie rysunku.', zeichnung:'Rysunek', pdf:'Otwórz PDF', frei:'Wymiary potwierdzone — dziękujemy.', aend:'Otrzymaliśmy prośbę o zmianę.', hinweis:'Sprawdź i zatwierdź rysunek' },
+  en: { kunde:'Please check your drawing.', zeichnung:'Drawing', pdf:'Open PDF', frei:'Dimensions confirmed — thank you.', aend:'Change request received.', hinweis:'Check and release the drawing' },
+};
 
 /** Mail an den Kunden mit Zeichnung, Bestaetigen/Aendern-Links. */
 export function kundenMail(auftrag, spr, urls){
-  const T = TEXTE[spr] || TEXTE.de;
+  const T = TEXTE[spr] || TEXTE.de, U = TITEL[spr] || TITEL.de;
   const bis = fristText(auftrag.frist, spr);
-  const liste = auftrag.positionen.map(p => `<li>${T.pos} ${p.idx}: ${esc(p.titel)} — <a href="${urls.datei(p.dateien.kunde_pdf)}">${T.zeichnung}</a></li>`).join('');
-  const html = RAHMEN(`<p>${T.kunde_hallo(esc(auftrag.kunde.split(' ')[0]||''))}</p><p>${T.kunde_intro}</p><ul>${liste}</ul><p>${T.kunde_bitte}</p>
-<p>${KNOPF(urls.freigabe, T.kunde_ok, true)} ${KNOPF(urls.freigabe + '?a=aenderung', T.kunde_aend, false)}</p>
-<p style="color:#555;font-size:13px">${T.kunde_frist(bis)}</p><p>${T.kunde_gruss}</p>`);
+  const nummerKurz = String(auftrag.name||'').replace(/^[^0-9]*/, '');
+  const positionen = auftrag.positionen.map(p => {
+    const pdf = urls.datei(p.dateien.kunde_pdf);
+    return BILD(urls.datei(bildName(p.dateien)), pdf, `${U.zeichnung} ${T.pos} ${p.idx} · ${auftrag.name}`)
+      + TABELLE(ZEILE(`${T.pos} ${p.idx}`, esc(p.titel)) + ZEILE(U.zeichnung, `Z-${esc(nummerKurz)}-${p.idx} · V1 &nbsp;·&nbsp; <a href="${pdf}" style="color:#1E1E1E">${U.pdf}</a>`, true));
+  }).join('');
+  const html = RAHMEN(
+    H1(U.kunde)
+    + P(`${T.kunde_hallo(vorname(auftrag))} ${T.kunde_intro} ${T.kunde_bitte}`)
+    + positionen
+    + KNOEPFE(KNOPF(urls.freigabe, T.kunde_ok, true), KNOPF(urls.freigabe + '?a=aenderung', T.kunde_aend, false))
+    + KLEIN(T.kunde_frist(bis))
+    + P(T.kunde_gruss, '#1E1E1E', '24px 0 0'),
+    { sprache: spr, nummer: auftrag.name, titel: `${U.hinweis} · ${auftrag.name}` });
   return { betreff: T.kunde_betreff(auftrag.name), html };
 }
 
 /** Interne Mail an shop@ mit allen Dateien und Links. */
 export function internMail(auftrag, urls, was){
   const st = { neu: 'Neue Konfigurator-Bestellung — Zeichnungen erzeugt', freigegeben: 'Kunde hat die Maße BESTÄTIGT', aenderung: 'Kunde meldet eine ÄNDERUNG — Fertigung stoppen', auto: 'Auto-Freigabe nach 72 h ohne Antwort' }[was] || was;
-  const liste = auftrag.positionen.map(p => `<li><b>Position ${p.idx}</b>: ${esc(p.titel)}<br>
-<a href="${urls.datei(p.dateien.kunde_pdf)}">Kundenzeichnung (PDF)</a> · <a href="${urls.datei(p.dateien.werkstatt_pdf)}">Werkstattzeichnung PL (PDF)</a> · <a href="${urls.datei(p.dateien.dxf)}">DXF für die Maschine</a> · <a href="${urls.datei(p.dateien.svg)}">SVG</a></li>`).join('');
-  const html = RAHMEN(`<p><b>${st}</b></p>
-<p>Bestellung <b>${esc(auftrag.name)}</b> · ${esc(auftrag.kunde)} · ${esc(auftrag.email)} · Sprache ${auftrag.sprache}${auftrag.test ? ' · <b>TESTBESTELLUNG</b>' : ''}</p>
-<ul>${liste}</ul>
-<p>Status: <b>${esc(auftrag.status)}</b>${auftrag.status==='offen' ? ` · Frist ${fristText(auftrag.frist,'de')}` : ''}${auftrag.freigabe ? ` · ${esc(auftrag.freigabe.name||'')} ${esc(auftrag.freigabe.zeit||'')}` : ''}</p>
-${auftrag.aenderung ? `<p><b>Änderungswunsch des Kunden:</b><br>${esc(auftrag.aenderung.text).replace(/\n/g,'<br>')}</p>` : ''}
-<p>Freigabe-Seite des Kunden: <a href="${urls.freigabe}">${urls.freigabe}</a><br>Bestellung in Shopify: <a href="${urls.shopify}">${urls.shopify}</a></p>
-<p style="color:#777;font-size:12px">Alle Dateien hängen an. Die Werkstattzeichnung trägt den Freigabestand; nach Bestätigung kommt sie noch einmal aktualisiert.</p>`);
+  const zeilen = auftrag.positionen.map(p => ZEILE(`Position ${p.idx}`, `${esc(p.titel)}<br><a href="${urls.datei(p.dateien.kunde_pdf)}" style="color:#1E1E1E">Kundenzeichnung (PDF)</a> · <a href="${urls.datei(p.dateien.werkstatt_pdf)}" style="color:#1E1E1E">Werkstatt PL (PDF)</a> · <a href="${urls.datei(p.dateien.dxf)}" style="color:#1E1E1E">DXF</a> · <a href="${urls.datei(p.dateien.svg)}" style="color:#1E1E1E">SVG</a>`)).join('')
+    + ZEILE('Status', `<b>${esc(auftrag.status)}</b>${auftrag.status==='offen' ? ` · Frist ${fristText(auftrag.frist,'de')}` : ''}${auftrag.freigabe ? ` · ${esc(auftrag.freigabe.name||'')} ${esc(auftrag.freigabe.zeit||'')}` : ''}`, true);
+  const html = RAHMEN(
+    H1(st)
+    + P(`Bestellung <b>${esc(auftrag.name)}</b> · ${esc(auftrag.kunde)} · ${esc(auftrag.email)} · Sprache ${auftrag.sprache}${auftrag.test ? ' · <b>TESTBESTELLUNG</b>' : ''}`, '#1E1E1E', '0')
+    + TABELLE(zeilen)
+    + (auftrag.aenderung ? P(`<b>Änderungswunsch des Kunden:</b><br>${esc(auftrag.aenderung.text).replace(/\n/g,'<br>')}`, '#1E1E1E') : '')
+    + KNOEPFE(KNOPF(urls.shopify, 'Bestellung in Shopify', true), KNOPF(urls.freigabe, 'Freigabe-Seite des Kunden', false))
+    + KLEIN('Alle Dateien hängen an. Die Werkstattzeichnung trägt den Freigabestand; nach Bestätigung kommt sie noch einmal aktualisiert.'),
+    { sprache:'de', kopf: `Intern &nbsp;·&nbsp; ${was === 'neu' ? 'Zeichnungen' : was === 'aenderung' ? 'Änderung' : 'Freigabe'} &nbsp;·&nbsp; <span style="color:#FFFFFF;font-weight:500">${esc(auftrag.name)}</span>`, titel: `Intern · ${auftrag.name}`, fuss:false });
   return { betreff: `${was==='neu' ? 'Zeichnungen' : was==='aenderung' ? 'ÄNDERUNG' : 'Freigabe'} ${auftrag.name} · ${auftrag.kunde} · ${auftrag.positionen.map(p=>p.kurz).join(' | ')}`, html };
 }
 
 export function freigabeMail(auftrag, spr, urls){
-  const T = TEXTE[spr] || TEXTE.de;
-  const html = RAHMEN(`<p>${T.kunde_hallo(esc(auftrag.kunde.split(' ')[0]||''))}</p><p>${T.frei_text(auftrag.freigabe ? auftrag.freigabe.zeit : '')}</p><p>${T.kunde_gruss}</p>`);
+  const T = TEXTE[spr] || TEXTE.de, U = TITEL[spr] || TITEL.de;
+  const html = RAHMEN(H1(U.frei) + P(`${T.kunde_hallo(vorname(auftrag))} ${T.frei_text(auftrag.freigabe ? auftrag.freigabe.zeit : '')}`) + P(T.kunde_gruss, '#1E1E1E', '0'),
+    { sprache: spr, nummer: auftrag.name, titel: `${U.frei} · ${auftrag.name}` });
   return { betreff: T.frei_betreff(auftrag.name), html };
 }
 export function aenderungMail(auftrag, spr){
-  const T = TEXTE[spr] || TEXTE.de;
-  const html = RAHMEN(`<p>${T.kunde_hallo(esc(auftrag.kunde.split(' ')[0]||''))}</p><p>${T.aend_text}</p>
-${auftrag.aenderung && auftrag.aenderung.text ? `<p><b>${T.aend_dein}</b><br>${esc(auftrag.aenderung.text).replace(/\n/g,'<br>')}</p>` : ''}<p>${T.kunde_gruss}</p>`);
+  const T = TEXTE[spr] || TEXTE.de, U = TITEL[spr] || TITEL.de;
+  const html = RAHMEN(H1(U.aend) + P(`${T.kunde_hallo(vorname(auftrag))} ${T.aend_text}`)
+    + (auftrag.aenderung && auftrag.aenderung.text ? P(`<b>${T.aend_dein}</b><br>${esc(auftrag.aenderung.text).replace(/\n/g,'<br>')}`, '#1E1E1E') : '')
+    + P(T.kunde_gruss, '#1E1E1E', '0'),
+    { sprache: spr, nummer: auftrag.name, titel: `${U.aend} · ${auftrag.name}` });
   return { betreff: T.aend_betreff(auftrag.name), html };
 }
 

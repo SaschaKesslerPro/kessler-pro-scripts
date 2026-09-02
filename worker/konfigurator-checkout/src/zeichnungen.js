@@ -85,6 +85,7 @@ export async function dateienFuerPosition(best, pos, idx, n, spr, freigabe){
   const stamm = `${String(best.name||nummerAus(best)).replace(/[^A-Za-z0-9-]/g,'')}-P${idx}`;
   const dateien = {
     kunde_pdf: `${stamm}-zeichnung.pdf`, werkstatt_pdf: `${stamm}-werkstatt.pdf`, dxf: `${stamm}-teil.dxf`, svg: `${stamm}-zeichnung.svg`,
+    png: `${stamm}-zeichnung.png`,   /* wird erst auf Abruf aus dem SVG gerendert (pngLaden) */
   };
   const inhalte = {
     [dateien.kunde_pdf]: pdfKunde, [dateien.werkstatt_pdf]: pdfWerk,
@@ -99,7 +100,7 @@ function kurzTitel(S, k){
   return `${S.mat} ${S.thick} ${m}`;
 }
 
-export const TYP = { pdf:'application/pdf', dxf:'application/dxf', svg:'image/svg+xml' };
+export const TYP = { pdf:'application/pdf', dxf:'application/dxf', svg:'image/svg+xml', png:'image/png' };
 
 /** Bestellung komplett verarbeiten. Idempotent: ein zweiter Aufruf (Webhook-
     Wiederholung) liefert den vorhandenen Auftrag, ausser opt.erneut. */
@@ -132,7 +133,10 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
     if(!e) continue;
     erzeugt.push(e);
     auftrag.positionen.push({ idx, lineItemId: e.lineItemId, titel: e.titel, kurz: e.kurz, dateien: e.dateien });
-    if(KV) for(const [name, daten] of Object.entries(e.inhalte)) await KV.put(dateiKey(nummer, name), daten, { metadata:{ typ: name.split('.').pop() } });
+    if(KV){
+      for(const [name, daten] of Object.entries(e.inhalte)) await KV.put(dateiKey(nummer, name), daten, { metadata:{ typ: name.split('.').pop() } });
+      await KV.delete(dateiKey(nummer, e.dateien.png));   /* altes Bild (erneut) verwerfen */
+    }
   }
   if(!auftrag.positionen.length) return { uebersprungen:true, grund:'keine Zeichnung erzeugbar', nummer, protokoll: auftrag.protokoll };
   if(KV){ await KV.put(auftragKey(nummer), JSON.stringify(auftrag)); await KV.put(`token:${auftrag.token}`, nummer); }
@@ -168,8 +172,25 @@ export async function auftragLaden(env, nummerOderToken){
   return KV.get(auftragKey(nummer), 'json');
 }
 export async function dateiLaden(env, auftrag, name){
+  if(/\.png$/.test(name)) return pngLaden(env, auftrag, name);
   if(!auftrag.positionen.some(p => Object.values(p.dateien).includes(name))) return null;
   return env.ZEICHNUNGEN.get(dateiKey(auftrag.nummer, name), 'arrayBuffer');
+}
+/** Zeichnungsbild fuer die Mail: aus dem gespeicherten SVG gerendert, danach in KV
+    zwischengespeichert. Der Name leitet sich vom SVG ab (…-zeichnung.png), damit
+    auch aeltere Auftraege ohne png-Eintrag ein Bild bekommen. */
+export async function pngLaden(env, auftrag, name){
+  const svgName = name.replace(/\.png$/, '.svg');
+  if(!auftrag.positionen.some(p => p.dateien.svg === svgName)) return null;
+  const KV = env.ZEICHNUNGEN;
+  const alt = await KV.get(dateiKey(auftrag.nummer, name), 'arrayBuffer');
+  if(alt) return alt;
+  const svg = await KV.get(dateiKey(auftrag.nummer, svgName), 'text');
+  if(!svg) return null;
+  const { svgZuPng } = await import('./bild.js');
+  const png = await svgZuPng(svg, await schriften(), +(env.BILD_BREITE || 1200));
+  await KV.put(dateiKey(auftrag.nummer, name), png, { metadata:{ typ:'png' } });
+  return png;
 }
 
 /** Freigabe durch den Kunden ('ok' | 'aenderung') oder automatisch ('auto'). */
@@ -196,7 +217,10 @@ export async function freigabeSetzen(env, auftrag, aktion, daten = {}){
         const e = await dateienFuerPosition(best, pos, idx, mitKonfig.length, spr, auftrag.freigabe);
         if(!e) continue;
         erzeugt.push(e);
-        if(KV) for(const [name, d] of Object.entries(e.inhalte)) await KV.put(dateiKey(auftrag.nummer, name), d, { metadata:{ typ: name.split('.').pop() } });
+        if(KV){
+          for(const [name, d] of Object.entries(e.inhalte)) await KV.put(dateiKey(auftrag.nummer, name), d, { metadata:{ typ: name.split('.').pop() } });
+          await KV.delete(dateiKey(auftrag.nummer, e.dateien.png));   /* Bild traegt den Freigabestand -> neu rendern */
+        }
       }
       auftrag.protokoll.push(`Zeichnungen mit Freigabestand neu erzeugt (${aktion})`);
     }catch(err){ auftrag.protokoll.push(`Neu-Erzeugung fehlgeschlagen: ${err.message}`); }
