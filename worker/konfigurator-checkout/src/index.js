@@ -223,8 +223,10 @@ function attributeFuer(S, K, c, body, waehrung){
   const hit = K.shopHit();
   if(hit) add('_kfg_lager_sku', hit[2]);
   add('_kfg_preis', `${c.total.toFixed(2)} ${waehrung} = Platte ${c.basis.toFixed(2)} + Kante ${c.kante.toFixed(2)} + Ecken ${c.ecken.toFixed(2)} + Ausklinkung ${c.lschnitt.toFixed(2)} + Bearbeitung ${c.extras.toFixed(2)}`);
-  add('_kfg_konfig', JSON.stringify({ mat:S.mat, dekor:S.dekor, thick:S.thick, form:S.form, L:S.L, B:S.B, D:S.D, lf:S.lf, edges:S.edges, cornerR:S.cornerR, lfR:S.lfR,
-    absColor:S.absColor, lack:S.extras.lack, bohr:S.extras.bohr, massband:S.massband, massbandNull:S.massbandNull, maschineMass:S.maschineMass, cuts:S.cuts }).slice(0,250));
+  /* Rohdaten in Stuecken — Shopify begrenzt Attributwerte auf 255 Zeichen */
+  const roh = JSON.stringify({ mat:S.mat, dekor:S.dekor, thick:S.thick, form:S.form, L:S.L, B:S.B, D:S.D, lf:S.lf, edges:S.edges, cornerR:S.cornerR, lfR:S.lfR,
+    absColor:S.absColor, lack:S.extras.lack, bohr:S.extras.bohr, massband:S.massband, massbandNull:S.massbandNull, maschineMass:S.maschineMass, cuts:S.cuts });
+  for(let i=0, n=1; i<roh.length && n<=8; i+=240, n++) add(`_kfg_konfig_${n}`, roh.slice(i, i+240));
   return a;
 }
 
