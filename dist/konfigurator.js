@@ -1,13 +1,15 @@
-/*! Kessler PRO — Tischplatten-Konfigurator  v1.16.2
+/*! Kessler PRO — Tischplatten-Konfigurator  v1.17.0
  *  Rendert die komplette Konfigurator-UI in jeden Container mit [data-kfg-root].
- *  Daten: kfg-produktmatrix.json (Lagerartikel) · Bilder: assets/kfg/ — beide via jsDelivr.
+ *  Daten: kfg-produktmatrix.json (Lagerartikel, EUR + PLN) · kfg-preiskurven.json
+ *  (Sondermass-Kurven je Material/Staerke/Form/Dekorstufe) · Bilder: assets/kfg/ —
+ *  alles via jsDelivr aus demselben Commit.
  *  Public API: window.KFG = { version, getConfig(), setConfig(), reload(), _debug() }
  */
 (function(){
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.16.2';
+  var VERSION = '1.17.0';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -28,6 +30,11 @@
      Vorher hing die Kette an der DCL der ganzen Seite: gemessen 0,9–1,8 s
      verlorene Zeit bis „Tool lebt“ (Audit 29.07., Fix 4). null = Anfrage-Flow. */
   var MATRIX_P = fetch(BASE + '/dist/data/kfg-produktmatrix.json', {cache:'default'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .catch(function(){ return null; });
+  /* Sondermass-Kurven (v1.17.0): ohne sie gibt es fuer Nicht-Lagergroessen
+     keinen Preis, nur den Anfrage-Flow. */
+  var KURVEN_P = fetch(BASE + '/dist/data/kfg-preiskurven.json', {cache:'default'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .catch(function(){ return null; });
 
@@ -81,42 +88,46 @@
     var base = root.getAttribute('data-kfg-base') || BASE;
     window.__KFG_BASE = base;
     var done = false;
-    setTimeout(function(){ if(!done){ done = true; start({}); } }, 4000);
-    /* Matrix kommt aus dem beim Parsen gestarteten MATRIX_P — nur ein
+    setTimeout(function(){ if(!done){ done = true; start({}, null); } }, 4000);
+    /* Matrix und Kurven kommen aus den beim Parsen gestarteten Fetches — nur ein
        data-kfg-base-Override (lokaler Spiegel) holt sie selbst (Audit, Fix 4). */
-    var mp = (base === BASE) ? MATRIX_P
-      : fetch(base + '/dist/data/kfg-produktmatrix.json', {cache:'default'})
-          .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
-    mp.then(function(d){
-        var out = {};
+    var lade = function(name){ return fetch(base + '/dist/data/' + name, {cache:'default'})
+          .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); };
+    var mp = (base === BASE) ? MATRIX_P : lade('kfg-produktmatrix.json');
+    var kp = (base === BASE) ? KURVEN_P : lade('kfg-preiskurven.json');
+    Promise.all([mp, kp]).then(function(res){
+        var d = res[0], kv = res[1], out = {};
         if (d && d.produkte) {
           for (var k in d.produkte) {
             var v = d.produkte[k];
-            if (v.eur) out[k] = [Math.round(v.eur*100)/100, String(v.variantId).split('/').pop(), v.sku];
+            /* [EUR, VariantId, SKU, PLN] — PLN seit v1.17.0 fuer die polnische Seite */
+            if (v.eur) out[k] = [Math.round(v.eur*100)/100, String(v.variantId||'').split('/').pop(), v.sku,
+                                 v.pln ? Math.round(v.pln*100)/100 : null];
           }
         }
-        if(!done){ done = true; start(out); }
+        if(!done){ done = true; start(out, kv && kv.kurven ? kv.kurven : null); }
       })
   }
 
-  function start(shopData){
-    KFG_APP(shopData);
+  function start(shopData, kurven){
+    KFG_APP(shopData, kurven);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
 /* ═══════════════════════ CSS ═══════════════════════ */
-var KFG_CSS = "\n  /* Guertel zur Webflow-nativen Reservierung auf tnm_kfg-mount: haelt die\n     Hoehe, falls der Site-Style je verloren geht. Gemessen 29.07.: Desktop\n     1278 px, <=991 px rund 2410 px. */\n  [data-kfg-root]{min-height:1240px}\n  @media(max-width:991px){[data-kfg-root]{min-height:2360px}}\n  /* Taps sofort und tolerant: kein Doppeltipp-Zoom-Delay, sichtbares\n     Druck-Feedback, und die Spalte gleitet auf Mobil nicht mehr (Bewegung\n     unter dem Finger liess iOS Taps als Wisch verwerfen). */\n  [data-kfg-root] button,[data-kfg-root] .kfg_chip,[data-kfg-root] .kfg_dekor,\n  [data-kfg-root] .kfg_mat,[data-kfg-root] .kfg_step-head,[data-kfg-root] label,\n  [data-kfg-root] .kfg_quick-chip,[data-kfg-root] summary{touch-action:manipulation}\n  [data-kfg-root] .kfg_dekor:active,[data-kfg-root] .kfg_mat:active,\n  [data-kfg-root] .kfg_chip:active,[data-kfg-root] .kfg_quick-chip:active{border-color:var(--ink)}\n  @media(max-width:979px){[data-kfg-root] .kfg_stickycol{transition:none}}\n  [data-kfg-root]{\n    --ink:#1E1E1E; --deep:#0A0A0A; --card:#F2F0EB; --alt:#FAFAFA; --hair:#E5E5E5;\n    --ok:#1c7a3d; --ok-bg:#e8f4ec; --warn:#9a6b12; --warn-bg:#faf3e2;\n    --s-3xs:4px; --s-2xs:8px; --s-xs:12px; --s-s:16px; --s-m:24px; --s-l:32px; --s-xl:48px; --s-2xl:64px;\n    --r:8px;\n  }\n  [data-kfg-root] *{box-sizing:border-box;margin:0;padding:0}\n  [data-kfg-root] button, [data-kfg-root] select, [data-kfg-root] input, [data-kfg-root] textarea{font-family:inherit}\n  \n\n  \n  \n  \n  \n  \n  \n  \n  \n  @media(min-width:768px){}\n\n  [data-kfg-root] .kfg_hero{max-width:1280px;margin-inline:auto;padding:var(--s-l) clamp(16px,4vw,80px) var(--s-s)}\n  [data-kfg-root] .kfg_hero h1{font-size:clamp(24px,3.4vw,36px);font-weight:500;letter-spacing:-.01em}\n  [data-kfg-root] .kfg_hero p{margin-top:var(--s-2xs);color:#555;font-size:15px;max-width:680px}\n  [data-kfg-root] .kfg_hero .anchor{color:var(--ink);font-weight:600}\n\n  [data-kfg-root] .kfg_layout{max-width:1280px;margin-inline:auto;padding:var(--s-s) clamp(16px,4vw,80px) 140px;\n    display:grid;grid-template-columns:1fr;gap:var(--s-m)}\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_layout{grid-template-columns:55fr 45fr;gap:var(--s-xl);padding-bottom:var(--s-2xl)}\n  }\n\n  /* \u2500\u2500 Preview \u2500\u2500 */\n  [data-kfg-root] .kfg_preview{background:var(--card);border-radius:16px;padding:var(--s-s);position:relative}\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_preview{padding:var(--s-m)}\n    /* Eigene Compositing-Ebene: die grosse Draufsicht muss beim Scrollen\n       sonst in jedem Frame neu gezeichnet werden, das ruckelt sichtbar.\n       (Im Block liegen keine fixed-Elemente, die Ebene stoert also nichts.) */\n    [data-kfg-root] .kfg_stickycol{position:sticky;top:84px;align-self:start;will-change:transform;\n      transition:top .16s ease}\n  }\n  [data-kfg-root] .kfg_preview-badge{position:absolute;top:var(--s-s);left:var(--s-s);z-index:2;display:inline-flex;align-items:center;gap:6px;\n    font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--r);background:var(--ok-bg);color:var(--ok)}\n  [data-kfg-root] .kfg_preview-badge.is-sonder{background:var(--warn-bg);color:var(--warn)}\n  [data-kfg-root] .kfg_preview-badge .dot{width:7px;height:7px;border-radius:50%;background:currentColor}\n  [data-kfg-root] .kfg_viewtoggle{position:absolute;top:var(--s-s);right:var(--s-s);z-index:2;display:flex;gap:2px;background:#fff;\n    border:1px solid var(--hair);border-radius:var(--r);padding:2px}\n  [data-kfg-root] .kfg_viewtoggle button{border:0;background:transparent;font-size:12px;font-weight:500;padding:6px 14px;\n    cursor:pointer;border-radius:6px;min-height:32px;color:#5F5F5F}\n  [data-kfg-root] .kfg_viewtoggle button.is-active{background:var(--ink);color:#fff}\n  [data-kfg-root] .kfg_preview-stage{width:100%;aspect-ratio:10/7.4;display:block}\n  [data-kfg-root] #stage3d{width:100%;aspect-ratio:10/7.4;display:none;border-radius:var(--r);cursor:grab;touch-action:none}\n  [data-kfg-root] .kfg_preview-hint{text-align:center;font-size:12px;color:#8a877f;padding-top:var(--s-2xs)}\n  [data-kfg-root] .ic-svg{width:14px;height:14px;flex:0 0 auto}\n  [data-kfg-root] .kfg_edge{cursor:pointer;transition:opacity .15s}\n  [data-kfg-root] .kfg_edge:hover{opacity:.75}\n  [data-kfg-root] .dim-line{stroke:#9b978c;stroke-width:1}\n  [data-kfg-root] .dim-text{font-family:'Onest',sans-serif;font-weight:600;font-size:var(--dim-fs,15px);fill:var(--ink);letter-spacing:.02em;\n    paint-order:stroke;stroke:var(--card);stroke-width:var(--dim-halo,3px);stroke-linejoin:round}\n\n  /* Detail */\n  /* Aufklapp-Zeile in JEDER Breite sichtbar: das Vorschaubild soll sich\n     jederzeit wegklicken lassen, so wie auf Mobil (Wunsch Sascha, 27.07.). */\n  /* Bearbeitungsliste: je Eintrag eine Zeile mit mm-Feldern */\n  /* Aufklappbare Schritte: zugeklappt bleibt die Kopfzeile mit Nummer,\n     Titel und der Zusammenfassung stehen. */\n  /* Kopfleiste ausblenden, solange im Konfigurator nach unten gescrollt\n     wird. Die Klasse sitzt auf den Kopfleisten selbst, nicht im Root —\n     deshalb ohne [data-kfg-root] davor. */\n  .kfg-headaway{transform:translateY(-100%) !important;transition:transform .22s ease !important}\n  [data-kfg-root] .kfg_step-head{cursor:pointer;-webkit-user-select:none;user-select:none}\n  [data-kfg-root] .kfg_step-head:hover .kfg_step-title{color:#000}\n  [data-kfg-root] .kfg_chev,\n  [data-kfg-root] .kfg_detail summary::after,\n  [data-kfg-root] .kfg_breakdown summary::after,\n  [data-kfg-root] .kfg_step-chev{content:'';flex:0 0 auto;display:inline-block;\n    width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;\n    transform:rotate(45deg);transform-origin:60% 60%;margin-left:10px;margin-bottom:3px;\n    opacity:.55;transition:transform .2s ease,opacity .2s ease}\n  [data-kfg-root] .kfg_step-head:hover .kfg_step-chev,\n  [data-kfg-root] .kfg_detail summary:hover::after{opacity:1}\n  [data-kfg-root] .kfg_step.is-open .kfg_step-chev,\n  [data-kfg-root] .kfg_detail[open] summary::after,\n  [data-kfg-root] .kfg_breakdown[open] summary::after{transform:rotate(225deg);margin-bottom:-2px}\n  [data-kfg-root] .kfg_step-body{display:none}\n  [data-kfg-root] .kfg_step.is-open .kfg_step-body{display:block}\n  [data-kfg-root] .kfg_step:not(.is-open) .kfg_step-head{margin-bottom:0}\n  /* Zugeklappt kompakter, sonst steht viel Luft um eine einzige Zeile */\n  [data-kfg-root] .kfg_step:not(.is-open){padding-top:var(--s-s);padding-bottom:var(--s-s)}\n  [data-kfg-root] .kfg_step.is-flash{outline:2px solid var(--ink);outline-offset:2px}\n  [data-kfg-root] .kfg_cutrow{border:1px solid var(--hair);border-radius:var(--r);\n    padding:var(--s-2xs) var(--s-xs) var(--s-xs);margin-top:var(--s-2xs);background:#fff}\n  [data-kfg-root] .kfg_cutrow-head{display:flex;align-items:center;gap:8px;font-size:13.5px;min-height:34px}\n  [data-kfg-root] .kfg_cutrow-head .ic{opacity:.55}\n  [data-kfg-root] .kfg_cutrow-head .pr{margin-left:auto;font-size:12.5px;color:#5F5F5F;white-space:nowrap}\n  [data-kfg-root] .kfg_cutrow-head .del{border:0;background:transparent;cursor:pointer;font-size:18px;\n    line-height:1;color:#b5b1a8;padding:0 2px;min-height:30px;min-width:30px}\n  [data-kfg-root] .kfg_cutrow-head .del:hover{color:var(--ink)}\n  [data-kfg-root] .kfg_cutrow-fields{display:flex;flex-wrap:wrap;gap:var(--s-2xs)}\n  [data-kfg-root] .kfg_cutrow-fields label{flex:1 1 96px;min-width:88px;max-width:160px;font-size:10.5px;color:#8a877f}\n  [data-kfg-root] .kfg_cutrow-fields .in{display:flex;align-items:center;border:1px solid var(--hair);\n    border-radius:6px;background:var(--alt);margin-top:3px}\n  [data-kfg-root] .kfg_cutrow-fields .in:focus-within{border-color:var(--ink)}\n  [data-kfg-root] .kfg_cutrow-fields input{width:100%;min-width:0;border:0;background:transparent;\n    padding:7px 0 7px 8px;font-size:13px;color:var(--ink);min-height:34px}\n  [data-kfg-root] .kfg_cutrow-fields select{width:100%;border:0;background:transparent;\n    padding:7px 6px;font-size:13px;color:var(--ink);min-height:34px;cursor:pointer}\n  [data-kfg-root] .kfg_cutrow-fields i{font-style:normal;font-size:10.5px;color:#9b978c;padding:0 8px}\n  [data-kfg-root] .kfg_cutrow-fields label.breit{flex:2 1 200px;max-width:340px}\n  [data-kfg-root] .kfg_cutlen{flex:1 0 100%;font-size:11.5px;color:#5F5F5F;margin-bottom:2px}\n  [data-kfg-root] .kfg_cutrow.is-warn{border-color:#e3c98f;background:var(--warn-bg)}\n  [data-kfg-root] .kfg_cutwarn{font-size:11px;color:var(--warn);margin-top:6px;display:block}\n  [data-kfg-root] .kfg_cutrow.is-sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}\n  [data-kfg-root] .kfg_detail{margin-top:var(--s-xs);background:transparent;border-radius:var(--r);padding:0}\n  [data-kfg-root] .kfg_detail summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;\n    font-size:12.5px;color:#555;font-weight:500;background:#fff;border-radius:var(--r);padding:10px var(--s-xs);min-height:44px}\n  [data-kfg-root] .kfg_detail summary::-webkit-details-marker{display:none}\n  [data-kfg-root] .kfg_detail summary::after{margin-left:auto}\n  [data-kfg-root] .kfg_detail summary:hover{color:var(--ink)}\n  [data-kfg-root] .kfg_detail-inner{display:flex;align-items:center;gap:var(--s-s);position:relative;\n    background:#fff;border-radius:var(--r);padding:var(--s-xs);margin-top:var(--s-3xs)}\n  [data-kfg-root] .kfg_detail-badge{position:absolute;top:var(--s-2xs);left:var(--s-2xs);z-index:2;font-size:10px;font-weight:500;\n    letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r);\n    background:#ffffffd9;color:#5F5F5F;border:1px solid var(--hair)}\n  /* Vorschaubild bewusst klein: die Draufsicht ist das Produktbild und soll\n     dominieren (Wunsch Sascha, 27.07. - Groessen getauscht). */\n  [data-kfg-root] .kfg_detail img{width:38%;min-width:150px;max-width:220px;flex:0 0 auto;display:block;border-radius:6px;background:var(--alt);aspect-ratio:3/2;object-fit:cover}\n  [data-kfg-root] .kfg_detail-label{font-size:12.5px;color:#5F5F5F;line-height:1.5;min-width:0}\n  [data-kfg-root] .kfg_detail-label b{display:block;font-weight:600;color:var(--ink);font-size:15px;margin-bottom:var(--s-3xs)}\n  [data-kfg-root] .kfg_detail-label span{display:block}\n  [data-kfg-root] .kfg_detail-label em{display:block;font-style:normal;font-size:10.5px;color:#9b978c;margin-top:var(--s-2xs)}\n  @media(max-width:560px){\n    [data-kfg-root] .kfg_detail{flex-direction:column;align-items:stretch;gap:var(--s-2xs)}\n    [data-kfg-root] .kfg_detail img{width:100%;max-width:none}\n    [data-kfg-root] .kfg_detail-label{text-align:center}\n  }\n\n  /* \u2500\u2500 Panel \u2500\u2500 */\n  [data-kfg-root] .kfg_panel{display:flex;flex-direction:column;gap:var(--s-m)}\n  [data-kfg-root] .kfg_step{border:1px solid var(--hair);border-radius:var(--r);padding:var(--s-s)}\n  @media(min-width:980px){[data-kfg-root] .kfg_step{padding:var(--s-m)}}\n  [data-kfg-root] .kfg_step-head{display:flex;align-items:baseline;gap:var(--s-xs);margin-bottom:var(--s-s)}\n  [data-kfg-root] .kfg_step-num{font-weight:500;font-size:12px;color:var(--ink);letter-spacing:.06em}\n  [data-kfg-root] .kfg_step-title{font-size:16px;font-weight:500}\n  [data-kfg-root] .kfg_step-sub{font-size:12.5px;color:#5F5F5F;margin-left:auto;text-align:right}\n  [data-kfg-root] .kfg_sublabel{font-size:12px;color:#5F5F5F;margin:var(--s-s) 0 var(--s-2xs)}\n\n  [data-kfg-root] .kfg_mat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-2xs)}\n  [data-kfg-root] .kfg_mat{border:1.5px solid var(--hair);border-radius:var(--r);padding:var(--s-xs);cursor:pointer;background:#fff;\n    text-align:left;transition:border-color .15s}\n  [data-kfg-root] .kfg_mat.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_mat b{display:block;font-size:13.5px;font-weight:500;line-height:1.25}\n  [data-kfg-root] .kfg_mat small{font-weight:300;font-size:11px;color:#888;display:block;margin-top:var(--s-3xs);letter-spacing:.02em}\n\n  [data-kfg-root] .kfg_dekor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-2xs);margin-top:var(--s-s)}\n  @media(min-width:560px){[data-kfg-root] .kfg_dekor-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}\n  [data-kfg-root] .kfg_dekor{border:1.5px solid var(--hair);border-radius:var(--r);cursor:pointer;padding:var(--s-3xs);background:#fff;\n    transition:border-color .15s;display:flex;flex-direction:column}\n  [data-kfg-root] .kfg_dekor.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_dekor .sw{aspect-ratio:1/1;width:100%;border-radius:5px;display:block;background-size:165%;background-position:center}\n  [data-kfg-root] .kfg_dekor span:last-child{display:block;font-size:10px;text-align:center;padding-top:var(--s-3xs);color:#5F5F5F;line-height:1.2;height:auto}\n  [data-kfg-root] .kfg_dekor-note{font-size:11px;color:#9b978c;margin-top:var(--s-2xs)}\n\n  [data-kfg-root] .kfg_chips{display:flex;flex-wrap:wrap;gap:var(--s-2xs)}\n  [data-kfg-root] .kfg_chip{border:1.5px solid var(--hair);border-radius:var(--r);background:#fff;padding:10px 16px;font-size:13.5px;\n    cursor:pointer;min-height:44px;display:inline-flex;align-items:center;gap:var(--s-2xs);transition:border-color .15s}\n  [data-kfg-root] .kfg_chip.is-active{border-color:var(--ink);font-weight:500}\n  [data-kfg-root] .kfg_chip small{font-size:11px;color:#888;font-weight:400}\n  [data-kfg-root] .kfg_chip:disabled{opacity:.4;cursor:not-allowed}\n\n  [data-kfg-root] .kfg_dims{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-xs)}\n  [data-kfg-root] .kfg_field label{font-size:12px;color:#5F5F5F;display:block;margin-bottom:var(--s-3xs)}\n  [data-kfg-root] .kfg_field .in{display:flex;align-items:center;border:1.5px solid var(--hair);border-radius:var(--r);overflow:hidden}\n  [data-kfg-root] .kfg_field input{border:0;outline:0;width:100%;padding:var(--s-xs);font-size:16px;font-weight:500;min-height:44px}\n  [data-kfg-root] .kfg_field .unit{padding-right:var(--s-xs);color:#999;font-size:13px}\n  [data-kfg-root] .kfg_field .range{font-weight:300;font-size:11px;color:#9b978c;margin-top:var(--s-3xs);display:block;letter-spacing:.03em}\n  [data-kfg-root] .kfg_field.is-error .in{border-color:#c0392b}\n  [data-kfg-root] .kfg_field .err{display:none;font-size:11.5px;color:#c0392b;margin-top:var(--s-3xs)}\n  [data-kfg-root] .kfg_field.is-error .err{display:block}\n  [data-kfg-root] .kfg_quick{margin-top:var(--s-s)}\n  [data-kfg-root] .kfg_quick p{font-size:12px;color:#5F5F5F;margin-bottom:var(--s-2xs)}\n  [data-kfg-root] .kfg_quick-chips{display:flex;flex-wrap:wrap;gap:6px}\n  [data-kfg-root] .kfg_quick-chip{font-weight:300;font-size:12px;letter-spacing:.03em;padding:7px 10px;border:1px solid var(--hair);\n    border-radius:var(--r);background:var(--alt);cursor:pointer;transition:all .15s}\n  [data-kfg-root] .kfg_quick-chip:hover{border-color:var(--ink)}\n  [data-kfg-root] .kfg_quick-chip.is-active{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:400}\n  [data-kfg-root] .kfg_measure{margin-top:var(--s-s);font-size:13px}\n  [data-kfg-root] .kfg_measure summary{cursor:pointer;color:#555;font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px}\n  [data-kfg-root] .kfg_share button{display:inline-flex;align-items:center;justify-content:center;gap:7px}\n  [data-kfg-root] .kfg_measure p{margin-top:var(--s-2xs);color:#5F5F5F;font-size:12.5px;line-height:1.55;background:var(--alt);\n    border-radius:var(--r);padding:var(--s-xs)}\n\n  [data-kfg-root] .kfg_radius{display:flex;align-items:flex-end;gap:var(--s-xs);flex-wrap:wrap}\n  [data-kfg-root] .kfg_radius .kfg_field{width:120px}\n  [data-kfg-root] .kfg_radius .kfg_field input{padding:9px var(--s-xs);font-size:14px;min-height:40px}\n  [data-kfg-root] .kfg_rule-note{margin-top:var(--s-2xs);font-size:12px;color:#9a6b12;background:var(--warn-bg);border-radius:var(--r);padding:var(--s-xs)}\n\n  [data-kfg-root] .kfg_edge-note{margin-top:var(--s-s);font-size:12.5px;color:#5F5F5F;background:var(--alt);border-radius:var(--r);\n    padding:var(--s-xs);display:flex;gap:var(--s-2xs);align-items:flex-start}\n  [data-kfg-root] .kfg_trust span .ic-svg{width:13px;height:13px}\n  [data-kfg-root] .kfg_mpx-note{margin-top:var(--s-2xs);font-size:12px;color:#9a6b12;background:var(--warn-bg);border-radius:var(--r);padding:var(--s-xs);display:none}\n\n  [data-kfg-root] .kfg_check{display:flex;align-items:flex-start;gap:var(--s-xs);padding:var(--s-xs);border:1.5px solid var(--hair);\n    border-radius:var(--r);cursor:pointer;transition:border-color .15s}\n  [data-kfg-root] .kfg_check + .kfg_check{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_check.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_check input{margin-top:3px;accent-color:var(--ink);width:16px;height:16px}\n  [data-kfg-root] .kfg_check b{font-size:13.5px;font-weight:500;display:block}\n  [data-kfg-root] .kfg_check small{font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_check .pr{margin-left:auto;font-weight:300;font-size:12px;color:#555;white-space:nowrap;letter-spacing:.02em}\n  [data-kfg-root] .kfg_custom{display:none;margin-top:var(--s-2xs);border:1.5px dashed var(--hair);border-radius:var(--r);padding:var(--s-s)}\n  [data-kfg-root] .kfg_custom.is-open{display:block}\n  [data-kfg-root] .kfg_custom textarea{width:100%;border:1.5px solid var(--hair);border-radius:var(--r);padding:var(--s-xs);\n    font-size:13px;min-height:64px;resize:vertical;outline:none}\n  [data-kfg-root] .kfg_custom textarea:focus{border-color:var(--ink)}\n  [data-kfg-root] .kfg_upload{margin-top:var(--s-2xs);border:1.5px dashed #c9c6bd;border-radius:var(--r);background:var(--alt);\n    padding:var(--s-s);text-align:center;font-size:12.5px;color:#5F5F5F;cursor:pointer;transition:border-color .15s}\n  [data-kfg-root] .kfg_upload:hover{border-color:var(--ink)}\n  [data-kfg-root] .kfg_upload b{display:block;font-weight:500;color:var(--ink);margin-bottom:2px}\n  [data-kfg-root] .kfg_custom-hint{font-size:11.5px;color:#9a6b12;margin-top:var(--s-2xs)}\n\n  [data-kfg-root] .kfg_preset{display:flex;align-items:center;gap:var(--s-xs);padding:var(--s-xs);border:1.5px solid var(--hair);\n    border-radius:var(--r);transition:border-color .15s}\n  [data-kfg-root] .kfg_preset + .kfg_preset{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_preset.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_preset b{font-size:13.5px;font-weight:500;display:block}\n  [data-kfg-root] .kfg_preset small{font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_preset .pr{margin-left:auto;font-weight:300;font-size:12px;color:#555;white-space:nowrap;letter-spacing:.02em}\n  [data-kfg-root] .kfg_stepper{display:inline-flex;align-items:stretch;gap:0;\n    border:1.5px solid var(--hair);border-radius:var(--r);overflow:hidden}\n  [data-kfg-root] .kfg_stepper button{border:0;background:#fff;width:36px;height:36px;font-size:17px;\n    cursor:pointer;color:var(--ink);display:grid;place-items:center;line-height:1;padding:0}\n  [data-kfg-root] .kfg_stepper button:hover{background:var(--alt)}\n  [data-kfg-root] .kfg_stepper [data-count]{min-width:28px;text-align:center;font-weight:500;font-size:14px;\n    font-variant-numeric:tabular-nums;display:grid;place-items:center;line-height:1}\n  [data-kfg-root] .kfg_cutlist{display:flex;flex-wrap:wrap;gap:var(--s-2xs);margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_cutitem{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hair);border-radius:var(--r);\n    padding:6px 10px;font-size:12px;background:var(--alt)}\n  [data-kfg-root] .kfg_cutitem button{border:0;background:none;cursor:pointer;font-size:14px;color:#999;padding:0 2px;line-height:1}\n  [data-kfg-root] .kfg_cutitem button:hover{color:#c0392b}\n  [data-kfg-root] #stage.is-drawing{cursor:crosshair;touch-action:none}\n  [data-kfg-root] #stage.is-dragging{touch-action:none}\n  [data-kfg-root] .kfg_muster{background:var(--card);border-radius:var(--r);padding:var(--s-s);display:flex;gap:var(--s-xs);align-items:center}\n  [data-kfg-root] .kfg_muster .ic .ic-svg{width:22px;height:22px}\n  [data-kfg-root] .kfg_muster b{font-size:13.5px;font-weight:500;display:block}\n  [data-kfg-root] .kfg_muster small{font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_muster button{margin-left:auto;border:1px solid var(--ink);background:#fff;border-radius:var(--r);\n    padding:9px 14px;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;min-height:40px}\n\n  /* Summary */\n  [data-kfg-root] .kfg_summary{border:1px solid var(--hair);border-radius:var(--r);padding:var(--s-s);margin-top:var(--s-s);background:#fff}\n  [data-kfg-root] .kfg_sum-row{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s-s)}\n  [data-kfg-root] .kfg_sum-price small{display:block;font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_sum-price .val{font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.1}\n  [data-kfg-root] .kfg_sum-price .vat{font-size:11px;color:#999}\n  [data-kfg-root] .kfg_delivery{font-size:12.5px;text-align:right}\n  [data-kfg-root] .kfg_delivery b{display:block;font-weight:500}\n  [data-kfg-root] .kfg_delivery span{color:#5F5F5F}\n  [data-kfg-root] .kfg_breakdown{margin-top:var(--s-xs);font-size:12.5px}\n  [data-kfg-root] .kfg_breakdown summary{cursor:pointer;color:#555;list-style:none;display:inline-flex;gap:6px;align-items:center}\n  [data-kfg-root] .kfg_breakdown summary::after{margin-left:2px}\n  [data-kfg-root] .kfg_breakdown table{width:100%;margin-top:var(--s-2xs);border-collapse:collapse}\n  [data-kfg-root] .kfg_breakdown td{padding:var(--s-3xs) 0;color:#5F5F5F;font-size:12px}\n  [data-kfg-root] .kfg_breakdown td:last-child{text-align:right;font-weight:300;letter-spacing:.02em}\n  [data-kfg-root] .kfg_breakdown tr.total td{border-top:1px solid var(--hair);padding-top:var(--s-2xs);color:var(--ink);font-weight:500}\n  [data-kfg-root] .kfg_cta{margin-top:var(--s-s);width:100%;border:0;border-radius:var(--r);background:var(--ink);color:#fff;\n    font-size:15px;font-weight:500;padding:var(--s-s);cursor:pointer;min-height:52px;transition:background .15s}\n  [data-kfg-root] .kfg_cta:hover{background:var(--deep)}\n  [data-kfg-root] .kfg_cta.is-sonder{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}\n  [data-kfg-root] .kfg_bar .kfg_cta.is-sonder{border-width:1.5px}\n  [data-kfg-root] .kfg_trust{display:flex;justify-content:center;gap:var(--s-s);margin-top:var(--s-xs);font-size:11px;color:#888;flex-wrap:wrap}\n  [data-kfg-root] .kfg_trust span{display:inline-flex;align-items:center;gap:5px}\n  [data-kfg-root] .kfg_share{display:flex;gap:var(--s-2xs);margin-top:var(--s-s)}\n  [data-kfg-root] .kfg_share button{flex:1;border:1px solid var(--hair);background:var(--alt);border-radius:var(--r);\n    padding:10px;font-size:12.5px;cursor:pointer;min-height:44px}\n  [data-kfg-root] .kfg_share button:hover{border-color:var(--ink)}\n\n  /* \u2550\u2550 MOBILE \u2550\u2550 */\n  /* Sticky Mini-Vorschau: erscheint, sobald die gro\u00dfe Vorschau aus dem Bild scrollt */\n  [data-kfg-root] .kfg_mini{position:fixed;left:0;right:0;z-index:45;background:#fff;border-bottom:1px solid var(--hair);\n    display:flex;align-items:center;gap:var(--s-xs);padding:var(--s-2xs) var(--s-s);\n    box-shadow:0 6px 18px rgba(0,0,0,.06);transform:translateY(-110%);transition:transform .22s ease}\n  [data-kfg-root] .kfg_mini.is-on{transform:translateY(0)}\n  [data-kfg-root] .kfg_mini-plate{flex:0 0 auto;height:34px;max-width:64px;border-radius:4px;background-size:cover;background-position:center;\n    border:1px solid #00000018}\n  [data-kfg-root] .kfg_mini-plate.is-round{border-radius:50%}\n  [data-kfg-root] .kfg_mini-txt{min-width:0;line-height:1.25}\n  [data-kfg-root] .kfg_mini-txt b{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_mini-txt span{display:block;font-size:11px;color:#5F5F5F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_mini button{margin-left:auto;flex:0 0 auto;border:1px solid var(--hair);background:var(--alt);border-radius:var(--r);\n    padding:7px 12px;font-size:12px;cursor:pointer;min-height:36px}\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_mini{padding-inline:clamp(16px,4vw,80px)}\n    [data-kfg-root] .kfg_mini-plate{height:42px;max-width:84px}\n  }\n\n  @media(max-width:979px){\n    [data-kfg-root] .kfg_hero{padding-top:var(--s-m)}\n    [data-kfg-root] .kfg_hero h1{font-size:26px}\n    [data-kfg-root] .kfg_hero p{font-size:14px}\n    [data-kfg-root] .kfg_layout{padding-top:var(--s-2xs);gap:var(--s-s)}\n    [data-kfg-root] .kfg_preview{padding:var(--s-xs)}\n    [data-kfg-root] .kfg_preview-stage, [data-kfg-root] #stage3d{aspect-ratio:10/7}\n    [data-kfg-root] .kfg_preview{margin-inline:calc(clamp(16px,4vw,80px) * -1);border-radius:0}\n    [data-kfg-root] .kfg_preview-hint{display:none}\n    /* Detailansicht einklappbar, spart ~300px vor dem ersten Schritt */\n    [data-kfg-root] .kfg_detail{display:block;padding:0;background:transparent}\n    [data-kfg-root] .kfg_detail summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;\n      font-size:12.5px;color:#555;font-weight:500;background:#fff;border-radius:var(--r);padding:10px var(--s-xs);min-height:44px}\n    [data-kfg-root] .kfg_detail summary::after{margin-left:auto}\n    [data-kfg-root] .kfg_detail-inner{display:flex;flex-direction:column;gap:var(--s-2xs);background:#fff;border-radius:var(--r);\n      padding:var(--s-xs);margin-top:var(--s-3xs)}\n    [data-kfg-root] .kfg_detail img{width:100%;max-width:none;min-width:0}\n    [data-kfg-root] .kfg_detail-badge{top:var(--s-m);left:var(--s-m)}\n    [data-kfg-root] .kfg_detail-label{text-align:left}\n    /* Preset-Zeilen: Stepper unter den Text statt gequetscht daneben */\n    [data-kfg-root] .kfg_preset{flex-wrap:wrap}\n    [data-kfg-root] .kfg_preset .pr{margin-left:0;order:3}\n    [data-kfg-root] .kfg_preset .kfg_stepper{margin-left:auto;order:4}\n    [data-kfg-root] .kfg_muster{flex-wrap:wrap}\n    [data-kfg-root] .kfg_muster button{margin-left:0;width:100%}\n    [data-kfg-root] .kfg_modal-box{padding:var(--s-s);border-radius:12px;max-height:94vh}\n    [data-kfg-root] .kfg_step{padding:var(--s-s) var(--s-xs)}\n  }\n  /* Die Leiste ist grundsaetzlich aus und kommt erst, wenn der Konfigurator\n     nach oben aus dem Bild gescrollt ist — auch mobil (Wunsch Sascha\n     29.07.). Solange man konfiguriert, steht der Preis in der Karte. */\n  /* Schwebende Karte statt randloser Platte: 8 px Ecken, umlaufender\n     Haarstrich, und die Hoehe folgt der Beschriftung statt fest zu sein\n     (Wunsch Sascha 29.07.). */\n  [data-kfg-root] .kfg_bar{position:fixed;bottom:0;left:0;right:0;background:#fff;\n    border:1px solid var(--hair);border-radius:var(--r);\n    margin:0 var(--s-xs) calc(var(--s-xs) + env(safe-area-inset-bottom));\n    display:none;transform:translateY(140%);transition:transform .22s ease;\n    padding:var(--s-xs) var(--s-xs) var(--s-xs) var(--s-s);z-index:60;\n    align-items:center;gap:var(--s-xs);box-shadow:0 10px 30px -12px rgba(0,0,0,.22)}\n  [data-kfg-root] .kfg_bar.is-on{display:flex;transform:translateY(0)}\n  /* Was gekauft wird, steht jetzt in der Leiste: kleine Platte, Material\n     und Dekor, darunter Form, Mass und Staerke (Befund Sascha 29.07.). */\n  [data-kfg-root] .kfg_bar-thumb{flex:0 0 auto;width:48px;height:36px;border-radius:4px;\n    background:var(--card);background-size:cover;background-position:center;border:1px solid #00000018}\n  [data-kfg-root] .kfg_bar-thumb.is-round{border-radius:50%;width:36px}\n  [data-kfg-root] .kfg_bar-what{min-width:0;line-height:1.25;flex:1 1 auto}\n  [data-kfg-root] .kfg_bar-what b{display:block;font-size:12.5px;font-weight:500;\n    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_bar-what small{display:block;font-size:11px;color:#5F5F5F;\n    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_bar .p{line-height:1.15;flex:0 0 auto;text-align:right}\n  [data-kfg-root] .kfg_bar .p .val{font-size:19px;font-weight:600;display:block}\n  [data-kfg-root] .kfg_bar .p small{font-size:10.5px;color:#5F5F5F;white-space:nowrap}\n  /* Gleiche Optik wie der Knopf in der Preiskarte (Wunsch Sascha 29.07.):\n     Rundung, Schriftgroesse und Hoehe unveraendert, nur die Breite ist\n     begrenzt statt ueber die halbe Seite zu laufen. */\n  [data-kfg-root] .kfg_bar .kfg_cta{margin:0;flex:0 0 auto;padding:14px var(--s-l);\n    min-height:50px;font-size:15px;width:auto;min-width:230px;border-radius:var(--r)}\n  /* Schmale Schirme: Bezeichnung und Miniatur weichen, damit Preis und\n     Knopf nicht aus der Leiste laufen (Befund Sascha 29.07.). */\n  @media(max-width:560px){\n    [data-kfg-root] .kfg_bar{gap:var(--s-2xs);padding-inline:var(--s-xs)}\n    [data-kfg-root] .kfg_bar-what{display:none}\n    [data-kfg-root] .kfg_bar-thumb{display:none}\n    [data-kfg-root] .kfg_bar .p{margin-right:auto;text-align:left}\n    [data-kfg-root] .kfg_bar .kfg_cta{flex:1 1 auto;min-width:0;max-width:62%;\n      padding-inline:var(--s-xs);font-size:14px;white-space:nowrap;\n      overflow:hidden;text-overflow:ellipsis}\n  }\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_bar.is-on{max-width:1180px;margin-inline:auto;\n      padding:var(--s-xs) var(--s-xs) var(--s-xs) var(--s-m)}\n    [data-kfg-root] .kfg_bar.is-on .p{margin-left:auto}\n    [data-kfg-root] .kfg_bar.is-on .p .val{font-size:21px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_cta{flex:0 0 auto;min-width:260px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_bar-thumb{width:62px;height:47px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_bar-what b{font-size:14px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_bar-what small{font-size:12px}\n  }\n\n  [data-kfg-root] .kfg_modal{position:fixed;inset:0;background:rgba(10,10,10,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:var(--s-s)}\n  [data-kfg-root] .kfg_modal[hidden]{display:none}\n  [data-kfg-root] .kfg_modal-box{background:#fff;border-radius:16px;max-width:960px;width:100%;max-height:90vh;overflow:auto;padding:var(--s-m)}\n  [data-kfg-root] .kfg_modal-head{display:flex;align-items:center;gap:var(--s-xs);margin-bottom:var(--s-s)}\n  [data-kfg-root] .kfg_modal-head b{font-size:18px;font-weight:600}\n  [data-kfg-root] .kfg_modal-tag{font-size:11px;color:#9a6b12;background:var(--warn-bg);border-radius:var(--r);padding:3px 8px}\n  [data-kfg-root] .kfg_modal-head button{margin-left:auto;border:0;background:var(--alt);border-radius:var(--r);width:36px;height:36px;font-size:20px;cursor:pointer}\n  [data-kfg-root] .kfg_modal-grid{display:grid;grid-template-columns:1fr;gap:var(--s-m)}\n  @media(min-width:760px){[data-kfg-root] .kfg_modal-grid{grid-template-columns:55fr 45fr}}\n  [data-kfg-root] .kfg_modal-draw{background:var(--card);border-radius:var(--r);padding:var(--s-xs)}\n  [data-kfg-root] .kfg_modal-draw svg{width:100%;display:block}\n  [data-kfg-root] .kfg_modal-draw p{font-size:11px;color:#8a877f;text-align:center;padding-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_modal-data table{width:100%;border-collapse:collapse;font-size:13px}\n  [data-kfg-root] .kfg_modal-data td{padding:6px 0;border-bottom:1px solid var(--hair);vertical-align:top}\n  [data-kfg-root] .kfg_modal-data td:first-child{color:#5F5F5F;width:38%;padding-right:var(--s-xs)}\n  [data-kfg-root] .kfg_modal-data .props{margin-top:var(--s-s);background:var(--alt);border-radius:var(--r);padding:var(--s-xs);\n    font-size:11px;color:#555;font-weight:300;letter-spacing:.02em;line-height:1.7;word-break:break-all}\n  [data-kfg-root] .kfg_modal-data .props b{display:block;font-weight:500;color:var(--ink);font-size:11.5px;margin-bottom:4px;letter-spacing:0}\n  [data-kfg-root] .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--deep);color:#fff;\n    padding:10px 18px;border-radius:var(--r);font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:70}\n  [data-kfg-root] .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}\n\n  /* \u2500\u2500 Isolationsschicht: Webflow-Site-CSS darf nicht in den Konfigurator bluten,\n        und der Konfigurator faerbt/resettet nichts ausserhalb seines Containers.\n        :where() hat Spezifitaet 0 \u2192 eigene Regeln gewinnen immer. \u2500\u2500 */\n  [data-kfg-root]{\n    --ink:#1E1E1E; --deep:#0A0A0A; --card:#F2F0EB; --alt:#FAFAFA; --hair:#E5E5E5;\n    --ok:#1c7a3d; --ok-bg:#e8f4ec; --warn:#9a6b12; --warn-bg:#faf3e2;\n    --s-3xs:4px; --s-2xs:8px; --s-xs:12px; --s-s:16px; --s-m:24px; --s-l:32px; --s-xl:48px; --s-2xl:64px;\n    --r:8px;\n    display:block; box-sizing:border-box;\n    font-family:'Onest','DM Sans',sans-serif; font-size:15px; font-weight:400;\n    line-height:1.45; color:#1E1E1E; background:#fff; text-align:left;\n    letter-spacing:normal; text-transform:none; -webkit-font-smoothing:antialiased;\n  }\n  [data-kfg-root] :where(*, *::before, *::after){\n    box-sizing:border-box; margin:0; padding:0;\n    font-family:inherit; line-height:inherit; color:inherit;\n    letter-spacing:normal; text-transform:none;\n  }\n  /* text-align NICHT pauschal auf inherit setzen \u2014 das nahm Buttons die vom\n     Browser vorgegebene Zentrierung, wodurch Minus und Plus im Mengenfeld\n     links klebten (Befund Sascha, 27.07.). */\n  [data-kfg-root] :where(button){text-align:center}\n  [data-kfg-root] :where(b, strong){font-weight:600}\n  [data-kfg-root] :where(small){font-size:inherit}\n  [data-kfg-root] :where(button){background:none;border:none;cursor:pointer;font:inherit}\n  [data-kfg-root] :where(img, svg){max-width:100%}\n  [data-kfg-root] :where(p, span, div, label, li, td, th, summary){font-weight:inherit}\n\n  /* Ueberschriften grundsaetzlich schwarz (Sascha 26.07.) */\n  [data-kfg-root] .kfg_step-title,\n  [data-kfg-root] .kfg_step-num,\n  [data-kfg-root] .kfg_sublabel,\n  [data-kfg-root] .kfg_mat b,\n  [data-kfg-root] .kfg_preset b,\n  [data-kfg-root] .kfg_check b,\n  [data-kfg-root] .kfg_muster b,\n  [data-kfg-root] .kfg_modal-head b,\n  [data-kfg-root] .kfg_detail-label b,\n  [data-kfg-root] .kfg_upload b,\n  [data-kfg-root] h1, [data-kfg-root] h2, [data-kfg-root] h3, [data-kfg-root] h4,\n  [data-kfg-root] summary{color:#1E1E1E}\n\n  /* \u2500\u2500 Schritt 05: EIN Raster fuer alle Zeilen \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n     Spalten: [Checkbox 18px] [Text 1fr] [Preis auto] [Stepper 96px]\n     Preset-Zeilen lassen Spalte 1 leer \u2192 Textkante identisch zu den\n     Checkbox-Zeilen. Checkbox-Zeilen lassen Spalte 4 leer \u2192 Preise stehen\n     bei allen Zeilen in derselben Spalte. min-height macht alle gleich hoch. */\n  [data-kfg-root] .kfg_panel{container-type:inline-size;container-name:kfgpanel}\n  [data-kfg-root] .kfg_check,\n  [data-kfg-root] .kfg_preset{\n    display:grid;\n    grid-template-columns:18px minmax(0,1fr) auto 96px;\n    align-items:center;\n    column-gap:var(--s-xs);\n    row-gap:0;\n    min-height:0;\n    padding:var(--s-xs) var(--s-s);\n    border:1.5px solid var(--hair);\n    border-radius:var(--r);\n  }\n  /* gleiche Abstaende zwischen ALLEN Zeilentypen */\n  [data-kfg-root] .kfg_check + .kfg_check,\n  [data-kfg-root] .kfg_check + .kfg_preset,\n  [data-kfg-root] .kfg_preset + .kfg_check,\n  [data-kfg-root] .kfg_preset + .kfg_preset{margin-top:var(--s-2xs)}\n\n  [data-kfg-root] .kfg_check input{grid-column:1;margin:0;accent-color:var(--ink);width:16px;height:16px}\n  [data-kfg-root] .kfg_check > span:not(.pr),\n  [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){\n    grid-column:2;min-width:0;display:block;\n  }\n  [data-kfg-root] .kfg_check .pr,\n  [data-kfg-root] .kfg_preset .pr{\n    grid-column:3;justify-self:end;margin:0;white-space:nowrap;text-align:right;\n    font-size:12px;font-weight:400;color:#555;letter-spacing:.02em;\n  }\n  [data-kfg-root] .kfg_preset .kfg_stepper{grid-column:4;justify-self:end;margin:0}\n\n  /* Titel einzeilig, Unterzeile auf 2 Zeilen begrenzt und reserviert\n     \u2192 jede Zeile in Schritt 05 ist exakt gleich hoch, unabhaengig von der Textlaenge */\n  /* Titel und Unterzeile je eine Zeile, Textblock mit fester Hoehe:\n     dadurch sind ALLE Zeilen in Schritt 05 exakt gleich hoch und der Preis\n     haengt nicht mehr als eigene Zeile darunter. */\n  [data-kfg-root] .kfg_check b,\n  [data-kfg-root] .kfg_preset b{\n    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;\n    font-size:13.5px;font-weight:500;line-height:1.35;color:#1E1E1E;\n  }\n  [data-kfg-root] .kfg_check > span:not(.pr),\n  [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){height:53px}\n  [data-kfg-root] .kfg_check small,\n  [data-kfg-root] .kfg_preset small{\n    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\n    font-size:12px;line-height:1.35;color:#5F5F5F;margin-top:2px;\n  }\n\n  [data-kfg-root] .kfg_stepper button{width:34px;height:34px}\n\n  /* Schmale Panels: Preis + Stepper ruecken unter den Text, Raster bleibt sauber */\n  @media(max-width:520px){\n    [data-kfg-root] .kfg_check,\n    [data-kfg-root] .kfg_preset{\n      grid-template-columns:18px minmax(0,1fr) auto;\n      row-gap:var(--s-2xs);\n    }\n    [data-kfg-root] .kfg_check > span:not(.pr),\n    [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){grid-column:2/-1}\n    [data-kfg-root] .kfg_check .pr,\n    [data-kfg-root] .kfg_preset .pr{grid-column:2;justify-self:start;text-align:left}\n    [data-kfg-root] .kfg_preset .kfg_stepper{grid-column:3;justify-self:end}\n    /* Zeilen ohne Stepper reservieren dieselbe Hoehe wie die mit Stepper */\n    [data-kfg-root] .kfg_preset .pr{display:flex;align-items:center;min-height:36px}\n    [data-kfg-root] .kfg_preset .kfg_stepper{min-height:36px}\n    /* Checkbox-Zeilen haben keinen Stepper: Preis bleibt in der ersten Zeile */\n    [data-kfg-root] .kfg_check{grid-template-columns:18px minmax(0,1fr) auto}\n    [data-kfg-root] .kfg_check > span:not(.pr){grid-column:2}\n    [data-kfg-root] .kfg_check .pr{grid-column:3;justify-self:end;text-align:right;min-height:36px;display:flex;align-items:center}\n    [data-kfg-root] .kfg_check b, [data-kfg-root] .kfg_preset b,\n    [data-kfg-root] .kfg_check small, [data-kfg-root] .kfg_preset small{-webkit-line-clamp:2}\n    [data-kfg-root] .kfg_check > span:not(.pr),\n    [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){height:auto;min-height:53px}\n    /* im gestapelten Layout darf der Titel umbrechen \u2014 nichts wird abgeschnitten */\n    [data-kfg-root] .kfg_check b,\n    [data-kfg-root] .kfg_preset b{white-space:normal;overflow:visible}\n  }\n  @container kfgpanel (max-width:420px){\n    [data-kfg-root] .kfg_check,\n    [data-kfg-root] .kfg_preset{\n      grid-template-columns:18px minmax(0,1fr) auto;\n      row-gap:var(--s-2xs);\n    }\n    [data-kfg-root] .kfg_check > span:not(.pr),\n    [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){grid-column:2/-1}\n    [data-kfg-root] .kfg_check .pr,\n    [data-kfg-root] .kfg_preset .pr{grid-column:2;justify-self:start;text-align:left}\n    [data-kfg-root] .kfg_preset .kfg_stepper{grid-column:3;justify-self:end}\n    /* Zeilen ohne Stepper reservieren dieselbe Hoehe wie die mit Stepper */\n    [data-kfg-root] .kfg_check .pr,\n    [data-kfg-root] .kfg_preset .pr{display:flex;align-items:center;min-height:36px}\n    [data-kfg-root] .kfg_preset .kfg_stepper{min-height:36px}\n    /* im gestapelten Layout darf der Titel umbrechen \u2014 nichts wird abgeschnitten */\n    [data-kfg-root] .kfg_check b,\n    [data-kfg-root] .kfg_preset b{white-space:normal;overflow:visible}\n  }\n\n\n  /* Musterbox-Karte auf dieselbe Textkante */\n  [data-kfg-root] .kfg_muster{align-items:center;gap:var(--s-xs);padding:var(--s-s)}\n  [data-kfg-root] .kfg_muster small{display:block;font-size:12px;line-height:1.35;color:#5F5F5F;margin-top:2px}\n\n  /* Dekor-Kacheln: Beschriftung darf nicht abgeschnitten werden */\n  /* Dekorname darf zwei Zeilen brauchen \u2014 \"Eiche Kamienny\" wurde vorher nach\n     dem ersten Wort abgeschnitten. Feste Hoehe haelt alle Kacheln gleich gross. */\n  [data-kfg-root] .kfg_dekor{overflow:visible}\n  [data-kfg-root] .kfg_dekor > span:last-child{\n    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;\n    font-size:10.5px; line-height:1.25; color:#1E1E1E; text-align:center;\n    white-space:normal; word-break:normal; hyphens:none;\n    height:30px; padding-top:var(--s-3xs);\n  }\n\n  /* \u2500\u2500 Radius je Ecke: verknuepfter Wert oben, darunter die vier Ecken\n        in derselben Anordnung wie auf der Platte (Draufsicht). \u2500\u2500 */\n  [data-kfg-root] .kfg_radgrid{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_radall{\n    display:flex;align-items:center;gap:var(--s-2xs);\n    border:1.5px solid var(--hair);border-radius:var(--r);\n    padding:8px var(--s-xs);margin-bottom:var(--s-2xs);background:var(--alt);\n  }\n  [data-kfg-root] .kfg_radall.is-linked{border-color:var(--ink)}\n  [data-kfg-root] .kfg_radall em{margin-left:auto;font-style:normal;font-size:11px;color:#5F5F5F}\n  [data-kfg-root] .kfg_radquad{\n    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-2xs);max-width:340px;\n  }\n  [data-kfg-root] .kfg_radcell{\n    display:flex;align-items:center;gap:6px;\n    border:1.5px solid var(--hair);border-radius:var(--r);padding:6px var(--s-2xs);\n    background:#fff;cursor:text;\n  }\n  [data-kfg-root] .kfg_radcell.is-on{border-color:var(--ink)}\n  [data-kfg-root] .kfg_radall input,\n  [data-kfg-root] .kfg_radcell input{\n    width:100%;min-width:0;border:0;outline:0;background:transparent;\n    font-size:14px;font-weight:500;color:#1E1E1E;padding:2px 0;-moz-appearance:textfield;\n  }\n  [data-kfg-root] .kfg_radall input::-webkit-outer-spin-button,\n  [data-kfg-root] .kfg_radall input::-webkit-inner-spin-button,\n  [data-kfg-root] .kfg_radcell input::-webkit-outer-spin-button,\n  [data-kfg-root] .kfg_radcell input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}\n  [data-kfg-root] .kfg_radall .u,\n  [data-kfg-root] .kfg_radcell .u{font-size:11px;color:#999;flex:0 0 auto}\n  [data-kfg-root] .kfg_cornerhit:hover{fill:#1E1E1E12}\n\n  /* \u2500\u2500 Gruppen in Schritt 05 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n  [data-kfg-root] .kfg_grouplabel{\n    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a8a;\n    font-weight:500;margin:var(--s-m) 0 var(--s-2xs);\n  }\n  [data-kfg-root] .kfg_grouplabel:first-of-type{margin-top:var(--s-s)}\n\n  /* \u2500\u2500 Z\u00e4hler am Schritt-Kopf \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n  [data-kfg-root] .kfg_step-count{\n    margin-left:auto;font-size:11px;font-weight:500;letter-spacing:.02em;\n    background:var(--ink);color:#fff;border-radius:var(--r);padding:3px 9px;\n    white-space:nowrap;max-width:52%;overflow:hidden;text-overflow:ellipsis;\n  }\n  [data-kfg-root] .kfg_step-count.is-empty{background:var(--card);color:#8a8a8a}\n  [data-kfg-root] .kfg_step-head{display:flex;align-items:center;gap:var(--s-2xs)}\n\n  /* \u2500\u2500 Konfigurations-Zusammenfassung \u00fcber dem CTA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n  [data-kfg-root] .kfg_conf{\n    border:1px solid var(--hair);border-radius:var(--r);background:var(--alt);\n    padding:var(--s-xs);margin:var(--s-s) 0 var(--s-2xs);\n  }\n  [data-kfg-root] .kfg_conf > p{\n    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a8a;\n    font-weight:500;margin-bottom:var(--s-2xs);\n  }\n  [data-kfg-root] .kfg_conf-chips{display:flex;flex-wrap:wrap;gap:5px}\n  [data-kfg-root] .kfg_conf-chip{\n    font-size:12px;line-height:1.3;border:1px solid var(--hair);background:#fff;\n    border-radius:var(--r);padding:5px 9px;color:var(--ink);cursor:pointer;text-align:left;\n  }\n  [data-kfg-root] .kfg_conf-chip:hover{border-color:var(--ink)}\n  [data-kfg-root] .kfg_conf-chip.is-warn{background:var(--warn-bg);border-color:#e8dcc0;color:var(--warn)}\n  [data-kfg-root] .kfg_step.is-flash{box-shadow:0 0 0 2px var(--ink);transition:box-shadow .2s}\n\n  /* Auf flachen Fenstern die Draufsicht mitskalieren, damit die Platte beim\n     Arbeiten an Ecken und Massen komplett sichtbar bleibt. */\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_preview-stage,\n    [data-kfg-root] #stage3d{max-height:min(74vh,780px)}\n  }\n\n  /* Flache Fenster: Vorschau UND Preiskarte wandern GEMEINSAM mit. Reicht die\n     Hoehe nicht, faellt gestuft weg, was am ehesten entbehrlich ist, die\n     Warenkorbkarte bleibt dabei immer am Bild (Wunsch Sascha, 27.07.). */\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_stickycol.is-tight .kfg_trust,\n    [data-kfg-root] .kfg_stickycol.is-tight .kfg_share{display:none}\n    /* Das Vorschaubild behaelt IMMER seine Groesse (Wunsch Sascha): kein\n       Schrumpfen beim Scrollen. Fehlt Platz, wird die Karte zugeklappt —\n       die Zeile dafuer ist ja sichtbar. */\n    [data-kfg-root] .kfg_stickycol.is-tighter .kfg_conf,\n    [data-kfg-root] .kfg_stickycol.is-tighter .kfg_breakdown{display:none}\n    /* Notfallstufe: die Spalte scrollt intern. Bewusst OHNE overscroll-behavior:\n       contain - sonst bleibt das Mausrad am Ende der Karte haengen statt die\n       Seite weiterzuscrollen, und genau das fuehlt sich hakelig an. */\n    [data-kfg-root] .kfg_stickycol.is-scroll{overflow-y:auto;\n      max-height:calc(100vh - var(--kfg-top,96px) - 16px);scrollbar-width:thin;padding-right:6px}\n  }\n\n  /* Mobil: Vorschaukarte bleibt beim Konfigurieren stehen (ersetzt die Mini-Leiste).\n     Die Preiskarte sitzt auf Mobil ohnehin am Ende, Preis und CTA liegen unten\n     in der festen Leiste \u2014 die bleibt bewusst erhalten. */\n  @media(max-width:979px){\n    [data-kfg-root] .kfg_stickycol{position:sticky;top:var(--kfg-top,56px);z-index:3;\n      background:#fff;padding-bottom:var(--s-2xs)}\n    [data-kfg-root] .kfg_preview{box-shadow:0 6px 16px -12px #00000040}\n    /* Badge darf den 2D/3D-Umschalter nicht ueberlappen */\n    [data-kfg-root] .kfg_preview-badge{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n  }\n  [data-kfg-root] .kfg_machine{display:block;margin-top:var(--s-2xs);font-size:13px;color:#555}\n  [data-kfg-root] .kfg_machine input{width:100%;margin-top:var(--s-3xs);padding:10px 12px;border:1px solid var(--hair);\n    border-radius:var(--r);font-size:15px;background:#fff;color:var(--ink)}\n  [data-kfg-root] .kfg_machine input:focus{outline:none;border-color:var(--ink)}\n  /* Die Lackierung ist eine Kantenoption, keine Zeile aus Schritt 05. Sie erbt\n     sonst deren Kasten samt der fuer den Mengenregler reservierten Spalte und\n     klebt am Chip-Raster darueber (Ruecklauf Senior 30.07.: 'die Raender\n     muessen bei Kante Natur weg'). */\n  [data-kfg-root] #lackBlock{margin-top:var(--s-s)}\n  [data-kfg-root] #lackBlock .kfg_check,\n  [data-kfg-root] #lackBlock .kfg_check.is-active{\n    border:0;border-radius:0;padding:0;background:none;\n    grid-template-columns:18px minmax(0,1fr) auto;align-items:start;column-gap:var(--s-2xs)}\n  [data-kfg-root] #lackBlock .kfg_check > span:not(.pr){height:auto;grid-column:2}\n  [data-kfg-root] #lackBlock .kfg_check .pr{grid-column:3;justify-self:end;text-align:right;\n    align-self:center;min-height:0}\n  [data-kfg-root] #lackBlock .kfg_check small{-webkit-line-clamp:3}\n  [data-kfg-root] #lackBlock .kfg_check input{margin-top:2px}\n  @media(max-width:520px){\n    [data-kfg-root] #lackBlock .kfg_check .pr{grid-column:2;justify-self:start;text-align:left}\n  }\n  /* ── Abstaende in Schritt 05 ────────────────────────────────────────────\n     Die Gruppen-Wrapper aus v1.16.0 (#grpMaschine, #grpDurchlass, #grpKueche,\n     #grpCustom, #grpFrei) haben die Nachbarschafts-Selektoren zerschnitten:\n     '.kfg_check + .kfg_preset' greift ueber eine Wrapper-Grenze nicht mehr\n     (erste Zeile einer Gruppe stand ohne Abstand, Rahmen an Rahmen), und\n     jede Gruppenueberschrift galt in ihrem Wrapper als :first-of-type und\n     bekam 16 statt 24 px. Die Abstaende haengen deshalb ab v1.16.1 am\n     Element selbst statt an der Nachbarschaft — unabhaengig davon, wie tief\n     es verschachtelt ist. 8 px zwischen Zeilen, 24 px vor einer neuen\n     Gruppe, 16 px vor der ersten (Ruecklauf Senior 30.07.). */\n  [data-kfg-root] .kfg_step .kfg_check,\n  [data-kfg-root] .kfg_step .kfg_preset{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_step .kfg_grouplabel{margin-top:var(--s-m)}\n  [data-kfg-root] .kfg_step-body > .kfg_grouplabel:first-child{margin-top:var(--s-s)}\n  [data-kfg-root] .kfg_grouplabel + .kfg_sublabel{margin-top:0}\n  [data-kfg-root] .kfg_machine + .kfg_chips{margin-top:var(--s-2xs)}\n";
+var KFG_CSS = "\n  /* Guertel zur Webflow-nativen Reservierung auf tnm_kfg-mount: haelt die\n     Hoehe, falls der Site-Style je verloren geht. Gemessen 29.07.: Desktop\n     1278 px, <=991 px rund 2410 px. */\n  [data-kfg-root]{min-height:1240px}\n  @media(max-width:991px){[data-kfg-root]{min-height:2360px}}\n  /* Taps sofort und tolerant: kein Doppeltipp-Zoom-Delay, sichtbares\n     Druck-Feedback, und die Spalte gleitet auf Mobil nicht mehr (Bewegung\n     unter dem Finger liess iOS Taps als Wisch verwerfen). */\n  [data-kfg-root] button,[data-kfg-root] .kfg_chip,[data-kfg-root] .kfg_dekor,\n  [data-kfg-root] .kfg_mat,[data-kfg-root] .kfg_step-head,[data-kfg-root] label,\n  [data-kfg-root] .kfg_quick-chip,[data-kfg-root] summary{touch-action:manipulation}\n  [data-kfg-root] .kfg_dekor:active,[data-kfg-root] .kfg_mat:active,\n  [data-kfg-root] .kfg_chip:active,[data-kfg-root] .kfg_quick-chip:active{border-color:var(--ink)}\n  @media(max-width:979px){[data-kfg-root] .kfg_stickycol{transition:none}}\n  [data-kfg-root]{\n    --ink:#1E1E1E; --deep:#0A0A0A; --card:#F2F0EB; --alt:#FAFAFA; --hair:#E5E5E5;\n    --ok:#1c7a3d; --ok-bg:#e8f4ec; --warn:#9a6b12; --warn-bg:#faf3e2;\n    --s-3xs:4px; --s-2xs:8px; --s-xs:12px; --s-s:16px; --s-m:24px; --s-l:32px; --s-xl:48px; --s-2xl:64px;\n    --r:8px;\n  }\n  [data-kfg-root] *{box-sizing:border-box;margin:0;padding:0}\n  [data-kfg-root] button, [data-kfg-root] select, [data-kfg-root] input, [data-kfg-root] textarea{font-family:inherit}\n  \n\n  \n  \n  \n  \n  \n  \n  \n  \n  @media(min-width:768px){}\n\n  [data-kfg-root] .kfg_hero{max-width:1280px;margin-inline:auto;padding:var(--s-l) clamp(16px,4vw,80px) var(--s-s)}\n  [data-kfg-root] .kfg_hero h1{font-size:clamp(24px,3.4vw,36px);font-weight:500;letter-spacing:-.01em}\n  [data-kfg-root] .kfg_hero p{margin-top:var(--s-2xs);color:#555;font-size:15px;max-width:680px}\n  [data-kfg-root] .kfg_hero .anchor{color:var(--ink);font-weight:600}\n\n  [data-kfg-root] .kfg_layout{max-width:1280px;margin-inline:auto;padding:var(--s-s) clamp(16px,4vw,80px) 140px;\n    display:grid;grid-template-columns:1fr;gap:var(--s-m)}\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_layout{grid-template-columns:55fr 45fr;gap:var(--s-xl);padding-bottom:var(--s-2xl)}\n  }\n\n  /* \u2500\u2500 Preview \u2500\u2500 */\n  [data-kfg-root] .kfg_preview{background:var(--card);border-radius:16px;padding:var(--s-s);position:relative}\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_preview{padding:var(--s-m)}\n    /* Eigene Compositing-Ebene: die grosse Draufsicht muss beim Scrollen\n       sonst in jedem Frame neu gezeichnet werden, das ruckelt sichtbar.\n       (Im Block liegen keine fixed-Elemente, die Ebene stoert also nichts.) */\n    [data-kfg-root] .kfg_stickycol{position:sticky;top:84px;align-self:start;will-change:transform;\n      transition:top .16s ease}\n  }\n  [data-kfg-root] .kfg_preview-badge{position:absolute;top:var(--s-s);left:var(--s-s);z-index:2;display:inline-flex;align-items:center;gap:6px;\n    font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--r);background:var(--ok-bg);color:var(--ok)}\n  [data-kfg-root] .kfg_preview-badge.is-sonder{background:var(--warn-bg);color:var(--warn)}\n  [data-kfg-root] .kfg_preview-badge .dot{width:7px;height:7px;border-radius:50%;background:currentColor}\n  [data-kfg-root] .kfg_viewtoggle{position:absolute;top:var(--s-s);right:var(--s-s);z-index:2;display:flex;gap:2px;background:#fff;\n    border:1px solid var(--hair);border-radius:var(--r);padding:2px}\n  [data-kfg-root] .kfg_viewtoggle button{border:0;background:transparent;font-size:12px;font-weight:500;padding:6px 14px;\n    cursor:pointer;border-radius:6px;min-height:32px;color:#5F5F5F}\n  [data-kfg-root] .kfg_viewtoggle button.is-active{background:var(--ink);color:#fff}\n  [data-kfg-root] .kfg_preview-stage{width:100%;aspect-ratio:10/7.4;display:block}\n  [data-kfg-root] #stage3d{width:100%;aspect-ratio:10/7.4;display:none;border-radius:var(--r);cursor:grab;touch-action:none}\n  [data-kfg-root] .kfg_preview-hint{text-align:center;font-size:12px;color:#8a877f;padding-top:var(--s-2xs)}\n  [data-kfg-root] .ic-svg{width:14px;height:14px;flex:0 0 auto}\n  [data-kfg-root] .kfg_edge{cursor:pointer;transition:opacity .15s}\n  [data-kfg-root] .kfg_edge:hover{opacity:.75}\n  [data-kfg-root] .dim-line{stroke:#9b978c;stroke-width:1}\n  [data-kfg-root] .dim-text{font-family:'Onest',sans-serif;font-weight:600;font-size:var(--dim-fs,15px);fill:var(--ink);letter-spacing:.02em;\n    paint-order:stroke;stroke:var(--card);stroke-width:var(--dim-halo,3px);stroke-linejoin:round}\n\n  /* Detail */\n  /* Aufklapp-Zeile in JEDER Breite sichtbar: das Vorschaubild soll sich\n     jederzeit wegklicken lassen, so wie auf Mobil (Wunsch Sascha, 27.07.). */\n  /* Bearbeitungsliste: je Eintrag eine Zeile mit mm-Feldern */\n  /* Aufklappbare Schritte: zugeklappt bleibt die Kopfzeile mit Nummer,\n     Titel und der Zusammenfassung stehen. */\n  /* Kopfleiste ausblenden, solange im Konfigurator nach unten gescrollt\n     wird. Die Klasse sitzt auf den Kopfleisten selbst, nicht im Root —\n     deshalb ohne [data-kfg-root] davor. */\n  .kfg-headaway{transform:translateY(-100%) !important;transition:transform .22s ease !important}\n  [data-kfg-root] .kfg_step-head{cursor:pointer;-webkit-user-select:none;user-select:none}\n  [data-kfg-root] .kfg_step-head:hover .kfg_step-title{color:#000}\n  [data-kfg-root] .kfg_chev,\n  [data-kfg-root] .kfg_detail summary::after,\n  [data-kfg-root] .kfg_breakdown summary::after,\n  [data-kfg-root] .kfg_step-chev{content:'';flex:0 0 auto;display:inline-block;\n    width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;\n    transform:rotate(45deg);transform-origin:60% 60%;margin-left:10px;margin-bottom:3px;\n    opacity:.55;transition:transform .2s ease,opacity .2s ease}\n  [data-kfg-root] .kfg_step-head:hover .kfg_step-chev,\n  [data-kfg-root] .kfg_detail summary:hover::after{opacity:1}\n  [data-kfg-root] .kfg_step.is-open .kfg_step-chev,\n  [data-kfg-root] .kfg_detail[open] summary::after,\n  [data-kfg-root] .kfg_breakdown[open] summary::after{transform:rotate(225deg);margin-bottom:-2px}\n  [data-kfg-root] .kfg_step-body{display:none}\n  [data-kfg-root] .kfg_step.is-open .kfg_step-body{display:block}\n  [data-kfg-root] .kfg_step:not(.is-open) .kfg_step-head{margin-bottom:0}\n  /* Zugeklappt kompakter, sonst steht viel Luft um eine einzige Zeile */\n  [data-kfg-root] .kfg_step:not(.is-open){padding-top:var(--s-s);padding-bottom:var(--s-s)}\n  [data-kfg-root] .kfg_step.is-flash{outline:2px solid var(--ink);outline-offset:2px}\n  [data-kfg-root] .kfg_cutrow{border:1px solid var(--hair);border-radius:var(--r);\n    padding:var(--s-2xs) var(--s-xs) var(--s-xs);margin-top:var(--s-2xs);background:#fff}\n  [data-kfg-root] .kfg_cutrow-head{display:flex;align-items:center;gap:8px;font-size:13.5px;min-height:34px}\n  [data-kfg-root] .kfg_cutrow-head .ic{opacity:.55}\n  [data-kfg-root] .kfg_cutrow-head .pr{margin-left:auto;font-size:12.5px;color:#5F5F5F;white-space:nowrap}\n  [data-kfg-root] .kfg_cutrow-head .del{border:0;background:transparent;cursor:pointer;font-size:18px;\n    line-height:1;color:#b5b1a8;padding:0 2px;min-height:30px;min-width:30px}\n  [data-kfg-root] .kfg_cutrow-head .del:hover{color:var(--ink)}\n  [data-kfg-root] .kfg_cutrow-fields{display:flex;flex-wrap:wrap;gap:var(--s-2xs)}\n  [data-kfg-root] .kfg_cutrow-fields label{flex:1 1 96px;min-width:88px;max-width:160px;font-size:10.5px;color:#8a877f}\n  [data-kfg-root] .kfg_cutrow-fields .in{display:flex;align-items:center;border:1px solid var(--hair);\n    border-radius:6px;background:var(--alt);margin-top:3px}\n  [data-kfg-root] .kfg_cutrow-fields .in:focus-within{border-color:var(--ink)}\n  [data-kfg-root] .kfg_cutrow-fields input{width:100%;min-width:0;border:0;background:transparent;\n    padding:7px 0 7px 8px;font-size:13px;color:var(--ink);min-height:34px}\n  [data-kfg-root] .kfg_cutrow-fields select{width:100%;border:0;background:transparent;\n    padding:7px 6px;font-size:13px;color:var(--ink);min-height:34px;cursor:pointer}\n  [data-kfg-root] .kfg_cutrow-fields i{font-style:normal;font-size:10.5px;color:#9b978c;padding:0 8px}\n  [data-kfg-root] .kfg_cutrow-fields label.breit{flex:2 1 200px;max-width:340px}\n  [data-kfg-root] .kfg_cutlen{flex:1 0 100%;font-size:11.5px;color:#5F5F5F;margin-bottom:2px}\n  [data-kfg-root] .kfg_cutrow.is-warn{border-color:#e3c98f;background:var(--warn-bg)}\n  [data-kfg-root] .kfg_cutwarn{font-size:11px;color:var(--warn);margin-top:6px;display:block}\n  [data-kfg-root] .kfg_cutrow.is-sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}\n  [data-kfg-root] .kfg_detail{margin-top:var(--s-xs);background:transparent;border-radius:var(--r);padding:0}\n  [data-kfg-root] .kfg_detail summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;\n    font-size:12.5px;color:#555;font-weight:500;background:#fff;border-radius:var(--r);padding:10px var(--s-xs);min-height:44px}\n  [data-kfg-root] .kfg_detail summary::-webkit-details-marker{display:none}\n  [data-kfg-root] .kfg_detail summary::after{margin-left:auto}\n  [data-kfg-root] .kfg_detail summary:hover{color:var(--ink)}\n  [data-kfg-root] .kfg_detail-inner{display:flex;align-items:center;gap:var(--s-s);position:relative;\n    background:#fff;border-radius:var(--r);padding:var(--s-xs);margin-top:var(--s-3xs)}\n  [data-kfg-root] .kfg_detail-badge{position:absolute;top:var(--s-2xs);left:var(--s-2xs);z-index:2;font-size:10px;font-weight:500;\n    letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r);\n    background:#ffffffd9;color:#5F5F5F;border:1px solid var(--hair)}\n  /* Vorschaubild bewusst klein: die Draufsicht ist das Produktbild und soll\n     dominieren (Wunsch Sascha, 27.07. - Groessen getauscht). */\n  [data-kfg-root] .kfg_detail img{width:38%;min-width:150px;max-width:220px;flex:0 0 auto;display:block;border-radius:6px;background:var(--alt);aspect-ratio:3/2;object-fit:cover}\n  [data-kfg-root] .kfg_detail-label{font-size:12.5px;color:#5F5F5F;line-height:1.5;min-width:0}\n  [data-kfg-root] .kfg_detail-label b{display:block;font-weight:600;color:var(--ink);font-size:15px;margin-bottom:var(--s-3xs)}\n  [data-kfg-root] .kfg_detail-label span{display:block}\n  [data-kfg-root] .kfg_detail-label em{display:block;font-style:normal;font-size:10.5px;color:#9b978c;margin-top:var(--s-2xs)}\n  @media(max-width:560px){\n    [data-kfg-root] .kfg_detail{flex-direction:column;align-items:stretch;gap:var(--s-2xs)}\n    [data-kfg-root] .kfg_detail img{width:100%;max-width:none}\n    [data-kfg-root] .kfg_detail-label{text-align:center}\n  }\n\n  /* \u2500\u2500 Panel \u2500\u2500 */\n  [data-kfg-root] .kfg_panel{display:flex;flex-direction:column;gap:var(--s-m)}\n  [data-kfg-root] .kfg_step{border:1px solid var(--hair);border-radius:var(--r);padding:var(--s-s)}\n  @media(min-width:980px){[data-kfg-root] .kfg_step{padding:var(--s-m)}}\n  [data-kfg-root] .kfg_step-head{display:flex;align-items:baseline;gap:var(--s-xs);margin-bottom:var(--s-s)}\n  [data-kfg-root] .kfg_step-num{font-weight:500;font-size:12px;color:var(--ink);letter-spacing:.06em}\n  [data-kfg-root] .kfg_step-title{font-size:16px;font-weight:500}\n  [data-kfg-root] .kfg_step-sub{font-size:12.5px;color:#5F5F5F;margin-left:auto;text-align:right}\n  [data-kfg-root] .kfg_sublabel{font-size:12px;color:#5F5F5F;margin:var(--s-s) 0 var(--s-2xs)}\n\n  [data-kfg-root] .kfg_mat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-2xs)}\n  [data-kfg-root] .kfg_mat{border:1.5px solid var(--hair);border-radius:var(--r);padding:var(--s-xs);cursor:pointer;background:#fff;\n    text-align:left;transition:border-color .15s}\n  [data-kfg-root] .kfg_mat.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_mat b{display:block;font-size:13.5px;font-weight:500;line-height:1.25}\n  [data-kfg-root] .kfg_mat small{font-weight:300;font-size:11px;color:#888;display:block;margin-top:var(--s-3xs);letter-spacing:.02em}\n\n  [data-kfg-root] .kfg_dekor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-2xs);margin-top:var(--s-s)}\n  @media(min-width:560px){[data-kfg-root] .kfg_dekor-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}\n  [data-kfg-root] .kfg_dekor{border:1.5px solid var(--hair);border-radius:var(--r);cursor:pointer;padding:var(--s-3xs);background:#fff;\n    transition:border-color .15s;display:flex;flex-direction:column}\n  [data-kfg-root] .kfg_dekor.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_dekor .sw{aspect-ratio:1/1;width:100%;border-radius:5px;display:block;background-size:165%;background-position:center}\n  [data-kfg-root] .kfg_dekor span:last-child{display:block;font-size:10px;text-align:center;padding-top:var(--s-3xs);color:#5F5F5F;line-height:1.2;height:auto}\n  [data-kfg-root] .kfg_dekor-note{font-size:11px;color:#9b978c;margin-top:var(--s-2xs)}\n\n  [data-kfg-root] .kfg_chips{display:flex;flex-wrap:wrap;gap:var(--s-2xs)}\n  [data-kfg-root] .kfg_chip{border:1.5px solid var(--hair);border-radius:var(--r);background:#fff;padding:10px 16px;font-size:13.5px;\n    cursor:pointer;min-height:44px;display:inline-flex;align-items:center;gap:var(--s-2xs);transition:border-color .15s}\n  [data-kfg-root] .kfg_chip.is-active{border-color:var(--ink);font-weight:500}\n  [data-kfg-root] .kfg_chip small{font-size:11px;color:#888;font-weight:400}\n  [data-kfg-root] .kfg_chip:disabled{opacity:.4;cursor:not-allowed}\n\n  [data-kfg-root] .kfg_dims{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-xs)}\n  [data-kfg-root] .kfg_field label{font-size:12px;color:#5F5F5F;display:block;margin-bottom:var(--s-3xs)}\n  [data-kfg-root] .kfg_field .in{display:flex;align-items:center;border:1.5px solid var(--hair);border-radius:var(--r);overflow:hidden}\n  [data-kfg-root] .kfg_field input{border:0;outline:0;width:100%;padding:var(--s-xs);font-size:16px;font-weight:500;min-height:44px}\n  [data-kfg-root] .kfg_field .unit{padding-right:var(--s-xs);color:#999;font-size:13px}\n  [data-kfg-root] .kfg_field .range{font-weight:300;font-size:11px;color:#9b978c;margin-top:var(--s-3xs);display:block;letter-spacing:.03em}\n  [data-kfg-root] .kfg_field.is-error .in{border-color:#c0392b}\n  [data-kfg-root] .kfg_field .err{display:none;font-size:11.5px;color:#c0392b;margin-top:var(--s-3xs)}\n  [data-kfg-root] .kfg_field.is-error .err{display:block}\n  [data-kfg-root] .kfg_quick{margin-top:var(--s-s)}\n  [data-kfg-root] .kfg_quick p{font-size:12px;color:#5F5F5F;margin-bottom:var(--s-2xs)}\n  [data-kfg-root] .kfg_quick-chips{display:flex;flex-wrap:wrap;gap:6px}\n  [data-kfg-root] .kfg_quick-chip{font-weight:300;font-size:12px;letter-spacing:.03em;padding:7px 10px;border:1px solid var(--hair);\n    border-radius:var(--r);background:var(--alt);cursor:pointer;transition:all .15s}\n  [data-kfg-root] .kfg_quick-chip:hover{border-color:var(--ink)}\n  [data-kfg-root] .kfg_quick-chip.is-active{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:400}\n  [data-kfg-root] .kfg_measure{margin-top:var(--s-s);font-size:13px}\n  [data-kfg-root] .kfg_measure summary{cursor:pointer;color:#555;font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px}\n  [data-kfg-root] .kfg_share button{display:inline-flex;align-items:center;justify-content:center;gap:7px}\n  [data-kfg-root] .kfg_measure p{margin-top:var(--s-2xs);color:#5F5F5F;font-size:12.5px;line-height:1.55;background:var(--alt);\n    border-radius:var(--r);padding:var(--s-xs)}\n\n  [data-kfg-root] .kfg_radius{display:flex;align-items:flex-end;gap:var(--s-xs);flex-wrap:wrap}\n  [data-kfg-root] .kfg_radius .kfg_field{width:120px}\n  [data-kfg-root] .kfg_radius .kfg_field input{padding:9px var(--s-xs);font-size:14px;min-height:40px}\n  [data-kfg-root] .kfg_rule-note{margin-top:var(--s-2xs);font-size:12px;color:#9a6b12;background:var(--warn-bg);border-radius:var(--r);padding:var(--s-xs)}\n\n  [data-kfg-root] .kfg_edge-note{margin-top:var(--s-s);font-size:12.5px;color:#5F5F5F;background:var(--alt);border-radius:var(--r);\n    padding:var(--s-xs);display:flex;gap:var(--s-2xs);align-items:flex-start}\n  [data-kfg-root] .kfg_trust span .ic-svg{width:13px;height:13px}\n  [data-kfg-root] .kfg_mpx-note{margin-top:var(--s-2xs);font-size:12px;color:#9a6b12;background:var(--warn-bg);border-radius:var(--r);padding:var(--s-xs);display:none}\n\n  [data-kfg-root] .kfg_check{display:flex;align-items:flex-start;gap:var(--s-xs);padding:var(--s-xs);border:1.5px solid var(--hair);\n    border-radius:var(--r);cursor:pointer;transition:border-color .15s}\n  [data-kfg-root] .kfg_check + .kfg_check{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_check.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_check input{margin-top:3px;accent-color:var(--ink);width:16px;height:16px}\n  [data-kfg-root] .kfg_check b{font-size:13.5px;font-weight:500;display:block}\n  [data-kfg-root] .kfg_check small{font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_check .pr{margin-left:auto;font-weight:300;font-size:12px;color:#555;white-space:nowrap;letter-spacing:.02em}\n  [data-kfg-root] .kfg_custom{display:none;margin-top:var(--s-2xs);border:1.5px dashed var(--hair);border-radius:var(--r);padding:var(--s-s)}\n  [data-kfg-root] .kfg_custom.is-open{display:block}\n  [data-kfg-root] .kfg_custom textarea{width:100%;border:1.5px solid var(--hair);border-radius:var(--r);padding:var(--s-xs);\n    font-size:13px;min-height:64px;resize:vertical;outline:none}\n  [data-kfg-root] .kfg_custom textarea:focus{border-color:var(--ink)}\n  [data-kfg-root] .kfg_upload{margin-top:var(--s-2xs);border:1.5px dashed #c9c6bd;border-radius:var(--r);background:var(--alt);\n    padding:var(--s-s);text-align:center;font-size:12.5px;color:#5F5F5F;cursor:pointer;transition:border-color .15s}\n  [data-kfg-root] .kfg_upload:hover{border-color:var(--ink)}\n  [data-kfg-root] .kfg_upload b{display:block;font-weight:500;color:var(--ink);margin-bottom:2px}\n  [data-kfg-root] .kfg_custom-hint{font-size:11.5px;color:#9a6b12;margin-top:var(--s-2xs)}\n\n  [data-kfg-root] .kfg_preset{display:flex;align-items:center;gap:var(--s-xs);padding:var(--s-xs);border:1.5px solid var(--hair);\n    border-radius:var(--r);transition:border-color .15s}\n  [data-kfg-root] .kfg_preset + .kfg_preset{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_preset.is-active{border-color:var(--ink)}\n  [data-kfg-root] .kfg_preset b{font-size:13.5px;font-weight:500;display:block}\n  [data-kfg-root] .kfg_preset small{font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_preset .pr{margin-left:auto;font-weight:300;font-size:12px;color:#555;white-space:nowrap;letter-spacing:.02em}\n  [data-kfg-root] .kfg_stepper{display:inline-flex;align-items:stretch;gap:0;\n    border:1.5px solid var(--hair);border-radius:var(--r);overflow:hidden}\n  [data-kfg-root] .kfg_stepper button{border:0;background:#fff;width:36px;height:36px;font-size:17px;\n    cursor:pointer;color:var(--ink);display:grid;place-items:center;line-height:1;padding:0}\n  [data-kfg-root] .kfg_stepper button:hover{background:var(--alt)}\n  [data-kfg-root] .kfg_stepper [data-count]{min-width:28px;text-align:center;font-weight:500;font-size:14px;\n    font-variant-numeric:tabular-nums;display:grid;place-items:center;line-height:1}\n  [data-kfg-root] .kfg_cutlist{display:flex;flex-wrap:wrap;gap:var(--s-2xs);margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_cutitem{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hair);border-radius:var(--r);\n    padding:6px 10px;font-size:12px;background:var(--alt)}\n  [data-kfg-root] .kfg_cutitem button{border:0;background:none;cursor:pointer;font-size:14px;color:#999;padding:0 2px;line-height:1}\n  [data-kfg-root] .kfg_cutitem button:hover{color:#c0392b}\n  [data-kfg-root] #stage.is-drawing{cursor:crosshair;touch-action:none}\n  [data-kfg-root] #stage.is-dragging{touch-action:none}\n  [data-kfg-root] .kfg_muster{background:var(--card);border-radius:var(--r);padding:var(--s-s);display:flex;gap:var(--s-xs);align-items:center}\n  [data-kfg-root] .kfg_muster .ic .ic-svg{width:22px;height:22px}\n  [data-kfg-root] .kfg_muster b{font-size:13.5px;font-weight:500;display:block}\n  [data-kfg-root] .kfg_muster small{font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_muster button{margin-left:auto;border:1px solid var(--ink);background:#fff;border-radius:var(--r);\n    padding:9px 14px;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;min-height:40px}\n\n  /* Summary */\n  [data-kfg-root] .kfg_summary{border:1px solid var(--hair);border-radius:var(--r);padding:var(--s-s);margin-top:var(--s-s);background:#fff}\n  [data-kfg-root] .kfg_sum-row{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s-s)}\n  [data-kfg-root] .kfg_sum-price small{display:block;font-size:12px;color:#5F5F5F}\n  [data-kfg-root] .kfg_sum-price .val{font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.1}\n  [data-kfg-root] .kfg_sum-price .vat{font-size:11px;color:#999}\n  [data-kfg-root] .kfg_delivery{font-size:12.5px;text-align:right}\n  [data-kfg-root] .kfg_delivery b{display:block;font-weight:500}\n  [data-kfg-root] .kfg_delivery span{color:#5F5F5F}\n  [data-kfg-root] .kfg_breakdown{margin-top:var(--s-xs);font-size:12.5px}\n  [data-kfg-root] .kfg_breakdown summary{cursor:pointer;color:#555;list-style:none;display:inline-flex;gap:6px;align-items:center}\n  [data-kfg-root] .kfg_breakdown summary::after{margin-left:2px}\n  [data-kfg-root] .kfg_breakdown table{width:100%;margin-top:var(--s-2xs);border-collapse:collapse}\n  [data-kfg-root] .kfg_breakdown td{padding:var(--s-3xs) 0;color:#5F5F5F;font-size:12px}\n  [data-kfg-root] .kfg_breakdown td:last-child{text-align:right;font-weight:300;letter-spacing:.02em}\n  [data-kfg-root] .kfg_breakdown tr.total td{border-top:1px solid var(--hair);padding-top:var(--s-2xs);color:var(--ink);font-weight:500}\n  [data-kfg-root] .kfg_cta{margin-top:var(--s-s);width:100%;border:0;border-radius:var(--r);background:var(--ink);color:#fff;\n    font-size:15px;font-weight:500;padding:var(--s-s);cursor:pointer;min-height:52px;transition:background .15s}\n  [data-kfg-root] .kfg_cta:hover{background:var(--deep)}\n  [data-kfg-root] .kfg_cta.is-sonder{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}\n  [data-kfg-root] .kfg_bar .kfg_cta.is-sonder{border-width:1.5px}\n  [data-kfg-root] .kfg_trust{display:flex;justify-content:center;gap:var(--s-s);margin-top:var(--s-xs);font-size:11px;color:#888;flex-wrap:wrap}\n  [data-kfg-root] .kfg_trust span{display:inline-flex;align-items:center;gap:5px}\n  [data-kfg-root] .kfg_share{display:flex;gap:var(--s-2xs);margin-top:var(--s-s)}\n  [data-kfg-root] .kfg_share button{flex:1;border:1px solid var(--hair);background:var(--alt);border-radius:var(--r);\n    padding:10px;font-size:12.5px;cursor:pointer;min-height:44px}\n  [data-kfg-root] .kfg_share button:hover{border-color:var(--ink)}\n\n  /* \u2550\u2550 MOBILE \u2550\u2550 */\n  /* Sticky Mini-Vorschau: erscheint, sobald die gro\u00dfe Vorschau aus dem Bild scrollt */\n  [data-kfg-root] .kfg_mini{position:fixed;left:0;right:0;z-index:45;background:#fff;border-bottom:1px solid var(--hair);\n    display:flex;align-items:center;gap:var(--s-xs);padding:var(--s-2xs) var(--s-s);\n    box-shadow:0 6px 18px rgba(0,0,0,.06);transform:translateY(-110%);transition:transform .22s ease}\n  [data-kfg-root] .kfg_mini.is-on{transform:translateY(0)}\n  [data-kfg-root] .kfg_mini-plate{flex:0 0 auto;height:34px;max-width:64px;border-radius:4px;background-size:cover;background-position:center;\n    border:1px solid #00000018}\n  [data-kfg-root] .kfg_mini-plate.is-round{border-radius:50%}\n  [data-kfg-root] .kfg_mini-txt{min-width:0;line-height:1.25}\n  [data-kfg-root] .kfg_mini-txt b{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_mini-txt span{display:block;font-size:11px;color:#5F5F5F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_mini button{margin-left:auto;flex:0 0 auto;border:1px solid var(--hair);background:var(--alt);border-radius:var(--r);\n    padding:7px 12px;font-size:12px;cursor:pointer;min-height:36px}\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_mini{padding-inline:clamp(16px,4vw,80px)}\n    [data-kfg-root] .kfg_mini-plate{height:42px;max-width:84px}\n  }\n\n  @media(max-width:979px){\n    [data-kfg-root] .kfg_hero{padding-top:var(--s-m)}\n    [data-kfg-root] .kfg_hero h1{font-size:26px}\n    [data-kfg-root] .kfg_hero p{font-size:14px}\n    [data-kfg-root] .kfg_layout{padding-top:var(--s-2xs);gap:var(--s-s)}\n    [data-kfg-root] .kfg_preview{padding:var(--s-xs)}\n    [data-kfg-root] .kfg_preview-stage, [data-kfg-root] #stage3d{aspect-ratio:10/7}\n    [data-kfg-root] .kfg_preview{margin-inline:calc(clamp(16px,4vw,80px) * -1);border-radius:0}\n    [data-kfg-root] .kfg_preview-hint{display:none}\n    /* Detailansicht einklappbar, spart ~300px vor dem ersten Schritt */\n    [data-kfg-root] .kfg_detail{display:block;padding:0;background:transparent}\n    [data-kfg-root] .kfg_detail summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;\n      font-size:12.5px;color:#555;font-weight:500;background:#fff;border-radius:var(--r);padding:10px var(--s-xs);min-height:44px}\n    [data-kfg-root] .kfg_detail summary::after{margin-left:auto}\n    [data-kfg-root] .kfg_detail-inner{display:flex;flex-direction:column;gap:var(--s-2xs);background:#fff;border-radius:var(--r);\n      padding:var(--s-xs);margin-top:var(--s-3xs)}\n    [data-kfg-root] .kfg_detail img{width:100%;max-width:none;min-width:0}\n    [data-kfg-root] .kfg_detail-badge{top:var(--s-m);left:var(--s-m)}\n    [data-kfg-root] .kfg_detail-label{text-align:left}\n    /* Preset-Zeilen: Stepper unter den Text statt gequetscht daneben */\n    [data-kfg-root] .kfg_preset{flex-wrap:wrap}\n    [data-kfg-root] .kfg_preset .pr{margin-left:0;order:3}\n    [data-kfg-root] .kfg_preset .kfg_stepper{margin-left:auto;order:4}\n    [data-kfg-root] .kfg_muster{flex-wrap:wrap}\n    [data-kfg-root] .kfg_muster button{margin-left:0;width:100%}\n    [data-kfg-root] .kfg_modal-box{padding:var(--s-s);border-radius:12px;max-height:94vh}\n    [data-kfg-root] .kfg_step{padding:var(--s-s) var(--s-xs)}\n  }\n  /* Die Leiste ist grundsaetzlich aus und kommt erst, wenn der Konfigurator\n     nach oben aus dem Bild gescrollt ist — auch mobil (Wunsch Sascha\n     29.07.). Solange man konfiguriert, steht der Preis in der Karte. */\n  /* Schwebende Karte statt randloser Platte: 8 px Ecken, umlaufender\n     Haarstrich, und die Hoehe folgt der Beschriftung statt fest zu sein\n     (Wunsch Sascha 29.07.). */\n  [data-kfg-root] .kfg_bar{position:fixed;bottom:0;left:0;right:0;background:#fff;\n    border:1px solid var(--hair);border-radius:var(--r);\n    margin:0 var(--s-xs) calc(var(--s-xs) + env(safe-area-inset-bottom));\n    display:none;transform:translateY(140%);transition:transform .22s ease;\n    padding:var(--s-xs) var(--s-xs) var(--s-xs) var(--s-s);z-index:60;\n    align-items:center;gap:var(--s-xs);box-shadow:0 10px 30px -12px rgba(0,0,0,.22)}\n  [data-kfg-root] .kfg_bar.is-on{display:flex;transform:translateY(0)}\n  /* Was gekauft wird, steht jetzt in der Leiste: kleine Platte, Material\n     und Dekor, darunter Form, Mass und Staerke (Befund Sascha 29.07.). */\n  [data-kfg-root] .kfg_bar-thumb{flex:0 0 auto;width:48px;height:36px;border-radius:4px;\n    background:var(--card);background-size:cover;background-position:center;border:1px solid #00000018}\n  [data-kfg-root] .kfg_bar-thumb.is-round{border-radius:50%;width:36px}\n  [data-kfg-root] .kfg_bar-what{min-width:0;line-height:1.25;flex:1 1 auto}\n  [data-kfg-root] .kfg_bar-what b{display:block;font-size:12.5px;font-weight:500;\n    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_bar-what small{display:block;font-size:11px;color:#5F5F5F;\n    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_bar .p{line-height:1.15;flex:0 0 auto;text-align:right}\n  [data-kfg-root] .kfg_bar .p .val{font-size:19px;font-weight:600;display:block}\n  [data-kfg-root] .kfg_bar .p small{font-size:10.5px;color:#5F5F5F;white-space:nowrap}\n  /* Gleiche Optik wie der Knopf in der Preiskarte (Wunsch Sascha 29.07.):\n     Rundung, Schriftgroesse und Hoehe unveraendert, nur die Breite ist\n     begrenzt statt ueber die halbe Seite zu laufen. */\n  [data-kfg-root] .kfg_bar .kfg_cta{margin:0;flex:0 0 auto;padding:14px var(--s-l);\n    min-height:50px;font-size:15px;width:auto;min-width:230px;border-radius:var(--r)}\n  /* Schmale Schirme: Bezeichnung und Miniatur weichen, damit Preis und\n     Knopf nicht aus der Leiste laufen (Befund Sascha 29.07.). */\n  @media(max-width:560px){\n    [data-kfg-root] .kfg_bar{gap:var(--s-2xs);padding-inline:var(--s-xs)}\n    [data-kfg-root] .kfg_bar-what{display:none}\n    [data-kfg-root] .kfg_bar-thumb{display:none}\n    [data-kfg-root] .kfg_bar .p{margin-right:auto;text-align:left}\n    [data-kfg-root] .kfg_bar .kfg_cta{flex:1 1 auto;min-width:0;max-width:62%;\n      padding-inline:var(--s-xs);font-size:14px;white-space:nowrap;\n      overflow:hidden;text-overflow:ellipsis}\n  }\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_bar.is-on{max-width:1180px;margin-inline:auto;\n      padding:var(--s-xs) var(--s-xs) var(--s-xs) var(--s-m)}\n    [data-kfg-root] .kfg_bar.is-on .p{margin-left:auto}\n    [data-kfg-root] .kfg_bar.is-on .p .val{font-size:21px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_cta{flex:0 0 auto;min-width:260px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_bar-thumb{width:62px;height:47px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_bar-what b{font-size:14px}\n    [data-kfg-root] .kfg_bar.is-on .kfg_bar-what small{font-size:12px}\n  }\n\n  [data-kfg-root] .kfg_modal{position:fixed;inset:0;background:rgba(10,10,10,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:var(--s-s)}\n  [data-kfg-root] .kfg_modal[hidden]{display:none}\n  [data-kfg-root] .kfg_modal-box{background:#fff;border-radius:16px;max-width:960px;width:100%;max-height:90vh;overflow:auto;padding:var(--s-m)}\n  [data-kfg-root] .kfg_modal-head{display:flex;align-items:center;gap:var(--s-xs);margin-bottom:var(--s-s)}\n  [data-kfg-root] .kfg_modal-head b{font-size:18px;font-weight:600}\n  [data-kfg-root] .kfg_modal-tag{font-size:11px;color:#9a6b12;background:var(--warn-bg);border-radius:var(--r);padding:3px 8px}\n  [data-kfg-root] .kfg_modal-head button{margin-left:auto;border:0;background:var(--alt);border-radius:var(--r);width:36px;height:36px;font-size:20px;cursor:pointer}\n  [data-kfg-root] .kfg_modal-grid{display:grid;grid-template-columns:1fr;gap:var(--s-m)}\n  @media(min-width:760px){[data-kfg-root] .kfg_modal-grid{grid-template-columns:55fr 45fr}}\n  [data-kfg-root] .kfg_modal-draw{background:var(--card);border-radius:var(--r);padding:var(--s-xs)}\n  [data-kfg-root] .kfg_modal-draw svg{width:100%;display:block}\n  [data-kfg-root] .kfg_modal-draw p{font-size:11px;color:#8a877f;text-align:center;padding-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_modal-data table{width:100%;border-collapse:collapse;font-size:13px}\n  [data-kfg-root] .kfg_modal-data td{padding:6px 0;border-bottom:1px solid var(--hair);vertical-align:top}\n  [data-kfg-root] .kfg_modal-data td:first-child{color:#5F5F5F;width:38%;padding-right:var(--s-xs)}\n  [data-kfg-root] .kfg_modal-data .props{margin-top:var(--s-s);background:var(--alt);border-radius:var(--r);padding:var(--s-xs);\n    font-size:11px;color:#555;font-weight:300;letter-spacing:.02em;line-height:1.7;word-break:break-all}\n  [data-kfg-root] .kfg_modal-data .props b{display:block;font-weight:500;color:var(--ink);font-size:11.5px;margin-bottom:4px;letter-spacing:0}\n  [data-kfg-root] .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--deep);color:#fff;\n    padding:10px 18px;border-radius:var(--r);font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:70}\n  [data-kfg-root] .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}\n\n  /* \u2500\u2500 Isolationsschicht: Webflow-Site-CSS darf nicht in den Konfigurator bluten,\n        und der Konfigurator faerbt/resettet nichts ausserhalb seines Containers.\n        :where() hat Spezifitaet 0 \u2192 eigene Regeln gewinnen immer. \u2500\u2500 */\n  [data-kfg-root]{\n    --ink:#1E1E1E; --deep:#0A0A0A; --card:#F2F0EB; --alt:#FAFAFA; --hair:#E5E5E5;\n    --ok:#1c7a3d; --ok-bg:#e8f4ec; --warn:#9a6b12; --warn-bg:#faf3e2;\n    --s-3xs:4px; --s-2xs:8px; --s-xs:12px; --s-s:16px; --s-m:24px; --s-l:32px; --s-xl:48px; --s-2xl:64px;\n    --r:8px;\n    display:block; box-sizing:border-box;\n    font-family:'Onest','DM Sans',sans-serif; font-size:15px; font-weight:400;\n    line-height:1.45; color:#1E1E1E; background:#fff; text-align:left;\n    letter-spacing:normal; text-transform:none; -webkit-font-smoothing:antialiased;\n  }\n  [data-kfg-root] :where(*, *::before, *::after){\n    box-sizing:border-box; margin:0; padding:0;\n    font-family:inherit; line-height:inherit; color:inherit;\n    letter-spacing:normal; text-transform:none;\n  }\n  /* text-align NICHT pauschal auf inherit setzen \u2014 das nahm Buttons die vom\n     Browser vorgegebene Zentrierung, wodurch Minus und Plus im Mengenfeld\n     links klebten (Befund Sascha, 27.07.). */\n  [data-kfg-root] :where(button){text-align:center}\n  [data-kfg-root] :where(b, strong){font-weight:600}\n  [data-kfg-root] :where(small){font-size:inherit}\n  [data-kfg-root] :where(button){background:none;border:none;cursor:pointer;font:inherit}\n  [data-kfg-root] :where(img, svg){max-width:100%}\n  [data-kfg-root] :where(p, span, div, label, li, td, th, summary){font-weight:inherit}\n\n  /* Ueberschriften grundsaetzlich schwarz (Sascha 26.07.) */\n  [data-kfg-root] .kfg_step-title,\n  [data-kfg-root] .kfg_step-num,\n  [data-kfg-root] .kfg_sublabel,\n  [data-kfg-root] .kfg_mat b,\n  [data-kfg-root] .kfg_preset b,\n  [data-kfg-root] .kfg_check b,\n  [data-kfg-root] .kfg_muster b,\n  [data-kfg-root] .kfg_modal-head b,\n  [data-kfg-root] .kfg_detail-label b,\n  [data-kfg-root] .kfg_upload b,\n  [data-kfg-root] h1, [data-kfg-root] h2, [data-kfg-root] h3, [data-kfg-root] h4,\n  [data-kfg-root] summary{color:#1E1E1E}\n\n  /* \u2500\u2500 Schritt 05: EIN Raster fuer alle Zeilen \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n     Spalten: [Checkbox 18px] [Text 1fr] [Preis auto] [Stepper 96px]\n     Preset-Zeilen lassen Spalte 1 leer \u2192 Textkante identisch zu den\n     Checkbox-Zeilen. Checkbox-Zeilen lassen Spalte 4 leer \u2192 Preise stehen\n     bei allen Zeilen in derselben Spalte. min-height macht alle gleich hoch. */\n  [data-kfg-root] .kfg_panel{container-type:inline-size;container-name:kfgpanel}\n  [data-kfg-root] .kfg_check,\n  [data-kfg-root] .kfg_preset{\n    display:grid;\n    grid-template-columns:18px minmax(0,1fr) auto 96px;\n    align-items:center;\n    column-gap:var(--s-xs);\n    row-gap:0;\n    min-height:0;\n    padding:var(--s-xs) var(--s-s);\n    border:1.5px solid var(--hair);\n    border-radius:var(--r);\n  }\n  /* gleiche Abstaende zwischen ALLEN Zeilentypen */\n  [data-kfg-root] .kfg_check + .kfg_check,\n  [data-kfg-root] .kfg_check + .kfg_preset,\n  [data-kfg-root] .kfg_preset + .kfg_check,\n  [data-kfg-root] .kfg_preset + .kfg_preset{margin-top:var(--s-2xs)}\n\n  [data-kfg-root] .kfg_check input{grid-column:1;margin:0;accent-color:var(--ink);width:16px;height:16px}\n  [data-kfg-root] .kfg_check > span:not(.pr),\n  [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){\n    grid-column:2;min-width:0;display:block;\n  }\n  [data-kfg-root] .kfg_check .pr,\n  [data-kfg-root] .kfg_preset .pr{\n    grid-column:3;justify-self:end;margin:0;white-space:nowrap;text-align:right;\n    font-size:12px;font-weight:400;color:#555;letter-spacing:.02em;\n  }\n  [data-kfg-root] .kfg_preset .kfg_stepper{grid-column:4;justify-self:end;margin:0}\n\n  /* Titel einzeilig, Unterzeile auf 2 Zeilen begrenzt und reserviert\n     \u2192 jede Zeile in Schritt 05 ist exakt gleich hoch, unabhaengig von der Textlaenge */\n  /* Titel und Unterzeile je eine Zeile, Textblock mit fester Hoehe:\n     dadurch sind ALLE Zeilen in Schritt 05 exakt gleich hoch und der Preis\n     haengt nicht mehr als eigene Zeile darunter. */\n  [data-kfg-root] .kfg_check b,\n  [data-kfg-root] .kfg_preset b{\n    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;\n    font-size:13.5px;font-weight:500;line-height:1.35;color:#1E1E1E;\n  }\n  [data-kfg-root] .kfg_check > span:not(.pr),\n  [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){height:53px}\n  [data-kfg-root] .kfg_check small,\n  [data-kfg-root] .kfg_preset small{\n    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\n    font-size:12px;line-height:1.35;color:#5F5F5F;margin-top:2px;\n  }\n\n  [data-kfg-root] .kfg_stepper button{width:34px;height:34px}\n\n  /* Schmale Panels: Preis + Stepper ruecken unter den Text, Raster bleibt sauber */\n  @media(max-width:520px){\n    [data-kfg-root] .kfg_check,\n    [data-kfg-root] .kfg_preset{\n      grid-template-columns:18px minmax(0,1fr) auto;\n      row-gap:var(--s-2xs);\n    }\n    [data-kfg-root] .kfg_check > span:not(.pr),\n    [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){grid-column:2/-1}\n    [data-kfg-root] .kfg_check .pr,\n    [data-kfg-root] .kfg_preset .pr{grid-column:2;justify-self:start;text-align:left}\n    [data-kfg-root] .kfg_preset .kfg_stepper{grid-column:3;justify-self:end}\n    /* Zeilen ohne Stepper reservieren dieselbe Hoehe wie die mit Stepper */\n    [data-kfg-root] .kfg_preset .pr{display:flex;align-items:center;min-height:36px}\n    [data-kfg-root] .kfg_preset .kfg_stepper{min-height:36px}\n    /* Checkbox-Zeilen haben keinen Stepper: Preis bleibt in der ersten Zeile */\n    [data-kfg-root] .kfg_check{grid-template-columns:18px minmax(0,1fr) auto}\n    [data-kfg-root] .kfg_check > span:not(.pr){grid-column:2}\n    [data-kfg-root] .kfg_check .pr{grid-column:3;justify-self:end;text-align:right;min-height:36px;display:flex;align-items:center}\n    [data-kfg-root] .kfg_check b, [data-kfg-root] .kfg_preset b,\n    [data-kfg-root] .kfg_check small, [data-kfg-root] .kfg_preset small{-webkit-line-clamp:2}\n    [data-kfg-root] .kfg_check > span:not(.pr),\n    [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){height:auto;min-height:53px}\n    /* im gestapelten Layout darf der Titel umbrechen \u2014 nichts wird abgeschnitten */\n    [data-kfg-root] .kfg_check b,\n    [data-kfg-root] .kfg_preset b{white-space:normal;overflow:visible}\n  }\n  @container kfgpanel (max-width:420px){\n    [data-kfg-root] .kfg_check,\n    [data-kfg-root] .kfg_preset{\n      grid-template-columns:18px minmax(0,1fr) auto;\n      row-gap:var(--s-2xs);\n    }\n    [data-kfg-root] .kfg_check > span:not(.pr),\n    [data-kfg-root] .kfg_preset > span:not(.pr):not(.kfg_stepper){grid-column:2/-1}\n    [data-kfg-root] .kfg_check .pr,\n    [data-kfg-root] .kfg_preset .pr{grid-column:2;justify-self:start;text-align:left}\n    [data-kfg-root] .kfg_preset .kfg_stepper{grid-column:3;justify-self:end}\n    /* Zeilen ohne Stepper reservieren dieselbe Hoehe wie die mit Stepper */\n    [data-kfg-root] .kfg_check .pr,\n    [data-kfg-root] .kfg_preset .pr{display:flex;align-items:center;min-height:36px}\n    [data-kfg-root] .kfg_preset .kfg_stepper{min-height:36px}\n    /* im gestapelten Layout darf der Titel umbrechen \u2014 nichts wird abgeschnitten */\n    [data-kfg-root] .kfg_check b,\n    [data-kfg-root] .kfg_preset b{white-space:normal;overflow:visible}\n  }\n\n\n  /* Musterbox-Karte auf dieselbe Textkante */\n  [data-kfg-root] .kfg_muster{align-items:center;gap:var(--s-xs);padding:var(--s-s)}\n  [data-kfg-root] .kfg_muster small{display:block;font-size:12px;line-height:1.35;color:#5F5F5F;margin-top:2px}\n\n  /* Dekor-Kacheln: Beschriftung darf nicht abgeschnitten werden */\n  /* Dekorname darf zwei Zeilen brauchen \u2014 \"Eiche Kamienny\" wurde vorher nach\n     dem ersten Wort abgeschnitten. Feste Hoehe haelt alle Kacheln gleich gross. */\n  [data-kfg-root] .kfg_dekor{overflow:visible}\n  [data-kfg-root] .kfg_dekor > span:last-child{\n    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;\n    font-size:10.5px; line-height:1.25; color:#1E1E1E; text-align:center;\n    white-space:normal; word-break:normal; hyphens:none;\n    height:30px; padding-top:var(--s-3xs);\n  }\n\n  /* \u2500\u2500 Radius je Ecke: verknuepfter Wert oben, darunter die vier Ecken\n        in derselben Anordnung wie auf der Platte (Draufsicht). \u2500\u2500 */\n  [data-kfg-root] .kfg_radgrid{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_radall{\n    display:flex;align-items:center;gap:var(--s-2xs);\n    border:1.5px solid var(--hair);border-radius:var(--r);\n    padding:8px var(--s-xs);margin-bottom:var(--s-2xs);background:var(--alt);\n  }\n  [data-kfg-root] .kfg_radall.is-linked{border-color:var(--ink)}\n  [data-kfg-root] .kfg_radall em{margin-left:auto;font-style:normal;font-size:11px;color:#5F5F5F}\n  [data-kfg-root] .kfg_radquad{\n    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-2xs);max-width:340px;\n  }\n  [data-kfg-root] .kfg_radlist{display:grid;grid-template-columns:1fr;gap:var(--s-2xs);max-width:420px}\n  [data-kfg-root] .kfg_radlist .kfg_radcell .nm{flex:1 1 auto;font-size:12.5px;color:#1E1E1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n  [data-kfg-root] .kfg_radlist .kfg_radcell input{width:64px;flex:0 0 64px;text-align:right}\n  [data-kfg-root] .kfg_lfrow{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_lfrow .kfg_sublabel{margin-top:0}\n  [data-kfg-root] .kfg_radcell{\n    display:flex;align-items:center;gap:6px;\n    border:1.5px solid var(--hair);border-radius:var(--r);padding:6px var(--s-2xs);\n    background:#fff;cursor:text;\n  }\n  [data-kfg-root] .kfg_radcell.is-on{border-color:var(--ink)}\n  [data-kfg-root] .kfg_radall input,\n  [data-kfg-root] .kfg_radcell input{\n    width:100%;min-width:0;border:0;outline:0;background:transparent;\n    font-size:14px;font-weight:500;color:#1E1E1E;padding:2px 0;-moz-appearance:textfield;\n  }\n  [data-kfg-root] .kfg_radall input::-webkit-outer-spin-button,\n  [data-kfg-root] .kfg_radall input::-webkit-inner-spin-button,\n  [data-kfg-root] .kfg_radcell input::-webkit-outer-spin-button,\n  [data-kfg-root] .kfg_radcell input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}\n  [data-kfg-root] .kfg_radall .u,\n  [data-kfg-root] .kfg_radcell .u{font-size:11px;color:#999;flex:0 0 auto}\n  [data-kfg-root] .kfg_cornerhit:hover{fill:#1E1E1E12}\n\n  /* \u2500\u2500 Gruppen in Schritt 05 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n  [data-kfg-root] .kfg_grouplabel{\n    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a8a;\n    font-weight:500;margin:var(--s-m) 0 var(--s-2xs);\n  }\n  [data-kfg-root] .kfg_grouplabel:first-of-type{margin-top:var(--s-s)}\n\n  /* \u2500\u2500 Z\u00e4hler am Schritt-Kopf \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n  [data-kfg-root] .kfg_step-count{\n    margin-left:auto;font-size:11px;font-weight:500;letter-spacing:.02em;\n    background:var(--ink);color:#fff;border-radius:var(--r);padding:3px 9px;\n    white-space:nowrap;max-width:52%;overflow:hidden;text-overflow:ellipsis;\n  }\n  [data-kfg-root] .kfg_step-count.is-empty{background:var(--card);color:#8a8a8a}\n  [data-kfg-root] .kfg_step-head{display:flex;align-items:center;gap:var(--s-2xs)}\n\n  /* \u2500\u2500 Konfigurations-Zusammenfassung \u00fcber dem CTA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n  [data-kfg-root] .kfg_conf{\n    border:1px solid var(--hair);border-radius:var(--r);background:var(--alt);\n    padding:var(--s-xs);margin:var(--s-s) 0 var(--s-2xs);\n  }\n  [data-kfg-root] .kfg_conf > p{\n    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a8a;\n    font-weight:500;margin-bottom:var(--s-2xs);\n  }\n  [data-kfg-root] .kfg_conf-chips{display:flex;flex-wrap:wrap;gap:5px}\n  [data-kfg-root] .kfg_conf-chip{\n    font-size:12px;line-height:1.3;border:1px solid var(--hair);background:#fff;\n    border-radius:var(--r);padding:5px 9px;color:var(--ink);cursor:pointer;text-align:left;\n  }\n  [data-kfg-root] .kfg_conf-chip:hover{border-color:var(--ink)}\n  [data-kfg-root] .kfg_conf-chip.is-warn{background:var(--warn-bg);border-color:#e8dcc0;color:var(--warn)}\n  [data-kfg-root] .kfg_step.is-flash{box-shadow:0 0 0 2px var(--ink);transition:box-shadow .2s}\n\n  /* Auf flachen Fenstern die Draufsicht mitskalieren, damit die Platte beim\n     Arbeiten an Ecken und Massen komplett sichtbar bleibt. */\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_preview-stage,\n    [data-kfg-root] #stage3d{max-height:min(74vh,780px)}\n  }\n\n  /* Flache Fenster: Vorschau UND Preiskarte wandern GEMEINSAM mit. Reicht die\n     Hoehe nicht, faellt gestuft weg, was am ehesten entbehrlich ist, die\n     Warenkorbkarte bleibt dabei immer am Bild (Wunsch Sascha, 27.07.). */\n  @media(min-width:980px){\n    [data-kfg-root] .kfg_stickycol.is-tight .kfg_trust,\n    [data-kfg-root] .kfg_stickycol.is-tight .kfg_share{display:none}\n    /* Das Vorschaubild behaelt IMMER seine Groesse (Wunsch Sascha): kein\n       Schrumpfen beim Scrollen. Fehlt Platz, wird die Karte zugeklappt —\n       die Zeile dafuer ist ja sichtbar. */\n    [data-kfg-root] .kfg_stickycol.is-tighter .kfg_conf,\n    [data-kfg-root] .kfg_stickycol.is-tighter .kfg_breakdown{display:none}\n    /* Notfallstufe: die Spalte scrollt intern. Bewusst OHNE overscroll-behavior:\n       contain - sonst bleibt das Mausrad am Ende der Karte haengen statt die\n       Seite weiterzuscrollen, und genau das fuehlt sich hakelig an. */\n    [data-kfg-root] .kfg_stickycol.is-scroll{overflow-y:auto;\n      max-height:calc(100vh - var(--kfg-top,96px) - 16px);scrollbar-width:thin;padding-right:6px}\n  }\n\n  /* Mobil: Vorschaukarte bleibt beim Konfigurieren stehen (ersetzt die Mini-Leiste).\n     Die Preiskarte sitzt auf Mobil ohnehin am Ende, Preis und CTA liegen unten\n     in der festen Leiste \u2014 die bleibt bewusst erhalten. */\n  @media(max-width:979px){\n    [data-kfg-root] .kfg_stickycol{position:sticky;top:var(--kfg-top,56px);z-index:3;\n      background:#fff;padding-bottom:var(--s-2xs)}\n    [data-kfg-root] .kfg_preview{box-shadow:0 6px 16px -12px #00000040}\n    /* Badge darf den 2D/3D-Umschalter nicht ueberlappen */\n    [data-kfg-root] .kfg_preview-badge{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n  }\n  [data-kfg-root] .kfg_machine{display:block;margin-top:var(--s-2xs);font-size:13px;color:#555}\n  [data-kfg-root] .kfg_machine input{width:100%;margin-top:var(--s-3xs);padding:10px 12px;border:1px solid var(--hair);\n    border-radius:var(--r);font-size:15px;background:#fff;color:var(--ink)}\n  [data-kfg-root] .kfg_machine input:focus{outline:none;border-color:var(--ink)}\n  /* Die Lackierung ist eine Kantenoption, keine Zeile aus Schritt 05. Sie erbt\n     sonst deren Kasten samt der fuer den Mengenregler reservierten Spalte und\n     klebt am Chip-Raster darueber (Ruecklauf Senior 30.07.: 'die Raender\n     muessen bei Kante Natur weg'). */\n  [data-kfg-root] #lackBlock{margin-top:var(--s-s)}\n  [data-kfg-root] #lackBlock .kfg_check,\n  [data-kfg-root] #lackBlock .kfg_check.is-active{\n    border:0;border-radius:0;padding:0;background:none;\n    grid-template-columns:18px minmax(0,1fr) auto;align-items:start;column-gap:var(--s-2xs)}\n  [data-kfg-root] #lackBlock .kfg_check > span:not(.pr){height:auto;grid-column:2}\n  [data-kfg-root] #lackBlock .kfg_check .pr{grid-column:3;justify-self:end;text-align:right;\n    align-self:center;min-height:0}\n  [data-kfg-root] #lackBlock .kfg_check small{-webkit-line-clamp:3}\n  [data-kfg-root] #lackBlock .kfg_check input{margin-top:2px}\n  @media(max-width:520px){\n    [data-kfg-root] #lackBlock .kfg_check .pr{grid-column:2;justify-self:start;text-align:left}\n  }\n  /* ── Abstaende in Schritt 05 ────────────────────────────────────────────\n     Die Gruppen-Wrapper aus v1.16.0 (#grpMaschine, #grpDurchlass, #grpKueche,\n     #grpCustom, #grpFrei) haben die Nachbarschafts-Selektoren zerschnitten:\n     '.kfg_check + .kfg_preset' greift ueber eine Wrapper-Grenze nicht mehr\n     (erste Zeile einer Gruppe stand ohne Abstand, Rahmen an Rahmen), und\n     jede Gruppenueberschrift galt in ihrem Wrapper als :first-of-type und\n     bekam 16 statt 24 px. Die Abstaende haengen deshalb ab v1.16.1 am\n     Element selbst statt an der Nachbarschaft — unabhaengig davon, wie tief\n     es verschachtelt ist. 8 px zwischen Zeilen, 24 px vor einer neuen\n     Gruppe, 16 px vor der ersten (Ruecklauf Senior 30.07.). */\n  [data-kfg-root] .kfg_step .kfg_check,\n  [data-kfg-root] .kfg_step .kfg_preset{margin-top:var(--s-2xs)}\n  [data-kfg-root] .kfg_step .kfg_grouplabel{margin-top:var(--s-m)}\n  [data-kfg-root] .kfg_step-body > .kfg_grouplabel:first-child{margin-top:var(--s-s)}\n  [data-kfg-root] .kfg_grouplabel + .kfg_sublabel{margin-top:0}\n  [data-kfg-root] .kfg_machine + .kfg_chips{margin-top:var(--s-2xs)}\n";
 
 /* ═══════════════════════ MARKUP ═══════════════════════ */
-var KFG_MARKUP = "<div class=\"kfg_layout\">\n\n  <!-- \u2550\u2550 PREVIEW \u2550\u2550 -->\n  <div class=\"kfg_stickycol\" id=\"stickyCol\">\n    <div class=\"kfg_preview\">\n      <div class=\"kfg_preview-badge\" id=\"badge\"><span class=\"dot\"></span><span id=\"badgeText\">Ab Lager</span></div>\n      <div class=\"kfg_viewtoggle\">\n        <button id=\"btn2d\" class=\"is-active\">2D</button>\n        <button id=\"btn3d\">3D</button>\n      </div>\n      <svg class=\"kfg_preview-stage\" id=\"stage\" viewBox=\"0 0 600 444\" role=\"img\" aria-label=\"Vorschau der konfigurierten Tischplatte\"></svg>\n      <canvas id=\"stage3d\"></canvas>\n      <details class=\"kfg_detail\" id=\"detailCard\" open>\n        <summary>Kante &amp; Material im Detail</summary>\n        <div class=\"kfg_detail-inner\">\n          <span class=\"kfg_detail-badge\">Vorschaubild</span><img id=\"detailImg\" alt=\"Detailansicht der Kante \u2014 Vorschaubild\" src=\"\">\n          <div class=\"kfg_detail-label\" id=\"detailLabel\"></div>\n        </div>\n      </details>\n      <div class=\"kfg_preview-hint\" id=\"previewHint\">Draufsicht, ma\u00dfstabsgetreu \u00b7 Kanten und Ecken anklickbar</div>\n    </div>\n\n    <div class=\"kfg_summary\">\n      <div class=\"kfg_sum-row\">\n        <div class=\"kfg_sum-price\">\n          <small id=\"priceLabel\">Dein Preis</small>\n          <span class=\"val\" id=\"price\" aria-live=\"polite\">\u2014</span>\n          <span class=\"vat\">inkl. MwSt., kostenloser Versand bis 110 \u00d7 50 cm</span>\n        </div>\n        <div class=\"kfg_delivery\">\n          <b id=\"delivDate\">\u2014</b>\n          <span id=\"delivSub\">\u2014</span>\n        </div>\n      </div>\n      <details class=\"kfg_breakdown\">\n        <summary>Preis-Aufschl\u00fcsselung</summary>\n        <table id=\"breakdown\"></table>\n      </details>\n      <div class=\"kfg_conf\" id=\"confBox\"><p>Deine Konfiguration</p><div class=\"kfg_conf-chips\" id=\"confChips\"></div></div>\n      <button class=\"kfg_cta\" id=\"cta\">In den Warenkorb</button>\n      <div class=\"kfg_trust\">\n        <span><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 21h18M5 21V10l5 3.5V10l5 3.5V4h4v17\"/></svg> Manufaktur seit 1897</span><span><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"3.2\"/><path d=\"M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1\"/></svg> CNC-pr\u00e4zise Kanten</span><span><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1.5 16V6h12v10h-12zM13.5 9h4.5l4 4v3h-3\"/><circle cx=\"6\" cy=\"18\" r=\"1.8\"/><circle cx=\"17\" cy=\"18\" r=\"1.8\"/></svg> Versand bis 110 \u00d7 50 cm gratis</span>\n      </div>\n      <div class=\"kfg_share\">\n        <button id=\"btnShare\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9.5 14.5l5-5M8.5 12l-2 2a3.5 3.5 0 105 5l2-2M15.5 12l2-2a3.5 3.5 0 10-5-5l-2 2\"/></svg> Konfiguration teilen</button>\n        <button id=\"btnMail\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M3 7.5l9 6 9-6\"/></svg> Per E-Mail senden</button>\n      </div>\n    </div>\n  </div>\n\n  <!-- \u2550\u2550 PANEL \u2550\u2550 -->\n  <div class=\"kfg_panel\">\n\n    <!-- 01 Material & Dekor -->\n    <section class=\"kfg_step\" id=\"kfgStep1\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">01</span><span class=\"kfg_step-title\">Material &amp; Dekor</span><span class=\"kfg_step-count\" id=\"k1\"></span></div>\n      <div class=\"kfg_mat-grid\" id=\"matGrid\"></div>\n      <div id=\"mpxSurfaceBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">Oberfl\u00e4che</p>\n        <div class=\"kfg_chips\" id=\"mpxSurfaceChips\">\n          <button class=\"kfg_chip is-active\" data-sf=\"natur\">Birke natur <small>geschliffen</small></button>\n          <button class=\"kfg_chip\" data-sf=\"hpl\">HPL-Laminat <small>alle Dekore</small></button>\n        </div>\n      </div>\n      <div class=\"kfg_dekor-grid\" id=\"dekorGrid\"></div>\n      <div class=\"kfg_muster\" style=\"margin-top:var(--s-s)\">\n        <span class=\"ic\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg></span>\n        <span><b>Unsicher beim Dekor?</b><small>Musterbox mit 4 Dekoren \u2014 4,90&nbsp;\u20ac, voll angerechnet beim Kauf</small></span>\n        <button type=\"button\" id=\"btnMuster\">Muster bestellen</button>\n      </div>\n      <p class=\"kfg_dekor-note\" id=\"dekorNote\">Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind f\u00fcr 18 und 25 mm verf\u00fcgbar.</p>\n    </section>\n\n    <!-- 02 Form -->\n    <section class=\"kfg_step\" id=\"kfgStep2\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">02</span><span class=\"kfg_step-title\">Form</span><span class=\"kfg_step-count\" id=\"k2\"></span></div>\n      <div class=\"kfg_chips\" id=\"formChips\">\n        <button class=\"kfg_chip is-active\" data-form=\"rect\">\u25ad Rechteck</button>\n        <button class=\"kfg_chip\" data-form=\"round\">\u25ef Rund</button>\n        <button class=\"kfg_chip\" data-form=\"lform\">\u2310 L-Form</button>\n      </div>\n      <div id=\"cornerBlock\">\n        <p class=\"kfg_sublabel\">Ecken abrunden</p>\n        <div class=\"kfg_radius\">\n          <div class=\"kfg_chips\" id=\"cornerChips\"></div>\n        </div>\n        <div id=\"cornerSelBlock\">\n          <p class=\"kfg_sublabel\">Radius je Ecke</p>\n          <div class=\"kfg_radgrid\" id=\"cornerSel\"></div>\n        </div>\n        <div class=\"kfg_rule-note\" id=\"cornerRule\" style=\"display:none\"></div>\n      </div>\n    </section>\n\n    <!-- 03 Ma\u00df -->\n    <section class=\"kfg_step\" id=\"kfgStep3\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">03</span><span class=\"kfg_step-title\">Ma\u00df</span><span class=\"kfg_step-count\" id=\"k3\"></span>\n        <span class=\"kfg_step-sub\" id=\"massHint\" hidden></span></div>\n      <div class=\"kfg_dims\" id=\"dimsRect\">\n        <div class=\"kfg_field\" id=\"fL\">\n          <label for=\"inL\">L\u00e4nge</label>\n          <div class=\"in\"><input id=\"inL\" type=\"number\" inputmode=\"numeric\" value=\"120\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeL\"></span><span class=\"err\" id=\"errL\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fB\">\n          <label for=\"inB\">Breite</label>\n          <div class=\"in\"><input id=\"inB\" type=\"number\" inputmode=\"numeric\" value=\"60\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeB\"></span><span class=\"err\" id=\"errB\"></span>\n        </div>\n      </div>\n      <div class=\"kfg_dims\" id=\"dimsRound\" style=\"display:none\">\n        <div class=\"kfg_field\" id=\"fD\" style=\"grid-column:1/-1\">\n          <label for=\"inD\">Durchmesser \u00d8</label>\n          <div class=\"in\"><input id=\"inD\" type=\"number\" inputmode=\"numeric\" value=\"80\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeD\"></span><span class=\"err\" id=\"errD\"></span>\n        </div>\n      </div>\n      <div class=\"kfg_dims\" id=\"dimsLform\" style=\"display:none\">\n        <div class=\"kfg_field\" id=\"fLL\">\n          <label for=\"inLL\">Gesamtl\u00e4nge</label>\n          <div class=\"in\"><input id=\"inLL\" type=\"number\" inputmode=\"numeric\" value=\"180\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeLL\"></span><span class=\"err\" id=\"errLL\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fLB\">\n          <label for=\"inLB\">Gesamtbreite</label>\n          <div class=\"in\"><input id=\"inLB\" type=\"number\" inputmode=\"numeric\" value=\"120\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeLB\"></span><span class=\"err\" id=\"errLB\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fAW\">\n          <label for=\"inAW\">Ausklinkung Breite</label>\n          <div class=\"in\"><input id=\"inAW\" type=\"number\" inputmode=\"numeric\" value=\"90\" min=\"10\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeAW\"></span><span class=\"err\" id=\"errAW\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fAH\">\n          <label for=\"inAH\">Ausklinkung Tiefe</label>\n          <div class=\"in\"><input id=\"inAH\" type=\"number\" inputmode=\"numeric\" value=\"60\" min=\"10\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeAH\"></span><span class=\"err\" id=\"errAH\"></span>\n        </div>\n        <div class=\"kfg_rule-note\" style=\"grid-column:1/-1\">Innenecke wird automatisch verrundet: R50 bei M\u00f6belplatte \u00b7 R10 bei Multiplex &amp; Compact (Fertigungsregel).</div>\n      </div>\n      <div class=\"kfg_quick\" id=\"quickBlock\">\n        <p>Ab Lager \u2014 sofort lieferbar:</p>\n        <div class=\"kfg_quick-chips\" id=\"quickChips\"></div>\n      </div>\n      <details class=\"kfg_measure\">\n        <summary><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 16.5L16.5 3l4.5 4.5L7.5 21zM7.5 13l2 2M10.5 10l2 2M13.5 7l2 2\"/></svg> Richtig messen \u2014 so geht's</summary>\n        <p>Miss die gew\u00fcnschte Fl\u00e4che an der breitesten Stelle und rechne bei Wandmontage 5&nbsp;mm Luft ein. Bei Gestellen: Platten\u00fcberstand 5\u201315&nbsp;cm je Seite einplanen. Unsicher? Ruf uns an \u2014 wir pr\u00fcfen dein Ma\u00df kostenlos vor der Fertigung.</p>\n      </details>\n    </section>\n\n    <!-- 04 St\u00e4rke & Kante -->\n    <section class=\"kfg_step\" id=\"kfgStep4\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">04</span><span class=\"kfg_step-title\">St\u00e4rke &amp; Kante</span><span class=\"kfg_step-count\" id=\"k4\"></span></div>\n      <div class=\"kfg_chips\" id=\"thickChips\"></div>\n      <p class=\"kfg_sublabel\">Kantenprofil</p>\n      <div class=\"kfg_chips\" id=\"edgeChips\"></div>\n      <div id=\"edgeRadiusBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">Rundungsradius der Kante</p>\n        <div class=\"kfg_chips\" id=\"edgeRadiusChips\">\n          <button class=\"kfg_chip is-active\" data-er=\"3\">R3</button>\n          <button class=\"kfg_chip\" data-er=\"6\">R6</button>\n          <button class=\"kfg_chip\" data-er=\"9\">R9</button>\n        </div>\n      </div>\n      <div id=\"absColorBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">ABS-Kantenfarbe</p>\n        <div class=\"kfg_chips\" id=\"absChips\"></div>\n      </div>\n      <div id=\"lackBlock\" style=\"display:none\">\n        <label class=\"kfg_check\"><input type=\"checkbox\" data-x=\"lack\">\n          <span><b>Kante natur, aber lackiert</b><small>unsere Lackierung, seidenmatt \u2014 sch\u00fctzt die offene Schichtkante</small></span><span class=\"pr\">5 \u20ac/lfm</span></label>\n      </div>\n      <div id=\"massbandBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">Ma\u00dfband an der Vorderkante</p>\n        <div class=\"kfg_chips\" id=\"massbandChips\"></div>\n      </div>\n      <div class=\"kfg_mpx-note\" id=\"mpxNote\">Sichtbare Schichtkante: nicht gefr\u00e4st ist serienm\u00e4\u00dfig, gefr\u00e4st 45\u00b0 kostet 5 \u20ac/lfm, halbrund 8 \u20ac/lfm. Lackiert sind es 5, 10 und 16 \u20ac/lfm \u2014 wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gew\u00fcnschten Farbe.</div>\n      <div class=\"kfg_edge-note\" id=\"edgeTip\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 3l6 16 2.5-6.5L20 10z\"/></svg><span>Tipp: Klicke in der 2D-Vorschau direkt auf eine Kante, um sie einzeln zu \u00e4ndern.</span></div>\n    </section>\n\n    <!-- 05 Ausschnitte & Bohrungen -->\n    <section class=\"kfg_step\" id=\"kfgStep5\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">05</span><span class=\"kfg_step-title\">Ausschnitte &amp; Bohrungen</span><span class=\"kfg_step-count\" id=\"k5\"></span></div>\n      <p class=\"kfg_grouplabel\">Bohrungen &amp; Durchl\u00e4sse</p>\n      <label class=\"kfg_check\"><input type=\"checkbox\" data-x=\"bohr\">\n        <span><b>Montagebohrungen 4\u00d7 \u00d88</b><small>vorgebohrt f\u00fcr g\u00e4ngige Gestelle</small></span><span class=\"pr\">+ 9,90&nbsp;\u20ac</span></label>\n      <div id=\"grpMaschine\" style=\"display:none\">\n        <p class=\"kfg_grouplabel\">Ausschnitt f\u00fcr die Maschine</p>\n        <div class=\"kfg_rule-note\">Ma\u00dfe musst du keine angeben \u2014 sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abst\u00e4nde zu allen vier Kanten stehen daneben.</div>\n        <label class=\"kfg_machine\">N\u00e4hmaschine \u2014 Hersteller und Modell\n          <input type=\"text\" id=\"machineInput\" placeholder=\"z. B. Bernina 770 QE oder Juki TL-2200\">\n        </label>\n        <div class=\"kfg_chips\"><button class=\"kfg_chip\" id=\"btnMaschine\">Maschinen-Ausschnitt hinzuf\u00fcgen</button></div>\n      </div>\n      <div id=\"grpDurchlass\">\n      <div class=\"kfg_preset\" data-preset=\"kabel\">\n        <span><b>Kabeldurchlass \u00d860</b><small>inkl. Abdeckung, frei positionierbar</small></span>\n        <span class=\"pr\">+ 14,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"kabel80\">\n        <span><b>Kabeldurchlass \u00d880</b><small>inkl. Abdeckung, frei positionierbar</small></span>\n        <span class=\"pr\">+ 16,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"armatur\">\n        <span><b>Armaturenbohrung \u00d835</b><small>f\u00fcr Armatur oder Kabeldose</small></span>\n        <span class=\"pr\">+ 12,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      </div>\n      <div id=\"grpKueche\">\n      <p class=\"kfg_grouplabel\">K\u00fcchen-Ausschnitte</p>\n      <div class=\"kfg_preset\" data-preset=\"usb\">\n        <span><b>Steckdosen-Ausschnitt</b><small>26,5 \u00d7 10 cm, f\u00fcr USB oder Steckdose</small></span>\n        <span class=\"pr\">+ 21,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"spuele\">\n        <span><b>Sp\u00fclen-Ausschnitt</b><small>78 \u00d7 43 cm, K\u00fcchen-Arbeitsplatte</small></span>\n        <span class=\"pr\">+ 65,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"induktion\">\n        <span><b>Induktionsfeld-Ausschnitt</b><small>56 \u00d7 49 cm, K\u00fcchen-Arbeitsplatte</small></span>\n        <span class=\"pr\">+ 54,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      </div>\n      <div id=\"grpCustom\">\n      <p class=\"kfg_grouplabel\">Individuelle Bearbeitung</p>\n      <label class=\"kfg_check\"><input type=\"checkbox\" data-x=\"custom\">\n        <span><b>Eigenes Bohrbild</b><small>frei nach deiner Vorgabe, CNC-gefr\u00e4st</small></span><span class=\"pr\">Angebot</span></label>\n      <div class=\"kfg_custom\" id=\"customBlock\">\n        <textarea id=\"customText\" placeholder=\"Beschreibe kurz, was du brauchst \u2014 z. B. \u201eEck-Ausklinkung 20\u00d715 cm hinten links\u201c.\"></textarea>\n        <div class=\"kfg_upload\" id=\"uploadZone\">\n          <b>Skizze oder Zeichnung hochladen</b>\n          PDF, Foto, DXF \u2014 oder einfach sp\u00e4ter per E-Mail an uns schicken\n          <input type=\"file\" id=\"uploadInput\" hidden>\n        </div>\n        <p class=\"kfg_custom-hint\">Mit eigener Skizze wird deine Platte individuell gefertigt \u2014 verbindliches Angebot in 24&nbsp;h.</p>\n      </div>\n      </div>\n      <div id=\"grpFrei\">\n      <p class=\"kfg_grouplabel\">Frei gestalten</p>\n      <p class=\"kfg_sublabel\">In der Vorschau aufziehen oder hinzuf\u00fcgen \u2014 danach jede Position auf den Millimeter genau einstellbar. Der Preis wird sofort berechnet.</p>\n      <div class=\"kfg_chips\" id=\"freiTools\">\n        <button class=\"kfg_chip\" id=\"drawRect\" data-draw=\"r\">\u25ad Ausschnitt</button>\n        <button class=\"kfg_chip\" id=\"drawCircle\" data-draw=\"c\">\u25ef Runder Ausschnitt</button>\n        <button class=\"kfg_chip\" id=\"drawPoly\" data-draw=\"p\">\u2b20 Freie Kontur</button>\n        <button class=\"kfg_chip\" id=\"addKanal\">\u2933 Kabelkanal fr\u00e4sen</button>\n      </div>\n      <p class=\"kfg_custom-hint\" id=\"drawHint\" style=\"display:none\">Zeichnen-Modus: In der Vorschau aufziehen.</p>\n      </div>\n      <div class=\"kfg_cutlist\" id=\"cutList\"></div>\n    </section>\n\n  </div>\n</div>\n\n<div class=\"kfg_bar\">\n  <span class=\"kfg_bar-thumb\" id=\"barThumb\" aria-hidden=\"true\"></span>\n  <div class=\"kfg_bar-what\"><b id=\"barTitle\">\u2014</b><small id=\"barSpec\">\u2014</small></div>\n  <div class=\"p\"><span class=\"val\" id=\"priceBar\" aria-live=\"polite\">\u2014</span><small id=\"delivBar\">\u2014</small></div>\n  <button class=\"kfg_cta\" id=\"ctaBar\">In den Warenkorb</button>\n</div>\n\n\n<div class=\"toast\" id=\"toast\"></div>\n\n<div class=\"kfg_modal\" id=\"orderModal\" hidden>\n  <div class=\"kfg_modal-box\">\n    <div class=\"kfg_modal-head\"><b>So kommt deine Bestellung bei uns an</b>\n      <span class=\"kfg_modal-tag\">Demo \u00b7 interne Ansicht</span>\n      <button id=\"omClose\" aria-label=\"Schlie\u00dfen\">\u00d7</button></div>\n    <div class=\"kfg_modal-grid\">\n      <div class=\"kfg_modal-draw\">\n        <svg id=\"omSvg\" viewBox=\"0 0 600 444\"></svg>\n        <p>Fertigungszeichnung \u2014 automatisch aus der Konfiguration erzeugt (inkl. Ausschnitt-Abst\u00e4nde)</p>\n      </div>\n      <div class=\"kfg_modal-data\" id=\"omData\"></div>\n    </div>\n  </div>\n</div>";
+var KFG_MARKUP = "<div class=\"kfg_layout\">\n\n  <!-- \u2550\u2550 PREVIEW \u2550\u2550 -->\n  <div class=\"kfg_stickycol\" id=\"stickyCol\">\n    <div class=\"kfg_preview\">\n      <div class=\"kfg_preview-badge\" id=\"badge\"><span class=\"dot\"></span><span id=\"badgeText\">Ab Lager</span></div>\n      <div class=\"kfg_viewtoggle\">\n        <button id=\"btn2d\" class=\"is-active\">2D</button>\n        <button id=\"btn3d\">3D</button>\n      </div>\n      <svg class=\"kfg_preview-stage\" id=\"stage\" viewBox=\"0 0 600 444\" role=\"img\" aria-label=\"Vorschau der konfigurierten Tischplatte\"></svg>\n      <canvas id=\"stage3d\"></canvas>\n      <details class=\"kfg_detail\" id=\"detailCard\" open>\n        <summary>Kante &amp; Material im Detail</summary>\n        <div class=\"kfg_detail-inner\">\n          <span class=\"kfg_detail-badge\">Vorschaubild</span><img id=\"detailImg\" alt=\"Detailansicht der Kante \u2014 Vorschaubild\" src=\"\">\n          <div class=\"kfg_detail-label\" id=\"detailLabel\"></div>\n        </div>\n      </details>\n      <div class=\"kfg_preview-hint\" id=\"previewHint\">Draufsicht, ma\u00dfstabsgetreu \u00b7 Kanten und Ecken anklickbar</div>\n    </div>\n\n    <div class=\"kfg_summary\">\n      <div class=\"kfg_sum-row\">\n        <div class=\"kfg_sum-price\">\n          <small id=\"priceLabel\">Dein Preis</small>\n          <span class=\"val\" id=\"price\" aria-live=\"polite\">\u2014</span>\n          <span class=\"vat\">inkl. MwSt., kostenloser Versand bis 110 \u00d7 50 cm</span>\n        </div>\n        <div class=\"kfg_delivery\">\n          <b id=\"delivDate\">\u2014</b>\n          <span id=\"delivSub\">\u2014</span>\n        </div>\n      </div>\n      <details class=\"kfg_breakdown\">\n        <summary>Preis-Aufschl\u00fcsselung</summary>\n        <table id=\"breakdown\"></table>\n      </details>\n      <div class=\"kfg_conf\" id=\"confBox\"><p>Deine Konfiguration</p><div class=\"kfg_conf-chips\" id=\"confChips\"></div></div>\n      <button class=\"kfg_cta\" id=\"cta\">In den Warenkorb</button>\n      <div class=\"kfg_trust\">\n        <span><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 21h18M5 21V10l5 3.5V10l5 3.5V4h4v17\"/></svg> Manufaktur seit 1897</span><span><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"3.2\"/><path d=\"M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1\"/></svg> CNC-pr\u00e4zise Kanten</span><span><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1.5 16V6h12v10h-12zM13.5 9h4.5l4 4v3h-3\"/><circle cx=\"6\" cy=\"18\" r=\"1.8\"/><circle cx=\"17\" cy=\"18\" r=\"1.8\"/></svg> Versand bis 110 \u00d7 50 cm gratis</span>\n      </div>\n      <div class=\"kfg_share\">\n        <button id=\"btnShare\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9.5 14.5l5-5M8.5 12l-2 2a3.5 3.5 0 105 5l2-2M15.5 12l2-2a3.5 3.5 0 10-5-5l-2 2\"/></svg> Konfiguration teilen</button>\n        <button id=\"btnMail\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M3 7.5l9 6 9-6\"/></svg> Per E-Mail senden</button>\n      </div>\n    </div>\n  </div>\n\n  <!-- \u2550\u2550 PANEL \u2550\u2550 -->\n  <div class=\"kfg_panel\">\n\n    <!-- 01 Material & Dekor -->\n    <section class=\"kfg_step\" id=\"kfgStep1\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">01</span><span class=\"kfg_step-title\">Material &amp; Dekor</span><span class=\"kfg_step-count\" id=\"k1\"></span></div>\n      <div class=\"kfg_mat-grid\" id=\"matGrid\"></div>\n      <div id=\"mpxSurfaceBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">Oberfl\u00e4che</p>\n        <div class=\"kfg_chips\" id=\"mpxSurfaceChips\">\n          <button class=\"kfg_chip is-active\" data-sf=\"natur\">Birke natur <small>geschliffen</small></button>\n          <button class=\"kfg_chip\" data-sf=\"hpl\">HPL-Laminat <small>alle Dekore</small></button>\n        </div>\n      </div>\n      <div class=\"kfg_dekor-grid\" id=\"dekorGrid\"></div>\n      <div class=\"kfg_muster\" style=\"margin-top:var(--s-s)\">\n        <span class=\"ic\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg></span>\n        <span><b>Unsicher beim Dekor?</b><small>Musterbox mit 4 Dekoren \u2014 4,90&nbsp;\u20ac, voll angerechnet beim Kauf</small></span>\n        <button type=\"button\" id=\"btnMuster\">Muster bestellen</button>\n      </div>\n      <p class=\"kfg_dekor-note\" id=\"dekorNote\">Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind f\u00fcr 18 und 25 mm verf\u00fcgbar.</p>\n    </section>\n\n    <!-- 02 Form -->\n    <section class=\"kfg_step\" id=\"kfgStep2\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">02</span><span class=\"kfg_step-title\">Form</span><span class=\"kfg_step-count\" id=\"k2\"></span></div>\n      <div class=\"kfg_chips\" id=\"formChips\">\n        <button class=\"kfg_chip is-active\" data-form=\"rect\">\u25ad Rechteck</button>\n        <button class=\"kfg_chip\" data-form=\"round\">\u25ef Rund</button>\n        <button class=\"kfg_chip\" data-form=\"lform\">\u2310 L-Form</button>\n      </div>\n      <div id=\"cornerBlock\">\n        <p class=\"kfg_sublabel\">Ecken abrunden</p>\n        <div class=\"kfg_radius\">\n          <div class=\"kfg_chips\" id=\"cornerChips\"></div>\n        </div>\n        <div id=\"cornerSelBlock\">\n          <p class=\"kfg_sublabel\">Radius je Ecke</p>\n          <div class=\"kfg_radgrid\" id=\"cornerSel\"></div>\n        </div>\n        <div class=\"kfg_rule-note\" id=\"cornerRule\" style=\"display:none\"></div>\n      </div>\n    </section>\n\n    <!-- 03 Ma\u00df -->\n    <section class=\"kfg_step\" id=\"kfgStep3\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">03</span><span class=\"kfg_step-title\">Ma\u00df</span><span class=\"kfg_step-count\" id=\"k3\"></span>\n        <span class=\"kfg_step-sub\" id=\"massHint\" hidden></span></div>\n      <div class=\"kfg_dims\" id=\"dimsRect\">\n        <div class=\"kfg_field\" id=\"fL\">\n          <label for=\"inL\">L\u00e4nge</label>\n          <div class=\"in\"><input id=\"inL\" type=\"number\" inputmode=\"numeric\" value=\"120\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeL\"></span><span class=\"err\" id=\"errL\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fB\">\n          <label for=\"inB\">Breite</label>\n          <div class=\"in\"><input id=\"inB\" type=\"number\" inputmode=\"numeric\" value=\"60\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeB\"></span><span class=\"err\" id=\"errB\"></span>\n        </div>\n      </div>\n      <div class=\"kfg_dims\" id=\"dimsRound\" style=\"display:none\">\n        <div class=\"kfg_field\" id=\"fD\" style=\"grid-column:1/-1\">\n          <label for=\"inD\">Durchmesser \u00d8</label>\n          <div class=\"in\"><input id=\"inD\" type=\"number\" inputmode=\"numeric\" value=\"80\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeD\"></span><span class=\"err\" id=\"errD\"></span>\n        </div>\n      </div>\n      <div class=\"kfg_dims\" id=\"dimsLform\" style=\"display:none\">\n        <div class=\"kfg_field\" id=\"fLL\">\n          <label for=\"inLL\">Gesamtl\u00e4nge</label>\n          <div class=\"in\"><input id=\"inLL\" type=\"number\" inputmode=\"numeric\" value=\"180\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeLL\"></span><span class=\"err\" id=\"errLL\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fLB\">\n          <label for=\"inLB\">Gesamtbreite</label>\n          <div class=\"in\"><input id=\"inLB\" type=\"number\" inputmode=\"numeric\" value=\"120\" min=\"20\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeLB\"></span><span class=\"err\" id=\"errLB\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fAW\">\n          <label for=\"inAW\">Ausklinkung Breite</label>\n          <div class=\"in\"><input id=\"inAW\" type=\"number\" inputmode=\"numeric\" value=\"90\" min=\"10\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeAW\"></span><span class=\"err\" id=\"errAW\"></span>\n        </div>\n        <div class=\"kfg_field\" id=\"fAH\">\n          <label for=\"inAH\">Ausklinkung Tiefe</label>\n          <div class=\"in\"><input id=\"inAH\" type=\"number\" inputmode=\"numeric\" value=\"60\" min=\"10\"><span class=\"unit\">cm</span></div>\n          <span class=\"range\" id=\"rangeAH\"></span><span class=\"err\" id=\"errAH\"></span>\n        </div>\n        <div class=\"kfg_lfrow\" style=\"grid-column:1/-1\"><p class=\"kfg_sublabel\">Lage der Ausklinkung</p><div class=\"kfg_chips\" id=\"lfPosChips\"></div></div>\n        <div class=\"kfg_lfrow\" style=\"grid-column:1/-1\"><p class=\"kfg_sublabel\">Schnitt</p><div class=\"kfg_chips\" id=\"lfCutChips\"><button class=\"kfg_chip is-active\" data-ls=\"gerade\">Gerade</button><button class=\"kfg_chip\" data-ls=\"schraeg\">Schr\u00e4g</button></div></div>\n        <div class=\"kfg_field\" id=\"fLW\" style=\"display:none\">\n          <label for=\"inLW\">Winkel der Schr\u00e4ge</label>\n          <div class=\"in\"><input id=\"inLW\" type=\"number\" inputmode=\"numeric\" value=\"34\" min=\"5\" max=\"85\"><span class=\"unit\">\u00b0</span></div>\n          <span class=\"range\" id=\"rangeLW\">5 bis 85\u00b0 \u2014 zur hinteren Kante</span><span class=\"err\" id=\"errLW\"></span>\n        </div>\n        <div class=\"kfg_rule-note\" id=\"lfInnerNote\" style=\"grid-column:1/-1\">Innenecke wird automatisch verrundet: R50 bei M\u00f6belplatte \u00b7 R10 bei Multiplex &amp; Compact (Fertigungsregel).</div>\n      </div>\n      <div class=\"kfg_quick\" id=\"quickBlock\">\n        <p>Ab Lager \u2014 sofort lieferbar:</p>\n        <div class=\"kfg_quick-chips\" id=\"quickChips\"></div>\n      </div>\n      <details class=\"kfg_measure\">\n        <summary><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 16.5L16.5 3l4.5 4.5L7.5 21zM7.5 13l2 2M10.5 10l2 2M13.5 7l2 2\"/></svg> Richtig messen \u2014 so geht's</summary>\n        <p>Miss die gew\u00fcnschte Fl\u00e4che an der breitesten Stelle und rechne bei Wandmontage 5&nbsp;mm Luft ein. Bei Gestellen: Platten\u00fcberstand 5\u201315&nbsp;cm je Seite einplanen. Unsicher? Ruf uns an \u2014 wir pr\u00fcfen dein Ma\u00df kostenlos vor der Fertigung.</p>\n      </details>\n    </section>\n\n    <!-- 04 St\u00e4rke & Kante -->\n    <section class=\"kfg_step\" id=\"kfgStep4\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">04</span><span class=\"kfg_step-title\">St\u00e4rke &amp; Kante</span><span class=\"kfg_step-count\" id=\"k4\"></span></div>\n      <div class=\"kfg_chips\" id=\"thickChips\"></div>\n      <p class=\"kfg_sublabel\">Kantenprofil</p>\n      <div class=\"kfg_chips\" id=\"edgeChips\"></div>\n      <div id=\"edgeRadiusBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">Rundungsradius der Kante</p>\n        <div class=\"kfg_chips\" id=\"edgeRadiusChips\">\n          <button class=\"kfg_chip is-active\" data-er=\"3\">R3</button>\n          <button class=\"kfg_chip\" data-er=\"6\">R6</button>\n          <button class=\"kfg_chip\" data-er=\"9\">R9</button>\n        </div>\n      </div>\n      <div id=\"absColorBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">ABS-Kantenfarbe</p>\n        <div class=\"kfg_chips\" id=\"absChips\"></div>\n      </div>\n      <div id=\"lackBlock\" style=\"display:none\">\n        <label class=\"kfg_check\"><input type=\"checkbox\" data-x=\"lack\">\n          <span><b>Kante natur, aber lackiert</b><small>unsere Lackierung, seidenmatt \u2014 sch\u00fctzt die offene Schichtkante</small></span><span class=\"pr\">5 \u20ac/lfm</span></label>\n      </div>\n      <div id=\"massbandBlock\" style=\"display:none\">\n        <p class=\"kfg_sublabel\">Ma\u00dfband an der Vorderkante</p>\n        <div class=\"kfg_chips\" id=\"massbandChips\"></div>\n        <div class=\"kfg_chips\" id=\"massbandNullChips\" style=\"margin-top:var(--s-2xs);display:none\"></div>\n        <div class=\"kfg_rule-note\" id=\"massbandNote\" style=\"display:none\"></div>\n      </div>\n      <div class=\"kfg_mpx-note\" id=\"mpxNote\">Sichtbare Schichtkante: nicht gefr\u00e4st ist serienm\u00e4\u00dfig, gefr\u00e4st 45\u00b0 kostet 5 \u20ac/lfm, halbrund 8 \u20ac/lfm. Lackiert sind es 5, 10 und 16 \u20ac/lfm \u2014 wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gew\u00fcnschten Farbe.</div>\n      <div class=\"kfg_edge-note\" id=\"edgeTip\"><svg class=\"ic-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 3l6 16 2.5-6.5L20 10z\"/></svg><span>Tipp: Klicke in der 2D-Vorschau direkt auf eine Kante, um sie einzeln zu \u00e4ndern.</span></div>\n    </section>\n\n    <!-- 05 Ausschnitte & Bohrungen -->\n    <section class=\"kfg_step\" id=\"kfgStep5\">\n      <div class=\"kfg_step-head\"><span class=\"kfg_step-num\">05</span><span class=\"kfg_step-title\">Ausschnitte &amp; Bohrungen</span><span class=\"kfg_step-count\" id=\"k5\"></span></div>\n      <p class=\"kfg_grouplabel\">Bohrungen &amp; Durchl\u00e4sse</p>\n      <label class=\"kfg_check\"><input type=\"checkbox\" data-x=\"bohr\">\n        <span><b>Montagebohrungen 4\u00d7 \u00d88</b><small>vorgebohrt f\u00fcr g\u00e4ngige Gestelle</small></span><span class=\"pr\">+ 9,90&nbsp;\u20ac</span></label>\n      <div id=\"grpMaschine\" style=\"display:none\">\n        <p class=\"kfg_grouplabel\">Ausschnitt f\u00fcr die Maschine</p>\n        <div class=\"kfg_rule-note\">W\u00e4hle ein Standardma\u00df oder lass uns nach deiner Maschine messen \u2014 Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abst\u00e4nde zu allen vier Kanten stehen daneben.</div>\n        <p class=\"kfg_sublabel\">Ma\u00df des Ausschnitts</p>\n        <div class=\"kfg_chips\" id=\"maschineMassChips\"><button class=\"kfg_chip is-active\" data-mm=\"52x18.1\">52 \u00d7 18,1 cm</button><button class=\"kfg_chip\" data-mm=\"48x18.1\">48 \u00d7 18,1 cm</button><button class=\"kfg_chip\" data-mm=\"61.7x18.1\">61,7 \u00d7 18,1 cm</button><button class=\"kfg_chip\" data-mm=\"auto\">Nach Maschine <small>wir messen</small></button></div>\n        <label class=\"kfg_machine\">N\u00e4hmaschine \u2014 Hersteller und Modell\n          <input type=\"text\" id=\"machineInput\" placeholder=\"z. B. Bernina 770 QE oder Juki TL-2200\">\n        </label>\n        <div class=\"kfg_chips\"><button class=\"kfg_chip\" id=\"btnMaschine\">Maschinen-Ausschnitt hinzuf\u00fcgen</button> <span class=\"pr\" style=\"align-self:center;font-size:13px\">+ 40,00 \u20ac pauschal</span></div>\n      </div>\n      <div id=\"grpDurchlass\">\n      <div class=\"kfg_preset\" data-preset=\"kabel\">\n        <span><b>Kabeldurchlass \u00d860</b><small>inkl. Abdeckung, frei positionierbar</small></span>\n        <span class=\"pr\">+ 9,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"kabel80\">\n        <span><b>Kabeldurchlass \u00d880</b><small>inkl. Abdeckung, frei positionierbar</small></span>\n        <span class=\"pr\">+ 9,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"armatur\">\n        <span><b>Armaturenbohrung \u00d835</b><small>f\u00fcr Armatur oder Kabeldose</small></span>\n        <span class=\"pr\">+ 9,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      </div>\n      <div id=\"grpKueche\">\n      <p class=\"kfg_grouplabel\">K\u00fcchen-Ausschnitte</p>\n      <div class=\"kfg_preset\" data-preset=\"usb\">\n        <span><b>Steckdosen-Ausschnitt</b><small>26,5 \u00d7 10 cm, f\u00fcr USB oder Steckdose</small></span>\n        <span class=\"pr\">+ 14,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"spuele\">\n        <span><b>Sp\u00fclen-Ausschnitt</b><small>78 \u00d7 43 cm, K\u00fcchen-Arbeitsplatte</small></span>\n        <span class=\"pr\">+ 39,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      <div class=\"kfg_preset\" data-preset=\"induktion\">\n        <span><b>Induktionsfeld-Ausschnitt</b><small>56 \u00d7 49 cm, K\u00fcchen-Arbeitsplatte</small></span>\n        <span class=\"pr\">+ 39,90&nbsp;\u20ac / St\u00fcck</span>\n        <span class=\"kfg_stepper\"><button data-dec aria-label=\"Weniger\">\u2212</button><span data-count>0</span><button data-inc aria-label=\"Mehr\">+</button></span>\n      </div>\n      </div>\n      <div id=\"grpCustom\">\n      <p class=\"kfg_grouplabel\">Individuelle Bearbeitung</p>\n      <label class=\"kfg_check\"><input type=\"checkbox\" data-x=\"custom\">\n        <span><b>Eigenes Bohrbild</b><small>frei nach deiner Vorgabe, CNC-gefr\u00e4st</small></span><span class=\"pr\">Angebot</span></label>\n      <div class=\"kfg_custom\" id=\"customBlock\">\n        <textarea id=\"customText\" placeholder=\"Beschreibe kurz, was du brauchst \u2014 z. B. \u201eEck-Ausklinkung 20\u00d715 cm hinten links\u201c.\"></textarea>\n        <div class=\"kfg_upload\" id=\"uploadZone\">\n          <b>Skizze oder Zeichnung hochladen</b>\n          PDF, Foto, DXF \u2014 oder einfach sp\u00e4ter per E-Mail an uns schicken\n          <input type=\"file\" id=\"uploadInput\" hidden>\n        </div>\n        <p class=\"kfg_custom-hint\">Mit eigener Skizze wird deine Platte individuell gefertigt \u2014 verbindliches Angebot in 24&nbsp;h.</p>\n      </div>\n      </div>\n      <div id=\"grpFrei\">\n      <p class=\"kfg_grouplabel\">Frei gestalten</p>\n      <p class=\"kfg_sublabel\">In der Vorschau aufziehen oder hinzuf\u00fcgen \u2014 danach jede Position auf den Millimeter genau einstellbar. Der Preis wird sofort berechnet.</p>\n      <div class=\"kfg_chips\" id=\"freiTools\">\n        <button class=\"kfg_chip\" id=\"drawRect\" data-draw=\"r\">\u25ad Ausschnitt</button>\n        <button class=\"kfg_chip\" id=\"drawCircle\" data-draw=\"c\">\u25ef Runder Ausschnitt</button>\n        <button class=\"kfg_chip\" id=\"drawPoly\" data-draw=\"p\">\u2b20 Freie Kontur</button>\n        <button class=\"kfg_chip\" id=\"addKanal\">\u2933 Kabelkanal fr\u00e4sen</button>\n      </div>\n      <p class=\"kfg_custom-hint\" id=\"drawHint\" style=\"display:none\">Zeichnen-Modus: In der Vorschau aufziehen.</p>\n      </div>\n      <div class=\"kfg_cutlist\" id=\"cutList\"></div>\n    </section>\n\n  </div>\n</div>\n\n<div class=\"kfg_bar\">\n  <span class=\"kfg_bar-thumb\" id=\"barThumb\" aria-hidden=\"true\"></span>\n  <div class=\"kfg_bar-what\"><b id=\"barTitle\">\u2014</b><small id=\"barSpec\">\u2014</small></div>\n  <div class=\"p\"><span class=\"val\" id=\"priceBar\" aria-live=\"polite\">\u2014</span><small id=\"delivBar\">\u2014</small></div>\n  <button class=\"kfg_cta\" id=\"ctaBar\">In den Warenkorb</button>\n</div>\n\n\n<div class=\"toast\" id=\"toast\"></div>\n\n<div class=\"kfg_modal\" id=\"orderModal\" hidden>\n  <div class=\"kfg_modal-box\">\n    <div class=\"kfg_modal-head\"><b>So kommt deine Bestellung bei uns an</b>\n      <span class=\"kfg_modal-tag\">Demo \u00b7 interne Ansicht</span>\n      <button id=\"omClose\" aria-label=\"Schlie\u00dfen\">\u00d7</button></div>\n    <div class=\"kfg_modal-grid\">\n      <div class=\"kfg_modal-draw\">\n        <svg id=\"omSvg\" viewBox=\"0 0 600 444\"></svg>\n        <p>Fertigungszeichnung \u2014 automatisch aus der Konfiguration erzeugt (inkl. Ausschnitt-Abst\u00e4nde)</p>\n      </div>\n      <div class=\"kfg_modal-data\" id=\"omData\"></div>\n    </div>\n  </div>\n</div>";
 
 /* ═══════════════════════ APP ═══════════════════════ */
-function KFG_APP(shopData){
+function KFG_APP(shopData, kurvenData){
 
-/* ═══════ Produktmatrix (Shopify-Lagerartikel: [EUR, VariantId, SKU]) ═══════ */
+/* ═══════ Produktmatrix (Shopify-Lagerartikel: [EUR, VariantId, SKU, PLN]) ═══════ */
 let SHOP = {};
+let KURVEN = {};                                    /* Sondermass-Kurven, s. Preisbasis */
 
 /* ═══════ Bilder (injiziert) ═══════ */
 const ASSET=(window.__KFG_BASE||'')+'/assets/kfg/';
@@ -164,19 +175,91 @@ function texVorladen(){
 }
 const KANTE = Object.fromEntries(["szwal_21", "schwarz_18", "schwarz_28", "schwarz_40", "szary_18", "kaszmir_18", "kaszmir_28", "kaszmir_36", "sosna-bielona_18", "sosna-bielona_28", "sosna-bielona_36", "ahorn_18", "ahorn_28", "ahorn_36", "buk_18", "buk_20", "buk_28", "buk_40", "sonoma-eiche_18", "sonoma-eiche_28", "sonoma-eiche_36", "eiche-artison_18", "eiche-artison_28", "eiche-artison_36", "weiss_36", "hikora_18", "hikora_36", "mpx_21", "mpx_40", "compact_12", "compact_weiss", "compact_szary", "compact_marmor-weiss", "compact_marmor-schwarz", "compact_czarny", "alaska-weiss_36", "eiche-kamienny_18", "eiche-kamienny_36", "szary_28"].map(k=>[k,ASSET+'kante/'+k+'.webp']));
 
-/* ═══════ Preismatrix (Produktions-Docx, zł brutto) ═══════ */
-const KURS = 4.25;                                  /* zł → € wie Katalogregel (Sascha, 30.07.) */
-const eur = zl => Math.max(25.9, Math.ceil(zl/KURS) - 0.10);   /* ,90-Rundung, Minimum 25,90 € */
-const RATE = {                                      /* zł pro m² */
-  dekor:   {18:295, 25:386, 36:566},
-  mpx:     {21:446, 40:515},                        /* Birke natur */
-  mpxHPL:  {hikora:{21:650,40:750}, std:{21:600,40:700}},
-  compact: {std:990, marmor:1080}
-};
+/* ═══════ Preisbasis (Preiswerk 29.08.2026, eingebaut 02.09.2026) ═══════
+   Bis v1.16.2 galt ein flacher zl/m2-Satz je Material und Staerke (RATE) —
+   eine 50x50 zahlte denselben m2-Preis wie eine 200x100. Jetzt:
+     ① Lagergroesse  -> exakt der Shop-Preis (SHOP, aus kfg-produktmatrix.json)
+     ② Sondermass    -> Kurve durch die Katalogpunkte, je Material, Staerke,
+                        Form und Dekorstufe (KURVEN, aus kfg-preiskurven.json),
+                        linear zwischen den Stuetzstellen, ausserhalb mit der
+                        Randsteigung, nach unten begrenzt, auf ,90 aufgerundet
+     ③ Deckel        -> ein Sondermass kostet nie mehr als die kleinste
+                        Lagerplatte, aus der es sich schneiden liesse
+   Nur die 18er Moebelplatte spreizt nach Dekor (premium / basis); alle anderen
+   Gruppen haben je Staerke und Form genau eine Kurve. Doku:
+   PREISBASIS-Konfigurator-aus-Preiswerk-02-09-2026.md */
+/* Preiskanal: die polnische Seite rechnet in zl (eigene Preisliste, kein Kurs). */
+function kanal(){ return KFG_LANG==='pl' ? 'pln' : 'eur'; }
+/* Dekore, die es im Katalog (noch) nicht gibt, laufen in der naechstliegenden
+   Stufe der 18er: Unifarben wie Grau/Schwarz, Holzdekore wie Buche/Ahorn. */
+const DEKOR_STUFE_ERSATZ = { weiss:'basis', 'alaska-weiss':'basis', kaszmir:'basis', 'eiche-artison':'premium' };
+/* 36 mm gibt es im Katalog nicht — Verhaeltnis zur 25er aus der alten
+   Preismatrix (566 / 386 zl je m2). */
+const STAERKE_FAKTOR = { 'dekor|36': 1.466 };
+/* Alle Preise enden auf ,90 — aufgerundet, nie abgerundet. */
+function auf90(v){ return Math.ceil(v - 0.90 - 1e-9) + 0.90; }
+function kurvenDekor(){ return S.mat==='mpx' ? 'sperrholz-natur' : S.dekor; }
+/* Welche Kurve gilt? Erst die Dekorstufen (premium/basis), dann standard. */
+function kurvenSchluessel(){
+  const form = S.form==='round' ? 'round' : 'rect';       /* L-Form rechnet wie Rechteck */
+  const mat = S.mat==='szwal' ? 'mpx' : S.mat;
+  let thick = S.thick;
+  if(!KURVEN[`${mat}|${thick}|${form}|standard`] && !KURVEN[`${mat}|${thick}|${form}|premium`] && STAERKE_FAKTOR[`${mat}|${thick}`]) thick = '25';
+  const roh = `${mat}|${thick}|${form}`, dek=kurvenDekor();
+  for(const st of ['premium','basis','standard']){
+    const k=roh+'|'+st;
+    if(KURVEN[k] && (KURVEN[k].dekore||[]).indexOf(dek)>=0) return k;
+  }
+  const ersatz=DEKOR_STUFE_ERSATZ[dek];
+  if(ersatz && KURVEN[roh+'|'+ersatz]) return roh+'|'+ersatz;
+  for(const st of ['standard','premium','basis']) if(KURVEN[roh+'|'+st]) return roh+'|'+st;
+  return null;
+}
+function aufDerKurve(kv, A){
+  const p=kv.punkte||[]; if(!p.length) return null;
+  let roh;
+  if(A<=p[0][0]) roh = p[0][1] - kv.randsteigung*(p[0][0]-A);
+  else if(A>=p[p.length-1][0]) roh = p[p.length-1][1] + kv.randsteigung*(A-p[p.length-1][0]);
+  else { let i=0; while(p[i+1][0]<A) i++;
+    const [x0,y0]=p[i], [x1,y1]=p[i+1]; roh = y0 + (y1-y0)*(A-x0)/(x1-x0); }
+  return auf90(Math.max(roh, kv.mindestpreis||0));
+}
+/* Deckel: kleinste Lagerplatte derselben Gruppe, in die das Mass passt. */
+function deckel(){
+  if(S.form!=='rect'&&S.form!=='round') return null;
+  const pre=`${S.mat}|${S.form}|${kurvenDekor()}|${S.thick}|`, d=dims();
+  const a=Math.max(d.w,d.h), b=Math.min(d.w,d.h); let best=null;
+  for(const k in SHOP){ if(!k.startsWith(pre)) continue;
+    const m=k.slice(pre.length); let passt;
+    if(S.form==='round') passt = +m.slice(1).replace(',','.') >= a-1e-9;
+    else { const [p,q]=m.split('x').map(x=>+x.replace(',','.')); passt = Math.max(p,q)>=a-1e-9 && Math.min(p,q)>=b-1e-9; }
+    const v=hitPreis(SHOP[k]);
+    if(passt && v!=null && (best===null||v<best)) best=v;
+  }
+  return best;
+}
+/* Sondermass-Grundpreis oder null, wenn keine Kurve vorliegt (dann Anfrage). */
+/* HPL auf Multiplex und die Naehtischplatte (Sklejka + Laminat) haben keinen
+   Katalog. Sie laufen ueber die Multiplex-Kurve plus Laminatzuschlag je m2 —
+   der Abstand entspricht der alten Preismatrix (600/700 gegen 446/515 zl). */
+const HPL_ZUSCHLAG = { eur: {std:36, hikora:47}, pln: {std:155, hikora:200} };
+function kurvenPreis(){
+  const ks=kurvenSchluessel(); if(!ks) return null;
+  const kv=(KURVEN[ks].kanaele||{})[kanal()]; if(!kv) return null;
+  const A=areaM2();
+  let p=aufDerKurve(kv, A); if(p===null) return null;
+  const fak=STAERKE_FAKTOR[`${S.mat}|${S.thick}`];
+  if(fak && ks.indexOf(`|${S.thick}|`)<0) p=auf90(p*fak);
+  if(S.mat==='szwal' || (S.mat==='mpx'&&S.mpxSurface==='hpl')){
+    const z=HPL_ZUSCHLAG[kanal()]; p=auf90(p + A*((S.dekor==='hikora')?z.hikora:z.std));
+  }
+  const cap=deckel(); if(cap!=null && p>cap) p=cap;
+  return p;
+}
 /* Fertigungsregeln (Senior): Radien + Maximalmaße */
 const RULES = {
   dekor:   {maxL:270, maxB:200, maxD:160, minCorner:30, cornerNote:'Möbelplatte (ABS-Kante): Außenradien mind. R30. Kleinere Radien sind fertigungstechnisch nicht möglich.'},
-  compact: {maxL:238, maxB:120, maxD:120, minCorner:0, cornerNote:''},
+  compact: {maxL:238, maxB:120, maxD:130, minCorner:0, cornerNote:''},   /* Katalog: rund bis 130 */
   mpx:     {maxL:238, maxB:120, maxD:120, minCorner:0, cornerNote:''},
   /* Naehtischplatten kommen aus der 240x120-Rohplatte (Senior 30.07.). */
   szwal:   {maxL:240, maxB:120, maxD:120, minCorner:0, cornerNote:''}
@@ -207,12 +290,12 @@ Object.keys(SZWAL_TEX).forEach(function(k){
   TEX[k]=TEX[SZWAL_TEX[k]]; TEX_THUMB[k]=TEX_THUMB[SZWAL_TEX[k]];
 });
 const MATERIALS = {
-  dekor:   { name:'Möbelplatte', sub:'ab 25,90 € · 18/25/36 mm',
+  dekor:   { name:'Möbelplatte', sub:'ab 19,90 € · 18/25/36 mm',
              thick:[['18','18 mm'],['25','25 mm'],['36','36 mm']], def:'25', dekore:DEKOR_MOEBEL, hasABS:true },
-  compact: { name:'Compact / HPL', sub:'ab 89 € · 12 mm',
+  compact: { name:'Compact / HPL', sub:'ab 69 € · 12 mm',
              thick:[['12','12 mm Vollkern']], def:'12',
              dekore:[['weiss','Weiß'],['czarny','Schwarz'],['szary','Grau'],['marmor-weiss','Weißer Marmor'],['marmor-schwarz','Schwarzer Marmor']], hasABS:false },
-  mpx:     { name:'Multiplex Birke', sub:'ab 49 € · 21/40 mm · alle Dekore',
+  mpx:     { name:'Multiplex Birke', sub:'ab 29,90 € · 21/40 mm · alle Dekore',
              thick:[['21','21 mm'],['40','40 mm']], def:'21', dekore:[['sperrholz-natur','Birke natur']], hasABS:true },
   /* Bis v1.15.0 war die Naehtischplatte eine FORM. Seit v1.16.0 ist sie eine
      eigene Kategorie neben Moebelplatte/Compact/Multiplex (Senior 30.07.). */
@@ -260,7 +343,8 @@ const MASSBAND = [['none','Kein Maßband','',0],
 function massbandEintrag(){ return MASSBAND.find(m=>m[0]===S.massband)||MASSBAND[0]; }
 function massbandPreis(){ return S.mat==='szwal' ? massbandEintrag()[3] : 0; }
 function massbandName(){ return massbandEintrag()[1]; }
-const CORNER_PRICE = { 30:3.8, 50:3.8, 100:7.9 };          /* € je Ecke (27.07.: 5 % unter KOLM) */
+/* Eckenpreis seit 26.08.2026 als Staffel nach Anzahl (RADIEN_STAFFEL), nicht
+   mehr je Ecke — CORNER_PRICE / cornerPriceFor sind damit Geschichte. */
 /* Ecken einzeln waehlbar (Wunsch Produktion, 27.07.): der Radius gilt nur fuer die
    angehakten Ecken. Reihenfolge im Uhrzeigersinn ab oben links = hinten links,
    hinten rechts, vorne rechts, vorne links. */
@@ -268,29 +352,36 @@ const CORNER_NAMES = ['hinten links','hinten rechts','vorne rechts','vorne links
 /* Radius JE ECKE in mm (0 = eckig). Preisstufen wie in der Preisliste:
    bis R50 = 4,90 € je Ecke, darueber = 7,90 € je Ecke. */
 function cornerLabel(){
-  if(S.form==='lform') return cornerR(0)>0?`R${cornerR(0)} · alle Außenecken`:'eckig';
-  const on=[0,1,2,3].filter(i=>cornerR(i)>0);
+  const idx=cornerIdx(), on=idx.filter(i=>cornerR(i)>0);
   if(!on.length) return 'eckig';
   const uniq=[...new Set(on.map(cornerR))];
-  if(uniq.length===1) return `R${uniq[0]} · ${on.length===4?'alle vier':on.map(i=>CORNER_NAMES[i]).join(', ')}`;
-  return on.map(i=>`${CORNER_NAMES[i]} R${cornerR(i)}`).join(' · ');
+  if(uniq.length===1) return `R${uniq[0]} · ${on.length===idx.length?(idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`;
+  return on.map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ');
 }
-function cornerPriceFor(r){ return r<=0?0:(r<=50?3.8:7.9); }
-/* Rechteck und Naehmaschinen-Platte: Radius je Ecke einzeln.
-   L-Form: ein Radius fuer alle fuenf Aussenecken (die Innenecke bekommt
-   ohnehin automatisch R50 bzw. R10 nach Fertigungsregel). Rund: entfaellt. */
+/* Indizes der Aussenecken: vier beim Rechteck, fuenf bei der L-Form */
+function cornerIdx(){ return S.form==='lform' ? [0,1,2,3,4] : [0,1,2,3]; }
+function cornerName(i){ return S.form==='lform' ? lfCornerName(i) : CORNER_NAMES[i]; }
+function setCorner(i,r){
+  if(S.form==='lform'){ if(!Array.isArray(S.lfR)||S.lfR.length!==5) S.lfR=[0,0,0,0,0]; S.lfR[i]=clampCorner(r); }
+  else S.cornerR[i]=clampCorner(r);
+  S.corner=cornerMax();
+}
+function cornerPriceFor(r){ return r<=0?0:radienpreis(1); }   /* nur noch fuer Alt-Aufrufer */
+/* Rechteck, Naehtischplatte UND L-Form: Radius je Ecke einzeln (Senior 02.09.:
+   "nicht immer muessen alle Ecken gerundet sein"). Die Innenecke des geraden L
+   bekommt automatisch R50 bzw. R10 nach Fertigungsregel. Rund: entfaellt. */
 function cornerFormOk(){ return S.form==='rect'||S.form==='lform'; }
-function cornerPerCorner(){ return S.form==='rect'; }
+function cornerPerCorner(){ return cornerFormOk(); }
 function cornerR(i){
   if(!cornerFormOk()) return 0;
-  if(!cornerPerCorner()) return Math.max(0, +S.cornerR[0]||0);   /* L-Form: einheitlich */
+  if(S.form==='lform') return lfCornerR(i);
   return Math.max(0, +S.cornerR[i]||0);
 }
 function cornerOuterCount(){ return S.form==='lform' ? 5 : 4; }
-function cornerCount(){ return S.form==='lform' ? (cornerR(0)>0?5:0) : [0,1,2,3].filter(i=>cornerR(i)>0).length; }
+function cornerCount(){ return cornerIdx().filter(i=>cornerR(i)>0).length; }
 function cornerOn(i){ return cornerR(i)>0; }
-function cornerSum(){ return S.form==='lform' ? cornerPriceFor(cornerR(0))*5 : [0,1,2,3].reduce((a,i)=>a+cornerPriceFor(cornerR(i)),0); }
-function cornerMax(){ return Math.max(0,...[0,1,2,3].map(cornerR)); }
+function cornerSum(){ return radienpreis(cornerCount()); }
+function cornerMax(){ return Math.max(0,...cornerIdx().map(cornerR)); }
 /* Auf Fertigungsregeln und halbe Plattenmasse begrenzen */
 function clampCorner(r){
   const d=dims(), lim=Math.min(d.w,d.h)*10/2, mn=rules().minCorner;
@@ -298,13 +389,88 @@ function clampCorner(r){
   if(r>0&&mn>0&&r<mn) r=mn;
   return Math.min(r,Math.floor(lim));
 }
-function setAllCorners(r){ S.cornerR=[0,1,2,3].map(()=>clampCorner(r)); S.corner=cornerMax(); }
+function setAllCorners(r){
+  const v=clampCorner(r);
+  if(S.form==='lform') S.lfR=[0,1,2,3,4].map(()=>v); else S.cornerR=[0,1,2,3].map(()=>v);
+  S.corner=cornerMax();
+}
 function cornerFieldsVisible(){ return cornerPerCorner(); }
 /* Radius je Ecke in Pixeln des Aufrufers */
 function cornerRadii(scale, maxA, maxB){
   const cap=Math.min(maxA,maxB);
   return [0,1,2,3].map(i => Math.min(cornerR(i)/10*scale, cap));
 }
+/* ═══════ L-Form: Lage der Ausklinkung, gerader oder schraeger Schnitt ═══════
+   Senior 02.09.: Lage waehlbar (bei Naehtischen sitzt sie meist vorn, wo die
+   Naeherin sitzt), der kurze Schenkel darf schraeg angesetzt werden, jede
+   Aussenecke einzeln rundbar. Winkel ohne Grenze ("was der Kunde braucht"). */
+const LF_POS = [['hr','hinten rechts'],['hl','hinten links'],['vr','vorne rechts'],['vl','vorne links']];
+function lfPos(){ return S.lf.pos || (S.mat==='szwal' ? 'vr' : 'hr'); }
+function lfSchraeg(){ return S.lf.schnitt==='schraeg'; }
+/* Kontur in Plattenkoordinaten (cm, Ursprung hinten links, y nach vorn), im
+   Uhrzeigersinn. ord = Nummer der Aussenecke (0..4) oder -1 fuer die Innenecke.
+   Gebaut wird immer fuer "hinten rechts" und dann gespiegelt; eine Spiegelung
+   kehrt den Umlaufsinn um, deshalb wird dann die Reihenfolge umgedreht. */
+function lfPts(){
+  const L=+S.lf.L, B=+S.lf.B, pos=lfPos();
+  const aw=Math.max(1,Math.min(+S.lf.aw, L-1)), ah=Math.max(1,Math.min(+S.lf.ah, B-1));
+  let pts, ord;
+  if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
+  else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
+  const mx=(pos==='hl'||pos==='vl'), my=(pos==='vr'||pos==='vl');
+  pts=pts.map(([x,y])=>[mx?L-x:x, my?B-y:y]);
+  if(mx!==my){ pts.reverse(); ord.reverse(); }
+  return {pts, ord, L, B, aw, ah, pos};
+}
+/* Schnittlaenge (m) des L-Schnitts und Umfang (m) der fertigen Kontur */
+function lfGeo(){
+  const g=lfPts(), L=g.L/100, B=g.B/100, aw=g.aw/100, ah=g.ah/100;
+  if(lfSchraeg()){ const s=Math.hypot(aw,ah);
+    return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:Math.round(Math.atan2(ah,aw)*180/Math.PI)}; }
+  return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:90};
+}
+function lfSchnittCm(){ return Math.round(lfGeo().schnitt*100); }
+/* Name einer Aussenecke aus ihrer Lage — folgt der gewaehlten Lage der Ausklinkung */
+function lfCornerName(o){
+  const g=lfPts(), i=g.ord.indexOf(o); if(i<0) return '';
+  const [x,y]=g.pts[i], e=1e-6;
+  const yy=y<e?'hinten':(y>g.B-e?'vorne':null), xx=x<e?'links':(x>g.L-e?'rechts':null);
+  if(yy&&xx) return `${yy} ${xx}`;
+  return `${yy||xx} · Ausklinkung`;
+}
+function lfCornerR(o){ return Math.max(0, +((S.lfR||[])[o])||0); }
+/* Mittelpunkt der Ausklinkung in Plattenkoordinaten (fuer die Massbeschriftung) */
+function lfNotchCenter(){
+  const g=lfPts(), mx=(g.pos==='hl'||g.pos==='vl'), my=(g.pos==='vr'||g.pos==='vl');
+  return [mx?g.aw/2:g.L-g.aw/2, my?g.B-g.ah/2:g.ah/2];
+}
+/* Abstand von einem Punkt (cm) in Richtung (dx,dy) bis zur Plattenkontur —
+   bei der L-Form bis zur naechsten Kante, also auch bis zur Ausklinkung. */
+function konturAbstand(px,py,dx,dy){
+  const d=dims();
+  if(S.form!=='lform'){ return dx>0?d.w-px:dx<0?px:dy>0?d.h-py:py; }
+  const g=lfPts(), n=g.pts.length; let best=Infinity;
+  for(let i=0;i<n;i++){ const a=g.pts[i], b=g.pts[(i+1)%n];
+    const ex=b[0]-a[0], ey=b[1]-a[1], den=dx*ey-dy*ex; if(Math.abs(den)<1e-9) continue;
+    const t=((a[0]-px)*ey-(a[1]-py)*ex)/den, u=((a[0]-px)*dy-(a[1]-py)*dx)/den;
+    if(t>1e-6&&u>=-1e-6&&u<=1+1e-6) best=Math.min(best,t); }
+  return isFinite(best)?best:(dx>0?d.w-px:dx<0?px:dy>0?d.h-py:py);
+}
+/* Die vier Randabstaende eines Ausschnitts, von seinen Kanten aus gemessen */
+function cutAbstaende(c){
+  const w=c.t==='c'?c.d:c.w, h=c.t==='c'?c.d:c.h;
+  return { l:konturAbstand(c.cx-w/2,c.cy,-1,0), r:konturAbstand(c.cx+w/2,c.cy,1,0),
+           t:konturAbstand(c.cx,c.cy-h/2,0,-1), b:konturAbstand(c.cx,c.cy+h/2,0,1) };
+}
+/* Liegt ein Punkt (cm) in der weggenommenen Ecke? */
+function lfInNotch(px,py){
+  const g=lfPts(), mx=(g.pos==='hl'||g.pos==='vl'), my=(g.pos==='vr'||g.pos==='vl');
+  const u=mx?px:g.L-px, v=my?g.B-py:py;          /* auf "hinten rechts" normiert: u vom Notch-Rand, v von hinten */
+  if(u>g.aw||v>g.ah) return false;
+  if(!lfSchraeg()) return true;
+  return v < g.ah*(1-u/g.aw);                    /* zwischen Ecke und Diagonale */
+}
+
 const ABS_STOCK = [['dekor','Dekorgleich','Standard'],['weiss','Weiß',''],['popiel','Asche Grau',''],
   ['dunkelgrau','Dunkelgrau',''],['schwarz','Schwarz',''],
   ['gruen','Grün','18/25 mm'],['rot','Rot','18/25 mm'],['gelb','Gelb','18/25 mm'],['blau','Blau','18/25 mm']];
@@ -348,15 +514,17 @@ function shopSizes(){
   return S.form==='round'?out.sort((x,y)=>x.d-y.d):out.sort((x,y)=>x.l-y.l||x.b-y.b);
 }
 const X_PRICE = { bohr:9.9 };
-/* Preise 27.07.2026 an den Wettbewerb angeglichen (5 % unter KOLM, Freigabe Sascha).
-   Vergleichsbasis siehe kessler-pro-docs/plans/Konfigurator-Wettbewerb-KOLM.md */
-/* Freie Bearbeitungen: Grundpreis + Zuschlag je laufendem Meter Schnittkante.
-   Hergeleitet aus KOLM, 5 % darunter (plans/Konfigurator-Wettbewerb-KOLM.md):
-   Kreisausschnitt bis Ø650 = 43,97 € bei 2,04 lfm, bis Ø1300 = 66,06 € bei
-   4,08 lfm → Steigung 10,80 €/lfm, Grundpreis 21,90 €. Kleinere Ausschnitte
-   liegen damit deutlich unter KOLM (Syphon 160×120: 27,95 € statt 30,71 €).
-   */
-const FREI_PRICE  = {basis:21.9, lfm:10.8};
+/* Preis einer Lagerposition im aktiven Kanal */
+function hitPreis(hit){ return kanal()==='pln' ? (hit[3]!=null?hit[3]:null) : hit[0]; }
+/* Bearbeitungen sind seit 26.08.2026 feste Aufschlaege (PREISREGEL-Bearbeitungen-
+   Konfigurator-26-08-2026.md), unabhaengig von Material und Staerke. Freie
+   Ausschnitte nach Schnittlaenge, kalibriert auf Steckdose 100x50 mm = 14,90 und
+   Spuele 560x480 mm = 39,90; kleiner als ein Steckdosenausschnitt gibt es nicht. */
+const FREI_PRICE  = {basis:10.7, lfm:13.9, minimum:14.9};
+function freierAusschnitt(lfm){ return Math.max(FREI_PRICE.minimum, auf90(FREI_PRICE.basis + FREI_PRICE.lfm*lfm)); }
+/* Eckradien: Staffel nach ANZAHL gerundeter Ecken, nicht je Ecke. Ab vier gedeckelt. */
+const RADIEN_STAFFEL = [0, 19.9, 29.9, 34.9, 39.9];
+function radienpreis(n){ return n<=0 ? 0 : RADIEN_STAFFEL[Math.min(n, RADIEN_STAFFEL.length-1)]; }
 /* Kabelkanal: KOLM bietet Kanaele nicht an, es gibt also keinen Vergleichswert.
    Abgeleitet aus der eigenen Fraesformel: eine Nut ist eine Tasche, der Fraeser
    muss sie in mehreren Bahnen ausraeumen statt einmal durchzutrennen. Basis ist
@@ -370,18 +538,17 @@ function kanalLfmPreis(w,t){
   return KANAL_PRICE.lfm + bStufen*KANAL_PRICE.breitePlus + tStufen*KANAL_PRICE.tiefePlus;
 }
 const PRESETS = {
-  kabel:    {label:'Kabeldurchlass Ø60', short:'Ø60',       t:'c', d:6,          price:14.9, pos:(L,B,n)=>[L/2+n*10, 0.15*B]},
-  kabel80:  {label:'Kabeldurchlass Ø80', short:'Ø80',       t:'c', d:8,          price:16.9, pos:(L,B,n)=>[L/2+n*12, 0.15*B]},
-  armatur:  {label:'Armaturenbohrung Ø35', short:'Ø35',     t:'c', d:3.5,        price:12.9, pos:(L,B,n)=>[L/2+n*8, 0.12*B]},
-  usb:      {label:'Steckdosen-Ausschnitt', short:'Steckdose',       t:'r', w:26.5, h:10, price:21.9, pos:(L,B,n)=>[L-21.25-n*30, 0.10*B+5]},
-  spuele:   {label:'Spülen-Ausschnitt',  short:'Spüle',     t:'r', w:78,  h:43,  price:65.9, pos:(L,B,n)=>[0.08*L+39+n*10, B/2]},
-  induktion:{label:'Induktionsfeld',     short:'Induktion', t:'r', w:56,  h:49,  price:54.9, pos:(L,B,n)=>[L-34-n*10, B/2]},
-  /* Naehtischplatte: der Kunde gibt KEINE Masse an, sondern seine Maschine —
-     wir passen den Ausschnitt in der Fertigung an (Senior 30.07.). Das hier
-     gezeigte Mass ist der gaengige Richtwert, damit Lage und Randabstaende
-     ueberhaupt darstellbar sind. Preis steckt im Plattenpreis. */
-  maschine: {label:'Ausschnitt für die Maschine', short:'Maschine', t:'r', w:52, h:18, price:0,
-             pos:(L,B,n)=>[L/2, Math.max(9, B-15)]}
+  kabel:    {label:'Kabeldurchlass Ø60', short:'Ø60',       t:'c', d:6,          price:9.9,  pos:(L,B,n)=>[L/2+n*10, 0.15*B]},
+  kabel80:  {label:'Kabeldurchlass Ø80', short:'Ø80',       t:'c', d:8,          price:9.9,  pos:(L,B,n)=>[L/2+n*12, 0.15*B]},
+  armatur:  {label:'Armaturenbohrung Ø35', short:'Ø35',     t:'c', d:3.5,        price:9.9,  pos:(L,B,n)=>[L/2+n*8, 0.12*B]},
+  usb:      {label:'Steckdosen-Ausschnitt', short:'Steckdose',       t:'r', w:26.5, h:10, price:14.9, pos:(L,B,n)=>[L-21.25-n*30, 0.10*B+5]},
+  spuele:   {label:'Spülen-Ausschnitt',  short:'Spüle',     t:'r', w:78,  h:43,  price:39.9, pos:(L,B,n)=>[0.08*L+39+n*10, B/2]},
+  induktion:{label:'Induktionsfeld',     short:'Induktion', t:'r', w:56,  h:49,  price:39.9, pos:(L,B,n)=>[L-34-n*10, B/2]},
+  /* Naehtischplatte: pauschal 40,00 fuer den Ausschnitt, jede Groesse (Senior
+     26.08.). Drei Standardmasse (48 / 52 / 61,7 x 18,1 cm) oder "nach Maschine";
+     Hersteller und Modell gibt der Kunde immer mit an. */
+  maschine: {label:'Ausschnitt für die Maschine', short:'Maschine', t:'r', w:52, h:18.1, price:40,
+             pos:(L,B,n)=>[L/2, Math.max(9.05, B-15)]}
 };
 
 /* ═══════ State ═══════ */
@@ -389,15 +556,17 @@ const PRESETS = {
    Eiche Sonoma gibt es nur in 90x50 und 90x60 — der Konfigurator startete dadurch
    im Angebots-Flow statt mit dem starken "Ab Lager"-Signal. */
 const S = { mat:'dekor', dekor:'buk', mpxSurface:'natur', absColor:'dekor',
-            form:'rect', L:120, B:60, D:80, lf:{L:180,B:120,aw:90,ah:60}, thick:'25',
-            corner:0, cornerR:[0,0,0,0], edgeR:3, edges:['abs','abs','abs','abs'],
+            form:'rect', L:120, B:60, D:80, lf:{L:180,B:120,aw:90,ah:60,pos:null,schnitt:'gerade'}, thick:'25',
+            corner:0, cornerR:[0,0,0,0], lfR:[0,0,0,0,0], edgeR:3, edges:['abs','abs','abs','abs'],
             extras:{bohr:false,custom:false,lack:false},
-            massband:'none', machine:'',
+            massband:'none', massbandNull:'links', machine:'', maschineMass:'52x18.1',
             cuts:[], draw:null, view:'2d' };
 
 /* ═══════ Helpers ═══════ */
 const $=id=>document.getElementById(id);
-const fmt=v=>v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const fmt=v=>kanal()==='pln'
+  ? v.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł'
+  : v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 function toast_roh(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600)}
 function rules(){ return RULES[S.mat]; }
 function baseEdge(){ return EDGEPROFILES[S.mat][0][0]; }
@@ -426,21 +595,19 @@ function dims(){
   if(S.form==='lform') return {w:+S.lf.L,h:+S.lf.B};
   return {w:+S.L,h:+S.B};
 }
+/* Flaeche: bei der L-Form das UMSCHLIESSENDE Rechteck. Die Rohplatte wird in
+   dieser Groesse eingekauft und zugeschnitten; das Weggenommene ist Verschnitt,
+   kein Rabatt (PREISREGEL 26.08.). */
 function areaM2(){
   if(S.form==='round') return Math.PI*Math.pow(S.D/200,2);
-  if(S.form==='lform') return (S.lf.L*S.lf.B - S.lf.aw*S.lf.ah)/1e4;
+  if(S.form==='lform') return S.lf.L*S.lf.B/1e4;
   return S.L*S.B/1e4;
 }
-function rateZl(){
-  /* Nähtischplatten werden aus Sklejka + Laminat + Kante gefertigt (Produktion 26.07.) */
-  if(S.mat==='szwal') return RATE.mpxHPL.std[+S.thick]||RATE.mpxHPL.std[21];
-  if(S.mat==='dekor') return RATE.dekor[+S.thick];
-  if(S.mat==='compact') return (S.dekor==='marmor-weiss'||S.dekor==='marmor-schwarz')?RATE.compact.marmor:RATE.compact.std;
-  if(S.mpxSurface==='hpl') return (S.dekor==='hikora'?RATE.mpxHPL.hikora:RATE.mpxHPL.std)[+S.thick];
-  return RATE.mpx[+S.thick];
-}
+/* Umfang in m: bei der L-Form der echte Konturumfang — beim geraden L gleich
+   dem Rechteck, beim schraegen kuerzer (Diagonale statt zwei Katheten). */
 function perimM(){
   if(S.form==='round') return Math.PI*S.D/100;
+  if(S.form==='lform') return lfGeo().umfang;
   const d=dims(); return 2*(d.w+d.h)/100;
 }
 function dekorList(){
@@ -448,21 +615,28 @@ function dekorList(){
   return S.mpxSurface==='hpl'?DEKOR_HPL:[['sperrholz-natur','Birke natur']];
 }
 function calc(){
-  const zl=areaM2()*rateZl();
   const hit=shopHit();
-  const basis=hit?hit[0]:eur(zl);      /* Lagerartikel: verbindlicher Shop-Preis */
+  const hp=hit?hitPreis(hit):null;
+  const kp=(hp===null)?kurvenPreis():null;
+  const basis=hp!==null?hp:(kp!==null?kp:0);   /* Lagerartikel: verbindlicher Shop-Preis */
+  const quelle=hp!==null?'katalog':(kp!==null?'kurve':'offen');
   let kante=0;
   if(S.form==='rect'){ const len=[+S.L,+S.B,+S.L,+S.B];
     S.edges.forEach((e,i)=>kante+=edgeLfm(e)*len[i]/100);
   } else kante=edgeLfm(S.edges[0])*perimM();
   const ecken=cornerSum();
+  /* Der Schnitt, der das L erzeugt: Formel der freien Ausschnitte auf die
+     INNERE Schnittlaenge — zwei Innenkanten beim geraden, eine Diagonale beim
+     schraegen L. */
+  const lschnitt=S.form==='lform'?freierAusschnitt(lfGeo().schnitt):0;
   let extras=0; if(S.extras.bohr) extras+=X_PRICE.bohr;
   extras+=massbandPreis();
   S.cuts.forEach(c2=>{ extras+=cutPrice(c2); });   /* freie Bearbeitungen jetzt mit Sofortpreis */
   ensureDekor();
   const dk=(dekorList().find(x=>x[0]===S.dekor))||dekorList()[0]||['','—'];
   const tt=MATERIALS[S.mat].thick.find(t=>t[0]===S.thick)||MATERIALS[S.mat].thick[0];
-  return {zl,basis,kante,ecken,extras,total:basis+kante+ecken+extras,
+  const total=Math.round((basis+kante+ecken+lschnitt+extras)*100)/100;
+  return {basis,quelle,kante,ecken,lschnitt,extras,total,
     dekorName:dk[1],thickName:tt[1]};
 }
 function isStandard(){
@@ -473,7 +647,7 @@ function isStandard(){
 /* Freie Ausschnitte, Ausklinkungen und Konturen haben seit v1.7.0 einen
    Sofortpreis nach Formel, der Kabelkanal seit v1.8.0 und die lackierte Kante
    seit v1.16.1. Ins Angebot geht nur noch die eigene Skizze. */
-function needsOffer(){ return S.extras.custom; }
+function needsOffer(){ return S.extras.custom || calc().quelle==='offen'; }
 function delivDate(){
   const d=new Date(); let n=0;
   while(n<4){ d.setDate(d.getDate()+1); if(d.getDay()!==0&&d.getDay()!==6)n++; }
@@ -506,19 +680,29 @@ function drawStage(){
       stroke="${edgeCol(S.edges[0])}" stroke-width="5"><title>Kante: ${edgeLabel(S.edges[0])}</title></circle>`;
     inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');
   } else if(S.form==='lform'){
-    const aw=S.lf.aw*sc, ah=S.lf.ah*sc, ri=(S.mat==='dekor'?5:1)*sc;
-    /* Aussenecken nach Wunsch abrunden; die Innenecke behaelt den
-       fertigungsbedingten Mindestradius (R50 Moebelplatte / R10 sonst). */
-    const rOut=Math.min(cornerR(0)/10*sc, pw/3, ph/3);
-    const ptsL=[[x,y],[x+pw-aw,y],[x+pw-aw,y+ah],[x+pw,y+ah],[x+pw,y+ph],[x,y+ph]];
-    const radL=[rOut,rOut,ri,rOut,rOut,rOut];
+    const lg=lfPts(), ri=(S.mat==='dekor'?5:1)*sc;
+    /* Kontur aus Lage und Schnitt; jede Aussenecke mit ihrem eigenen Radius,
+       die Innenecke (nur beim geraden L) mit dem Fertigungsradius R50 / R10. */
+    const ptsL=lg.pts.map(([px,py])=>[x+px*sc, y+py*sc]);
+    const radL=lg.ord.map(o=>o<0 ? ri : Math.min(lfCornerR(o)/10*sc, pw/3, ph/3));
     const pd=roundPoly(ptsL, radL);
     inner+=`<clipPath id="plateClip"><path d="${pd}"/></clipPath>`;
     inner+=`<image href="${tex}" x="${x-pw*0.08}" y="${y-ph*0.08}" width="${pw*1.16}" height="${ph*1.16}" preserveAspectRatio="xMidYMid slice" clip-path="url(#plateClip)"/>`;
+    inner+=massbandSVG(x,y,sc,pw,ph);
     inner+=`<path d="${pd}" fill="none" stroke="${edgeCol(S.edges[0])}" stroke-width="5" stroke-linejoin="round"/>`;
     inner+=`<path d="${pd}" fill="none" stroke="#00000018"/>`;
     inner+=dimH(x,x+pw,y+ph+30,S.lf.L+' cm')+dimV(x-30,y,y+ph,S.lf.B+' cm');
-    inner+=`<text class="dim-text" x="${x+pw-aw/2}" y="${y+ah/2+4}" text-anchor="middle">${S.lf.aw} × ${S.lf.ah}</text>`;
+    /* Mass der Ausklinkung in ihrer Mitte, beim schraegen Schnitt mit Winkel */
+    const nc=lfNotchCenter(), vorn=(lg.pos==='vr'||lg.pos==='vl'), links=(lg.pos==='hl'||lg.pos==='vl');
+    const ntxt=lfSchraeg()?`${lg.aw} × ${lg.ah} · ${lfGeo().winkel}°`:`${lg.aw} × ${lg.ah}`;
+    /* in der aeusseren Ecke der Ausklinkung, weg von Masslinien der Ausschnitte */
+    inner+=`<text class="dim-text" x="${x+(nc[0]+(links?-1:1)*lg.aw*0.22)*sc}" y="${y+(nc[1]+(vorn?1:-1)*lg.ah*0.25)*sc+4}" text-anchor="middle">${ntxt}</text>`;
+    if(cornerCount()>0) inner+=`<text class="dim-text" x="${x+8}" y="${y-10}">Ecken: ${cornerLabel()}</text>`;
+    /* Aussenecken direkt anklickbar — wie beim Rechteck */
+    lg.ord.forEach((o,i)=>{ if(o<0) return; const pt=ptsL[i];
+      inner+=`<circle class="kfg_cornerhit" data-c="${o}" cx="${pt[0]}" cy="${pt[1]}" r="15" fill="transparent" style="cursor:pointer">`
+        +`<title>Ecke ${cornerName(o)}, klicken zum ${cornerOn(o)?'Begradigen':'Abrunden'}</title></circle>`;
+    });
   } else {
     /* Radius je Ecke — 0 heisst eckig. Ohne Rundung bleibt die alte leichte 3-px-Fase. */
     const RR=cornerRadii(sc,pw/2,ph/2);
@@ -529,31 +713,7 @@ function drawStage(){
     let clip=`<path d="${pdRect}"/>`;
     inner+=`<clipPath id="plateClip">${clip}</clipPath>`;
     inner+=`<image href="${tex}" x="${x-pw*0.08}" y="${y-ph*0.08}" width="${pw*1.16}" height="${ph*1.16}" preserveAspectRatio="xMidYMid slice" clip-path="url(#plateClip)"/>`;
-    /* Massband an der Vorderkante — gelasert oder als Aufkleberkante; beide
-       sitzen an derselben Stelle, deshalb dieselbe Zeichnung (Fotos 30.07.). */
-    if(S.mat==='szwal' && S.massband!=='none'){
-      const yB=y+ph-Math.max(5,1.6*sc);
-      const lang=Math.max(5,0.9*sc), kurz=Math.max(2.5,0.45*sc);
-      const schritt = 1*sc>=2.2 ? 1 : (5*sc>=2.2 ? 5 : 10);
-      let st='';
-      for(let cm=0; cm<=Math.floor(d.w)+0.001; cm+=schritt){
-        const px=x+cm*sc, gross=Math.round(cm)%10===0;
-        st+=`<line x1="${px}" y1="${yB}" x2="${px}" y2="${yB-(gross?lang:kurz)}"
-          stroke="#1E1E1E" stroke-width="${gross?1:0.6}" opacity="${gross?'.85':'.45'}"/>`;
-      }
-      /* Beschriftung nur so dicht, dass die Zahlen sich nicht beruehren */
-      const beschr=Math.max(10, Math.ceil(26/Math.max(1,10*sc))*10);
-      for(let cm=0; cm<=Math.floor(d.w)+0.001; cm+=beschr){
-        /* Erste und letzte Zahl nach innen ziehen, sonst haengen sie ueber der
-           Kante und werden vom Plattenrand angeschnitten. */
-        const letzte = cm+beschr > Math.floor(d.w);
-        const anker = cm===0 ? 'start' : (letzte ? 'end' : 'middle');
-        const dx = cm===0 ? 2 : (letzte ? -2 : 0);
-        st+=`<text class="dim-text" x="${x+cm*sc+dx}" y="${yB-lang-2}" text-anchor="${anker}"
-          style="font-size:9px;font-weight:500;stroke-width:2px">${cm}</text>`;
-      }
-      inner+=`<g style="pointer-events:none">${st}</g>`;
-    }
+    inner+=massbandSVG(x,y,sc,pw,ph);
     inner+=`<path d="${pdRect}" fill="none" stroke="#00000018"/>`;
     /* Kanten als konturfolgende Pfade — jede Kante traegt die Haelfte der beiden
        angrenzenden Eckbogen, jetzt mit individuellem Radius je Ecke. */
@@ -629,16 +789,16 @@ function drawStage(){
       /* Abstandsmaße zur Kante: beim Ziehen dieses Ausschnitts oder in der Auftragszeichnung */
       if((dragCut&&dragCut.i===i&&committed)||FORCE_DISTS||(committed&&c2.preset==='maschine')){
         const f=v=>(''+(Math.round(v*10)/10)).replace('.',',');
-        const cl=c2.cx-c2.w/2, cr=G.w-(c2.cx+c2.w/2), ct=c2.cy-c2.h/2, cb=G.h-(c2.cy+c2.h/2);
+        const ab=cutAbstaende(c2), cl=ab.l, cr=ab.r, ct=ab.t, cb=ab.b;
         const cyp=y+c2.cy*sc, cxp=x+c2.cx*sc;
         const halo='paint-order:stroke;stroke:#F2F0EB;stroke-width:3px;font-size:10.5px';
         const dline=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#F2F0EB" stroke-width="3"/>
           <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#55524d" stroke-width="1" stroke-dasharray="2 2"/>`;
         inner+=`<g style="pointer-events:none">
-          ${dline(x,cyp,x+cl*sc,cyp)}<text class="dim-text" x="${x+cl*sc/2}" y="${cyp-6}" text-anchor="middle" style="${halo}">${f(cl)}</text>
-          ${dline(x+(G.w-cr)*sc,cyp,x+G.w*sc,cyp)}<text class="dim-text" x="${x+(G.w-cr/2)*sc}" y="${cyp-6}" text-anchor="middle" style="${halo}">${f(cr)}</text>
-          ${dline(cxp,y,cxp,y+ct*sc)}<text class="dim-text" x="${cxp+6}" y="${y+ct*sc/2+4}" style="${halo}">${f(ct)}</text>
-          ${dline(cxp,y+(G.h-cb)*sc,cxp,y+G.h*sc)}<text class="dim-text" x="${cxp+6}" y="${y+(G.h-cb/2)*sc+4}" style="${halo}">${f(cb)}</text>
+          ${dline(x+(c2.cx-c2.w/2-cl)*sc,cyp,x+(c2.cx-c2.w/2)*sc,cyp)}<text class="dim-text" x="${x+(c2.cx-c2.w/2-cl/2)*sc}" y="${cyp-6}" text-anchor="middle" style="${halo}">${f(cl)}</text>
+          ${dline(x+(c2.cx+c2.w/2)*sc,cyp,x+(c2.cx+c2.w/2+cr)*sc,cyp)}<text class="dim-text" x="${x+(c2.cx+c2.w/2+cr/2)*sc}" y="${cyp-6}" text-anchor="middle" style="${halo}">${f(cr)}</text>
+          ${dline(cxp,y+(c2.cy-c2.h/2-ct)*sc,cxp,y+(c2.cy-c2.h/2)*sc)}<text class="dim-text" x="${cxp+6}" y="${y+(c2.cy-c2.h/2-ct/2)*sc+4}" style="${halo}">${f(ct)}</text>
+          ${dline(cxp,y+(c2.cy+c2.h/2)*sc,cxp,y+(c2.cy+c2.h/2+cb)*sc)}<text class="dim-text" x="${cxp+6}" y="${y+(c2.cy+c2.h/2+cb/2)*sc+4}" style="${halo}">${f(cb)}</text>
         </g>`;
       }
     });
@@ -660,11 +820,10 @@ function drawStage(){
   svg.querySelectorAll('.kfg_cornerhit').forEach(e=>e.addEventListener('click',ev=>{
     ev.stopPropagation();
     const i=+e.dataset.c;
-    if(cornerR(i)>0){ S.cornerR[i]=0; }
-    else { S.cornerR[i]=clampCorner(cornerMax()||(rules().minCorner>0?rules().minCorner:10)); }
-    S.corner=cornerMax();
+    if(cornerR(i)>0) setCorner(i,0);
+    else setCorner(i, cornerMax()||(rules().minCorner>0?rules().minCorner:10));
     buildCorner(); render();
-    toast(cornerR(i)>0?`Ecke ${CORNER_NAMES[i]}: R${cornerR(i)}`:`Ecke ${CORNER_NAMES[i]} wieder eckig`);
+    toast(cornerR(i)>0?`Ecke ${cornerName(i)}: R${cornerR(i)}`:`Ecke ${cornerName(i)} wieder eckig`);
   }));
 
   drawDetail(); if(S.view==='3d') draw3D();
@@ -989,13 +1148,12 @@ function plateShape(){
     sh.lineTo(x,y+ra); if(ra) sh.quadraticCurveTo(x,y,x+ra,y);
   } else { sh.moveTo(x,y); sh.lineTo(x+w,y); sh.lineTo(x+w,y+h); sh.lineTo(x,y+h); sh.closePath(); }
   if(S.form==='lform'){
-    const L2=S.lf.L/10,B2=S.lf.B/10,aw2=S.lf.aw/10,ah2=S.lf.ah/10,ri=(S.mat==='dekor'?0.5:0.1);
-    const sh2=new THREE.Shape(), x2=-L2/2, y2=-B2/2;
-    /* Aussenecken nach Wunsch, Innenecke mit dem Fertigungsradius */
-    const ro=Math.min(cornerR(0)/100, L2/3, B2/3);
-    polyToShape(sh2,
-      [[x2,y2],[x2+L2,y2],[x2+L2,y2+B2-ah2],[x2+L2-aw2,y2+B2-ah2],[x2+L2-aw2,y2+B2],[x2,y2+B2]],
-      [ro,ro,ro,ri,ro,ro]);
+    const lg=lfPts(), L2=lg.L/10, B2=lg.B/10, ri=(S.mat==='dekor'?0.5:0.1);
+    const sh2=new THREE.Shape();
+    /* Plattenkoordinaten (cm, y nach vorn) -> Shape (dm, y nach hinten), wie addCutHoles */
+    const pts=lg.pts.map(([px,py])=>[-L2/2+px/10, B2/2-py/10]);
+    const rad=lg.ord.map(o=>o<0 ? ri : Math.min(lfCornerR(o)/100, L2/3, B2/3));
+    polyToShape(sh2, pts, rad);
     addCutHoles(sh2);
     return sh2;
   }
@@ -1045,10 +1203,48 @@ function kanal3D(depth){
   });
   return g;
 }
+/* Massband als Textur: Striche je cm, Zahlen alle 10 cm. Beim Aufkleber haengen
+   die Striche von der Oberkante des Bandes, beim gelaserten stehen sie auf der
+   Vorderkante der Platte. */
+function massbandTextur(len, rechts, aufkleber){
+  const cv=document.createElement('canvas'), pxCm=24; cv.width=Math.max(48,Math.round(len*pxCm)); cv.height=96;
+  const g=cv.getContext('2d');
+  if(aufkleber){ g.fillStyle='#f4f0e6'; g.fillRect(0,0,cv.width,cv.height); }
+  g.strokeStyle='#1E1E1E'; g.fillStyle='#1E1E1E'; g.textAlign='center'; g.textBaseline='middle';
+  g.font='600 26px system-ui, Arial, sans-serif';
+  for(let cm=0; cm<=len; cm++){
+    const xx=(rechts?len-cm:cm)*pxCm, gross=cm%10===0, mittel=cm%5===0, h=gross?50:(mittel?34:20);
+    g.lineWidth=gross?3:1.5; g.beginPath();
+    if(aufkleber){ g.moveTo(xx,0); g.lineTo(xx,h); } else { g.moveTo(xx,cv.height); g.lineTo(xx,cv.height-h); }
+    g.stroke();
+    if(gross){ let tx=xx; if(cm===0) tx+=rechts?-14:14; else if(cm===len) tx+=rechts?14:-14;
+      g.fillText(String(cm), tx, aufkleber?cv.height-24:24); }
+  }
+  const t=new THREE.CanvasTexture(cv); t.encoding=THREE.sRGBEncoding; t.anisotropy=8;
+  t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; return t;
+}
+function massband3D(depth){
+  const st=massbandStrecke(); if(!st) return null;
+  const d=dims(), W=d.w/10, H=d.h/10, len=st.len/10, cx=-W/2+(st.x0+st.len/2)/10;
+  const aufkleber=S.massband==='sticker';
+  const tex=massbandTextur(st.len, st.rechts, aufkleber);
+  if(aufkleber){
+    const hb=Math.min(0.15, depth*0.75);
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(len,hb), new THREE.MeshStandardMaterial({map:tex,roughness:.7}));
+    /* Platte liegt zwischen y=depth (unten) und y=2*depth (oben), s. kanal3D */
+    m.position.set(cx, 1.5*depth, H/2+0.003);                            /* Stirnseite, vorn */
+    return m;
+  }
+  const bw=0.16;                                                       /* 1,6 cm breit */
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(len,bw), new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false}));
+  m.rotateX(-Math.PI/2); m.position.set(cx, 2*depth+0.003, H/2-bw/2-0.01);  /* Oberseite, an der Vorderkante */
+  return m;
+}
 function draw3D(){
   ensure3D(()=>{
     if(three.mesh){three.scene.remove(three.mesh);three.mesh.geometry.dispose();}
     if(three.kanal){three.scene.remove(three.kanal);three.kanal=null;}
+    if(three.band){three.scene.remove(three.band);three.band=null;}
     const depth=(+S.thick)/100;
     const geo=new THREE.ExtrudeGeometry(plateShape(),{depth,bevelEnabled:false,curveSegments:48});
     /* UV-Fix: Deckflächen sauber [0..1] gemappt, Proportionen über max(B,T) — kein Kacheln, kein Zerren */
@@ -1077,6 +1273,8 @@ function draw3D(){
     three.scene.add(three.mesh);
     three.kanal=kanal3D(depth);
     if(three.kanal) three.scene.add(three.kanal);
+    three.band=massband3D(depth);
+    if(three.band) three.scene.add(three.band);
     const d=dims(), maxd=Math.max(d.w,d.h)/10;
     three.cam.position.set(0, maxd*0.9, maxd*1.55); three.cam.lookAt(0,0,0);
     frame3D();
@@ -1111,7 +1309,7 @@ function buildMats(){
     if(S.mat==='mpx'){S.mpxSurface='natur';S.dekor='sperrholz-natur';}
     else if(!MATERIALS[S.mat].dekore.some(d=>d[0]===S.dekor)) S.dekor=MATERIALS[S.mat].dekore[0][0];
     if(S.mat==='szwal'){
-      if(S.form!=='rect') setForm('rect');
+      if(S.form==='round') setForm('rect');           /* Rund gibt es nicht, L-Form schon (02.09.) */
       /* Schritt 05 kennt bei Naehtischplatten nur Montagebohrung und
          Maschinen-Ausschnitt — alles andere faellt beim Wechsel weg. */
       S.cuts=S.cuts.filter(c=>c.preset==='maschine');
@@ -1206,20 +1404,120 @@ function buildMassband(){
   el.querySelectorAll('.kfg_chip').forEach(b=>b.addEventListener('click',()=>{
     S.massband=b.dataset.mb; buildMassband(); render();
   }));
+  /* Nullpunkt links oder rechts — beides moeglich (Sascha 02.09.) */
+  const nz=$('massbandNullChips'), note=$('massbandNote'), an=S.massband!=='none';
+  if(nz){ nz.style.display=an?'':'none';
+    nz.innerHTML=[['links','Nullpunkt links'],['rechts','Nullpunkt rechts']].map(([k,n])=>
+      `<button class="kfg_chip${(S.massbandNull||'links')===k?' is-active':''}" data-mn="${k}">${n}</button>`).join('');
+    nz.querySelectorAll('.kfg_chip').forEach(b=>b.addEventListener('click',()=>{ S.massbandNull=b.dataset.mn; buildMassband(); render(); })); }
+  if(note){ note.style.display=an?'':'none';
+    const st=massbandStrecke();
+    note.innerHTML='<span>'+(S.massband==='sticker'
+      ? 'Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.'
+      : 'Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.')
+      +'</span> <span>Es ist höchstens 100 cm lang und endet vor den Eckradien.</span>'
+      +(st?` <span>Länge hier: ${st.len} cm</span>`:''); }
+}
+/* Nutzbare Strecke des Massbands an der Vorderkante (cm, Plattenkoordinaten):
+   die laengste gerade Vorderkante, abzueglich der beiden Eckradien und je 1 cm
+   Luft, gedeckelt auf 100 cm (Senior 02.09.: "nicht laenger als ein Meter, und
+   nie ueber den Radius hinaus"). */
+function massbandStrecke(){
+  if(S.mat!=='szwal'||S.massband==='none'||S.form==='round') return null;
+  const d=dims(); let pts, rad;
+  if(S.form==='lform'){ const g=lfPts(); pts=g.pts; rad=g.ord.map(o=>o<0?0:lfCornerR(o)/10); }
+  else { pts=[[0,0],[d.w,0],[d.w,d.h],[0,d.h]]; rad=[0,1,2,3].map(i=>cornerR(i)/10); }
+  const n=pts.length, e=1e-6; let best=null;
+  for(let i=0;i<n;i++){ const j=(i+1)%n, a=pts[i], b=pts[j];
+    if(Math.abs(a[1]-d.h)>e||Math.abs(b[1]-d.h)>e) continue;
+    const li=a[0]<b[0]?i:j, re=a[0]<b[0]?j:i;
+    const s=pts[li][0]+rad[li]+1, t=pts[re][0]-rad[re]-1;
+    if(!best||t-s>best.t-best.s) best={s,t};
+  }
+  if(!best||best.t-best.s<10) return null;
+  const len=Math.min(100, Math.floor(best.t-best.s));
+  const rechts=(S.massbandNull||'links')==='rechts';
+  return {x0: rechts?best.t-len:best.s, len, rechts, y:d.h};
+}
+/* Draufsicht: gelasert = Striche auf der Oberseite; Aufkleber = nur eine Linie
+   an der Kante, denn er sitzt auf der Stirnseite und ist von oben nicht zu sehen. */
+function massbandSVG(x,y,sc,pw,ph){
+  const st=massbandStrecke(); if(!st) return '';
+  const xs=cm=>x+(st.rechts?st.x0+st.len-cm:st.x0+cm)*sc;
+  let out='';
+  if(S.massband==='laser'){
+    const yB=y+ph-Math.max(5,1.6*sc);
+    const lang=Math.max(5,0.9*sc), kurz=Math.max(2.5,0.45*sc);
+    const schritt = 1*sc>=2.2 ? 1 : (5*sc>=2.2 ? 5 : 10);
+    for(let cm=0; cm<=st.len+0.001; cm+=schritt){
+      const gross=Math.round(cm)%10===0;
+      out+=`<line x1="${xs(cm)}" y1="${yB}" x2="${xs(cm)}" y2="${yB-(gross?lang:kurz)}"
+        stroke="#1E1E1E" stroke-width="${gross?1:0.6}" opacity="${gross?'.85':'.45'}"/>`;
+    }
+    const beschr=Math.max(10, Math.ceil(26/Math.max(1,10*sc))*10);
+    for(let cm=0; cm<=st.len+0.001; cm+=beschr){
+      /* Erste und letzte Zahl nach innen ziehen, sonst haengen sie ueber dem Bandende. */
+      const letzte = cm+beschr > st.len;
+      const innen = (cm===0) !== st.rechts;               /* Nullpunkt links → erste Zahl nach rechts ruecken */
+      const anker = cm===0||letzte ? (innen?'start':'end') : 'middle';
+      const dx = cm===0||letzte ? (innen?2:-2) : 0;
+      out+=`<text class="dim-text" x="${xs(cm)+dx}" y="${yB-lang-2}" text-anchor="${anker}"
+        style="font-size:9px;font-weight:500;stroke-width:2px">${cm}</text>`;
+    }
+  } else {
+    const x1=x+st.x0*sc, x2=x+(st.x0+st.len)*sc, yB=y+ph;
+    out+=`<line x1="${x1}" y1="${yB-1.5}" x2="${x2}" y2="${yB-1.5}" stroke="#1E1E1E" stroke-width="1.2" stroke-dasharray="3 2" opacity=".8"/>`;
+    out+=`<text class="dim-text" x="${(x1+x2)/2}" y="${yB-6}" text-anchor="middle" style="font-size:9px;font-weight:500;stroke-width:2px">Maßband auf der Kante · ${st.len} cm</text>`;
+  }
+  return `<g style="pointer-events:none">${out}</g>`;
 }
 /* Legt den Maschinen-Ausschnitt an, wenn noch keiner da ist. Wird beim Wechsel
    auf die Naehtischplatte und beim Start aus einem geteilten Link gerufen —
    ohne das kam ueber einen Link eine Naehtischplatte ganz ohne Ausschnitt an. */
+const MASCHINE_MASSE = {'48x18.1':[48,18.1], '52x18.1':[52,18.1], '61.7x18.1':[61.7,18.1], 'auto':[52,18.1]};
+function maschineMass(){ return MASCHINE_MASSE[S.maschineMass]||MASCHINE_MASSE['52x18.1']; }
+/* Vorgabe-Lage: vorne mittig; bei der L-Form mit Ausklinkung vorn hinter der
+   Ausklinkung (dort sitzt die Naeherin, die Maschine steht vor ihr). */
+function maschineStart(){
+  const d=dims(), [w,h]=maschineMass();
+  if(S.form==='lform'){ const g=lfPts(), nc=lfNotchCenter(), vorn=(g.pos==='vr'||g.pos==='vl');
+    if(vorn) return [Math.max(w/2,Math.min(d.w-w/2,nc[0])), Math.max(h/2, d.h-g.ah-h/2-5)];
+    return [Math.max(w/2,Math.min(d.w-w/2,nc[0])), Math.max(h/2, d.h-15)];
+  }
+  return [Math.max(w/2,d.w/2), Math.max(h/2,d.h-15)];
+}
 function seedMaschine(){
   if(S.mat!=='szwal' || presetCount('maschine')) return;
-  S.cuts.push({t:'r',preset:'maschine',w:52,h:18,
-    cx:Math.max(26,(+S.L||120)/2), cy:Math.max(9,(+S.B||60)-15)});
+  const [w,h]=maschineMass(), [cx,cy]=maschineStart();
+  S.cuts.push({t:'r',preset:'maschine',w,h,cx,cy});
 }
-/* Naehtischplatte gibt es nur als Rechteck. */
+/* Standardmass-Chips: Wahl schreibt ins vorhandene Ausschnitt-Objekt */
+function buildMaschineMass(){
+  document.querySelectorAll('#maschineMassChips .kfg_chip').forEach(b=>b.classList.toggle('is-active',b.dataset.mm===S.maschineMass));
+}
+document.querySelectorAll('#maschineMassChips .kfg_chip').forEach(b=>b.addEventListener('click',()=>{
+  S.maschineMass=b.dataset.mm; const [w,h]=maschineMass();
+  S.cuts.filter(c=>c.preset==='maschine').forEach(c=>{ c.w=w; c.h=h; });
+  buildMaschineMass(); render();
+}));
+/* Naehtischplatte: Rechteck und L-Form (Senior 02.09.: "L-Form ist sehr
+   haeufig"), kein Rund. */
 function syncFormChips(){
   document.querySelectorAll('#formChips .kfg_chip').forEach(b=>{
-    b.style.display=(S.mat==='szwal'&&b.dataset.form!=='rect')?'none':'';
+    b.style.display=(S.mat==='szwal'&&b.dataset.form==='round')?'none':'';
   });
+  if(S.mat==='szwal'&&S.form==='round') S.form='rect';
+}
+/* Lage-, Schnitt- und Winkel-Steuerung der L-Form */
+function buildLfControls(){
+  const pc=$('lfPosChips'); if(!pc) return;
+  const pos=lfPos();
+  pc.innerHTML=LF_POS.map(([k,n])=>`<button class="kfg_chip${pos===k?' is-active':''}" data-lp="${k}">${n}</button>`).join('');
+  pc.querySelectorAll('.kfg_chip').forEach(b=>b.addEventListener('click',()=>{ S.lf.pos=b.dataset.lp; render(); }));
+  document.querySelectorAll('#lfCutChips .kfg_chip').forEach(b=>b.classList.toggle('is-active',(b.dataset.ls==='schraeg')===lfSchraeg()));
+  const fw=$('fLW'); if(fw) fw.style.display=lfSchraeg()?'':'none';
+  const iw=$('inLW'); if(iw && document.activeElement!==iw) iw.value=lfGeo().winkel;
+  const note=$('lfInnerNote'); if(note) note.style.display=lfSchraeg()?'none':'';
 }
 /* Schritt 05 haelt bei Naehtischplatten nur Montagebohrung und Maschinen-
    Ausschnitt bereit (Senior 30.07.) — Kuechenausschnitte, Kabeldurchlaesse,
@@ -1233,13 +1531,14 @@ function syncStep5(){
   if(mi && document.activeElement!==mi && mi.value!==(S.machine||'')) mi.value=S.machine||'';
   const bm=$('btnMaschine');
   if(bm) bm.textContent=presetCount('maschine')?'Maschinen-Ausschnitt entfernen':'Maschinen-Ausschnitt hinzufügen';
+  buildMaschineMass();
 }
 function buildCorner(){
   const r=rules();
   const opts=r.minCorner>0?[[0,'Eckig','Standard'],[30,'R30',''],[50,'R50',''],[100,'R100','']]
                           :[[0,'Eckig','Standard'],[3,'R3',''],[10,'R10',''],[30,'R30','']];
   $('cornerChips').innerHTML=opts.map(([v,l,s])=>
-    `<button class="kfg_chip${[0,1,2,3].every(i=>cornerR(i)===v)?' is-active':''}" data-c="${v}">${l}${s?` <small>${s}</small>`:''}</button>`).join('');
+    `<button class="kfg_chip${cornerIdx().every(i=>cornerR(i)===v)?' is-active':''}" data-c="${v}">${l}${s?` <small>${s}</small>`:''}</button>`).join('');
   $('cornerChips').querySelectorAll('.kfg_chip').forEach(b=>b.addEventListener('click',()=>{
     setAllCorners(+b.dataset.c);
     buildCorner(); render();
@@ -1247,7 +1546,8 @@ function buildCorner(){
   buildCornerSel();
   const note=$('cornerRule');
   const lformNote = S.form==='lform'
-    ? 'L-Form: der Radius gilt für alle Außenecken. Die Innenecke wird nach Fertigungsregel automatisch verrundet.'
+    ? (lfSchraeg() ? 'L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.'
+                   : 'L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.')
     : '';
   const txt=[lformNote, r.minCorner>0?r.cornerNote:''].filter(Boolean).join(' ');
   note.style.display=txt?'block':'none';
@@ -1255,10 +1555,11 @@ function buildCorner(){
 }
 /* Kleines Icon: Quadrat, bei dem genau die gemeinte Ecke gerundet ist */
 function radiusField(i,val,on){
+  const lf=S.form==='lform';
   return `<label class="kfg_radcell${on?' is-on':''}">`
-    +cornerIcon(i,on)
+    +(lf?`<span class="nm">${cornerName(i)}</span>`:cornerIcon(i,on))
     +`<input type="number" inputmode="numeric" min="0" max="300" step="1" value="${val}" data-cr="${i}"
-       aria-label="Radius ${CORNER_NAMES[i]}"><span class="u">mm</span></label>`;
+       aria-label="Radius ${cornerName(i)}"><span class="u">mm</span></label>`;
 }
 function cornerIcon(i,on){
   /* Das Icon zeigt IMMER die gemeinte Ecke gerundet — gefuellt = ausgewaehlt.
@@ -1273,7 +1574,7 @@ function buildCornerSel(){
   const show=cornerFieldsVisible();
   box.style.display=show?'block':'none';
   if(!show) return;
-  const all=cornerMax(), gleich=[0,1,2,3].every(i=>cornerR(i)===all);
+  const all=cornerMax(), gleich=cornerIdx().every(i=>cornerR(i)===all);
   /* Kopfzeile = verknuepfter Wert fuer alle vier Ecken, darunter die 2x2-Felder
      in derselben Anordnung wie auf der Platte (Draufsicht). */
   el.innerHTML=`<label class="kfg_radall${gleich?' is-linked':''}">`
@@ -1283,12 +1584,15 @@ function buildCornerSel(){
     /* Anordnung wie auf der Platte: oben hinten links|rechts, unten vorne links|rechts.
        Die Datenreihenfolge laeuft im Uhrzeigersinn (…,vorne rechts,vorne links),
        fuer die Anzeige werden die unteren beiden daher getauscht. */
-    +`<div class="kfg_radquad">`+[0,1,3,2].map(i=>radiusField(i,cornerR(i),cornerR(i)>0)).join('')+`</div>`;
+    +(S.form==='lform'
+        /* L-Form: fuenf Aussenecken in Umlaufrichtung, jede mit ihrem Namen */
+        ? `<div class="kfg_radlist">`+lfPts().ord.filter(o=>o>=0).map(o=>radiusField(o,cornerR(o),cornerR(o)>0)).join('')+`</div>`
+        : `<div class="kfg_radquad">`+[0,1,3,2].map(i=>radiusField(i,cornerR(i),cornerR(i)>0)).join('')+`</div>`);
   el.querySelectorAll('input[data-cr]').forEach(inp=>{
     const apply=()=>{
       const v=+inp.value||0;
       if(inp.dataset.cr==='all') setAllCorners(v);
-      else { S.cornerR[+inp.dataset.cr]=clampCorner(v); S.corner=cornerMax(); }
+      else setCorner(+inp.dataset.cr, v);
       buildCorner(); render();
     };
     inp.addEventListener('change',apply);
@@ -1314,7 +1618,7 @@ function buildQuick(){
   }));
   $('massHint').textContent=`${list.length} ${list.length===1?'Größe':'Größen'} ab Lager`;
 }
-function buildAll(){ buildMats(); buildDekore(); buildThick(); buildAbs(); buildEdges(); buildCorner(); syncFormChips(); }
+function buildAll(){ buildMats(); buildDekore(); buildThick(); buildAbs(); buildEdges(); syncFormChips(); syncFormUI(); buildCorner(); }
 
 function clampDims(){
   const r=rules();
@@ -1337,9 +1641,9 @@ function validate(){
     chk('fLL','errLL','rangeLL',+S.lf.L,20,r.maxL); chk('fLB','errLB','rangeLB',+S.lf.B,20,r.maxB);
     chk('fAW','errAW','rangeAW',+S.lf.aw,10,Math.max(10,+S.lf.L-10)); chk('fAH','errAH','rangeAH',+S.lf.ah,10,Math.max(10,+S.lf.B-10));
   }
-  /* Radius-Regel Möbelplatte */
-  if(S.form==='rect'&&S.mat==='dekor'&&cornerCount()>0&&cornerMax()<r.minCorner){
-    S.cornerR=S.cornerR.map(v=>v>0?r.minCorner:0); S.corner=cornerMax();
+  /* Radius-Regel Möbelplatte — gilt fuer Rechteck und L-Form */
+  if(cornerFormOk()&&S.mat==='dekor'&&r.minCorner>0&&cornerIdx().some(i=>cornerR(i)>0&&cornerR(i)<r.minCorner)){
+    cornerIdx().forEach(i=>{ if(cornerR(i)>0&&cornerR(i)<r.minCorner) setCorner(i,r.minCorner); });
     toast('Möbelplatte: Außenradius mind. R30, angepasst'); buildCorner();
   }
   return ok;
@@ -1365,16 +1669,16 @@ function render(){
   $('cta').classList.toggle('is-sonder',!std);$('ctaBar').classList.toggle('is-sonder',!std);
   const sur=S.mat==='mpx'?{natur:' · natur',hpl:' + HPL'}[S.mpxSurface]:'';
   const hit=shopHit();
+  const a2=(''+(Math.round(areaM2()*100)/100)).replace('.',',');
   const rows=[[hit
     ? `${MATERIALS[S.mat].name}${sur} · ${c.dekorName} · ${c.thickName} · Lagerartikel ${hit[2]||''}`
-    : `${MATERIALS[S.mat].name}${sur} · ${c.dekorName} · ${c.thickName} (${Math.round(areaM2()*100)/100} m² × ${rateZl()} zł)`, c.basis]];
+    : `${MATERIALS[S.mat].name}${sur} · ${c.dekorName} · ${c.thickName} · Sondermaß · ${a2} m²`, c.basis]];
   if(c.kante>0)rows.push([isLack()?`Kantenbearbeitung, lackiert`:`Kantenbearbeitung`,c.kante]);
+  if(c.lschnitt>0)rows.push([lfGeo().schraeg?`Ausklinkung schräg (${lfSchnittCm()} cm Schnitt)`:`Ausklinkung (${lfSchnittCm()} cm Schnitt)`,c.lschnitt]);
   if(massbandPreis()>0)rows.push([massbandName(),massbandPreis()]);
   if(c.ecken>0){
-    const uniq=[...new Set([0,1,2,3].map(cornerR).filter(r=>r>0))];
-    rows.push([uniq.length===1
-      ? `Eckenrundung R${uniq[0]} (${cornerCount()}× à ${fmt(cornerPriceFor(uniq[0]))})`
-      : `Eckenrundung ${[0,1,2,3].filter(i=>cornerR(i)>0).map(i=>'R'+cornerR(i)).join(' · ')}`, c.ecken]);
+    const n=cornerCount();
+    rows.push([`Eckenrundung ${cornerLabel()} (${n} ${n===1?'Ecke':'Ecken'})`, c.ecken]);
   }
   /* Presets in einer Zeile, jede freie Bearbeitung mit eigenem Preis darunter */
   const summePreset=(S.extras.bohr?X_PRICE.bohr:0)
@@ -1391,7 +1695,7 @@ function render(){
   $('breakdown').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${typeof r[1]==='number'?fmt(r[1]):r[1]}</td></tr>`).join('')
     +`<tr class="total"><td>Gesamt inkl. MwSt.</td><td>${pv}</td></tr>`;
   syncStep5();
-  buildQuick(); drawStage(); updateMini(); updateSticky(); updateBottomBar(); buildCounts(); buildConf(); buildBarWhat(); syncURL(); uebersetze();
+  buildQuick(); buildLfControls(); drawStage(); updateMini(); updateSticky(); updateBottomBar(); buildCounts(); buildConf(); buildBarWhat(); syncURL(); uebersetze();
 }
 /* Geteilte Links wiederherstellen — syncURL schreibt den Zustand in den Hash,
    bisher hat ihn aber niemand gelesen: "Konfiguration teilen" fuehrte zur Standard-
@@ -1406,7 +1710,13 @@ function restoreFromHash(){
   /* Alt-Links: die Naehmaschinen-Platte war bis v1.15.0 eine FORM. */
   if(g('f')==='szwal'){ S.mat='szwal'; S.form='rect'; }
   else if(['rect','round','lform'].indexOf(g('f'))>=0) S.form=g('f');
-  if(S.mat==='szwal') S.form='rect';
+  if(S.mat==='szwal'&&S.form==='round') S.form='rect';
+  /* L-Form seit v1.17.0: Lage (lp), Schnitt (ls), Radien je Aussenecke (lr) */
+  if(LF_POS.some(p=>p[0]===g('lp'))) S.lf.pos=g('lp');
+  if(g('ls')==='s') S.lf.schnitt='schraeg';
+  if(/^\d{1,3}(-\d{1,3}){4}$/.test(g('lr')||'')) S.lfR=g('lr').split('-').map(v=>Math.max(0,Math.min(300,+v)));
+  if(['links','rechts'].indexOf(g('mn'))>=0) S.massbandNull=g('mn');
+  if(g('mm')&&MASCHINE_MASSE[g('mm')]) S.maschineMass=g('mm');
   if(g('t')&&MATERIALS[S.mat].thick.some(t=>t[0]===g('t'))) S.thick=g('t');
   const c=num('c',0,300); if(c!==null) S.corner=c;
   if(/^\d{1,3}(-\d{1,3}){3}$/.test(g('cr')||'')) S.cornerR=g('cr').split('-').map(v=>clampCorner(+v));
@@ -1482,7 +1792,7 @@ function buildConf(){
     {t:`${MATERIALS[S.mat].name}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName}`, s:1},
     {t:c.thickName, s:1},
     {t:S.form==='round'?`Rund Ø ${S.D} cm`
-      :S.form==='lform'?`L-Form ${S.lf.L} × ${S.lf.B} cm`
+      :S.form==='lform'?`L-Form ${S.lf.L} × ${S.lf.B} cm`+(lfSchraeg()?' · schräg':'')
       :`${S.mat==='szwal'?'Nähtischplatte':'Rechteck'} ${d.w} × ${d.h} cm`,
      s:3, warn:!hit&&S.mat!=='szwal'&&(S.form==='rect'||S.form==='round')},
   ];
@@ -1516,12 +1826,13 @@ function feld(lbl, f, val, unit, extra){
    trotzdem, und die Abstaende zu allen vier Kanten stehen dabei. */
 function maschinenZeile(c,i,d){
   const f=v=>(''+(Math.round(v*10)/10)).replace('.',',');
-  const info=`Größe ${f(c.w)} × ${f(c.h)} cm — Richtwert, wir passen ihn an deine Maschine an. `
-    +`Abstände: links ${f(c.cx-c.w/2)} · rechts ${f(d.w-(c.cx+c.w/2))} · `
-    +`hinten ${f(c.cy-c.h/2)} · vorn ${f(d.h-(c.cy+c.h/2))} cm`;
+  const info=(S.maschineMass==='auto'
+      ? `Größe ${f(c.w)} × ${f(c.h)} cm — Richtwert, wir passen ihn an deine Maschine an. `
+      : `Größe ${f(c.w)} × ${f(c.h)} cm — Standardmaß. `)
+    +(()=>{ const ab=cutAbstaende(c); return `Abstände: links ${f(ab.l)} · rechts ${f(ab.r)} · hinten ${f(ab.t)} · vorn ${f(ab.b)} cm`; })();
   return `<div class="kfg_cutrow" data-i="${i}">
       <div class="kfg_cutrow-head"><span class="ic">▭</span><b>Ausschnitt für die Maschine</b>
-        <span class="pr">im Plattenpreis</span>
+        <span class="pr">+ ${fmt(PRESETS.maschine.price)}</span>
         <button class="del" data-del="${i}" aria-label="Entfernen">×</button></div>
       <div class="kfg_cutrow-fields"><span class="kfg_cutlen breit">${info}</span>
         ${feld('X ab links','cx',c.cx*10,'mm','min="0"')}${feld('Y ab hinten','cy',c.cy*10,'mm','min="0"')}</div>
@@ -1701,9 +2012,9 @@ var _kfgUrlT;
 function syncURL(){ clearTimeout(_kfgUrlT); _kfgUrlT = setTimeout(_syncURLnow, 250); }
 function _syncURLnow(){
   const p=new URLSearchParams({m:S.mat,d:S.dekor,f:S.form,t:S.thick,c:S.corner,cr:S.cornerR.join('-'),er:S.edgeR,sf:S.mpxSurface,ac:S.absColor,
-    mb:S.massband, lk:S.extras.lack?1:0,
+    mb:S.massband, mn:S.massbandNull||'links', mm:S.maschineMass, lk:S.extras.lack?1:0,
     ...(S.form==='round'?{dm:S.D}
-       :S.form==='lform'?{ll:S.lf.L,lb:S.lf.B,aw:S.lf.aw,ah:S.lf.ah}
+       :S.form==='lform'?{ll:S.lf.L,lb:S.lf.B,aw:S.lf.aw,ah:S.lf.ah,lp:lfPos(),ls:lfSchraeg()?'s':'g',lr:[0,1,2,3,4].map(lfCornerR).join('-')}
        :{l:S.L,b:S.B}),e:S.edges.join(',')});
   history.replaceState(null,'','#'+p.toString());
 }
@@ -1763,14 +2074,33 @@ $('btn2d').addEventListener('click',()=>setView('2d'));
 $('btn3d').addEventListener('click',()=>setView('3d'));
 function setForm(f){
   S.form=f;
+  syncFormUI();
+  buildCorner();          /* Chips + Radiusfelder an die neue Form anpassen */
+}
+/* Form-Chips, Massfelder und Eckenblock an S.form angleichen — auch nach
+   setConfig() und geteilten Links, die frueher die Rechteck-Felder stehen liessen. */
+function syncFormUI(){
+  const f=S.form;
   document.querySelectorAll('#formChips .kfg_chip').forEach(x=>x.classList.toggle('is-active',x.dataset.form===f));
   $('dimsRect').style.display=f==='rect'?'grid':'none';
   $('dimsRound').style.display=f==='round'?'grid':'none';
   $('dimsLform').style.display=f==='lform'?'grid':'none';
-  /* Ecken auch bei L-Form (Wunsch Sascha 27.07.) */
+  if(f==='lform'){ const set=(id,v)=>{ const el=$(id); if(el&&document.activeElement!==el) el.value=v; };
+    set('inLL',S.lf.L); set('inLB',S.lf.B); set('inAW',S.lf.aw); set('inAH',S.lf.ah); }
+  /* Ecken auch bei L-Form (Wunsch Sascha 27.07.), seit v1.17.0 je Ecke */
   $('cornerBlock').style.display=cornerFormOk()?'block':'none';
-  buildCorner();          /* Chips + Radiusfelder an die neue Form anpassen */
+  buildLfControls();
 }
+/* Schnitt gerade/schraeg und Winkel der Schraege */
+document.querySelectorAll('#lfCutChips .kfg_chip').forEach(b=>b.addEventListener('click',()=>{
+  S.lf.schnitt=b.dataset.ls==='schraeg'?'schraeg':'gerade';
+  buildCorner(); render();
+}));
+{ let wT; const iw=$('inLW'); if(iw) iw.addEventListener('input',()=>{ clearTimeout(wT); wT=setTimeout(()=>{
+    /* Winkel zur hinteren Kante: Tiefe folgt aus Breite x tan(Winkel) */
+    const w=Math.max(5,Math.min(85,+iw.value||34)), aw=+S.lf.aw||1;
+    S.lf.ah=Math.max(10,Math.min(+S.lf.B-10, Math.round(aw*Math.tan(w*Math.PI/180))));
+    $('inAH').value=S.lf.ah; render(); },300); }); }
 document.querySelectorAll('#formChips .kfg_chip').forEach(b=>b.addEventListener('click',()=>{
   setForm(b.dataset.form);
   ga('kfg_form',{form:S.form});
@@ -1797,7 +2127,7 @@ let cT; const inCEl=$('inC'); if(inCEl) inCEl.addEventListener('input',()=>{clea
   render();},250)});
 ['inL','inB','inD','inLL','inLB','inAW','inAH'].forEach(id=>{let t;$(id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{
   S.L=$('inL').value;S.B=$('inB').value;S.D=$('inD').value;
-  S.lf={L:+$('inLL').value,B:+$('inLB').value,aw:+$('inAW').value,ah:+$('inAH').value};render();},250)})});
+  Object.assign(S.lf,{L:+$('inLL').value,B:+$('inLB').value,aw:+$('inAW').value,ah:+$('inAH').value});render();},250)})});
 document.querySelectorAll('#edgeRadiusChips .kfg_chip').forEach(b=>b.addEventListener('click',()=>{
   S.edgeR=+b.dataset.er;
   document.querySelectorAll('#edgeRadiusChips .kfg_chip').forEach(c=>c.classList.toggle('is-active',c===b));
@@ -1822,7 +2152,7 @@ function openOrder(){
   const std=isStandard(), offer=needsOffer(), c=calc();
   const formName=S.mat==='szwal'?'Nähtischplatte':{rect:'Rechteck',round:'Rund',lform:'L-Form'}[S.form];
   const mass=S.form==='round'?`Ø ${S.D} cm`
-    :S.form==='lform'?`${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm`
+    :S.form==='lform'?`${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${(LF_POS.find(p=>p[0]===lfPos())||[])[1]}${lfSchraeg()?` · schräg ${lfGeo().winkel}°`:''}`
     :`${S.L} × ${S.B} cm`;
   const edges=[...new Set((S.form==='round'?[S.edges[0]]:S.edges).map(edgeLabel))];
   const edgeTxt=edges.length===1?edges[0]:S.edges.map((e,i)=>'ABCD'[i]+': '+edgeLabel(e)).join(' · ');
@@ -1833,7 +2163,8 @@ function openOrder(){
       +`Verlauf (x/y in cm ab hinten links): `+kanalPunkte(c2).map(q=>f(q[0])+'/'+f(q[1])).join(' → ');
     if(c2.t==='p') return `Freie Kontur, Punkte (x/y in cm ab hinten links): `
       +(c2.pts||[]).map(p=>f(p[0])+'/'+f(p[1])).join(' · ')+`, Radius R${c2.r||0}`;
-    return `${fmtCut(c2)} · Abstände: links ${f(c2.cx-c2.w/2)} · rechts ${f(G.w-(c2.cx+c2.w/2))} · hinten ${f(c2.cy-c2.h/2)} · vorn ${f(G.h-(c2.cy+c2.h/2))} cm`;
+    const ab=cutAbstaende(c2);
+    return `${fmtCut(c2)} · Abstände: links ${f(ab.l)} · rechts ${f(ab.r)} · hinten ${f(ab.t)} · vorn ${f(ab.b)} cm`;
   });
   const presets=[]; if(S.extras.bohr)presets.push('Montagebohrungen 4× Ø8');
   Object.keys(PRESETS).forEach(k=>{const n=presetCount(k); if(n)presets.push((n>1?n+'× ':'')+PRESETS[k].label);});
@@ -1844,28 +2175,30 @@ function openOrder(){
     ['Dekor', c.dekorName],
     ['Stärke', c.thickName],
     ['Form & Maß', `${formName} · ${mass}`],
-    ...(cornerCount()>0?[['Eckenradius',[0,1,2,3].filter(i=>cornerR(i)>0)
-      .map(i=>`${CORNER_NAMES[i]} R${cornerR(i)}`).join(' · ')]]:[]),
+    ...(cornerCount()>0?[['Eckenradius',cornerIdx().filter(i=>cornerR(i)>0)
+      .map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ')]]:[]),
     ['Kante', edgeTxt
       +(S.edges.some(e=>e==='abs')&&S.absColor!=='dekor'?` · ABS-Farbe ${(ABS_STOCK.find(a=>a[0]===S.absColor)||[])[1]}`:'')
       +(isLack()?' · lackiert (eine Lackierung)':'')],
-    ...(S.mat==='szwal'?[['Maßband', massbandName()],
-                         ['Nähmaschine', S.machine||'— vom Kunden noch nicht angegeben —']]:[]),
+    ...(S.mat==='szwal'?[['Maßband', massbandName()+(S.massband!=='none'&&massbandStrecke()?` · ${massbandStrecke().len} cm · Nullpunkt ${S.massbandNull||'links'}`:'')],
+                         ['Nähmaschine', (S.machine||'— vom Kunden noch nicht angegeben —')+` · Ausschnitt ${S.maschineMass==='auto'?'nach Maschine':S.maschineMass.replace('x',' × ')+' cm'}`]]:[]),
     ...(presets.length?[['Ausschnitte (Preset)',presets.join(', ')]]:[]),
     ...(cutsTxt.length?[['Ausschnitt-Positionen',cutsTxt.join('<br>')]]:[]),
     ...(S.extras.custom?[['Eigenes Bohrbild',($('customText').value||'—')+' · Skizze: '+($('uploadInput').files.length?$('uploadInput').files[0].name:'folgt per E-Mail')]]:[]),
-    ['Preis', $('price').textContent+' inkl. MwSt. ('+Math.round(c.zl)+' zł Materialbasis)'],
+    ['Preis', $('price').textContent+' inkl. MwSt. ('+(c.quelle==='katalog'?'Lagerpreis':'Sondermaß-Kurve')+')'],
   ];
   const hitP=shopHit();
   const props={...(hitP?{'_kfg_variant_id':hitP[1],'_kfg_sku':hitP[2]||''}:{}),
     '_kfg_config_url':location.href.slice(0,60)+'…','_kfg_material':S.mat,'_kfg_dekor':S.dekor,'_kfg_staerke_mm':S.thick,
     '_kfg_form':S.form,'_kfg_mass_cm':mass.replace(/ cm/g,''),'_kfg_kante':S.edges.join('|'),'_kfg_abs':S.absColor,
     ...(isLack()?{'_kfg_kante_lackiert':'ja'}:{}),
-    ...(S.mat==='szwal'?{'_kfg_massband':S.massband,'_kfg_naehmaschine':S.machine||''}:{}),
+    ...(S.mat==='szwal'?{'_kfg_massband':S.massband+(S.massband!=='none'?`|${S.massbandNull||'links'}|${(massbandStrecke()||{}).len||0}cm`:''),
+                         '_kfg_naehmaschine':S.machine||'','_kfg_maschinenmass':S.maschineMass}:{}),
+    ...(S.form==='lform'?{'_kfg_lform':`${lfPos()}|${lfSchraeg()?'schraeg':'gerade'}|${lfGeo().winkel}`}:{}),
     ...(S.cuts.some(c2=>c2.t==='k')?{'_kfg_kabelkanal':S.cuts.filter(c2=>c2.t==='k')
       .map(c2=>`${Math.round(cutLen(c2))}cm x ${c2.w}mm x ${c2.dp}mm ${c2.seite}`).join(' | ')}:{}),
-    ...(cornerCount()>0?{'_kfg_eckenradius_mm':S.cornerR.join('/'),
-      '_kfg_ecken':[0,1,2,3].filter(i=>cornerR(i)>0).map(i=>`${CORNER_NAMES[i]}:R${cornerR(i)}`).join(' | ')}:{}),
+    ...(cornerCount()>0?{'_kfg_eckenradius_mm':cornerIdx().map(cornerR).join('/'),
+      '_kfg_ecken':cornerIdx().filter(i=>cornerR(i)>0).map(i=>`${cornerName(i)}:R${cornerR(i)}`).join(' | ')}:{}),
     ...(S.cuts.length?{'_kfg_cuts':S.cuts.map(c2=>`${c2.preset||c2.t}:${c2.w}x${c2.h}@${c2.cx}/${c2.cy}`).join(';')}:{})};
   $('omData').innerHTML='<table>'+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')+'</table>'
     +'<div class="props"><b>Technisch: Shopify Line-Item-Properties</b>'
@@ -1938,7 +2271,7 @@ function cutLen(c){
 function cutPrice(c){
   if(c.preset) return PRESETS[c.preset].price;
   if(c.t==='k') return Math.round((KANAL_PRICE.basis + kanalLfmPreis(c.w,c.dp)*cutLen(c)/100)*10)/10;
-  return Math.round((FREI_PRICE.basis + FREI_PRICE.lfm*cutLen(c)/100)*10)/10;   /* auf 10 Cent */
+  return freierAusschnitt(cutLen(c)/100);
 }
 /* Fertigungsgrenzen: geschlossene Aussparungen brauchen Abstand zur Kante,
    Innenecken einen Mindestradius, Ausklinkungen duerfen die Platte nicht
@@ -1971,6 +2304,10 @@ function cutWarn(c){
   const w=c.t==='c'?c.d:c.w, h=c.t==='c'?c.d:c.h;
   if(c.cx-w/2<m||c.cy-h/2<m||c.cx+w/2>d.w-m||c.cy+h/2>d.h-m)
     return 'Mindestabstand ' + (m*10) + ' mm zur Plattenkante unterschritten';
+  if(S.form==='lform'){
+    const ecken=[[c.cx-w/2,c.cy-h/2],[c.cx+w/2,c.cy-h/2],[c.cx-w/2,c.cy+h/2],[c.cx+w/2,c.cy+h/2]];
+    if(ecken.some(([px,py])=>lfInNotch(px,py))) return 'Liegt in der Ausklinkung — bitte verschieben';
+  }
   return '';
 }
 /* Massangabe fuer Aufschluesselung und Bestelldaten — mit Einheit und Komma */
@@ -2009,11 +2346,11 @@ function presetCount(k){ return S.cuts.filter(c=>c.preset===k).length; }
 function addPreset(k){
   if(S.form==='round'){toast('Ausschnitte aktuell nur bei eckigen Formen');return;}
   const p=PRESETS[k], d=dims(), n=presetCount(k);
-  let [cx,cy]=p.pos(d.w,d.h,n);
-  const w=p.t==='c'?p.d:p.w, hh=p.t==='c'?p.d:p.h;
+  let [cx,cy]=k==='maschine'?maschineStart():p.pos(d.w,d.h,n);
+  const w=p.t==='c'?p.d:(k==='maschine'?maschineMass()[0]:p.w), hh=p.t==='c'?p.d:(k==='maschine'?maschineMass()[1]:p.h);
   if(w>d.w-2||hh>d.h-2){toast(p.label+' passt nicht auf diese Plattengröße');return;}
   cx=Math.max(w/2,Math.min(d.w-w/2,cx)); cy=Math.max(hh/2,Math.min(d.h-hh/2,cy));
-  S.cuts.push(p.t==='c'?{t:'c',preset:k,cx,cy,d:p.d,w:p.d,h:p.d}:{t:'r',preset:k,cx,cy,w:p.w,h:p.h});
+  S.cuts.push(p.t==='c'?{t:'c',preset:k,cx,cy,d:p.d,w:p.d,h:p.d}:{t:'r',preset:k,cx,cy,w,h:hh});
   toast(p.label+' hinzugefügt, auf der Platte verschiebbar'); render();
 }
 function removePreset(k){
@@ -2478,6 +2815,7 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
 
 
   SHOP = shopData || {};
+  KURVEN = kurvenData || {};
 
   restoreFromHash();
   seedMaschine();

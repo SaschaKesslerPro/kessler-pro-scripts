@@ -1,13 +1,13 @@
 {
  "_meta": {
   "name": "Kessler PRO — Konfigurator, Sprachdatei",
-  "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft.",
+  "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft.",
   "sprachen": [
    "pl",
    "en"
   ],
-  "anzahl": 230,
-  "muster": 37
+  "anzahl": 259,
+  "muster": 46
  },
  "pl": {
   "Ab Lager": "Z magazynu",
@@ -177,7 +177,7 @@
   "vorne": "z przodu",
   "links": "z lewej",
   "Kante": "Krawędź",
-  "Ecke": "Narożnik",
+  "Ecke": "narożnik",
   "Leicht gefast": "Lekko fazowana",
   "Gefast 45°": "Faza 45°",
   "Halbrund": "Półokrągła",
@@ -239,7 +239,36 @@
   "Kantenbearbeitung, lackiert": "Obróbka krawędzi, lakierowana",
   "+ 8 €/lfm": "+ 8 €/mb",
   "auf Anfrage": "na zapytanie",
-  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Widoczna krawędź warstwowa: bez frezowania w standardzie, frezowana 45° kosztuje 5 €/mb, półokrągła 8 €/mb. Lakierowane to 5, 10 i 16 €/mb — mamy dokładnie jeden lakier. Alternatywnie obrzeże ABS w wybranym kolorze."
+  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Widoczna krawędź warstwowa: bez frezowania w standardzie, frezowana 45° kosztuje 5 €/mb, półokrągła 8 €/mb. Lakierowane to 5, 10 i 16 €/mb — mamy dokładnie jeden lakier. Alternatywnie obrzeże ABS w wybranym kolorze.",
+  "Lage der Ausklinkung": "Położenie wycięcia",
+  "Schnitt": "Cięcie",
+  "Gerade": "Proste",
+  "Schräg": "Skośne",
+  "Winkel der Schräge": "Kąt skosu",
+  "5 bis 85° — zur hinteren Kante": "5 do 85° — względem tylnej krawędzi",
+  "Ausklinkung": "wycięcie",
+  "schräg": "skośne",
+  "alle fünf": "wszystkie pięć",
+  "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym nie ma narożnika wewnętrznego.",
+  "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Narożnik wewnętrzny jest zaokrąglany automatycznie według reguły produkcji.",
+  "Liegt in der Ausklinkung — bitte verschieben": "Leży w wycięciu — przesuń",
+  "Nullpunkt links": "Zero po lewej",
+  "Nullpunkt rechts": "Zero po prawej",
+  "Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.": "Miarka naklejana siedzi na czole przedniej krawędzi — w widoku z góry zaznaczona tylko linią, widoczna w widoku 3D.",
+  "Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.": "Miarka wypalana laserem leży na wierzchu wzdłuż przedniej krawędzi.",
+  "Es ist höchstens 100 cm lang und endet vor den Eckradien.": "Ma najwyżej 100 cm długości i kończy się przed zaokrągleniami narożników.",
+  "Maßband auf der Kante": "Miarka na krawędzi",
+  "Maß des Ausschnitts": "Wymiar wycięcia",
+  "Nach Maschine": "Według maszyny",
+  "wir messen": "zmierzymy",
+  "+ 40,00 € pauschal": "+ 40,00 € ryczałt",
+  "Standardmaß": "wymiar standardowy",
+  "Wähle ein Standardmaß oder lass uns nach deiner Maschine messen — Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Wybierz wymiar standardowy albo pozwól nam zmierzyć według Twojej maszyny — producenta i model potrzebujemy w każdym przypadku. Miejsce wycięcia ustalasz sam: przesuń je w podglądzie, odległości od wszystkich czterech krawędzi pokazują się obok.",
+  "ab 19,90 € · 18/25/36 mm": "od 19,90 € · 18/25/36 mm",
+  "ab 69 € · 12 mm": "od 69 € · 12 mm",
+  "ab 29,90 € · 21/40 mm · alle Dekore": "od 29,90 € · 21/40 mm · wszystkie dekory",
+  "Ecken": "narożniki",
+  "Sondermaß": "Wymiar niestandardowy"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -409,7 +438,7 @@
   "vorne": "front",
   "links": "left",
   "Kante": "Edge",
-  "Ecke": "Corner",
+  "Ecke": "corner",
   "Leicht gefast": "Lightly chamfered",
   "Gefast 45°": "Chamfered 45°",
   "Halbrund": "Half round",
@@ -471,7 +500,36 @@
   "Kantenbearbeitung, lackiert": "Edge finishing, lacquered",
   "+ 8 €/lfm": "+ €8/lin. m",
   "auf Anfrage": "on request",
-  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Visible layered edge: not milled as standard, milled 45° costs €5/lin. m, half-round €8/lin. m. Lacquered it is €5, €10 and €16/lin. m — we have exactly one lacquer. Alternatively an ABS edge in the colour of your choice."
+  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Visible layered edge: not milled as standard, milled 45° costs €5/lin. m, half-round €8/lin. m. Lacquered it is €5, €10 and €16/lin. m — we have exactly one lacquer. Alternatively an ABS edge in the colour of your choice.",
+  "Lage der Ausklinkung": "Position of the notch",
+  "Schnitt": "Cut",
+  "Gerade": "Straight",
+  "Schräg": "Angled",
+  "Winkel der Schräge": "Angle of the cut",
+  "5 bis 85° — zur hinteren Kante": "5 to 85° — relative to the back edge",
+  "Ausklinkung": "notch",
+  "schräg": "angled",
+  "alle fünf": "all five",
+  "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "L-shape: five outer corners, each selectable on its own. With an angled cut there is no inner corner.",
+  "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. The inner corner is rounded automatically per the production rule.",
+  "Liegt in der Ausklinkung — bitte verschieben": "Sits in the notch — please move it",
+  "Nullpunkt links": "Zero at the left",
+  "Nullpunkt rechts": "Zero at the right",
+  "Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.": "The adhesive tape sits on the face of the front edge — marked only as a line in the top view, visible in the 3D view.",
+  "Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.": "The laser-etched tape lies on the top surface along the front edge.",
+  "Es ist höchstens 100 cm lang und endet vor den Eckradien.": "It is at most 100 cm long and stops short of the corner radii.",
+  "Maßband auf der Kante": "Tape on the edge",
+  "Maß des Ausschnitts": "Size of the cut-out",
+  "Nach Maschine": "To the machine",
+  "wir messen": "we measure",
+  "+ 40,00 € pauschal": "+ €40.00 flat",
+  "Standardmaß": "standard size",
+  "Wähle ein Standardmaß oder lass uns nach deiner Maschine messen — Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Pick a standard size or let us measure to your machine — we need make and model in any case. You decide where the cut-out sits: drag it in the preview, the distances to all four edges are shown next to it.",
+  "ab 19,90 € · 18/25/36 mm": "from €19.90 · 18/25/36 mm",
+  "ab 69 € · 12 mm": "from €69 · 12 mm",
+  "ab 29,90 € · 21/40 mm · alle Dekore": "from €29.90 · 21/40 mm · all decors",
+  "Ecken": "corners",
+  "Sondermaß": "Custom size"
  },
  "muster": {
   "pl": [
@@ -622,6 +680,42 @@
    [
     "^(\\d+(?:,\\d+)?) €/lfm$",
     "$1 €/mb"
+   ],
+   [
+    "^Ausklinkung schräg \\((\\d+) cm Schnitt\\)$",
+    "Wycięcie skośne ($1 cm cięcia)"
+   ],
+   [
+    "^Ausklinkung \\((\\d+) cm Schnitt\\)$",
+    "Wycięcie ($1 cm cięcia)"
+   ],
+   [
+    "^Eckenrundung (.+) \\((\\d+) (Ecke|Ecken)\\)$",
+    "Zaokrąglenie narożników $1 ($2 $3)"
+   ],
+   [
+    "^Sondermaß (.+) m²$",
+    "Wymiar niestandardowy $1 m²"
+   ],
+   [
+    "^Lagerartikel (.+)$",
+    "Artykuł magazynowy $1"
+   ],
+   [
+    "^Länge hier: (\\d+) cm$",
+    "Długość tutaj: $1 cm"
+   ],
+   [
+    "^Größe (.+) — Standardmaß\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+    "Wymiar $1 — wymiar standardowy. Odległości: lewo $2 · prawo $3 · tył $4 · przód $5 cm"
+   ],
+   [
+    "^Ecke (.+), klicken zum Begradigen$",
+    "Narożnik $1, kliknij, aby wyprostować"
+   ],
+   [
+    "^Maßband auf der Kante · (\\d+) cm$",
+    "Miarka na krawędzi · $1 cm"
    ]
   ],
   "en": [
@@ -772,6 +866,42 @@
    [
     "^(\\d+(?:,\\d+)?) €/lfm$",
     "€$1/lin. m"
+   ],
+   [
+    "^Ausklinkung schräg \\((\\d+) cm Schnitt\\)$",
+    "Angled notch ($1 cm of cut)"
+   ],
+   [
+    "^Ausklinkung \\((\\d+) cm Schnitt\\)$",
+    "Notch ($1 cm of cut)"
+   ],
+   [
+    "^Eckenrundung (.+) \\((\\d+) (Ecke|Ecken)\\)$",
+    "Corner rounding $1 ($2 $3)"
+   ],
+   [
+    "^Sondermaß (.+) m²$",
+    "Custom size $1 m²"
+   ],
+   [
+    "^Lagerartikel (.+)$",
+    "Stock item $1"
+   ],
+   [
+    "^Länge hier: (\\d+) cm$",
+    "Length here: $1 cm"
+   ],
+   [
+    "^Größe (.+) — Standardmaß\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+    "Size $1 — standard size. Distances: left $2 · right $3 · back $4 · front $5 cm"
+   ],
+   [
+    "^Ecke (.+), klicken zum Begradigen$",
+    "Corner $1, click to square off"
+   ],
+   [
+    "^Maßband auf der Kante · (\\d+) cm$",
+    "Tape on the edge · $1 cm"
    ]
   ]
  }
