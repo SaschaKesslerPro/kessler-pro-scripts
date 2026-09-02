@@ -16,10 +16,17 @@
    der Konfigurator faellt dann auf die Mail-Anfrage zurueck.
 
    Umgebung (wrangler secret / vars):
-     SHOPIFY_SHOP          hyf2zr-7x.myshopify.com
-     SHOPIFY_ADMIN_TOKEN   Custom-App-Token mit write_draft_orders
-     ALLOWED_ORIGINS       kommagetrennt, z. B. https://www.kessler-pro.com,https://kessler-pro.com,https://kessler-pro-com.webflow.io
-     DATEN_BASE            jsDelivr-Basis fuer Matrix und Kurven — leer = aus der Konfigurations-URL ableiten
+     SHOPIFY_SHOP             hyf2zr-7x.myshopify.com
+     SHOPIFY_CLIENT_ID        Dev-Dashboard-App "Konfigurator-Checkout" (Client-ID)
+     SHOPIFY_CLIENT_SECRET    dazu der Schluessel (shpss_…) — Secret!
+                              Der Worker holt sich damit per Client-Credentials-Grant einen
+                              24-h-Admin-Token; die Scopes kommen aus der App-Version im
+                              Dev Dashboard (write_draft_orders, read_products, read_orders).
+     SHOPIFY_ADMIN_TOKEN      alternativ ein fester shpat_-Token (Legacy Custom App)
+     ALLOWED_ORIGINS          kommagetrennt, z. B. https://www.kessler-pro.com,https://kessler-pro.com,https://kessler-pro-com.webflow.io
+     DATEN_BASE               jsDelivr-Basis fuer Matrix und Kurven — leer = aus der Konfigurations-URL ableiten
+     VERSAND                  optional JSON, ueberschreibt die Versandstaffel unten
+     LIEFERZEIT               optional, Text fuer das Attribut "Lieferzeit"
 */
 import { preisKern } from './preis-kern.js';
 
@@ -30,6 +37,25 @@ const KANTE_NAME = { abs:'ABS-Kante 2 mm', nicht:'nicht gefräst', f45:'gefräst
 const LF_POS = { hr:'hinten rechts', hl:'hinten links', vr:'vorne rechts', vl:'vorne links' };
 /* Rohdichte fuer das Versandgewicht, kg je m2 und mm Staerke */
 const DICHTE = { dekor:0.00070, mpx:0.00068, compact:0.00140, szwal:0.00072 };
+/* Versand fuer Massanfertigungen — Vorschlag 02.09.: bis 110 x 50 cm kostenlos (so
+   verspricht es der Konfigurator), darueber die Sperrgut-Staffel aus dem Shopify-
+   Profil "Dostawa (przesylka niestandardowa)" nach berechnetem Gewicht.
+   Ueberschreibbar per Umgebungsvariable VERSAND (gleiche Struktur als JSON). */
+const VERSAND_STANDARD = {
+  frei_bis_cm: [110, 50],
+  eur: { titel:'Versand Sperrgut', stufen:[[14,6.90],[28,12.90],[42,24.90],[Infinity,59.90]] },
+  pln: { titel:'Dostawa (przesyłka niestandardowa)', stufen:[[14,39.90],[28,69.90],[Infinity,119.90]] },
+  frei_titel: { eur:'Kostenloser Versand (DHL)', pln:'Darmowa dostawa (DHL)' },
+};
+function versandZeile(S, K, gewichtKg, kanal, env){
+  let V = VERSAND_STANDARD;
+  if(env && env.VERSAND){ try{ V = Object.assign({}, VERSAND_STANDARD, JSON.parse(env.VERSAND)); }catch(e){} }
+  const d = K.dims(), lang = Math.max(d.w, d.h), kurz = Math.min(d.w, d.h);
+  if(lang <= V.frei_bis_cm[0] && kurz <= V.frei_bis_cm[1]) return { title: V.frei_titel[kanal], price: '0.00' };
+  const st = V[kanal] || V.eur;
+  const stufe = st.stufen.find(([bis]) => gewichtKg <= bis) || st.stufen[st.stufen.length-1];
+  return { title: `${st.titel} (${Math.round(gewichtKg)} kg)`, price: stufe[1].toFixed(2) };
+}
 
 export default {
   async fetch(req, env, ctx){
@@ -37,7 +63,11 @@ export default {
     const cors = corsHeaders(origin, env);
     if(req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     const url = new URL(req.url);
-    if(req.method === 'GET' && url.pathname === '/health') return json({ ok:true, version: API_VERSION }, 200, cors);
+    if(req.method === 'GET' && url.pathname === '/health'){
+      let shopify = 'nicht geprueft';
+      if(url.searchParams.get('shopify')==='1'){ try{ await adminToken(env); shopify = 'ok'; }catch(e){ shopify = e.message + (e.detail?': '+JSON.stringify(e.detail).slice(0,200):''); } }
+      return json({ ok:true, version: API_VERSION, shopify }, 200, cors);
+    }
     if(req.method !== 'POST' || url.pathname !== '/checkout') return json({ fehler:'nicht gefunden' }, 404, cors);
     if(!cors['Access-Control-Allow-Origin']) return json({ fehler:'Origin nicht erlaubt' }, 403, cors);
     let body;
@@ -120,8 +150,9 @@ export async function checkout(body, env, ctx){
   const waehrung = kanal==='pln' ? 'PLN' : 'EUR';
 
   const titel = titelFuer(S, K, c);
-  const attribute = attributeFuer(S, K, c, body, waehrung);
+  const attribute = attributeFuer(S, K, c, Object.assign({}, body, { __env: env }), waehrung);
   const gewicht = Math.max(1, Math.round(K.areaM2() * (+S.thick||25) * (DICHTE[S.mat]||0.0007) * 1000 * 10) / 10);   /* kg, 1 Nachkommastelle */
+  const versand = versandZeile(S, K, gewicht, kanal, env);
 
   const input = {
     lineItems: [{
@@ -134,6 +165,7 @@ export async function checkout(body, env, ctx){
       customAttributes: attribute,
     }],
     presentmentCurrencyCode: waehrung,
+    shippingLine: versand,
     tags: ['konfigurator', `kfg-${body.version||'?'}`, `sprache-${sprache}`],
     note: `Konfigurator-Bestellung · ${body.url || ''}`,
     customAttributes: [
@@ -186,6 +218,8 @@ function attributeFuer(S, K, c, body, waehrung){
       lage += ` · Abstände links ${f(ab.l)} · rechts ${f(ab.r)} · hinten ${f(ab.t)} · vorn ${f(ab.b)} cm`; }
     add(`Bearbeitung ${i+1}`, `${K.cutTypName(cut)} ${K.cutMass(cut)} · ${lage}`);
   });
+  if(body && body.__env && body.__env.LIEFERZEIT) add('Lieferzeit', body.__env.LIEFERZEIT);
+  add('Hinweis', 'Maßanfertigung nach Kundenspezifikation — vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB)');
   const hit = K.shopHit();
   if(hit) add('_kfg_lager_sku', hit[2]);
   add('_kfg_preis', `${c.total.toFixed(2)} ${waehrung} = Platte ${c.basis.toFixed(2)} + Kante ${c.kante.toFixed(2)} + Ecken ${c.ecken.toFixed(2)} + Ausklinkung ${c.lschnitt.toFixed(2)} + Bearbeitung ${c.extras.toFixed(2)}`);
@@ -195,11 +229,28 @@ function attributeFuer(S, K, c, body, waehrung){
 }
 
 /* ── Shopify Admin API ────────────────────────────────────────────────────── */
+/* Admin-Token: fester shpat_-Token oder — Dev-Dashboard-App — Client-Credentials-
+   Grant. Der geholte Token lebt 24 h und wird im Isolate zwischengespeichert. */
+let _token = { wert:null, bis:0 };
+async function adminToken(env){
+  if(env.SHOPIFY_ADMIN_TOKEN) return env.SHOPIFY_ADMIN_TOKEN;
+  if(!env.SHOPIFY_CLIENT_ID || !env.SHOPIFY_CLIENT_SECRET) throw fehler('Shopify nicht konfiguriert', 503);
+  if(_token.wert && Date.now() < _token.bis - 60000) return _token.wert;
+  const r = await fetch(`https://${env.SHOPIFY_SHOP}/admin/oauth/access_token`, {
+    method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type:'client_credentials', client_id: env.SHOPIFY_CLIENT_ID, client_secret: env.SHOPIFY_CLIENT_SECRET }) });
+  const d = await r.json().catch(()=>null);
+  if(!r.ok || !d || !d.access_token) throw fehler('Shopify-Anmeldung fehlgeschlagen', 502, d);
+  if(d.scope && !/write_draft_orders/.test(d.scope)) throw fehler('App-Version ohne write_draft_orders', 503, d.scope);
+  _token = { wert: d.access_token, bis: Date.now() + (d.expires_in||86399)*1000 };
+  return _token.wert;
+}
 async function draftOrderAnlegen(input, env){
-  if(!env.SHOPIFY_SHOP || !env.SHOPIFY_ADMIN_TOKEN) throw fehler('Shopify nicht konfiguriert', 503);
+  if(!env.SHOPIFY_SHOP) throw fehler('Shopify nicht konfiguriert', 503);
+  const token = await adminToken(env);
   const q = `mutation kfg($input: DraftOrderInput!){ draftOrderCreate(input:$input){ draftOrder{ id invoiceUrl totalPriceSet{ presentmentMoney{ amount currencyCode } } } userErrors{ field message } } }`;
   const r = await fetch(`https://${env.SHOPIFY_SHOP}/admin/api/${API_VERSION}/graphql.json`, {
-    method:'POST', headers:{ 'Content-Type':'application/json', 'X-Shopify-Access-Token': env.SHOPIFY_ADMIN_TOKEN },
+    method:'POST', headers:{ 'Content-Type':'application/json', 'X-Shopify-Access-Token': token },
     body: JSON.stringify({ query:q, variables:{ input } }) });
   const d = await r.json().catch(()=>null);
   if(!r.ok || !d || d.errors) throw fehler('Shopify antwortet nicht', 502, d && (d.errors||d));
