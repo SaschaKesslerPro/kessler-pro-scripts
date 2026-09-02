@@ -15,6 +15,10 @@ colors:
   text-disabled: "#9A978F" # NUR deaktiviert und Platzhalter, nie Fließtext
   paper-deep: "#E9E6E0"    # abgesetzte Fläche auf paper
 
+  # Auf Dunkel (tile-dark) — freigegeben 02.09.2026 mit Mail-Layout B
+  rule-on-dark: "#3A3D41"  # Trennlinie auf #17191B, 1px
+  text-on-dark: "#CFCBC3"  # Sekundärtext auf #17191B     10,9:1
+
 typography:
   family: "Onest"
   weights: [300, 400, 500, 700]
@@ -97,7 +101,7 @@ components:
 
 # Designsystem Kessler PRO
 
-Kopie des Projektdokuments `claude/DESIGN.md` (Stand 20.08.2026) für die Werkzeuge im Repo. Führend bleibt das Projektdokument.
+Kopie des Projektdokuments `claude/DESIGN.md` (Stand 02.09.2026) für die Werkzeuge im Repo. Führend bleibt das Projektdokument.
 
 ## 1. Grundhaltung
 
@@ -112,6 +116,7 @@ Die Palette ist vollständig neutral, mit warmer Tendenz. Hierarchie entsteht au
 - Warm und kühl nicht mischen. Höchstens **eine** dunkle Sektion je Seite.
 - Keine Verläufe. Keine farbigen Schatten.
 - Benannte Ausnahme `link-blue #1A5FD0` (freigegeben 20.08.2026): nur Textlinks innerhalb einer Karte, die deren Inhalt umschalten. Nie für Buttons, Navigation, Flächen.
+- Auf der dunklen Sektion (`tile-dark`) gilt: Überschrift Weiß, Sekundärtext `text-on-dark #CFCBC3`, Linien `rule-on-dark #3A3D41`. Freigegeben 02.09.2026 mit dem Mail-Kopf B (Ink block); gilt für Mails und Website gleichermaßen.
 
 ## 3. Typografie: eine Familie, sieben Stufen
 
