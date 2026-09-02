@@ -1,0 +1,10 @@
+name = "kessler-konfigurator-checkout"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Oeffentliche Variablen — Geheimnisse (SHOPIFY_ADMIN_TOKEN) nur per `wrangler secret put`
+[vars]
+SHOPIFY_SHOP = "hyf2zr-7x.myshopify.com"
+ALLOWED_ORIGINS = "https://www.kessler-pro.com,https://kessler-pro.com,https://kessler-pro-com.webflow.io"
+# Leer lassen: der Worker nimmt Matrix und Kurven aus demselben Commit wie das Skript im Browser.
+DATEN_BASE = ""

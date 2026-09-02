@@ -1,4 +1,4 @@
-/*! Kessler PRO — Tischplatten-Konfigurator  v1.17.0
+/*! Kessler PRO — Tischplatten-Konfigurator  v1.17.1
  *  Rendert die komplette Konfigurator-UI in jeden Container mit [data-kfg-root].
  *  Daten: kfg-produktmatrix.json (Lagerartikel, EUR + PLN) · kfg-preiskurven.json
  *  (Sondermass-Kurven je Material/Staerke/Form/Dekorstufe) · Bilder: assets/kfg/ —
@@ -9,7 +9,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.17.0';
+  var VERSION = '1.17.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -205,15 +205,24 @@ function kurvenSchluessel(){
   const mat = S.mat==='szwal' ? 'mpx' : S.mat;
   let thick = S.thick;
   if(!KURVEN[`${mat}|${thick}|${form}|standard`] && !KURVEN[`${mat}|${thick}|${form}|premium`] && STAERKE_FAKTOR[`${mat}|${thick}`]) thick = '25';
-  const roh = `${mat}|${thick}|${form}`, dek=kurvenDekor();
-  for(const st of ['premium','basis','standard']){
-    const k=roh+'|'+st;
-    if(KURVEN[k] && (KURVEN[k].dekore||[]).indexOf(dek)>=0) return k;
-  }
-  const ersatz=DEKOR_STUFE_ERSATZ[dek];
-  if(ersatz && KURVEN[roh+'|'+ersatz]) return roh+'|'+ersatz;
-  for(const st of ['standard','premium','basis']) if(KURVEN[roh+'|'+st]) return roh+'|'+st;
-  return null;
+  const dek=kurvenDekor();
+  const suche=(roh)=>{
+    for(const st of ['premium','basis','standard']){ const k=roh+'|'+st;
+      if(KURVEN[k] && (KURVEN[k].dekore||[]).indexOf(dek)>=0) return k; }
+    const ersatz=DEKOR_STUFE_ERSATZ[dek];
+    if(ersatz && KURVEN[roh+'|'+ersatz]) return roh+'|'+ersatz;
+    for(const st of ['standard','premium','basis']) if(KURVEN[roh+'|'+st]) return roh+'|'+st;
+    return null;
+  };
+  /* Runde Platten ohne eigene Kurve (Multiplex, 18er Moebelplatte) laufen
+     ueber die Rechteck-Kurve mit dem umschliessenden Quadrat — das ist der
+     Zuschnitt, aus dem die Scheibe gefraest wird. */
+  return suche(`${mat}|${thick}|${form}`) || (form==='round' ? suche(`${mat}|${thick}|rect`) : null);
+}
+/* Flaeche, mit der die Kurve gerechnet wird: bei "rund ueber Rechteck" das Quadrat D x D */
+function kurvenFlaeche(ks){
+  if(S.form==='round' && ks && ks.indexOf('|rect|')>=0) return Math.pow(S.D/100,2);
+  return areaM2();
 }
 function aufDerKurve(kv, A){
   const p=kv.punkte||[]; if(!p.length) return null;
@@ -246,7 +255,7 @@ const HPL_ZUSCHLAG = { eur: {std:36, hikora:47}, pln: {std:155, hikora:200} };
 function kurvenPreis(){
   const ks=kurvenSchluessel(); if(!ks) return null;
   const kv=(KURVEN[ks].kanaele||{})[kanal()]; if(!kv) return null;
-  const A=areaM2();
+  const A=kurvenFlaeche(ks);
   let p=aufDerKurve(kv, A); if(p===null) return null;
   const fak=STAERKE_FAKTOR[`${S.mat}|${S.thick}`];
   if(fak && ks.indexOf(`|${S.thick}|`)<0) p=auf90(p*fak);
@@ -551,6 +560,23 @@ const PRESETS = {
              pos:(L,B,n)=>[L/2, Math.max(9.05, B-15)]}
 };
 
+/* ═══════ Bezahlen nach Mass ═══════
+   Lagerartikel ohne Aufpreise gehen wie bisher als Cart-Permalink in den
+   Checkout. Alles andere — Sondermass, Bearbeitungen, L-Form, Naehtisch — hat
+   seit v1.17.0 einen festen Preis und geht als Draft Order durch den
+   Checkout-Worker (worker/konfigurator-checkout): der rechnet den Preis
+   serverseitig nach, legt die Bestellung mit allen Konfigurationsdaten an
+   und liefert die Checkout-URL. Ohne konfigurierten Endpunkt bleibt die
+   Mail-Anfrage. Endpunkt: data-kfg-checkout am Root-Element oder
+   window.KFG_CHECKOUT_URL. */
+const CHECKOUT_URL=(function(){
+  try{ const r=document.querySelector('[data-kfg-root]');
+    return (r&&r.getAttribute('data-kfg-checkout'))||window.KFG_CHECKOUT_URL||''; }catch(e){ return ''; }
+})();
+function kannBezahlen(){ return !!CHECKOUT_URL && !needsOffer() && calc().quelle!=='offen'; }
+/* Lagerartikel ohne jeden Aufpreis — nur dann traegt der Permalink den vollen Preis */
+function nurLager(){ const c=calc(); return isStandard() && Math.abs(c.total-c.basis)<0.005; }
+
 /* ═══════ State ═══════ */
 /* Startkonfiguration: bewusst ein LAGERARTIKEL (Buche 120x60x25 = 47,95 EUR ab Lager).
    Eiche Sonoma gibt es nur in 90x50 und 90x60 — der Konfigurator startete dadurch
@@ -640,7 +666,10 @@ function calc(){
     dekorName:dk[1],thickName:tt[1]};
 }
 function isStandard(){
-  if(S.extras.custom||isLack()||S.mat==='szwal'||S.form==='lform'||cornerCount()>0||S.cuts.some(c=>!c.preset)) return false;
+  /* "Ab Lager" heisst: die Platte geht so aus dem Regal. Jede Bearbeitung —
+     auch ein Kabeldurchlass oder die Montagebohrung — macht daraus einen
+     Fertigungsauftrag mit Aufpreis (vorher lief der Permalink ohne den Aufpreis). */
+  if(S.extras.custom||isLack()||S.mat==='szwal'||S.form==='lform'||cornerCount()>0||S.cuts.length>0||S.extras.bohr) return false;
   if(S.mat!=='dekor'&&S.mat!=='compact') { /* mpx Festmaße? aktuell keine → nur 18er Liste für dekor */ }
   return !!shopHit();
 }
@@ -1662,11 +1691,13 @@ function render(){
   const pv=offer?fmt(c.total)+' +':fmt(c.total);
   $('price').textContent=pv; $('priceBar').textContent=pv;
   $('priceLabel').textContent=std?'Dein Preis':(offer?'Preis ab (zzgl. Sonderarbeiten)':'Dein Preis');
+  const zahlbar=!std && kannBezahlen();
   if(std){$('delivDate').textContent='Versand bis '+delivDate();$('delivSub').textContent='DHL, ab Lager';$('delivBar').textContent='Versand bis '+delivDate();}
+  else if(zahlbar){$('delivDate').textContent='Fertigung nach Maß';$('delivSub').textContent='Versandkosten im Checkout';$('delivBar').textContent='Nach Maß gefertigt';}
   else {$('delivDate').textContent='Angebot in 24 h';$('delivSub').textContent='Versandkosten im Angebot';$('delivBar').textContent='Fertigung · Angebot in 24 h';}
-  const t=std?'In den Warenkorb':'Unverbindlich anfragen';
-  $('cta').textContent=t;$('ctaBar').textContent=t;
-  $('cta').classList.toggle('is-sonder',!std);$('ctaBar').classList.toggle('is-sonder',!std);
+  const t=std?'In den Warenkorb':(zahlbar?'Jetzt bezahlen':'Unverbindlich anfragen');
+  if(!_checkoutLaeuft){ $('cta').textContent=t;$('ctaBar').textContent=t; }
+  $('cta').classList.toggle('is-sonder',!std&&!zahlbar);$('ctaBar').classList.toggle('is-sonder',!std&&!zahlbar);
   const sur=S.mat==='mpx'?{natur:' · natur',hpl:' + HPL'}[S.mpxSurface]:'';
   const hit=shopHit();
   const a2=(''+(Math.round(areaM2()*100)/100)).replace('.',',');
@@ -1985,20 +2016,22 @@ function initSteps(){
   });
   stepOffen(1,true);                          /* Schritt 01 offen, Rest zu */
 }
+/* Eine Auswahl in Schritt n oeffnet Schritt n+1 — und laesst Schritt n OFFEN.
+   Zugeklappt werden nur die Schritte DAVOR: wer in Schritt 2 eine Form waehlt,
+   ist mit Schritt 1 fertig. Vorher klappte der aktuelle Schritt 650 ms nach
+   jedem Klick zu — beim Durchprobieren der Dekore verschwand das Raster unter
+   dem Finger (Befund Sascha 02.09.). */
 function weiterZu(n){
   const sec=stepEl(n); if(!sec||sec.dataset.manual) return;
-  if(sec.contains(document.activeElement)) return;   /* es wird gerade getippt */
+  const ae=document.activeElement;                   /* es wird gerade getippt — nur bei Eingabefeldern warten */
+  if(ae && sec.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
   const nx=stepEl(n+1);
-  if(KFG_TOUCH){                            /* Touch: nichts klappt von selbst zu,
-                                               nichts scrollt — nur der naechste
-                                               Schritt oeffnet sich unterhalb. */
-    if(nx && !nx.dataset.manual && !nx.classList.contains('is-open')) stepOffen(n+1,true);
-    return;
-  }
+  const oeffneNx=()=>{ if(nx && !nx.dataset.manual && !nx.classList.contains('is-open')) stepOffen(n+1,true); };
+  if(KFG_TOUCH){ oeffneNx(); return; }      /* Touch: nichts klappt zu, nichts scrollt */
   const anker=sec.querySelector('.kfg_step-head');
   ohneSprung(anker, ()=>{
-    stepOffen(n,false);
-    if(nx && !nx.dataset.manual && !nx.classList.contains('is-open')) stepOffen(n+1,true);
+    for(let k=1;k<n;k++){ const fr=stepEl(k); if(fr && !fr.dataset.manual && fr.classList.contains('is-open')) stepOffen(k,false); }
+    oeffneNx();
   });
   if(nx && nx.classList.contains('is-open')){
     const r=nx.getBoundingClientRect();
@@ -2227,10 +2260,40 @@ function anfrageMail(){
     +encodeURIComponent('Anfrage Tischplatte nach Mass')
     +'&body='+encodeURIComponent(zeilen.join('\n'));
 }
+var _checkoutLaeuft=false;
+/* Konfiguration als Draft Order anlegen lassen und in den Checkout gehen.
+   Der Worker rechnet den Preis selbst nach — der hier mitgeschickte Betrag
+   dient nur dem Abgleich. Schlaegt der Aufruf fehl, faellt es auf die
+   Mail-Anfrage zurueck, damit der Kunde nie vor einer toten Taste steht. */
+function checkoutStarten(){
+  if(_checkoutLaeuft) return;
+  if(typeof _syncURLnow==='function') _syncURLnow();
+  const c=calc(), K=JSON.parse(JSON.stringify(S)); delete K.draw; delete K.view;
+  const body={ version:VERSION, kanal:kanal(), sprache:KFG_LANG, url:location.href, base:(window.__KFG_BASE||''),
+    preis:c.total, betrag_text:(($('price')||{}).textContent)||'',
+    zeilen:[...document.querySelectorAll('#breakdown tr')].map(tr=>[...tr.children].map(td=>td.textContent)),
+    konfig:K, lager:shopHit()?{variant:shopHit()[1], sku:shopHit()[2]}:null,
+    maschine:S.machine||'', skizze:$('customText')?($('customText').value||''):'' };
+  _checkoutLaeuft=true;
+  const alt=$('cta').textContent;
+  [$('cta'),$('ctaBar')].forEach(b=>{ b.disabled=true; b.textContent='Warenkorb wird vorbereitet …'; });
+  const zurueck=()=>{ _checkoutLaeuft=false; [$('cta'),$('ctaBar')].forEach(b=>{ b.disabled=false; b.textContent=alt; }); };
+  const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),15000);
+  fetch(CHECKOUT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl.signal})
+    .then(r=>r.json().then(d=>({ok:r.ok,d})))
+    .then(({ok,d})=>{ clearTimeout(tm);
+      if(ok && d && d.checkoutUrl){ ga('kfg_checkout',{preis:c.total}); location.href=d.checkoutUrl; return; }
+      throw new Error((d&&d.fehler)||'kein checkoutUrl'); })
+    .catch(e=>{ clearTimeout(tm); zurueck();
+      toast('Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail');
+      try{ ga('kfg_checkout_fehler',{grund:String(e&&e.message||e).slice(0,80)}); }catch(_){}
+      setTimeout(anfrageMail, 900); });
+}
 function ctaKlick(){
-  const std=isStandard(), hit=std && shopHit();
-  ga('kfg_cta',{typ: hit?'lager':'anfrage', preis: (($('price')||{}).textContent)||''});
+  const hit=nurLager() && shopHit();
+  ga('kfg_cta',{typ: hit?'lager':(kannBezahlen()?'checkout':'anfrage'), preis: (($('price')||{}).textContent)||''});
   if(hit){ location.href='https://checkout.kessler-pro.com/cart/'+hit[1]+':1'; return; }
+  if(kannBezahlen()){ checkoutStarten(); return; }
   anfrageMail();
 }
 $('cta').addEventListener('click',ctaKlick);

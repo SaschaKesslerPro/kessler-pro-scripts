@@ -6,7 +6,7 @@
    "pl",
    "en"
   ],
-  "anzahl": 259,
+  "anzahl": 265,
   "muster": 46
  },
  "pl": {
@@ -268,7 +268,13 @@
   "ab 69 € · 12 mm": "od 69 € · 12 mm",
   "ab 29,90 € · 21/40 mm · alle Dekore": "od 29,90 € · 21/40 mm · wszystkie dekory",
   "Ecken": "narożniki",
-  "Sondermaß": "Wymiar niestandardowy"
+  "Sondermaß": "Wymiar niestandardowy",
+  "Jetzt bezahlen": "Zapłać teraz",
+  "Fertigung nach Maß": "Produkcja na wymiar",
+  "Versandkosten im Checkout": "Koszt wysyłki w kasie",
+  "Nach Maß gefertigt": "Wykonane na wymiar",
+  "Warenkorb wird vorbereitet …": "Przygotowujemy koszyk …",
+  "Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail": "Płatność chwilowo niedostępna — przyjmiemy Twoje zapytanie e-mailem"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -529,7 +535,13 @@
   "ab 69 € · 12 mm": "from €69 · 12 mm",
   "ab 29,90 € · 21/40 mm · alle Dekore": "from €29.90 · 21/40 mm · all decors",
   "Ecken": "corners",
-  "Sondermaß": "Custom size"
+  "Sondermaß": "Custom size",
+  "Jetzt bezahlen": "Pay now",
+  "Fertigung nach Maß": "Made to measure",
+  "Versandkosten im Checkout": "Shipping calculated at checkout",
+  "Nach Maß gefertigt": "Made to measure",
+  "Warenkorb wird vorbereitet …": "Preparing your cart …",
+  "Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail": "Payment is not available right now — we will take your request by e-mail"
  },
  "muster": {
   "pl": [
