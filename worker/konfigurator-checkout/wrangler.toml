@@ -19,7 +19,7 @@ LIEFERZEIT = "Fertigung nach Maß, Versand nach Fertigstellung"
 # Zeichnungs-Pipeline
 PUBLIC_URL = "https://kessler-konfigurator-checkout.kessler-konfigurator-checkout.workers.dev"
 SHOP_MAIL = "shop@kessler-pro.com"
-MAIL_VON = "Kessler PRO <konfigurator@kessler-pro.com>"
+MAIL_VON = "Kessler PRO <drawings@kessler-pro.com>"
 # SMTP-Zugang des Shop-Postfachs (Passwort als Secret SMTP_PASS)
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = "587"
