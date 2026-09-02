@@ -23,7 +23,7 @@ MAIL_VON = "Kessler PRO <drawings@kessler-pro.com>"
 # SMTP-Zugang des Shop-Postfachs (Passwort als Secret SMTP_PASS)
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = "587"
-SMTP_USER = "hello@kessler-pro.com"
+SMTP_USER = "alexander.sobkow@kessler-pro.com"
 FREIGABE_STUNDEN = "72"
 
 # Ablage der Zeichnungen (PDF, DXF, SVG) und Auftragsstatus
