@@ -5,6 +5,8 @@ workers_dev = true
 
 # Oeffentliche Variablen. Geheimnisse NUR per `wrangler secret put`:
 #   SHOPIFY_CLIENT_SECRET   (Dev-Dashboard-App "Konfigurator-Checkout")
+#   SETUP_KEY               (schuetzt /setup/webhooks, /nachlauf, /auftrag, /cron)
+#   RESEND_API_KEY          (Mailversand — ohne ihn keine Mails, Rest laeuft)
 [vars]
 SHOPIFY_SHOP = "hyf2zr-7x.myshopify.com"
 SHOPIFY_CLIENT_ID = "856fa7aeb3fdc7c50ffe31dc7593f4db"
@@ -12,3 +14,26 @@ ALLOWED_ORIGINS = "https://www.kessler-pro.com,https://kessler-pro.com,https://k
 # Leer lassen: der Worker nimmt Matrix und Kurven aus demselben Commit wie das Skript im Browser.
 DATEN_BASE = ""
 LIEFERZEIT = "Fertigung nach Maß, Versand nach Fertigstellung"
+# Zeichnungs-Pipeline
+PUBLIC_URL = "https://kessler-konfigurator-checkout.kessler-konfigurator-checkout.workers.dev"
+SHOP_MAIL = "shop@kessler-pro.com"
+MAIL_VON = "Kessler PRO <zeichnung@kessler-pro.com>"
+FREIGABE_STUNDEN = "72"
+
+# Ablage der Zeichnungen (PDF, DXF, SVG) und Auftragsstatus
+[[kv_namespaces]]
+binding = "ZEICHNUNGEN"
+id = "0d0a3998fd9a424aa91d129a57403f16"
+
+# Schriften fuer das PDF als Binaermodule
+[[rules]]
+type = "Data"
+globs = ["**/*.ttf"]
+fallthrough = true
+
+# Stuendlich: 72-h-Auto-Freigabe
+[triggers]
+crons = ["17 * * * *"]
+
+[observability]
+enabled = true

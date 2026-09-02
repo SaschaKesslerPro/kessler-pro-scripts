@@ -15,6 +15,16 @@
    er vom serverseitig gerechneten Preis ab, gibt es keine Draft Order (409) —
    der Konfigurator faellt dann auf die Mail-Anfrage zurueck.
 
+   Seit 02.09.2026 ausserdem die Zeichnungs-Pipeline (src/zeichnungen.js):
+     POST /webhook/orders          Shopify orders/paid -> Zeichnungen (Kunde, Werkstatt PL, DXF),
+                                   Ablage in KV, Tag + Notiz in Shopify, Mail an shop@ und Kunde
+     GET  /z/<token>/<datei>       Datei ausliefern (PDF/DXF/SVG)
+     GET|POST /freigabe/<token>    Kunde bestaetigt die Masse oder meldet eine Aenderung
+     POST /setup/webhooks?key=     Webhook-Abo in Shopify anlegen (key = SETUP_KEY)
+     POST /nachlauf?key=&order=    Bestehende Bestellung (Nummer/Name) durch die Pipeline schicken
+     GET  /auftrag?key=&order=     Status eines Auftrags aus KV
+     scheduled (stuendlich)        72-h-Auto-Freigabe
+
    Umgebung (wrangler secret / vars):
      SHOPIFY_SHOP             hyf2zr-7x.myshopify.com
      SHOPIFY_CLIENT_ID        Dev-Dashboard-App "Konfigurator-Checkout" (Client-ID)
@@ -27,10 +37,21 @@
      DATEN_BASE               jsDelivr-Basis fuer Matrix und Kurven — leer = aus der Konfigurations-URL ableiten
      VERSAND                  optional JSON, ueberschreibt die Versandstaffel unten
      LIEFERZEIT               optional, Text fuer das Attribut "Lieferzeit"
+     PUBLIC_URL               oeffentliche Basis-URL des Workers (fuer Links in Mails)
+     SHOP_MAIL                interne Empfaengeradresse (shop@kessler-pro.com)
+     MAIL_VON                 Absender, Domain muss bei Resend verifiziert sein
+     RESEND_API_KEY           Secret — ohne ihn werden keine Mails verschickt
+     SETUP_KEY                Secret — schuetzt /setup, /nachlauf, /auftrag
+     FREIGABE_STUNDEN         Frist fuer die automatische Freigabe (72)
+     ZEICHNUNGEN              KV-Namespace (Bindung)
 */
 import { preisKern } from './preis-kern.js';
+import * as SH from './shopify.js';
+import { adminToken, draftOrderAnlegen, fehler, API_VERSION } from './shopify.js';
+import { bestellungVerarbeiten, auftragLaden, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP } from './zeichnungen.js';
+import { freigabeSeite } from './freigabe.js';
+import { fristText } from './mail.js';
 
-const API_VERSION = '2024-10';
 const REPO = 'SaschaKesslerPro/kessler-pro-scripts';
 const MATERIAL = { dekor:'Möbelplatte', mpx:'Multiplex Birke', compact:'Compact / HPL', szwal:'Nähtischplatte' };
 const KANTE_NAME = { abs:'ABS-Kante 2 mm', nicht:'nicht gefräst', f45:'gefräst 45°', halbrund:'halbrund', roh:'geschliffen', fase:'gefast 45°' };
@@ -63,25 +84,91 @@ export default {
     const cors = corsHeaders(origin, env);
     if(req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     const url = new URL(req.url);
-    if(req.method === 'GET' && url.pathname === '/health'){
-      let shopify = 'nicht geprueft';
-      if(url.searchParams.get('shopify')==='1'){ try{ await adminToken(env); shopify = 'ok'; }catch(e){ shopify = e.message + (e.detail?': '+JSON.stringify(e.detail).slice(0,200):''); } }
-      return json({ ok:true, version: API_VERSION, shopify }, 200, cors);
-    }
-    if(req.method !== 'POST' || url.pathname !== '/checkout') return json({ fehler:'nicht gefunden' }, 404, cors);
-    if(!cors['Access-Control-Allow-Origin']) return json({ fehler:'Origin nicht erlaubt' }, 403, cors);
-    let body;
-    try{ body = await req.json(); }catch(e){ return json({ fehler:'kein JSON' }, 400, cors); }
+    const pfad = url.pathname;
     try{
-      const ergebnis = await checkout(body, env, ctx);
-      return json(ergebnis, 200, cors);
+      if(req.method === 'GET' && pfad === '/health'){
+        let shopify = 'nicht geprueft';
+        if(url.searchParams.get('shopify')==='1'){ try{ await adminToken(env); shopify = 'ok · ' + SH.tokenScope(); }catch(e){ shopify = e.message + (e.detail?': '+JSON.stringify(e.detail).slice(0,200):''); } }
+        return json({ ok:true, version: API_VERSION, shopify, kv: !!env.ZEICHNUNGEN, mail: !!env.RESEND_API_KEY, publicUrl: env.PUBLIC_URL||'' }, 200, cors);
+      }
+      if(req.method === 'POST' && pfad === '/checkout'){
+        if(!cors['Access-Control-Allow-Origin']) return json({ fehler:'Origin nicht erlaubt' }, 403, cors);
+        let body;
+        try{ body = await req.json(); }catch(e){ return json({ fehler:'kein JSON' }, 400, cors); }
+        return json(await checkout(body, env, ctx), 200, cors);
+      }
+      if(req.method === 'POST' && pfad === '/webhook/orders') return webhookOrders(req, env, ctx);
+      let m;
+      if(req.method === 'GET' && (m = pfad.match(/^\/z\/([A-Za-z0-9_-]{10,})\/([A-Za-z0-9._-]+)$/))) return datei(env, m[1], m[2]);
+      if((m = pfad.match(/^\/freigabe\/([A-Za-z0-9_-]{10,})$/))) return freigabe(req, env, m[1], url);
+      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron'){
+        if(!env.SETUP_KEY || url.searchParams.get('key') !== env.SETUP_KEY) return json({ fehler:'kein Zugriff' }, 403);
+        if(pfad === '/setup/webhooks'){
+          const ziel = `${String(env.PUBLIC_URL||'').replace(/\/$/,'')}/webhook/orders`;
+          const r = await SH.webhookAnlegen(env, 'ORDERS_PAID', ziel);
+          return json({ ok:true, ...r, alle: await SH.webhooksAuflisten(env) });
+        }
+        if(pfad === '/nachlauf'){
+          const best = await SH.bestellungHolen(env, url.searchParams.get('order')||'');
+          if(!best) return json({ fehler:'Bestellung nicht gefunden' }, 404);
+          const a = await bestellungVerarbeiten(best, env, { erneut: url.searchParams.get('erneut')==='1' });
+          return json(a);
+        }
+        if(pfad === '/auftrag') return json((await auftragLaden(env, url.searchParams.get('order')||'')) || { fehler:'kein Auftrag' });
+        if(pfad === '/cron') return json(await autoFreigabeLauf(env));
+      }
+      return json({ fehler:'nicht gefunden' }, 404, cors);
     }catch(e){
       const status = e.status || 500;
-      console.error('checkout', status, e.message, e.detail ? JSON.stringify(e.detail).slice(0,500) : '');
-      return json({ fehler: e.message }, status, cors);
+      console.error('worker', pfad, status, e.message, e.detail ? JSON.stringify(e.detail).slice(0,500) : '');
+      const intern = env.SETUP_KEY && url.searchParams.get('key') === env.SETUP_KEY;   /* Details nur fuer uns */
+      return json(intern ? { fehler: e.message, detail: e.detail } : { fehler: e.message }, status, cors);
     }
-  }
+  },
+  async scheduled(ev, env, ctx){ ctx.waitUntil(autoFreigabeLauf(env).then(r => console.log('auto-freigabe', JSON.stringify(r)))); }
 };
+
+/* ── Webhook: bezahlte Bestellung ─────────────────────────────────────────── */
+async function webhookOrders(req, env, ctx){
+  const roh = await req.arrayBuffer();
+  const ok = await SH.webhookHmacOk(env, roh, req.headers.get('X-Shopify-Hmac-Sha256'));
+  if(!ok) return json({ fehler:'HMAC ungueltig' }, 401);
+  let order;
+  try{ order = JSON.parse(new TextDecoder().decode(roh)); }catch(e){ return json({ fehler:'kein JSON' }, 400); }
+  const topic = req.headers.get('X-Shopify-Topic') || '';
+  const best = SH.normBestellung(order);
+  const hatKonfig = best.positionen.some(p => p.attribute.some(a => a.key === '_kfg_konfig_1'));
+  if(!hatKonfig) return json({ ok:true, uebersprungen:'keine Konfigurator-Position', topic });
+  // schnell antworten, Arbeit im Hintergrund — Shopify wartet nur 5 s
+  ctx.waitUntil(bestellungVerarbeiten(best, env).then(a => console.log('zeichnungen', best.name, a.status||a.grund, (a.protokoll||[]).join(' | '))).catch(e => console.error('zeichnungen', best.name, e.message)));
+  return json({ ok:true, angenommen: best.name, topic });
+}
+
+/* ── Dateien und Freigabe ─────────────────────────────────────────────────── */
+async function datei(env, token, name){
+  const a = await auftragLaden(env, token);
+  if(!a) return new Response('nicht gefunden', { status:404 });
+  const d = await dateiLaden(env, a, name);
+  if(!d) return new Response('nicht gefunden', { status:404 });
+  const ext = name.split('.').pop();
+  return new Response(d, { headers:{ 'Content-Type': TYP[ext] || 'application/octet-stream', 'Content-Disposition': `${ext==='dxf' ? 'attachment' : 'inline'}; filename="${name}"`, 'Cache-Control':'private, max-age=300', 'X-Robots-Tag':'noindex' } });
+}
+async function freigabe(req, env, token, url){
+  const a = await auftragLaden(env, token);
+  const base = String(env.PUBLIC_URL||'').replace(/\/$/,'');
+  const seite = (auftrag, opt) => new Response(freigabeSeite(auftrag, opt.svgs||[], { ...opt, base }), { headers:{ 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'X-Robots-Tag':'noindex' } });
+  if(!a) return seite(null, { sprache: 'de' });
+  const svgs = [];
+  for(const p of a.positionen){ const d = await dateiLaden(env, a, p.dateien.svg); svgs.push(d ? new TextDecoder().decode(d) : ''); }
+  if(req.method === 'POST'){
+    const f = await req.formData().catch(()=>null);
+    const akt = f && f.get('a');
+    if(a.status !== 'offen' || !['ok','aenderung'].includes(akt)) return seite(a, { svgs, fristText: fristText(a.frist, a.sprache) });
+    const neu = await freigabeSetzen(env, a, akt, { name: f.get('name')||'', text: f.get('text')||'' });
+    return seite(neu, { svgs, gerade: akt });
+  }
+  return seite(a, { svgs, a: url.searchParams.get('a')||'', fristText: fristText(a.frist, a.sprache) });
+}
 
 function corsHeaders(origin, env){
   const erlaubt = String(env.ALLOWED_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean);
@@ -90,7 +177,6 @@ function corsHeaders(origin, env){
   return h;
 }
 function json(obj, status, headers){ return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type':'application/json; charset=utf-8', ...headers } }); }
-function fehler(msg, status, detail){ const e = new Error(msg); e.status = status; e.detail = detail; return e; }
 
 /* ── Daten: Matrix und Kurven aus demselben Commit wie das Skript ─────────── */
 async function ladeDaten(body, env, ctx){
@@ -180,6 +266,12 @@ export async function checkout(body, env, ctx){
   return { checkoutUrl: draft.invoiceUrl, draftOrderId: draft.id, preis: c.total, waehrung };
 }
 
+const ABLAUF_TEXT = {
+  de: 'Nach dem Zahlungseingang bekommst du per E-Mail die technische Zeichnung deiner Platte. Bitte prüfe die Maße und bestätige sie über den Link — ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben, dann fertigen wir.',
+  pl: 'Po zaksięgowaniu płatności otrzymasz e-mailem rysunek techniczny blatu. Sprawdź wymiary i potwierdź je linkiem — bez odpowiedzi rysunek uznajemy po 72 godzinach za zatwierdzony i rozpoczynamy produkcję.',
+  en: 'After payment you receive the technical drawing of your top by e-mail. Please check the dimensions and confirm via the link — without a reply the drawing is deemed released after 72 hours and we start production.',
+};
+
 /* ── Titel und Attribute aus der Konfiguration (nicht aus dem Browser) ────── */
 function titelFuer(S, K, c){
   const d = K.dims();
@@ -219,6 +311,9 @@ function attributeFuer(S, K, c, body, waehrung){
     add(`Bearbeitung ${i+1}`, `${K.cutTypName(cut)} ${K.cutMass(cut)} · ${lage}`);
   });
   if(body && body.__env && body.__env.LIEFERZEIT) add('Lieferzeit', body.__env.LIEFERZEIT);
+  /* Sichtbar fuer den Kunden (Bestellbestaetigung, Bestellstatus): der Zeichnungs-
+     und Freigabeschritt, den die Pipeline nach der Zahlung anstoesst. */
+  add('Ablauf', ABLAUF_TEXT[body && ['de','pl','en'].includes(body.sprache) ? body.sprache : 'de']);
   add('Hinweis', 'Maßanfertigung nach Kundenspezifikation — vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB)');
   const hit = K.shopHit();
   if(hit) add('_kfg_lager_sku', hit[2]);
@@ -228,36 +323,4 @@ function attributeFuer(S, K, c, body, waehrung){
     absColor:S.absColor, lack:S.extras.lack, bohr:S.extras.bohr, massband:S.massband, massbandNull:S.massbandNull, maschineMass:S.maschineMass, cuts:S.cuts });
   for(let i=0, n=1; i<roh.length && n<=8; i+=240, n++) add(`_kfg_konfig_${n}`, roh.slice(i, i+240));
   return a;
-}
-
-/* ── Shopify Admin API ────────────────────────────────────────────────────── */
-/* Admin-Token: fester shpat_-Token oder — Dev-Dashboard-App — Client-Credentials-
-   Grant. Der geholte Token lebt 24 h und wird im Isolate zwischengespeichert. */
-let _token = { wert:null, bis:0 };
-async function adminToken(env){
-  if(env.SHOPIFY_ADMIN_TOKEN) return env.SHOPIFY_ADMIN_TOKEN;
-  if(!env.SHOPIFY_CLIENT_ID || !env.SHOPIFY_CLIENT_SECRET) throw fehler('Shopify nicht konfiguriert', 503);
-  if(_token.wert && Date.now() < _token.bis - 60000) return _token.wert;
-  const r = await fetch(`https://${env.SHOPIFY_SHOP}/admin/oauth/access_token`, {
-    method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type:'client_credentials', client_id: env.SHOPIFY_CLIENT_ID, client_secret: env.SHOPIFY_CLIENT_SECRET }) });
-  const d = await r.json().catch(()=>null);
-  if(!r.ok || !d || !d.access_token) throw fehler('Shopify-Anmeldung fehlgeschlagen', 502, d);
-  if(d.scope && !/write_draft_orders/.test(d.scope)) throw fehler('App-Version ohne write_draft_orders', 503, d.scope);
-  _token = { wert: d.access_token, bis: Date.now() + (d.expires_in||86399)*1000 };
-  return _token.wert;
-}
-async function draftOrderAnlegen(input, env){
-  if(!env.SHOPIFY_SHOP) throw fehler('Shopify nicht konfiguriert', 503);
-  const token = await adminToken(env);
-  const q = `mutation kfg($input: DraftOrderInput!){ draftOrderCreate(input:$input){ draftOrder{ id invoiceUrl totalPriceSet{ presentmentMoney{ amount currencyCode } } } userErrors{ field message } } }`;
-  const r = await fetch(`https://${env.SHOPIFY_SHOP}/admin/api/${API_VERSION}/graphql.json`, {
-    method:'POST', headers:{ 'Content-Type':'application/json', 'X-Shopify-Access-Token': token },
-    body: JSON.stringify({ query:q, variables:{ input } }) });
-  const d = await r.json().catch(()=>null);
-  if(!r.ok || !d || d.errors) throw fehler('Shopify antwortet nicht', 502, d && (d.errors||d));
-  const res = d.data && d.data.draftOrderCreate;
-  if(!res || (res.userErrors && res.userErrors.length)) throw fehler('Draft Order abgelehnt', 502, res && res.userErrors);
-  if(!res.draftOrder || !res.draftOrder.invoiceUrl) throw fehler('keine Checkout-URL', 502, res);
-  return res.draftOrder;
 }
