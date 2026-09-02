@@ -1,12 +1,52 @@
-/* E-Mail-Versand ueber Resend (https://resend.com) — ein HTTP-Aufruf, Anhaenge
-   als Base64. Ohne RESEND_API_KEY wird nichts geschickt, der Rest der Pipeline
-   (Dateien, Tags, Notiz) laeuft trotzdem; die Antwort sagt dann "uebersprungen".
+/* E-Mail-Versand — zwei Wege, der erste konfigurierte gewinnt:
 
-   Umgebung:  RESEND_API_KEY (Secret), MAIL_VON  ("Kessler PRO <zeichnung@kessler-pro.com>"),
-              SHOP_MAIL (shop@kessler-pro.com), MAIL_KOPIE (optional, BCC intern) */
+   1. SMTP aus dem eigenen Postfach (shop@kessler-pro.com bei Google Workspace,
+      IONOS, Strato …). Kein Drittanbieter, Mails kommen wirklich vom Shop,
+      Antworten landen im Postfach. Laeuft ueber worker-mailer (TCP-Sockets der
+      Workers, braucht compatibility_flags = ["nodejs_compat"]).
+        SMTP_HOST   z. B. smtp.gmail.com / smtp.ionos.de / smtp.strato.de
+        SMTP_PORT   587 (STARTTLS, Vorgabe) oder 465 (TLS)
+        SMTP_USER   Postfach, z. B. shop@kessler-pro.com
+        SMTP_PASS   App-Passwort (Secret)
+   2. Resend (https://resend.com) — ein HTTP-Aufruf, RESEND_API_KEY (Secret).
+
+   Ohne beides wird nichts geschickt; Dateien, Tags und Notiz laufen trotzdem
+   und die Antwort sagt "uebersprungen".
+
+   Gemeinsam: MAIL_VON ("Kessler PRO <shop@kessler-pro.com>"), SHOP_MAIL,
+   MAIL_KOPIE (optional, BCC intern). */
 
 export async function sendeMail(env, m){
-  if(!env.RESEND_API_KEY) return { uebersprungen:true, grund:'kein RESEND_API_KEY' };
+  if(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) return sendeSmtp(env, m);
+  if(env.RESEND_API_KEY) return sendeResend(env, m);
+  return { uebersprungen:true, grund:'kein SMTP_HOST/SMTP_USER/SMTP_PASS und kein RESEND_API_KEY' };
+}
+
+/** "Name <adresse>" oder "adresse" -> { name, email } */
+function adresse(s){
+  const m = String(s||'').match(/^\s*(?:"?([^"<]*?)"?\s*)?<([^>]+)>\s*$/);
+  return m ? { name: (m[1]||'').trim() || undefined, email: m[2].trim() } : { email: String(s||'').trim() };
+}
+const liste = (v) => (Array.isArray(v) ? v : [v]).filter(Boolean).map(adresse);
+
+async function sendeSmtp(env, m){
+  const { WorkerMailer } = await import('worker-mailer');
+  const port = +(env.SMTP_PORT || 587);
+  const von = adresse(env.MAIL_VON || env.SMTP_USER);
+  if(!von.email || von.email.split('@')[1] !== String(env.SMTP_USER).split('@')[1]) von.email = env.SMTP_USER;   /* Absender muss zum Postfach passen */
+  try{
+    await WorkerMailer.send(
+      { host: env.SMTP_HOST, port, secure: port === 465, startTls: port !== 465,
+        credentials: { username: env.SMTP_USER, password: env.SMTP_PASS }, authType: ['plain','login'],
+        socketTimeoutMs: 30000, responseTimeoutMs: 30000 },
+      { from: von, to: liste(m.an), bcc: m.bcc ? liste(m.bcc) : undefined, reply: m.antwortAn ? adresse(m.antwortAn) : undefined,
+        subject: m.betreff, html: m.html, text: m.text || html2text(m.html),
+        attachments: (m.anhaenge||[]).map(a => ({ filename: a.name, content: b64(a.daten), mimeType: mime(a.name) })) });
+    return { ok:true, weg:'smtp' };
+  }catch(e){ return { fehler: String(e && e.message || e).slice(0,300), weg:'smtp' }; }
+}
+
+async function sendeResend(env, m){
   const body = {
     from: env.MAIL_VON || 'Kessler PRO <onboarding@resend.dev>',
     to: Array.isArray(m.an) ? m.an : [m.an],
@@ -21,9 +61,11 @@ export async function sendeMail(env, m){
     method:'POST', headers:{ 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type':'application/json' },
     body: JSON.stringify(body) });
   const d = await r.json().catch(()=>null);
-  if(!r.ok) return { fehler: (d && (d.message||d.error)) || `HTTP ${r.status}`, status: r.status };
-  return { id: d && d.id };
+  if(!r.ok) return { fehler: (d && (d.message||d.error)) || `HTTP ${r.status}`, status: r.status, weg:'resend' };
+  return { id: d && d.id, weg:'resend' };
 }
+
+const mime = (name) => ({ pdf:'application/pdf', dxf:'application/dxf', svg:'image/svg+xml' })[String(name).split('.').pop()] || 'application/octet-stream';
 
 function b64(bytes){
   const u = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);

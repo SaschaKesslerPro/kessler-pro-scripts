@@ -11,7 +11,8 @@ const T = {
         dankeAend:'Danke — wir haben deinen Änderungswunsch erhalten, stoppen die Fertigung und melden uns.',
         schonOk:(z)=>`Diese Zeichnung wurde am ${z} bestätigt.`, schonAuto:'Diese Zeichnung wurde nach 72 Stunden ohne Widerspruch freigegeben.',
         schonAend:'Für diese Bestellung liegt ein Änderungswunsch vor — wir melden uns.', nicht:'Dieser Link ist ungültig oder abgelaufen.',
-        hinweisWiderruf:'Maßanfertigungen sind vom Widerruf ausgenommen — deshalb dieser Zwischenschritt.' },
+        hinweisWiderruf:'Maßanfertigungen sind vom Widerruf ausgenommen — deshalb dieser Zwischenschritt.',
+        wartet:'Deine Zeichnung wird erstellt. Sobald deine Zahlung bei uns eingegangen ist, erscheint sie hier — meist innerhalb weniger Minuten. Du bekommst sie außerdem per E-Mail. Diese Seite lädt sich automatisch neu.' },
   pl: { titel:'Sprawdź rysunek', hallo:'Prosimy o sprawdzenie rysunku technicznego do zamówienia', bestellung:'Zamówienie', pos:'Pozycja',
         pdf:'Otwórz PDF', ok:'Potwierdzam wymiary', okHint:'Po potwierdzeniu produkujemy dokładnie według tego rysunku.',
         aend:'Zgłaszam zmianę', aendHint:'Opisz krótko, co ma być inaczej — odezwiemy się z poprawionym rysunkiem.',
@@ -21,7 +22,8 @@ const T = {
         dankeAend:'Dziękujemy — otrzymaliśmy prośbę o zmianę, wstrzymujemy produkcję i odezwiemy się.',
         schonOk:(z)=>`Rysunek został potwierdzony ${z}.`, schonAuto:'Rysunek został zatwierdzony po 72 godzinach bez sprzeciwu.',
         schonAend:'Do tego zamówienia zgłoszono zmianę — odezwiemy się.', nicht:'Ten link jest nieprawidłowy lub wygasł.',
-        hinweisWiderruf:'Produkty na wymiar nie podlegają zwrotowi — stąd ten dodatkowy krok.' },
+        hinweisWiderruf:'Produkty na wymiar nie podlegają zwrotowi — stąd ten dodatkowy krok.',
+        wartet:'Rysunek jest w przygotowaniu. Pojawi się tutaj, gdy zaksięgujemy Twoją płatność — zwykle w ciągu kilku minut. Otrzymasz go również e-mailem. Strona odświeży się automatycznie.' },
   en: { titel:'Check the drawing', hallo:'Please check the technical drawing for your order', bestellung:'Order', pos:'Item',
         pdf:'Open PDF', ok:'Confirm dimensions', okHint:'Once confirmed, we produce exactly to this drawing.',
         aend:'Request a change', aendHint:'Briefly describe what should be different — we will get back to you with a corrected drawing.',
@@ -31,7 +33,8 @@ const T = {
         dankeAend:'Thank you — we have received your change request, paused production and will get back to you.',
         schonOk:(z)=>`This drawing was confirmed on ${z}.`, schonAuto:'This drawing was released after 72 hours without objection.',
         schonAend:'A change request exists for this order — we will get back to you.', nicht:'This link is invalid or has expired.',
-        hinweisWiderruf:'Made-to-measure items are excluded from withdrawal — hence this step.' },
+        hinweisWiderruf:'Made-to-measure items are excluded from withdrawal — hence this step.',
+        wartet:'Your drawing is being prepared. It appears here as soon as your payment has been received — usually within a few minutes. You will also get it by e-mail. This page reloads automatically.' },
 };
 const esc = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -47,6 +50,7 @@ a.l{color:#1f4e79}`;
 export function freigabeSeite(auftrag, svgs, opt = {}){
   const spr = (auftrag && auftrag.sprache) || opt.sprache || 'de';
   const t = T[spr] || T.de;
+  if(!auftrag && opt.wartet) return html(t.titel, `<h1>${t.titel}</h1><div class="k">${t.wartet}</div>`, '<meta http-equiv="refresh" content="45">');
   if(!auftrag) return html(t.titel, `<div class="k warn">${t.nicht}</div>`);
   const kopf = `<h1>${t.titel}</h1><p class="m">${t.bestellung} <b>${esc(auftrag.name)}</b>${auftrag.kunde ? ' · ' + esc(auftrag.kunde) : ''}</p>`;
   let status = '';
@@ -74,7 +78,7 @@ export function freigabeSeite(auftrag, svgs, opt = {}){
   return html(`${t.titel} · ${auftrag.name}`, kopf + status + aktion + bilder);
 }
 
-function html(titel, body){
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+function html(titel, body, kopf = ''){
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">${kopf}
 <title>${esc(titel)} · Kessler PRO</title><style>${CSS}</style></head><body><div class="w"><p style="font-weight:800;letter-spacing:.04em;margin:0 0 18px">KESSLER PRO</p>${body}</div></body></html>`;
 }

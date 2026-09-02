@@ -1,12 +1,14 @@
 name = "kessler-konfigurator-checkout"
 main = "src/index.js"
 compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 # Oeffentliche Variablen. Geheimnisse NUR per `wrangler secret put`:
 #   SHOPIFY_CLIENT_SECRET   (Dev-Dashboard-App "Konfigurator-Checkout")
 #   SETUP_KEY               (schuetzt /setup/webhooks, /nachlauf, /auftrag, /cron)
-#   RESEND_API_KEY          (Mailversand — ohne ihn keine Mails, Rest laeuft)
+#   SMTP_PASS               (App-Passwort des Shop-Postfachs — Mailversand per SMTP)
+#   RESEND_API_KEY          (Alternative zu SMTP)
 [vars]
 SHOPIFY_SHOP = "hyf2zr-7x.myshopify.com"
 SHOPIFY_CLIENT_ID = "856fa7aeb3fdc7c50ffe31dc7593f4db"
@@ -17,7 +19,11 @@ LIEFERZEIT = "Fertigung nach Maß, Versand nach Fertigstellung"
 # Zeichnungs-Pipeline
 PUBLIC_URL = "https://kessler-konfigurator-checkout.kessler-konfigurator-checkout.workers.dev"
 SHOP_MAIL = "shop@kessler-pro.com"
-MAIL_VON = "Kessler PRO <zeichnung@kessler-pro.com>"
+MAIL_VON = "Kessler PRO <shop@kessler-pro.com>"
+# SMTP-Zugang des Shop-Postfachs (Passwort als Secret SMTP_PASS)
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_USER = "shop@kessler-pro.com"
 FREIGABE_STUNDEN = "72"
 
 # Ablage der Zeichnungen (PDF, DXF, SVG) und Auftragsstatus

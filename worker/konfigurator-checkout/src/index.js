@@ -22,6 +22,7 @@
      GET|POST /freigabe/<token>    Kunde bestaetigt die Masse oder meldet eine Aenderung
      POST /setup/webhooks?key=     Webhook-Abo in Shopify anlegen (key = SETUP_KEY)
      POST /nachlauf?key=&order=    Bestehende Bestellung (Nummer/Name) durch die Pipeline schicken
+     GET  /mailtest?key=[&an=]     Testmail ueber den konfigurierten Weg (SMTP/Resend)
      GET  /auftrag?key=&order=     Status eines Auftrags aus KV
      scheduled (stuendlich)        72-h-Auto-Freigabe
 
@@ -40,7 +41,8 @@
      PUBLIC_URL               oeffentliche Basis-URL des Workers (fuer Links in Mails)
      SHOP_MAIL                interne Empfaengeradresse (shop@kessler-pro.com)
      MAIL_VON                 Absender, Domain muss bei Resend verifiziert sein
-     RESEND_API_KEY           Secret — ohne ihn werden keine Mails verschickt
+     SMTP_HOST/PORT/USER      Shop-Postfach (Google Workspace: smtp.gmail.com, 587), SMTP_PASS = App-Passwort (Secret)
+     RESEND_API_KEY           Alternative zu SMTP (Secret)
      SETUP_KEY                Secret — schuetzt /setup, /nachlauf, /auftrag
      FREIGABE_STUNDEN         Frist fuer die automatische Freigabe (72)
      ZEICHNUNGEN              KV-Namespace (Bindung)
@@ -48,9 +50,9 @@
 import { preisKern } from './preis-kern.js';
 import * as SH from './shopify.js';
 import { adminToken, draftOrderAnlegen, fehler, API_VERSION } from './shopify.js';
-import { bestellungVerarbeiten, auftragLaden, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP } from './zeichnungen.js';
+import { bestellungVerarbeiten, auftragLaden, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP, zufallToken, tokenStatus } from './zeichnungen.js';
 import { freigabeSeite } from './freigabe.js';
-import { fristText } from './mail.js';
+import { fristText, sendeMail } from './mail.js';
 
 const REPO = 'SaschaKesslerPro/kessler-pro-scripts';
 const MATERIAL = { dekor:'Möbelplatte', mpx:'Multiplex Birke', compact:'Compact / HPL', szwal:'Nähtischplatte' };
@@ -89,7 +91,7 @@ export default {
       if(req.method === 'GET' && pfad === '/health'){
         let shopify = 'nicht geprueft';
         if(url.searchParams.get('shopify')==='1'){ try{ await adminToken(env); shopify = 'ok · ' + SH.tokenScope(); }catch(e){ shopify = e.message + (e.detail?': '+JSON.stringify(e.detail).slice(0,200):''); } }
-        return json({ ok:true, version: API_VERSION, shopify, kv: !!env.ZEICHNUNGEN, mail: !!env.RESEND_API_KEY, publicUrl: env.PUBLIC_URL||'' }, 200, cors);
+        return json({ ok:true, version: API_VERSION, shopify, kv: !!env.ZEICHNUNGEN, mail: env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS ? `smtp ${env.SMTP_HOST}` : env.RESEND_API_KEY ? 'resend' : 'keiner', publicUrl: env.PUBLIC_URL||'' }, 200, cors);
       }
       if(req.method === 'POST' && pfad === '/checkout'){
         if(!cors['Access-Control-Allow-Origin']) return json({ fehler:'Origin nicht erlaubt' }, 403, cors);
@@ -101,7 +103,7 @@ export default {
       let m;
       if(req.method === 'GET' && (m = pfad.match(/^\/z\/([A-Za-z0-9_-]{10,})\/([A-Za-z0-9._-]+)$/))) return datei(env, m[1], m[2]);
       if((m = pfad.match(/^\/freigabe\/([A-Za-z0-9_-]{10,})$/))) return freigabe(req, env, m[1], url);
-      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron'){
+      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron' || pfad === '/mailtest'){
         if(!env.SETUP_KEY || url.searchParams.get('key') !== env.SETUP_KEY) return json({ fehler:'kein Zugriff' }, 403);
         if(pfad === '/setup/webhooks'){
           const ziel = `${String(env.PUBLIC_URL||'').replace(/\/$/,'')}/webhook/orders`;
@@ -116,6 +118,11 @@ export default {
         }
         if(pfad === '/auftrag') return json((await auftragLaden(env, url.searchParams.get('order')||'')) || { fehler:'kein Auftrag' });
         if(pfad === '/cron') return json(await autoFreigabeLauf(env));
+        if(pfad === '/mailtest'){
+          const an = url.searchParams.get('an') || env.SHOP_MAIL || 'shop@kessler-pro.com';
+          const r = await sendeMail(env, { an, betreff: 'Kessler PRO · Testmail aus dem Konfigurator-Worker', html: '<p>Der Mailversand aus dem Worker funktioniert.</p><p>Weg: ' + (env.SMTP_HOST && env.SMTP_PASS ? 'SMTP ' + env.SMTP_HOST : env.RESEND_API_KEY ? 'Resend' : 'keiner') + '</p>', anhaenge: [{ name:'test.txt', daten: new TextEncoder().encode('Kessler PRO Testanhang') }] });
+          return json({ an, ...r });
+        }
       }
       return json({ fehler:'nicht gefunden' }, 404, cors);
     }catch(e){
@@ -145,6 +152,10 @@ async function webhookOrders(req, env, ctx){
 }
 
 /* ── Dateien und Freigabe ─────────────────────────────────────────────────── */
+function sprachAusHeader(req){
+  const h = (req.headers.get('Accept-Language')||'').toLowerCase();
+  return h.startsWith('pl') ? 'pl' : h.startsWith('en') ? 'en' : 'de';
+}
 async function datei(env, token, name){
   const a = await auftragLaden(env, token);
   if(!a) return new Response('nicht gefunden', { status:404 });
@@ -157,7 +168,11 @@ async function freigabe(req, env, token, url){
   const a = await auftragLaden(env, token);
   const base = String(env.PUBLIC_URL||'').replace(/\/$/,'');
   const seite = (auftrag, opt) => new Response(freigabeSeite(auftrag, opt.svgs||[], { ...opt, base }), { headers:{ 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'X-Robots-Tag':'noindex' } });
-  if(!a) return seite(null, { sprache: 'de' });
+  if(!a){
+    const st = await tokenStatus(env, token);
+    const spr = ['de','pl','en'].includes(url.searchParams.get('lang')) ? url.searchParams.get('lang') : sprachAusHeader(req);
+    return seite(null, { sprache: spr, wartet: st === 'draft' });
+  }
   const svgs = [];
   for(const p of a.positionen){ const d = await dateiLaden(env, a, p.dateien.svg); svgs.push(d ? new TextDecoder().decode(d) : ''); }
   if(req.method === 'POST'){
@@ -235,8 +250,12 @@ export async function checkout(body, env, ctx){
     throw fehler(`Preis weicht ab: Konfigurator ${clientPreis}, Server ${c.total}`, 409, { server:c, client:clientPreis });
   const waehrung = kanal==='pln' ? 'PLN' : 'EUR';
 
+  /* Freigabe-Link schon jetzt festlegen: er steht als sichtbare Zeile an der Position
+     und damit in Shopifys eigener Bestellbestaetigung — auch ohne unsere Mail. */
+  const token = zufallToken();
+  const freigabeUrl = env.PUBLIC_URL ? `${String(env.PUBLIC_URL).replace(/\/$/,'')}/freigabe/${token}` : '';
   const titel = titelFuer(S, K, c);
-  const attribute = attributeFuer(S, K, c, Object.assign({}, body, { __env: env }), waehrung);
+  const attribute = attributeFuer(S, K, c, Object.assign({}, body, { __env: env, __freigabeUrl: freigabeUrl }), waehrung);
   const gewicht = Math.max(1, Math.round(K.areaM2() * (+S.thick||25) * (DICHTE[S.mat]||0.0007) * 1000 * 10) / 10);   /* kg, 1 Nachkommastelle */
   const versand = versandZeile(S, K, gewicht, kanal, env);
 
@@ -259,10 +278,16 @@ export async function checkout(body, env, ctx){
       { key:'_kfg_version', value: String(body.version||'') },
       { key:'_kfg_sprache', value: sprache },
       { key:'_kfg_daten', value: base },
+      ...(freigabeUrl ? [{ key:'_kfg_token', value: token }] : []),
     ],
     useCustomerDefaultAddress: false,
   };
   const draft = await draftOrderAnlegen(input, env);
+  /* Merker, damit /freigabe/<token> vor der Zahlung "wird erstellt" zeigt statt "ungueltig" */
+  if(freigabeUrl && env.ZEICHNUNGEN){
+    const merk = env.ZEICHNUNGEN.put(`token:${token}`, `draft:${draft.id}`, { expirationTtl: 30*86400 }).catch(()=>{});
+    if(ctx && ctx.waitUntil) ctx.waitUntil(merk); else await merk;
+  }
   return { checkoutUrl: draft.invoiceUrl, draftOrderId: draft.id, preis: c.total, waehrung };
 }
 
@@ -313,7 +338,9 @@ function attributeFuer(S, K, c, body, waehrung){
   if(body && body.__env && body.__env.LIEFERZEIT) add('Lieferzeit', body.__env.LIEFERZEIT);
   /* Sichtbar fuer den Kunden (Bestellbestaetigung, Bestellstatus): der Zeichnungs-
      und Freigabeschritt, den die Pipeline nach der Zahlung anstoesst. */
-  add('Ablauf', ABLAUF_TEXT[body && ['de','pl','en'].includes(body.sprache) ? body.sprache : 'de']);
+  const spr = body && ['de','pl','en'].includes(body.sprache) ? body.sprache : 'de';
+  add('Ablauf', ABLAUF_TEXT[spr]);
+  if(body && body.__freigabeUrl) add({ de:'Zeichnung prüfen', pl:'Sprawdź rysunek', en:'Check the drawing' }[spr], body.__freigabeUrl);
   add('Hinweis', 'Maßanfertigung nach Kundenspezifikation — vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB)');
   const hit = K.shopHit();
   if(hit) add('_kfg_lager_sku', hit[2]);

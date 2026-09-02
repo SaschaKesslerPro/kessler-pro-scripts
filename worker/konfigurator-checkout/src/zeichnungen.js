@@ -29,6 +29,17 @@ const nummerAus = (best) => String(best.nummer || String(best.id).split('/').pop
 export const auftragKey = (nummer) => `auftrag:${nummer}`;
 const dateiKey = (nummer, name) => `datei:${nummer}:${name}`;
 
+function tokenAus(best){
+  const a = (best.attribute||[]).find(x => x.key === '_kfg_token');
+  return a && /^[A-Za-z0-9_-]{16,64}$/.test(a.value) ? a.value : null;
+}
+/** 'auftrag' (Zeichnungen da) | 'draft' (Checkout angelegt, Zahlung/Zeichnung noch offen) | null */
+export async function tokenStatus(env, token){
+  const KV = env.ZEICHNUNGEN; if(!KV) return null;
+  const v = await KV.get(`token:${token}`);
+  if(!v) return null;
+  return v.startsWith('draft:') ? 'draft' : 'auftrag';
+}
 export function spracheAus(best){
   const a = (best.attribute||[]).find(x => x.key === '_kfg_sprache');
   const s = (a && a.value) || String(best.locale||'').slice(0,2).toLowerCase();
@@ -42,7 +53,7 @@ export function urlsFuer(env, auftrag){
     shopify: `https://admin.shopify.com/store/${String(env.SHOPIFY_SHOP||'').replace('.myshopify.com','')}/orders/${auftrag.nummer}`,
   };
 }
-function zufallToken(){
+export function zufallToken(){
   const b = new Uint8Array(18); crypto.getRandomValues(b);
   return btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
@@ -105,7 +116,9 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
   const stunden = +(env.FREIGABE_STUNDEN || 72);
   const auftrag = {
     nummer, id: best.id, name: best.name, email: best.email || '', kunde: best.kunde || '', sprache: spr, test: !!best.test,
-    token: (alt && alt.token) || zufallToken(),
+    /* Token kommt bevorzugt aus dem Checkout (_kfg_token an der Bestellung): der
+       Freigabe-Link steht dann schon in Shopifys Bestellbestaetigung. */
+    token: (alt && alt.token) || tokenAus(best) || zufallToken(),
     erstellt: best.erstellt, angelegt: jetzt.toISOString(), frist: new Date(jetzt.getTime() + stunden*3600e3).toISOString(),
     status: 'offen', freigabe: null, aenderung: null, positionen: [], protokoll: [],
   };

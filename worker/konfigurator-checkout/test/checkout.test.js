@@ -17,7 +17,7 @@ globalThis.fetch = async (u, opt) => {
     return new Response(JSON.stringify({ data:{ draftOrderCreate:{ draftOrder:{ id:'gid://shopify/DraftOrder/1', invoiceUrl:'https://checkout.kessler-pro.com/…/invoices/abc', totalPriceSet:{ presentmentMoney:{ amount:'199.80', currencyCode:'EUR' } } }, userErrors:[] } } }), { status:200 }); }
   throw new Error('unerwarteter fetch '+u);
 };
-const env = { SHOPIFY_SHOP:'test.myshopify.com', SHOPIFY_CLIENT_ID:'cid', SHOPIFY_CLIENT_SECRET:'geheim', ALLOWED_ORIGINS:'https://www.kessler-pro.com', DATEN_BASE:'', LIEFERZEIT:'Fertigung 10–15 Werktage' };
+const env = { SHOPIFY_SHOP:'test.myshopify.com', SHOPIFY_CLIENT_ID:'cid', SHOPIFY_CLIENT_SECRET:'geheim', ALLOWED_ORIGINS:'https://www.kessler-pro.com', DATEN_BASE:'', LIEFERZEIT:'Fertigung 10–15 Werktage', PUBLIC_URL:'https://kfg.test' };
 let ok=0; const bad=[]; const check=(n,c,i)=>{ if(c) ok++; else bad.push(n+(i?' → '+JSON.stringify(i).slice(0,300):'')); };
 
 const S = { mat:'dekor', dekor:'buk', thick:'25', mpxSurface:'natur', absColor:'dekor', form:'lform', L:120,B:60,D:80,
@@ -36,6 +36,8 @@ check('Versand Sperrgut 24,90 (bis 42 kg) fuer 200x90', letzterAufruf.variables.
 check('Rohdaten in Stuecken vollstaendig', (()=>{ const t=li.customAttributes.filter(a=>/^_kfg_konfig_\d$/.test(a.key)).sort((x,y)=>x.key.localeCompare(y.key)).map(a=>a.value).join(''); try{ const o=JSON.parse(t); return o.lf && o.lf.L===200; }catch(e){ return false; } })(), li.customAttributes.filter(a=>/_kfg_konfig/.test(a.key)).length);
 check('Widerruf + Lieferzeit als Attribut', li.customAttributes.some(a=>a.key==='Hinweis'&&/Widerruf/.test(a.value)) && li.customAttributes.some(a=>a.key==='Lieferzeit'), li.customAttributes.map(a=>a.key));
 check('Presentment EUR, Tags, Notiz', letzterAufruf.variables.input.presentmentCurrencyCode==='EUR' && letzterAufruf.variables.input.tags.includes('konfigurator') && /kfg-1\.17\.0/.test(letzterAufruf.variables.input.tags.join()), letzterAufruf.variables.input);
+
+check('Ablauf-Attribut + Freigabe-Link sichtbar, Token an der Bestellung', li.customAttributes.some(a=>a.key==='Ablauf'&&/72 Stunden/.test(a.value)) && li.customAttributes.some(a=>a.key==='Zeichnung prüfen'&&/^https:\/\/kfg\.test\/freigabe\/[A-Za-z0-9_-]{16,}$/.test(a.value)) && letzterAufruf.variables.input.customAttributes.some(a=>a.key==='_kfg_token'&&a.value.length>=16), li.customAttributes.map(a=>a.key));
 
 /* ② Preis manipuliert → 409 */
 try{ await checkout({ kanal:'eur', preis:99.9, konfig:S }, env, null); check('Manipulierter Preis abgelehnt', false); }
