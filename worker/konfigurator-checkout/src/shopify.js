@@ -49,7 +49,7 @@ export async function draftOrderAnlegen(input, env){
 const ORDER_FELDER = `id name email createdAt customerLocale tags note test
   billingAddress{ firstName lastName } shippingAddress{ firstName lastName }
   customAttributes{ key value }
-  lineItems(first:25){ nodes{ id title quantity customAttributes{ key value } } }`;
+  lineItems(first:25){ nodes{ id title variantTitle quantity customAttributes{ key value } } }`;
 
 /** Bestellung per GraphQL holen — Nummer (1034), Name (KP-2026-1034) oder GID. */
 export async function bestellungHolen(env, ref){
@@ -74,6 +74,12 @@ const nameAus = (o) => o ? `${o.firstName ?? o.first_name ?? ''} ${o.lastName ??
 /** GraphQL-Bestellung und REST-Webhook-Payload auf dieselbe Form bringen. */
 export function normBestellung(o){
   const paare = (arr) => (arr||[]).map(a => ({ key: a.key ?? a.name, value: a.value }));
+  /* Positionstitel: seit 03.09. haengt die Konfigurator-Position an einer Variante des
+     Basisprodukts ("Tischplatte nach Maß · Möbelplatte · Buche"); der vollstaendige
+     Titel mit Mass liegt im versteckten Attribut _kfg_titel. */
+  const titelAus = (li, attr) => { const t = attr.find(a => a.key === '_kfg_titel'); if(t && t.value) return t.value;
+    const v = li.variant_title ?? (li.variantTitle || (li.variant && li.variant.title)) ?? ''; return v && v !== 'Default Title' ? `${li.title} · ${v}` : li.title; };
+  const pos = (li, id, attr) => { const attribute = paare(attr); return { id, titel: titelAus(li, attribute), menge: li.quantity, attribute }; };
   if(o.admin_graphql_api_id || o.line_items){           // REST (Webhook)
     return {
       id: o.admin_graphql_api_id || `gid://shopify/Order/${o.id}`,
@@ -82,7 +88,7 @@ export function normBestellung(o){
       note: o.note || '', test: !!o.test,
       kunde: nameAus(o.customer) || nameAus(o.billing_address) || nameAus(o.shipping_address) || '',
       attribute: paare(o.note_attributes),
-      positionen: (o.line_items||[]).map(li => ({ id: li.admin_graphql_api_id || `gid://shopify/LineItem/${li.id}`, titel: li.title, menge: li.quantity, attribute: paare(li.properties) })),
+      positionen: (o.line_items||[]).map(li => pos(li, li.admin_graphql_api_id || `gid://shopify/LineItem/${li.id}`, li.properties)),
     };
   }
   return {                                                // GraphQL
@@ -90,7 +96,7 @@ export function normBestellung(o){
     erstellt: o.createdAt, locale: o.customerLocale || '', tags: o.tags || [], note: o.note || '', test: !!o.test,
     kunde: nameAus(o.customer) || nameAus(o.billingAddress) || nameAus(o.shippingAddress) || '',
     attribute: paare(o.customAttributes),
-    positionen: ((o.lineItems && o.lineItems.nodes) || []).map(li => ({ id: li.id, titel: li.title, menge: li.quantity, attribute: paare(li.customAttributes) })),
+    positionen: ((o.lineItems && o.lineItems.nodes) || []).map(li => pos(li, li.id, li.customAttributes)),
   };
 }
 

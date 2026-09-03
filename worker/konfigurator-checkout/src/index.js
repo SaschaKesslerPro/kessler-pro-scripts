@@ -54,6 +54,11 @@ import { preisKern } from './preis-kern.js';
    waehlen koennen (Sicherheitscheck 03.09.). */
 import PRODUKTMATRIX from '../../../dist/data/kfg-produktmatrix.json' with { type: 'json' };
 import PREISKURVEN from '../../../dist/data/kfg-preiskurven.json' with { type: 'json' };
+/* Verstecktes Basisprodukt "Tischplatte nach Maß" mit einer Variante je Dekor: die
+   Position zeigt so im Warenkorb, Checkout und in der Bestellbestaetigung das
+   Produktfoto des gewaehlten Dekors (Sascha 03.09.). Preis kommt per priceOverride
+   vom Worker; die Varianten selbst kosten 0,00 und sind nirgends veroeffentlicht. */
+import VARIANTEN from './varianten.json' with { type: 'json' };
 import * as SH from './shopify.js';
 import { adminToken, draftOrderAnlegen, fehler, API_VERSION } from './shopify.js';
 import { bestellungVerarbeiten, auftragLaden, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP, zufallToken, tokenStatus } from './zeichnungen.js';
@@ -293,16 +298,27 @@ export async function checkout(body, env, ctx){
   const gewicht = Math.max(1, Math.round(K.areaM2() * (+S.thick||25) * (DICHTE[S.mat]||0.0007) * 1000 * 10) / 10);   /* kg, 1 Nachkommastelle */
   const versand = versandZeile(S, K, gewicht, kanal, env);
 
+  /* Position: bevorzugt die Dekor-Variante des Basisprodukts (Foto im Warenkorb),
+     der Preis wird ueberschrieben. Ohne passende Variante (oder wenn Shopify die
+     Variante ablehnt) eine individuelle Position wie bisher — nur ohne Bild. */
+  const variantId = basisVariante(S);
+  const positionVariante = variantId ? {
+    variantId,
+    quantity: 1,
+    priceOverride: { amount: c.total.toFixed(2), currencyCode: waehrung },
+    customAttributes: [...attribute, { key:'_kfg_titel', value: titel }],
+  } : null;
+  const positionEigen = {
+    title: titel,
+    quantity: 1,
+    originalUnitPriceWithCurrency: { amount: c.total.toFixed(2), currencyCode: waehrung },
+    requiresShipping: true,
+    taxable: true,
+    weight: { unit: 'KILOGRAMS', value: gewicht },
+    customAttributes: attribute,
+  };
   const input = {
-    lineItems: [{
-      title: titel,
-      quantity: 1,
-      originalUnitPriceWithCurrency: { amount: c.total.toFixed(2), currencyCode: waehrung },
-      requiresShipping: true,
-      taxable: true,
-      weight: { unit: 'KILOGRAMS', value: gewicht },
-      customAttributes: attribute,
-    }],
+    lineItems: [positionVariante || positionEigen],
     presentmentCurrencyCode: waehrung,
     shippingLine: versand,
     tags: ['konfigurator', `kfg-${versionSauber(body.version)}`, `sprache-${sprache}`],
@@ -316,13 +332,29 @@ export async function checkout(body, env, ctx){
     ],
     useCustomerDefaultAddress: false,
   };
-  const draft = await draftOrderAnlegen(input, env);
+  let draft;
+  try{ draft = await draftOrderAnlegen(input, env); }
+  catch(e){
+    /* Variante geloescht, Produkt umgebaut, API-Feld unbekannt: lieber ohne Bild als gar nicht */
+    if(!positionVariante) throw e;
+    console.warn('Basisvariante abgelehnt, individuelle Position:', e.message, JSON.stringify(e.detail||'').slice(0,300));
+    draft = await draftOrderAnlegen(Object.assign({}, input, { lineItems: [positionEigen] }), env);
+  }
   /* Merker, damit /freigabe/<token> vor der Zahlung "wird erstellt" zeigt statt "ungueltig" */
   if(freigabeUrl && env.ZEICHNUNGEN){
     const merk = env.ZEICHNUNGEN.put(`token:${token}`, `draft:${draft.id}`, { expirationTtl: 30*86400 }).catch(()=>{});
     if(ctx && ctx.waitUntil) ctx.waitUntil(merk); else await merk;
   }
   return { checkoutUrl: draft.invoiceUrl, draftOrderId: draft.id, preis: c.total, waehrung };
+}
+
+/* Variante des Basisprodukts fuer Material + Dekor (src/varianten.json). Multiplex mit
+   HPL-Laminat nutzt die Dekorfotos der Moebelplatte, Multiplex natur sein eigenes. */
+export function basisVariante(S){
+  const mat = S.mat === 'mpx' ? (S.mpxSurface === 'hpl' ? 'mpx_hpl' : 'mpx') : S.mat;
+  const dekor = S.mat === 'mpx' && S.mpxSurface !== 'hpl' ? 'sperrholz-natur' : S.dekor;
+  const id = VARIANTEN[`${mat}|${dekor}`];
+  return typeof id === 'string' && /^gid:\/\/shopify\/ProductVariant\/\d+$/.test(id) ? id : null;
 }
 
 /* Nur Links auf die eigenen Seiten landen in Notiz und Attributen — der Browser

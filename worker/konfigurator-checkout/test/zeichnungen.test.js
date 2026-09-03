@@ -84,6 +84,18 @@ check('Shopify: Tag zeichnung-offen + Notiz mit Link', gql.some(g => /tagsAdd/.t
 check('Mail intern an shop@ mit 3 Anhaengen + Testhinweis', mails[0] && mails[0].to[0] === 'shop@kessler-pro.com' && mails[0].attachments.length === 3 && /TESTBESTELLUNG/.test(mails[0].html) && /werkstatt\.pdf/.test(mails[0].attachments[1].filename), mails[0] && { to: mails[0].to, n: mails[0].attachments.length });
 check('Mail Kunde mit Zeichnung, Bestaetigen-Link, 72-h-Hinweis', mails[1] && mails[1].to[0] === 'sobkow.alexander@gmail.com' && mails[1].attachments.length === 1 && /\/freigabe\/[A-Za-z0-9_-]+"/.test(mails[1].html) && /72-Stunden/.test(mails[1].html) && /Hallo Alexander/.test(mails[1].html), mails[1] && mails[1].subject);
 
+/* ②b Positionstitel: Variantenposition des Basisprodukts → voller Titel aus _kfg_titel */
+{
+  const li = { id: 1, admin_graphql_api_id:'gid://shopify/LineItem/1', title:'Tischplatte nach Maß', variant_title:'Möbelplatte · Buche', quantity:1,
+    properties:[{ name:'Dekor', value:'Buche' }, { name:'_kfg_titel', value:'Tischplatte nach Maß · Möbelplatte · Buche · 25 mm · 120 × 60 cm' }] };
+  const n1 = normBestellung({ ...restOrder, line_items:[li] });
+  const n2 = normBestellung({ ...restOrder, line_items:[{ ...li, properties:[] }] });
+  const n3 = normBestellung({ id:'gid://shopify/Order/1', name:'KP-1', lineItems:{ nodes:[{ id:'gid://shopify/LineItem/1', title:'Tischplatte nach Maß', variantTitle:'Compact · Grau', quantity:1, customAttributes:[] }] } });
+  check('Titel aus _kfg_titel (REST)', n1.positionen[0].titel === 'Tischplatte nach Maß · Möbelplatte · Buche · 25 mm · 120 × 60 cm', n1.positionen[0].titel);
+  check('Ohne Attribut: Produkt · Variante (REST)', n2.positionen[0].titel === 'Tischplatte nach Maß · Möbelplatte · Buche', n2.positionen[0].titel);
+  check('Ohne Attribut: Produkt · Variante (GraphQL)', n3.positionen[0].titel === 'Tischplatte nach Maß · Compact · Grau', n3.positionen[0].titel);
+}
+
 /* ③ Zweiter Webhook (Wiederholung) aendert nichts */
 const nMails = mails.length;
 const a2 = await bestellungVerarbeiten(normBestellung(restOrder), env);
