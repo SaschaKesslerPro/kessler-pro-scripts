@@ -176,7 +176,7 @@ const KNOPF = (url, text, dunkel) => dunkel
   ? `<a href="${url}" style="display:inline-block;background:#1E1E1E;color:#FFFFFF;text-decoration:none;font-size:16px;font-weight:500;line-height:48px;padding:0 24px;border-radius:8px">${text}</a>`
   : `<a href="${url}" style="display:inline-block;border:1px solid #1E1E1E;color:#1E1E1E;text-decoration:none;font-size:16px;font-weight:500;line-height:46px;padding:0 24px;border-radius:8px">${text}</a>`;
 /* Knoepfe untereinander: nebeneinander passen zwei nicht in 320 px Handybreite. */
-const KNOEPFE = (a, b) => `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="padding:0 0 8px">${a}</td></tr>${b ? `<tr><td style="padding:0 0 8px">${b}</td></tr>` : ''}</table>`;
+const KNOEPFE = (...k) => `<table role="presentation" cellpadding="0" cellspacing="0">${k.filter(Boolean).map(x => `<tr><td style="padding:0 0 8px">${x}</td></tr>`).join('')}</table>`;
 const ZEILE = (k, v, letzte) => `<tr><td style="padding:8px 12px 8px 0;border-top:1px solid #E5E5E5;${letzte?'border-bottom:1px solid #E5E5E5;':''}color:#6D6A63;width:34%;vertical-align:top">${k}</td><td style="padding:8px 0;border-top:1px solid #E5E5E5;${letzte?'border-bottom:1px solid #E5E5E5;':''}vertical-align:top">${v}</td></tr>`;
 const TABELLE = (zeilen) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 24px;font-size:14px;line-height:1.5">${zeilen}</table>`;
 const BILD = (urlBild, urlPdf, alt) => `<a href="${urlPdf}" style="display:block;border:1px solid #D8D4CC;border-radius:8px;overflow:hidden;background:#FFFFFF"><img src="${urlBild}" width="534" alt="${esc(alt)}" style="display:block;width:100%;height:auto;border:0"></a>`;
@@ -213,15 +213,16 @@ export function kundenMail(auftrag, spr, urls){
 /** Interne Mail an shop@ mit allen Dateien und Links. */
 export function internMail(auftrag, urls, was){
   const st = { neu: 'Neue Konfigurator-Bestellung — Zeichnungen erzeugt', freigegeben: 'Kunde hat die Maße BESTÄTIGT', aenderung: 'Kunde meldet eine ÄNDERUNG — Fertigung stoppen', auto: 'Auto-Freigabe nach 72 h ohne Antwort' }[was] || was;
-  const zeilen = auftrag.positionen.map(p => ZEILE(`Position ${p.idx}`, `${esc(p.titel)}<br><a href="${urls.datei(p.dateien.kunde_pdf)}" style="color:#1E1E1E">Kundenzeichnung (PDF)</a> · <a href="${urls.datei(p.dateien.werkstatt_pdf)}" style="color:#1E1E1E">Werkstatt PL (PDF)</a> · <a href="${urls.datei(p.dateien.dxf)}" style="color:#1E1E1E">DXF</a> · <a href="${urls.datei(p.dateien.svg)}" style="color:#1E1E1E">SVG</a>`)).join('')
+  /* Interne Links mit dem internen Token — der Kundenlink liefert Werkstatt-PDF und DXF nicht */
+  const zeilen = auftrag.positionen.map(p => ZEILE(`Position ${p.idx}`, `${esc(p.titel)}<br><a href="${urls.intern(p.dateien.kunde_pdf)}" style="color:#1E1E1E">Kundenzeichnung (PDF)</a> · <a href="${urls.intern(p.dateien.werkstatt_pdf)}" style="color:#1E1E1E">Werkstatt PL (PDF)</a> · <a href="${urls.intern(p.dateien.dxf)}" style="color:#1E1E1E">DXF</a> · <a href="${urls.intern(p.dateien.svg)}" style="color:#1E1E1E">SVG</a>`)).join('')
     + ZEILE('Status', `<b>${esc(auftrag.status)}</b>${auftrag.status==='offen' ? ` · Frist ${fristText(auftrag.frist,'de')}` : ''}${auftrag.freigabe ? ` · ${esc(auftrag.freigabe.name||'')} ${esc(auftrag.freigabe.zeit||'')}` : ''}`, true);
   const html = RAHMEN(
     H1(st)
     + P(`Bestellung <b>${esc(auftrag.name)}</b> · ${esc(auftrag.kunde)} · ${esc(auftrag.email)} · Sprache ${auftrag.sprache}${auftrag.test ? ' · <b>TESTBESTELLUNG</b>' : ''}`, '#1E1E1E', '0')
     + TABELLE(zeilen)
     + (auftrag.aenderung ? P(`<b>Änderungswunsch des Kunden:</b><br>${esc(auftrag.aenderung.text).replace(/\n/g,'<br>')}`, '#1E1E1E') : '')
-    + KNOEPFE(KNOPF(urls.shopify, 'Bestellung in Shopify', true), KNOPF(urls.freigabe, 'Freigabe-Seite des Kunden', false))
-    + KLEIN('Alle Dateien hängen an. Die Werkstattzeichnung trägt den Freigabestand; nach Bestätigung kommt sie noch einmal aktualisiert.'),
+    + KNOEPFE(KNOPF(urls.shopify, 'Bestellung in Shopify', true), KNOPF(urls.uebersicht, 'Alle Dateien (intern)', false), KNOPF(urls.freigabe, 'Freigabe-Seite des Kunden', false))
+    + KLEIN('Alle Dateien hängen an. Die Werkstattzeichnung trägt den Freigabestand; nach Bestätigung kommt sie noch einmal aktualisiert. Die Links in dieser Mail sind intern — bitte nicht an Kunden weitergeben.'),
     { sprache:'de', kopf: `Intern &nbsp;·&nbsp; ${was === 'neu' ? 'Zeichnungen' : was === 'aenderung' ? 'Änderung' : 'Freigabe'} &nbsp;·&nbsp; <span style="color:#FFFFFF;font-weight:500">${esc(auftrag.name)}</span>`, titel: `Intern · ${auftrag.name}`, fuss:false });
   return { betreff: `${was==='neu' ? 'Zeichnungen' : was==='aenderung' ? 'ÄNDERUNG' : 'Freigabe'} ${auftrag.name} · ${auftrag.kunde} · ${auftrag.positionen.map(p=>p.kurz).join(' | ')}`, html };
 }

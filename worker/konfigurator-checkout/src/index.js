@@ -19,7 +19,9 @@
      POST /webhook/orders          Shopify orders/paid -> Zeichnungen (Kunde, Werkstatt PL, DXF),
                                    Ablage in KV, Tag + Notiz in Shopify, Mail an shop@ und Kunde
      GET  /z/<token>/<datei>       Datei ausliefern (PDF/DXF/SVG; …-zeichnung.png wird aus dem SVG gerendert)
-     GET|POST /freigabe/<token>    Kunde bestaetigt die Masse oder meldet eine Aenderung
+                                   Kundentoken: nur Kunden-PDF/SVG/PNG — Werkstatt-PDF und DXF nur mit internem Token
+     GET|POST /freigabe/<token>    Kunde bestaetigt die Masse oder meldet eine Aenderung (nur Kundentoken)
+     GET  /i/<tokenIntern>         Interne Uebersicht: Status, Protokoll, alle Dateien (Link in Mail an shop@ und Shopify-Notiz)
      POST /setup/webhooks?key=     Webhook-Abo in Shopify anlegen (key = SETUP_KEY)
      POST /nachlauf?key=&order=    Bestehende Bestellung (Nummer/Name) durch die Pipeline schicken
      GET  /mailtest?key=[&an=]     Testmail ueber den konfigurierten Weg (SMTP/Resend)
@@ -45,6 +47,7 @@
      RESEND_API_KEY           Alternative zu SMTP (Secret)
      SETUP_KEY                Secret — schuetzt /setup, /nachlauf, /auftrag
      FREIGABE_STUNDEN         Frist fuer die automatische Freigabe (72)
+     LINK_TAGE                Ablauf der Links in Tagen, "Kunde,intern" (Standard 180,365)
      ZEICHNUNGEN              KV-Namespace (Bindung)
 */
 import { preisKern } from './preis-kern.js';
@@ -61,8 +64,8 @@ import PREISKURVEN from '../../../dist/data/kfg-preiskurven.json' with { type: '
 import VARIANTEN from './varianten.json' with { type: 'json' };
 import * as SH from './shopify.js';
 import { adminToken, draftOrderAnlegen, fehler, API_VERSION } from './shopify.js';
-import { bestellungVerarbeiten, auftragLaden, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP, zufallToken, tokenStatus } from './zeichnungen.js';
-import { freigabeSeite } from './freigabe.js';
+import { bestellungVerarbeiten, auftragLaden, auftragMitRolle, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP, zufallToken, tokenStatus } from './zeichnungen.js';
+import { freigabeSeite, seiteHtml } from './freigabe.js';
 import { fristText, sendeMail } from './mail.js';
 
 const REPO = 'SaschaKesslerPro/kessler-pro-scripts';
@@ -115,6 +118,7 @@ export default {
       let m;
       if(req.method === 'GET' && (m = pfad.match(/^\/z\/([A-Za-z0-9_-]{10,})\/([A-Za-z0-9._-]+)$/))) return datei(env, m[1], m[2]);
       if((m = pfad.match(/^\/freigabe\/([A-Za-z0-9_-]{10,})$/))) return freigabe(req, env, m[1], url);
+      if(req.method === 'GET' && (m = pfad.match(/^\/i\/([A-Za-z0-9_-]{10,})$/))) return internSeite(env, m[1]);
       if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron' || pfad === '/mailtest'){
         if(!env.SETUP_KEY || url.searchParams.get('key') !== env.SETUP_KEY) return json({ fehler:'kein Zugriff' }, 403);
         if(pfad === '/setup/webhooks'){
@@ -168,25 +172,50 @@ function sprachAusHeader(req){
   const h = (req.headers.get('Accept-Language')||'').toLowerCase();
   return h.startsWith('pl') ? 'pl' : h.startsWith('en') ? 'en' : 'de';
 }
+/* Gleiche Antwort fuer "gibt es nicht", "abgelaufen" und "darf dieser Link nicht":
+   wer einen Link raet, erfaehrt nicht, ob er nah dran war. */
+const NICHT = () => new Response('nicht gefunden', { status:404, headers:{ 'Cache-Control':'no-store', 'X-Robots-Tag':'noindex' } });
 async function datei(env, token, name){
-  const a = await auftragLaden(env, token);
-  if(!a) return new Response('nicht gefunden', { status:404 });
-  const d = await dateiLaden(env, a, name);
-  if(!d) return new Response('nicht gefunden', { status:404 });
+  const r = await auftragMitRolle(env, token);
+  if(!r) return NICHT();
+  const d = await dateiLaden(env, r.auftrag, name, r.rolle);
+  if(!d) return NICHT();
   const ext = name.split('.').pop();
-  return new Response(d, { headers:{ 'Content-Type': TYP[ext] || 'application/octet-stream', 'Content-Disposition': `${ext==='dxf' ? 'attachment' : 'inline'}; filename="${name}"`, 'Cache-Control': ext === 'png' ? 'public, max-age=86400' : 'private, max-age=300', 'X-Robots-Tag':'noindex' } });
+  return new Response(d, { headers:{ 'Content-Type': TYP[ext] || 'application/octet-stream', 'Content-Disposition': `${ext==='dxf' ? 'attachment' : 'inline'}; filename="${name}"`, 'Cache-Control': ext === 'png' ? 'private, max-age=86400' : 'private, max-age=300', 'Referrer-Policy':'no-referrer', 'X-Robots-Tag':'noindex' } });
+}
+/* Interne Uebersicht: Status, Protokoll, alle Dateien — nur mit dem internen Token */
+async function internSeite(env, token){
+  const r = await auftragMitRolle(env, token);
+  if(!r || r.rolle !== 'intern') return NICHT();
+  const a = r.auftrag, urls = urlsFuer(env, a);
+  const esc = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const pos = a.positionen.map(p => `<div class="k"><h2>Position ${p.idx}: ${esc(p.titel)}</h2><p class="hint" style="margin:0 0 10px">${esc(p.kurz||'')}</p>
+<img class="z" src="${urls.intern(p.dateien.png || p.dateien.svg.replace(/\.svg$/,'.png'))}" alt="" loading="lazy">
+<p class="hint"><a class="l" href="${urls.intern(p.dateien.kunde_pdf)}">Kundenzeichnung (PDF)</a> · <a class="l" href="${urls.intern(p.dateien.werkstatt_pdf)}">Werkstatt PL (PDF)</a> · <a class="l" href="${urls.intern(p.dateien.dxf)}">DXF</a> · <a class="l" href="${urls.intern(p.dateien.svg)}">SVG</a></p></div>`).join('');
+  const st = { offen:'offen — Freigabe des Kunden ausstehend', freigegeben:'vom Kunden bestätigt', auto:'automatisch freigegeben (Frist abgelaufen)', aenderung:'ÄNDERUNGSWUNSCH — Fertigung stoppen' }[a.status] || a.status;
+  const body = `<h1>Auftrag ${esc(a.name)} · intern</h1><p class="m">${esc(a.kunde)} · ${esc(a.email)} · Sprache ${esc(a.sprache)}${a.test ? ' · <b>TESTBESTELLUNG</b>' : ''}</p>
+<div class="k ${a.status==='aenderung' ? 'warn' : a.status==='offen' ? '' : 'ok'}"><b>Status:</b> ${esc(st)}${a.status==='offen' ? ` · Frist ${esc(fristText(a.frist,'de'))}` : ''}${a.freigabe && a.freigabe.name ? ` · ${esc(a.freigabe.name)} ${esc(a.freigabe.zeit||'')}` : ''}
+${a.aenderung ? `<p style="margin:10px 0 0"><b>Änderungswunsch:</b><br>${esc(a.aenderung.text).replace(/\n/g,'<br>')}</p>` : ''}
+<p class="hint"><a class="l" href="${urls.shopify}">Bestellung in Shopify</a> · <a class="l" href="${urls.freigabe}">Freigabe-Seite des Kunden</a></p></div>
+${pos}
+<div class="k"><h2>Protokoll</h2><p class="hint" style="margin:0">${(a.protokoll||[]).map(esc).join('<br>')}</p></div>
+<p class="hint">Dieser Link ist intern (shop@, BaseLinker). Der Kunde bekommt nur seine eigene Zeichnung.</p>`;
+  return new Response(seiteHtml(`Intern · ${a.name}`, body), { headers:{ 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'Referrer-Policy':'no-referrer', 'X-Robots-Tag':'noindex' } });
 }
 async function freigabe(req, env, token, url){
-  const a = await auftragLaden(env, token);
+  const r = await auftragMitRolle(env, token);
   const base = String(env.PUBLIC_URL||'').replace(/\/$/,'');
-  const seite = (auftrag, opt) => new Response(freigabeSeite(auftrag, opt.svgs||[], { ...opt, base }), { headers:{ 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'X-Robots-Tag':'noindex' } });
+  const seite = (auftrag, opt) => new Response(freigabeSeite(auftrag, opt.svgs||[], { ...opt, base }), { headers:{ 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'Referrer-Policy':'no-referrer', 'X-Robots-Tag':'noindex' } });
+  /* Die Freigabe (Bestaetigen / Aenderung) ist Sache des Kunden — der interne Link zeigt die Uebersicht */
+  if(r && r.rolle === 'intern') return Response.redirect(`${base}/i/${token}`, 302);
+  const a = r ? r.auftrag : null;
   if(!a){
     const st = await tokenStatus(env, token);
     const spr = ['de','pl','en'].includes(url.searchParams.get('lang')) ? url.searchParams.get('lang') : sprachAusHeader(req);
     return seite(null, { sprache: spr, wartet: st === 'draft' });
   }
   const svgs = [];
-  for(const p of a.positionen){ const d = await dateiLaden(env, a, p.dateien.svg); svgs.push(d ? new TextDecoder().decode(d) : ''); }
+  for(const p of a.positionen){ const d = await dateiLaden(env, a, p.dateien.svg, 'kunde'); svgs.push(d ? new TextDecoder().decode(d) : ''); }
   if(req.method === 'POST'){
     const f = await req.formData().catch(()=>null);
     const akt = f && f.get('a');

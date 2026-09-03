@@ -4,8 +4,15 @@
 
    Ablage (KV ZEICHNUNGEN):
      auftrag:<nummer>            JSON: Status, Positionen, Dateinamen, Token, Frist
-     token:<token>               -> nummer      (Link des Kunden)
-     datei:<nummer>:<dateiname>  Binaerdaten (PDF/DXF/SVG) */
+     token:<token>               -> nummer          (Link des Kunden: Freigabe-Seite, Kunden-PDF, Bild)
+     token:<tokenIntern>         -> intern:<nummer> (Link fuer shop@ / BaseLinker: alle Dateien, Uebersicht /i/)
+     datei:<nummer>:<dateiname>  Binaerdaten (PDF/DXF/SVG)
+
+   Link-Schutz (Sascha 03.09.): Die Links sind der Schluessel — 18 Zufallsbytes
+   (144 Bit), nicht erratbar, nur ueber HTTPS. Der Kundenlink oeffnet nur, was der
+   Kunde ohnehin per Mail bekommt (seine Zeichnung); Werkstatt-PDF und DXF gibt es
+   nur ueber den internen Link. Beide Tokens laufen ab (LINK_TAGE, Standard 180 Tage
+   Kunde / 365 Tage intern); der Auftrag selbst bleibt gespeichert. */
 
 import { konfigAusAttributen, konfigZuZeichnung } from './zeichnung/adapter.js';
 import { zeichnung } from './zeichnung/zeichnung.js';
@@ -40,6 +47,23 @@ export async function tokenStatus(env, token){
   if(!v) return null;
   return v.startsWith('draft:') ? 'draft' : 'auftrag';
 }
+/** Ablauf der Links in Tagen: LINK_TAGE = "180" oder "180,365" (Kunde, intern). */
+export function linkTage(env){
+  const t = String(env.LINK_TAGE || '').split(',').map(s => +s.trim()).filter(n => n > 0);
+  return { kunde: t[0] || 180, intern: t[1] || t[0] || 365 };
+}
+/* Was der jeweilige Link liefern darf */
+const KUNDE_DATEIEN = ['kunde_pdf', 'svg', 'png'];
+export function dateiErlaubt(auftrag, rolle, name){
+  for(const p of auftrag.positionen || []){
+    for(const [art, n] of Object.entries(p.dateien || {})){
+      if(n !== name) continue;
+      return rolle === 'intern' || rolle === 'nummer' || KUNDE_DATEIEN.includes(art);
+    }
+  }
+  /* png-Name kann fehlen (aeltere Auftraege): vom svg abgeleitet, fuer alle erlaubt */
+  return /\.png$/.test(name) && (auftrag.positionen || []).some(p => p.dateien && p.dateien.svg === name.replace(/\.png$/, '.svg'));
+}
 export function spracheAus(best){
   const a = (best.attribute||[]).find(x => x.key === '_kfg_sprache');
   const s = (a && a.value) || String(best.locale||'').slice(0,2).toLowerCase();
@@ -47,9 +71,12 @@ export function spracheAus(best){
 }
 export function urlsFuer(env, auftrag){
   const base = String(env.PUBLIC_URL || '').replace(/\/$/, '');
+  const ti = auftrag.tokenIntern || auftrag.token;   /* aeltere Auftraege ohne internen Token */
   return {
     freigabe: `${base}/freigabe/${auftrag.token}`,
     datei: (name) => `${base}/z/${auftrag.token}/${name}`,
+    intern: (name) => `${base}/z/${ti}/${name}`,
+    uebersicht: `${base}/i/${ti}`,
     shopify: `https://admin.shopify.com/store/${String(env.SHOPIFY_SHOP||'').replace('.myshopify.com','')}/orders/${auftrag.nummer}`,
   };
 }
@@ -120,6 +147,7 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
     /* Token kommt bevorzugt aus dem Checkout (_kfg_token an der Bestellung): der
        Freigabe-Link steht dann schon in Shopifys Bestellbestaetigung. */
     token: (alt && alt.token) || tokenAus(best) || zufallToken(),
+    tokenIntern: (alt && alt.tokenIntern) || zufallToken(),
     erstellt: best.erstellt, angelegt: jetzt.toISOString(), frist: new Date(jetzt.getTime() + stunden*3600e3).toISOString(),
     status: 'offen', freigabe: null, aenderung: null, positionen: [], protokoll: [],
   };
@@ -139,13 +167,18 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
     }
   }
   if(!auftrag.positionen.length) return { uebersprungen:true, grund:'keine Zeichnung erzeugbar', nummer, protokoll: auftrag.protokoll };
-  if(KV){ await KV.put(auftragKey(nummer), JSON.stringify(auftrag)); await KV.put(`token:${auftrag.token}`, nummer); }
+  if(KV){
+    const tage = linkTage(env);
+    await KV.put(auftragKey(nummer), JSON.stringify(auftrag));
+    await KV.put(`token:${auftrag.token}`, nummer, { expirationTtl: tage.kunde * 86400 });
+    await KV.put(`token:${auftrag.tokenIntern}`, `intern:${nummer}`, { expirationTtl: tage.intern * 86400 });
+  }
 
   const urls = urlsFuer(env, auftrag);
   // Shopify: Tag + Notiz (braucht write_orders — ohne den Scope nur Protokoll, kein Abbruch)
   try{
     await SH.tagsHinzufuegen(env, best.id, [TAG.offen]);
-    await SH.notizAnhaengen(env, best.id, `Zeichnungen erzeugt ${jetztText('de')} · Freigabe des Kunden offen bis ${fristText(auftrag.frist,'de')} · ${urls.freigabe}`);
+    await SH.notizAnhaengen(env, best.id, `Zeichnungen erzeugt ${jetztText('de')} · Freigabe des Kunden offen bis ${fristText(auftrag.frist,'de')} · Dateien intern: ${urls.uebersicht}`);
     auftrag.protokoll.push('Shopify: Tag und Notiz gesetzt');
   }catch(err){ auftrag.protokoll.push(`Shopify-Tag/Notiz fehlgeschlagen: ${err.message} ${err.detail ? JSON.stringify(err.detail).slice(0,200) : ''}`); }
 
@@ -165,15 +198,29 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
 }
 
 export async function auftragLaden(env, nummerOderToken){
-  const KV = env.ZEICHNUNGEN; if(!KV) return null;
-  let nummer = nummerOderToken;
-  if(!/^\d+$/.test(String(nummer))) nummer = await KV.get(`token:${nummerOderToken}`);
-  if(!nummer) return null;
-  return KV.get(auftragKey(nummer), 'json');
+  const r = await auftragMitRolle(env, nummerOderToken);
+  return r ? r.auftrag : null;
 }
-export async function dateiLaden(env, auftrag, name){
+/** Auftrag plus Rolle des Aufrufers: 'nummer' (interne Route mit Schluessel),
+    'kunde' (Kundentoken), 'intern' (interner Token). Abgelaufene Tokens: null. */
+export async function auftragMitRolle(env, nummerOderToken){
+  const KV = env.ZEICHNUNGEN; if(!KV) return null;
+  let nummer = String(nummerOderToken), rolle = 'nummer';
+  if(!/^\d+$/.test(nummer)){
+    const v = await KV.get(`token:${nummerOderToken}`);
+    if(!v || v.startsWith('draft:')) return null;
+    if(v.startsWith('intern:')){ nummer = v.slice(7); rolle = 'intern'; } else { nummer = v; rolle = 'kunde'; }
+  }
+  const auftrag = await KV.get(auftragKey(nummer), 'json');
+  if(!auftrag) return null;
+  /* Sicherheitsnetz gegen vertauschte KV-Eintraege: der Token muss zum Auftrag gehoeren */
+  if(rolle === 'kunde' && auftrag.token !== nummerOderToken) return null;
+  if(rolle === 'intern' && auftrag.tokenIntern !== nummerOderToken) return null;
+  return { auftrag, rolle };
+}
+export async function dateiLaden(env, auftrag, name, rolle = 'intern'){
+  if(!dateiErlaubt(auftrag, rolle, name)) return null;
   if(/\.png$/.test(name)) return pngLaden(env, auftrag, name);
-  if(!auftrag.positionen.some(p => Object.values(p.dateien).includes(name))) return null;
   return env.ZEICHNUNGEN.get(dateiKey(auftrag.nummer, name), 'arrayBuffer');
 }
 /** Zeichnungsbild fuer die Mail: aus dem gespeicherten SVG gerendert, danach in KV

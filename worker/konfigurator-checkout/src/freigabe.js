@@ -78,6 +78,7 @@ export function freigabeSeite(auftrag, svgs, opt = {}){
   return html(`${t.titel} · ${auftrag.name}`, kopf + status + aktion + bilder);
 }
 
+export function seiteHtml(titel, body, kopf = ''){ return html(titel, body, kopf); }
 function html(titel, body, kopf = ''){
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">${kopf}
 <title>${esc(titel)} · Kessler PRO</title><style>${CSS}</style></head><body><div class="w"><p style="font-weight:800;letter-spacing:.04em;margin:0 0 18px">KESSLER PRO</p>${body}</div></body></html>`;

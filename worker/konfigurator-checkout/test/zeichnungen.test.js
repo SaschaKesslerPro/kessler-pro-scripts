@@ -17,7 +17,7 @@ let ok = 0; const bad = []; const check = (n, c, i) => { if (c) ok++; else bad.p
 function kvMock(){
   const m = new Map(), meta = new Map();
   return {
-    _m: m,
+    _m: m, _meta: meta,
     async get(k, typ){ const v = m.get(k); if (v == null) return null; if (typ === 'json') return JSON.parse(v); if (typ === 'arrayBuffer') return v instanceof Uint8Array ? v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength) : new TextEncoder().encode(v).buffer; return v; },
     async put(k, v, o){ m.set(k, v); meta.set(k, o); },
     async delete(k){ m.delete(k); meta.delete(k); },
@@ -80,7 +80,7 @@ check('Kunden-PDF im KV, echtes PDF', pdf && new TextDecoder().decode(new Uint8A
 const dxfTxt = new TextDecoder().decode(await env.ZEICHNUNGEN.get(`datei:8372871594330:${d.dxf}`, 'arrayBuffer'));
 check('DXF mit Aussenkontur, Bohrungen, Innenkreis', /AUSSEN/.test(dxfTxt) && (dxfTxt.match(/BOHRUNG/g) || []).length >= 4 && /INNEN/.test(dxfTxt), dxfTxt.length);
 check('Frist ≈ 72 h', Math.abs(new Date(a.frist) - new Date(a.angelegt) - 72 * 3600e3) < 5000, [a.angelegt, a.frist]);
-check('Shopify: Tag zeichnung-offen + Notiz mit Link', gql.some(g => /tagsAdd/.test(g.query) && g.variables.tags.includes(TAG.offen)) && /Freigabe des Kunden offen bis .* https:\/\/kfg\.example\.workers\.dev\/freigabe\//.test(orderNote), orderNote);
+check('Shopify: Tag zeichnung-offen + Notiz mit Link', gql.some(g => /tagsAdd/.test(g.query) && g.variables.tags.includes(TAG.offen)) && /Freigabe des Kunden offen bis .* Dateien intern: https:\/\/kfg\.example\.workers\.dev\/i\/[A-Za-z0-9_-]{20,}/.test(orderNote), orderNote);
 check('Mail intern an shop@ mit 3 Anhaengen + Testhinweis', mails[0] && mails[0].to[0] === 'shop@kessler-pro.com' && mails[0].attachments.length === 3 && /TESTBESTELLUNG/.test(mails[0].html) && /werkstatt\.pdf/.test(mails[0].attachments[1].filename), mails[0] && { to: mails[0].to, n: mails[0].attachments.length });
 check('Mail Kunde mit Zeichnung, Bestaetigen-Link, 72-h-Hinweis', mails[1] && mails[1].to[0] === 'sobkow.alexander@gmail.com' && mails[1].attachments.length === 1 && /\/freigabe\/[A-Za-z0-9_-]+"/.test(mails[1].html) && /72-Stunden/.test(mails[1].html) && /Hallo Alexander/.test(mails[1].html), mails[1] && mails[1].subject);
 
@@ -114,6 +114,32 @@ check('Falscher Token → 404', r.status === 404);
 r = await worker.fetch(new Request(`https://x/freigabe/${a.token}?a=aenderung`), env, ctx);
 html = await r.text();
 check('Aenderungsformular', /<textarea name="text"/.test(html));
+
+/* ④b Link-Schutz: Kundentoken vs. interner Token */
+check('Zwei verschiedene Tokens, beide ≥ 20 Zeichen', a.tokenIntern && a.tokenIntern !== a.token && a.tokenIntern.length >= 20, [a.token, a.tokenIntern]);
+r = await worker.fetch(new Request(`https://x/z/${a.token}/${d.werkstatt_pdf}`), env, ctx);
+check('Kundentoken: Werkstatt-PDF → 404', r.status === 404);
+r = await worker.fetch(new Request(`https://x/z/${a.token}/${d.dxf}`), env, ctx);
+check('Kundentoken: DXF → 404', r.status === 404);
+r = await worker.fetch(new Request(`https://x/z/${a.token}/${d.svg}`), env, ctx);
+check('Kundentoken: SVG erlaubt', r.status === 200 && /svg/.test(r.headers.get('Content-Type')));
+r = await worker.fetch(new Request(`https://x/z/${a.tokenIntern}/${d.werkstatt_pdf}`), env, ctx);
+check('Interner Token: Werkstatt-PDF', r.status === 200 && r.headers.get('Content-Type') === 'application/pdf');
+r = await worker.fetch(new Request(`https://x/z/${a.tokenIntern}/${d.dxf}`), env, ctx);
+check('Interner Token: DXF als Download', r.status === 200 && /attachment/.test(r.headers.get('Content-Disposition')));
+r = await worker.fetch(new Request(`https://x/i/${a.tokenIntern}`), env, ctx);
+html = await r.text();
+check('Interne Uebersicht: Status, Dateien, Protokoll', r.status === 200 && /Auftrag KP-2026-1034 · intern/.test(html) && /werkstatt\.pdf/.test(html) && /teil\.dxf/.test(html) && /Protokoll/.test(html) && r.headers.get('Cache-Control') === 'no-store');
+r = await worker.fetch(new Request(`https://x/i/${a.token}`), env, ctx);
+check('Interne Uebersicht mit Kundentoken → 404', r.status === 404);
+r = await worker.fetch(new Request(`https://x/freigabe/${a.tokenIntern}`, { redirect:'manual' }), env, ctx);
+check('Freigabe-Seite mit internem Token → Umleitung auf /i/', r.status === 302 && /\/i\//.test(r.headers.get('Location')));
+const fdX = new FormData(); fdX.set('a', 'ok');
+r = await worker.fetch(new Request(`https://x/freigabe/${a.tokenIntern}`, { method:'POST', body: fdX, redirect:'manual' }), env, ctx);
+check('Bestaetigen mit internem Token nicht moeglich', r.status === 302 && (await auftragLaden(env, a.token)).status === 'offen');
+check('Interne Mail nutzt interne Links, Kundenmail den Kundenlink', mails[0].html.includes(`/z/${a.tokenIntern}/`) && !mails[0].html.includes(`/z/${a.token}/${d.werkstatt_pdf}`) && mails[1].html.includes(`/freigabe/${a.token}`) && !mails[1].html.includes(a.tokenIntern));
+{ const meta = env.ZEICHNUNGEN._meta; const k = meta.get(`token:${a.token}`), i = meta.get(`token:${a.tokenIntern}`);
+  check('Links laufen ab: Kunde 180 Tage, intern 365 Tage (KV-TTL)', k && k.expirationTtl === 180*86400 && i && i.expirationTtl === 365*86400, [k, i]); }
 
 /* ⑤ Kunde bestaetigt */
 const fd = new FormData(); fd.set('a', 'ok'); fd.set('name', 'Alexander Sobkow');
@@ -158,6 +184,7 @@ fs.mkdirSync('/tmp/zprobe', { recursive:true });
 fs.writeFileSync('/tmp/zprobe/freigabe_seite.html', html);
 fs.writeFileSync('/tmp/zprobe/mail_kunde.html', mails[1].html);
 fs.writeFileSync('/tmp/zprobe/mail_intern.html', mails[0].html);
+fs.writeFileSync('/tmp/zprobe/intern_seite.html', await (await worker.fetch(new Request(`https://x/i/${a.tokenIntern}`), env, ctx)).text());
 
 console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b => console.log('  ✗', b));
 process.exit(bad.length ? 1 : 0);
