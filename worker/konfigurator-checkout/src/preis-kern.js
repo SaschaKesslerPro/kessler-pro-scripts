@@ -104,7 +104,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   const CORNER_NAMES = ['hinten links','hinten rechts','vorne rechts','vorne links'];
 
-  const LF_POS = [['hr','hinten rechts'],['hl','hinten links'],['vr','vorne rechts'],['vl','vorne links']];
+  const LF_POS = [['vr','vorne rechts'],['vl','vorne links'],['hr','hinten rechts'],['hl','hinten links']];
 
   const MASCHINE_MASSE = {'48x18.1':[48,18.1], '52x18.1':[52,18.1], '61.7x18.1':[61.7,18.1], 'auto':[52,18.1]};
 
@@ -325,7 +325,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     S.corner=cornerMax();
   }
 
-  function lfPos(){ return S.lf.pos || (S.mat==='szwal' ? 'vr' : 'hr'); }
+  function lfPos(){ return S.lf.pos || 'vr'; }
 
   function lfSchraeg(){ return S.lf.schnitt==='schraeg'; }
 

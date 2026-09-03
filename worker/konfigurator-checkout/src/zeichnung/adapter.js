@@ -93,7 +93,7 @@ export function konfigZuZeichnung(S, meta = {}) {
     const innen = S.mat === 'dekor' ? 50 : 10;
     k.lform = {
       L: cm(S.lf.L), B: cm(S.lf.B), aw: cm(S.lf.aw), ah: cm(S.lf.ah),
-      pos: S.lf.pos || (S.mat === 'szwal' ? 'vr' : 'hr'),
+      pos: S.lf.pos || 'vr',   /* Vorgabe seit v1.17.2: vorne rechts (Senior 03.09.) */
       schraeg: !!g.schraeg, winkel: g.winkel,
       innenradius: g.schraeg ? 0 : innen,
       radien: (S.lfR || [0, 0, 0, 0, 0]).map((v) => +v || 0),

@@ -72,7 +72,7 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   const winkel=await page.evaluate(()=>document.getElementById('inLW').value+'|'+document.getElementById('fLW').style.display+'|'+document.getElementById('lfInnerNote').style.display);
   check('Winkelfeld sichtbar, 32°, Innenecken-Hinweis weg', winkel==='32||none', winkel);
   const posChips=await page.evaluate(()=>[...document.querySelectorAll('#lfPosChips .kfg_chip')].map(b=>b.textContent+(b.classList.contains('is-active')?'*':'')).join(','));
-  check('Lage-Chips mit vorne links aktiv', posChips==='hinten rechts,hinten links,vorne rechts,vorne links*', posChips);
+  check('Lage-Chips: nur vorne, vorne links aktiv (v1.17.2)', posChips==='vorne rechts,vorne links*', posChips);
   /* Ecken je Ecke bei der L-Form */
   r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'gerade'}, lfR:[50,0,0,50,0]});
   check('L 2 Ecken 29,90', r.rows.some(x=>/Eckenrundung/.test(x[0]) && parseP(x[1])===29.9), JSON.stringify(r.rows.filter(x=>/Ecken/.test(x[0]))));
@@ -158,7 +158,7 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   check(`PL Katalog (${cnt} Stichproben) in zl`, plbad===0);
   r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'schraeg'}, lfR:[50,0,0,0,0]});
   const plTexte=await page.evaluate(()=>({pos:[...document.querySelectorAll('#lfPosChips .kfg_chip')].map(b=>b.textContent), cut:[...document.querySelectorAll('#lfCutChips .kfg_chip')].map(b=>b.textContent), lbl:document.querySelector('label[for=inLW]').textContent, rows:[...document.querySelectorAll('#breakdown tr td:first-child')].map(e=>e.textContent), namen:[...document.querySelectorAll('#cornerSel .nm')].map(e=>e.textContent)}));
-  check('PL: Lage-Chips uebersetzt', plTexte.pos.join(',')==='z tyłu po prawej,z tyłu po lewej,z przodu po prawej,z przodu po lewej', plTexte.pos.join(','));
+  check('PL: Lage-Chips uebersetzt', plTexte.pos.join(',')==='z przodu po prawej,z przodu po lewej', plTexte.pos.join(','));
   check('PL: Schnitt-Chips + Winkel', plTexte.cut.join(',')==='Proste,Skośne' && plTexte.lbl==='Kąt skosu', JSON.stringify([plTexte.cut,plTexte.lbl]));
   check('PL: Aufschluesselung ohne deutsche Reste', !plTexte.rows.some(t=>/Ausklinkung|Eckenrundung|Sondermaß|Kantenbearbeitung/.test(t)), JSON.stringify(plTexte.rows));
   check('PL: Eckennamen uebersetzt', plTexte.namen.length===5 && !plTexte.namen.some(t=>/hinten|vorne|links|rechts|Ausklinkung/.test(t)), JSON.stringify(plTexte.namen));

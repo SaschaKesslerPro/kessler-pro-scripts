@@ -19,9 +19,21 @@ let ok=0, bad=[]; const check=(n,c,i)=>{ if(c) ok++; else bad.push(n+(i?' → '+
   check('Nach Formwahl: Schritt 1 zu, Schritt 2 offen, Schritt 3 offen', !(await offen(1)) && (await offen(2)) && (await offen(3)), [await offen(1),await offen(2),await offen(3)]);
   await page.click('#formChips .kfg_chip[data-form="rect"]'); await page.waitForTimeout(900);
   check('Formen durchprobieren laesst Schritt 2 offen', await offen(2));
-  /* ② Ohne Endpunkt: Sondermass bleibt Anfrage */
-  await page.evaluate(()=>window.KFG.setConfig({mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:99,B:59,cuts:[],extras:{bohr:false,custom:false,lack:false},cornerR:[0,0,0,0]}));
-  check('Ohne Endpunkt: Unverbindlich anfragen', (await page.textContent('#cta')).trim()==='Unverbindlich anfragen', await page.textContent('#cta'));
+  /* ② Ohne Attribut: seit v1.17.2 steckt der Endpunkt im Skript — Sondermass ist bezahlbar.
+     Nur data-kfg-checkout="off" schaltet auf die Mail-Anfrage. */
+  await page.evaluate(()=>window.KFG.setConfig({mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:99,B:59,cuts:[],extras:{bohr:false,custom:false,lack:false},cornerR:[0,0,0,0],edges:['abs','abs','abs','abs']}));
+  check('Ohne Attribut (Skript-Vorgabe): Jetzt bezahlen', (await page.textContent('#cta')).trim()==='Jetzt bezahlen', await page.textContent('#cta'));
+  /* L-Form: nur vorne rechts (Vorgabe) und vorne links; Naehtisch behaelt alle vier */
+  await page.evaluate(()=>window.KFG.setConfig({mat:'dekor',dekor:'buk',thick:'25',form:'lform',lf:{L:180,B:120,aw:90,ah:60,pos:null,schnitt:'gerade'},cuts:[],extras:{bohr:false,custom:false,lack:false}}));
+  const chips=await page.evaluate(()=>[...document.querySelectorAll('#lfPosChips .kfg_chip')].map(b=>b.dataset.lp+(b.classList.contains('is-active')?'*':'')));
+  check('L-Form Moebelplatte: Chips vr* und vl', chips.join(',')==='vr*,vl', chips);
+  await page.evaluate(()=>window.KFG.setConfig({mat:'szwal',dekor:'sz-weiss',thick:'21',form:'lform',lf:{L:180,B:120,aw:90,ah:60,pos:null,schnitt:'gerade'},cuts:[],extras:{bohr:false,custom:false,lack:false}}));
+  const chips2=await page.evaluate(()=>[...document.querySelectorAll('#lfPosChips .kfg_chip')].map(b=>b.dataset.lp));
+  check('L-Form Naehtisch: vier Lagen', chips2.join(',')==='vr,vl,hr,hl', chips2);
+  await page.goto('http://127.0.0.1:8765/_spiegel/de-off.html',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—',null,{timeout:20000});
+  await page.evaluate(()=>window.KFG.setConfig({mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:99,B:59,cuts:[],extras:{bohr:false,custom:false,lack:false},cornerR:[0,0,0,0],edges:['abs','abs','abs','abs']}));
+  check('data-kfg-checkout="off": Unverbindlich anfragen', (await page.textContent('#cta')).trim()==='Unverbindlich anfragen', await page.textContent('#cta'));
   /* ③ Mit Endpunkt */
   await page.goto('http://127.0.0.1:8765/_spiegel/de-checkout.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—',null,{timeout:20000});

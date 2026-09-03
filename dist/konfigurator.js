@@ -9,7 +9,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.17.1';
+  var VERSION = '1.17.2';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -413,8 +413,16 @@ function cornerRadii(scale, maxA, maxB){
    Senior 02.09.: Lage waehlbar (bei Naehtischen sitzt sie meist vorn, wo die
    Naeherin sitzt), der kurze Schenkel darf schraeg angesetzt werden, jede
    Aussenecke einzeln rundbar. Winkel ohne Grenze ("was der Kunde braucht"). */
-const LF_POS = [['hr','hinten rechts'],['hl','hinten links'],['vr','vorne rechts'],['vl','vorne links']];
-function lfPos(){ return S.lf.pos || (S.mat==='szwal' ? 'vr' : 'hr'); }
+/* Lage der Ausklinkung. Senior/Sascha 03.09.: Vorgabe „vorne rechts", daneben
+   „vorne links". Eine Ausklinkung hinten ist dieselbe Platte um 180° gedreht
+   (hinten rechts = vorne links, hinten links = vorne rechts): alle Kanten der
+   L-Form tragen dasselbe Profil, das Dekor hat keine Laufrichtung. Nur die
+   Naehtischplatte hat ein festes „vorn" (Massband, Maschinenausschnitt) —
+   dort bleiben alle vier Lagen waehlbar. Alte Links mit lp=hr/hl rendern
+   weiter, die Lage erscheint dann als zusaetzlicher Chip. */
+const LF_POS = [['vr','vorne rechts'],['vl','vorne links'],['hr','hinten rechts'],['hl','hinten links']];
+function lfPosListe(){ const cur=lfPos(); return LF_POS.filter(([k])=>S.mat==='szwal'||k==='vr'||k==='vl'||k===cur); }
+function lfPos(){ return S.lf.pos || 'vr'; }
 function lfSchraeg(){ return S.lf.schnitt==='schraeg'; }
 /* Kontur in Plattenkoordinaten (cm, Ursprung hinten links, y nach vorn), im
    Uhrzeigersinn. ord = Nummer der Aussenecke (0..4) oder -1 fuer die Innenecke.
@@ -569,9 +577,16 @@ const PRESETS = {
    und liefert die Checkout-URL. Ohne konfigurierten Endpunkt bleibt die
    Mail-Anfrage. Endpunkt: data-kfg-checkout am Root-Element oder
    window.KFG_CHECKOUT_URL. */
+/* v1.17.2 (03.09.): Der Endpunkt steht im Skript. Das Webflow-Attribut
+   data-kfg-checkout ging bei einem Designer-Publish am 03.09. verloren — die
+   Seite fiel fuer alle Sondermasse still auf die Mail-Anfrage zurueck. Attribut
+   oder window.KFG_CHECKOUT_URL ueberschreiben weiterhin; "off" schaltet ab. */
+const CHECKOUT_DEFAULT='https://kessler-konfigurator-checkout.kessler-konfigurator-checkout.workers.dev/checkout';
 const CHECKOUT_URL=(function(){
   try{ const r=document.querySelector('[data-kfg-root]');
-    return (r&&r.getAttribute('data-kfg-checkout'))||window.KFG_CHECKOUT_URL||''; }catch(e){ return ''; }
+    const a=(r&&r.getAttribute('data-kfg-checkout'))||window.KFG_CHECKOUT_URL||'';
+    if(a==='off') return '';
+    return a||CHECKOUT_DEFAULT; }catch(e){ return CHECKOUT_DEFAULT; }
 })();
 function kannBezahlen(){ return !!CHECKOUT_URL && !needsOffer() && calc().quelle!=='offen'; }
 /* Lagerartikel ohne jeden Aufpreis — nur dann traegt der Permalink den vollen Preis */
@@ -1541,7 +1556,7 @@ function syncFormChips(){
 function buildLfControls(){
   const pc=$('lfPosChips'); if(!pc) return;
   const pos=lfPos();
-  pc.innerHTML=LF_POS.map(([k,n])=>`<button class="kfg_chip${pos===k?' is-active':''}" data-lp="${k}">${n}</button>`).join('');
+  pc.innerHTML=lfPosListe().map(([k,n])=>`<button class="kfg_chip${pos===k?' is-active':''}" data-lp="${k}">${n}</button>`).join('');
   pc.querySelectorAll('.kfg_chip').forEach(b=>b.addEventListener('click',()=>{ S.lf.pos=b.dataset.lp; render(); }));
   document.querySelectorAll('#lfCutChips .kfg_chip').forEach(b=>b.classList.toggle('is-active',(b.dataset.ls==='schraeg')===lfSchraeg()));
   const fw=$('fLW'); if(fw) fw.style.display=lfSchraeg()?'':'none';
