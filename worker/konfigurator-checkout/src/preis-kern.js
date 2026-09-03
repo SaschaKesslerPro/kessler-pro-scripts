@@ -512,7 +512,21 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     return isFinite(best)?best:(dx>0?d.w-px:dx<0?px:dy>0?d.h-py:py);
   }
 
-  function cornerSum(){ return radienpreis(cornerCount()); }
+  function cornerSum(){ return radienpreis(cornerCount()+lfAutoEcken()); }
+
+  function lfAutoEcken(){
+    if(S.form!=='lform'||!lfSchraeg()) return 0;
+    const g=lfPts(); let n=0;
+    g.pts.forEach((_,i)=>{ const o=g.ord[i]; if(g.rad[i]>0 && (o<0 || lfCornerR(o)<=0) && lfIstDiagonalEcke(g,i)) n++; });
+    return n;
+  }
+
+  function lfIstDiagonalEcke(g,i){
+    /* Endpunkte der Schraege: das Segment davor oder danach ist weder waagerecht noch senkrecht */
+    const n=g.pts.length, a=g.pts[(i-1+n)%n], b=g.pts[i], c=g.pts[(i+1)%n];
+    const schief=(p,q)=>Math.abs(p[0]-q[0])>1e-6 && Math.abs(p[1]-q[1])>1e-6;
+    return schief(a,b)||schief(b,c);
+  }
 
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,

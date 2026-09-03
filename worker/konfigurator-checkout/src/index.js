@@ -48,6 +48,12 @@
      ZEICHNUNGEN              KV-Namespace (Bindung)
 */
 import { preisKern } from './preis-kern.js';
+/* Preisdaten fest im Bundle — dieselben Dateien wie das Skript aus demselben Commit.
+   Vorher holte der Worker sie von einer vom Browser benannten jsDelivr-Adresse
+   (irgendein Commit des Repos): damit haette ein Aufrufer alte, guenstigere Kurven
+   waehlen koennen (Sicherheitscheck 03.09.). */
+import PRODUKTMATRIX from '../../../dist/data/kfg-produktmatrix.json' with { type: 'json' };
+import PREISKURVEN from '../../../dist/data/kfg-preiskurven.json' with { type: 'json' };
 import * as SH from './shopify.js';
 import { adminToken, draftOrderAnlegen, fehler, API_VERSION } from './shopify.js';
 import { bestellungVerarbeiten, auftragLaden, dateiLaden, freigabeSetzen, autoFreigabeLauf, urlsFuer, TYP, zufallToken, tokenStatus } from './zeichnungen.js';
@@ -64,20 +70,20 @@ const DICHTE = { dekor:0.00070, mpx:0.00068, compact:0.00140, szwal:0.00072 };
    verspricht es der Konfigurator), darueber die Sperrgut-Staffel aus dem Shopify-
    Profil "Dostawa (przesylka niestandardowa)" nach berechnetem Gewicht.
    Ueberschreibbar per Umgebungsvariable VERSAND (gleiche Struktur als JSON). */
+/* Versand fuer Massanfertigungen: Pauschale (Sascha 03.09.: 19,99 EUR). Lagerartikel
+   laufen nicht hier, sondern als Cart-Permalink mit Shopifys eigenen Versandregeln.
+   PLN-Betrag vorlaeufig (≈ 19,99 EUR), von Sascha zu bestaetigen. Ueberschreibbar
+   per Variable VERSAND, z. B. {"pauschal":{"eur":19.99,"pln":84.90}}. Der Konfigurator
+   zeigt denselben Betrag (VERSAND_MASS) unter dem Preis. */
 const VERSAND_STANDARD = {
-  frei_bis_cm: [110, 50],
-  eur: { titel:'Versand Sperrgut', stufen:[[14,6.90],[28,12.90],[42,24.90],[Infinity,59.90]] },
-  pln: { titel:'Dostawa (przesyłka niestandardowa)', stufen:[[14,39.90],[28,69.90],[Infinity,119.90]] },
-  frei_titel: { eur:'Kostenloser Versand (DHL)', pln:'Darmowa dostawa (DHL)' },
+  pauschal: { eur: 19.99, pln: 84.90 },
+  titel: { eur: 'Versand Maßanfertigung (pauschal)', pln: 'Dostawa produktu na wymiar (ryczałt)' },
 };
 function versandZeile(S, K, gewichtKg, kanal, env){
   let V = VERSAND_STANDARD;
-  if(env && env.VERSAND){ try{ V = Object.assign({}, VERSAND_STANDARD, JSON.parse(env.VERSAND)); }catch(e){} }
-  const d = K.dims(), lang = Math.max(d.w, d.h), kurz = Math.min(d.w, d.h);
-  if(lang <= V.frei_bis_cm[0] && kurz <= V.frei_bis_cm[1]) return { title: V.frei_titel[kanal], price: '0.00' };
-  const st = V[kanal] || V.eur;
-  const stufe = st.stufen.find(([bis]) => gewichtKg <= bis) || st.stufen[st.stufen.length-1];
-  return { title: `${st.titel} (${Math.round(gewichtKg)} kg)`, price: stufe[1].toFixed(2) };
+  if(env && env.VERSAND){ try{ const o = JSON.parse(env.VERSAND); V = { pauschal: Object.assign({}, VERSAND_STANDARD.pauschal, o.pauschal||{}), titel: Object.assign({}, VERSAND_STANDARD.titel, o.titel||{}) }; }catch(e){} }
+  const betrag = V.pauschal[kanal] ?? V.pauschal.eur;
+  return { title: V.titel[kanal] || V.titel.eur, price: (+betrag).toFixed(2) };
 }
 
 export default {
@@ -95,6 +101,7 @@ export default {
       }
       if(req.method === 'POST' && pfad === '/checkout'){
         if(!cors['Access-Control-Allow-Origin']) return json({ fehler:'Origin nicht erlaubt' }, 403, cors);
+        if(!(await rateOk(req, env, 'checkout', 12))) return json({ fehler:'Zu viele Anfragen — bitte kurz warten' }, 429, cors);
         let body;
         try{ body = await req.json(); }catch(e){ return json({ fehler:'kein JSON' }, 400, cors); }
         return json(await checkout(body, env, ctx), 200, cors);
@@ -185,6 +192,17 @@ async function freigabe(req, env, token, url){
   return seite(a, { svgs, a: url.searchParams.get('a')||'', fristText: fristText(a.frist, a.sprache) });
 }
 
+/* Grobe Bremse je IP und Minute ueber KV (eventual consistent — reicht gegen
+   Skripte, die Draft Orders im Sekundentakt anlegen). Ohne KV: durchlassen. */
+async function rateOk(req, env, was, limit){
+  const KV = env.ZEICHNUNGEN; if(!KV) return true;
+  const ip = req.headers.get('CF-Connecting-IP') || 'x';
+  const key = `rl:${was}:${ip}:${Math.floor(Date.now()/60000)}`;
+  const n = +(await KV.get(key)) || 0;
+  if(n >= limit) return false;
+  await KV.put(key, String(n+1), { expirationTtl: 120 });
+  return true;
+}
 function corsHeaders(origin, env){
   const erlaubt = String(env.ALLOWED_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean);
   const h = { 'Access-Control-Allow-Methods':'POST, OPTIONS', 'Access-Control-Allow-Headers':'Content-Type', 'Access-Control-Max-Age':'86400', 'Vary':'Origin' };
@@ -194,26 +212,16 @@ function corsHeaders(origin, env){
 function json(obj, status, headers){ return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type':'application/json; charset=utf-8', ...headers } }); }
 
 /* ── Daten: Matrix und Kurven aus demselben Commit wie das Skript ─────────── */
+let _daten = null;
 async function ladeDaten(body, env, ctx){
-  let base = env.DATEN_BASE || '';
-  if(!base){
-    /* der Konfigurator schickt seine eigene Basis mit — nur der bekannte Pfad wird akzeptiert */
-    const m = String(body.base || '').match(/^https:\/\/cdn\.jsdelivr\.net\/gh\/SaschaKesslerPro\/kessler-pro-scripts@([0-9a-f]{7,40})$/);
-    base = m ? m[0] : `https://cdn.jsdelivr.net/gh/${REPO}@main`;
-  }
-  const hole = async (name) => {
-    const u = `${base}/dist/data/${name}`;
-    const cache = typeof caches !== 'undefined' ? caches.default : null;
-    let r = cache ? await cache.match(u) : null;
-    if(!r){ r = await fetch(u, { cf: { cacheTtl: 3600 } }); if(!r.ok) throw fehler('Preisdaten nicht erreichbar', 502, u);
-      if(cache && ctx) ctx.waitUntil(cache.put(u, r.clone())); }
-    return r.json();
-  };
-  const [matrix, kurven] = await Promise.all([hole('kfg-produktmatrix.json'), hole('kfg-preiskurven.json')]);
+  if(_daten) return _daten;
+  const matrix = PRODUKTMATRIX, kurven = PREISKURVEN;
   const SHOP = {};
   for(const k in (matrix.produkte||{})){ const v = matrix.produkte[k];
     if(v.eur) SHOP[k] = [Math.round(v.eur*100)/100, String(v.variantId||'').split('/').pop(), v.sku, v.pln ? Math.round(v.pln*100)/100 : null]; }
-  return { SHOP, KURVEN: kurven.kurven || {}, base };
+  const stand = (matrix._meta && (matrix._meta.stand || matrix._meta.erzeugt)) || '';
+  _daten = { SHOP, KURVEN: kurven.kurven || {}, base: `bundle ${API_VERSION}${stand ? ' · ' + stand : ''}` };
+  return _daten;
 }
 
 /* ── Konfiguration pruefen und Preis nachrechnen ──────────────────────────── */
@@ -225,14 +233,40 @@ function pruefeKonfig(S){
   if(S.form==='rect'){ S.L=num(S.L,20,300); S.B=num(S.B,20,200); }
   if(S.form==='round'){ S.D=num(S.D,20,160); }
   if(S.form==='lform'){ S.lf=S.lf||{}; S.lf.L=num(S.lf.L,20,300); S.lf.B=num(S.lf.B,20,200); S.lf.aw=num(S.lf.aw,1,S.lf.L-1); S.lf.ah=num(S.lf.ah,1,S.lf.B-1); }
+  if(S.form==='lform'){ S.lf.sb = S.lf.sb == null ? 0 : num(S.lf.sb, 0, Math.max(0, S.lf.ah-1)); S.lf.schnitt = S.lf.schnitt==='schraeg' ? 'schraeg' : 'gerade'; if(S.lf.pos!=null && !['hr','hl','vr','vl'].includes(S.lf.pos)) S.lf.pos=null; }
+  /* Bearbeitungen: nur bekannte Typen und Vorlagen, alle Zahlen endlich, nicht negativ,
+     im Plattenmass — sonst liessen sich ueber negative Masse Preise druecken. */
   if(!Array.isArray(S.cuts)) S.cuts=[];
   if(S.cuts.length>20) throw fehler('zu viele Bearbeitungen', 400);
+  const PRESET_OK = ['kabel','kabel80','armatur','usb','spuele','induktion','maschine'];
+  const z = (v, max=400) => { const x=+v; if(!isFinite(x)||x<0||x>max) throw fehler('Bearbeitung außerhalb des Bereichs', 400); return x; };
+  S.cuts = S.cuts.map(c => {
+    if(!c || typeof c!=='object' || !['r','c','p','k'].includes(c.t)) throw fehler('Bearbeitung unbekannt', 400);
+    const o = { t:c.t, cx:z(c.cx), cy:z(c.cy) };
+    if(c.preset!=null){ if(!PRESET_OK.includes(c.preset)) throw fehler('Vorlage unbekannt', 400); o.preset=c.preset; }
+    if(c.t==='c'){ o.d=z(c.d); o.w=o.h=o.d; }
+    else if(c.t==='r'){ o.w=z(c.w); o.h=z(c.h); if(c.r!=null) o.r=z(c.r,100); }
+    else if(c.t==='p'){ if(!Array.isArray(c.pts)||c.pts.length<3||c.pts.length>60) throw fehler('Kontur ungültig', 400);
+      o.pts=c.pts.map(pt=>{ if(!Array.isArray(pt)||pt.length<2) throw fehler('Kontur ungültig', 400); const a=+pt[0], b=+pt[1]; if(!isFinite(a)||!isFinite(b)||Math.abs(a)>400||Math.abs(b)>400) throw fehler('Kontur ungültig', 400); return [a,b]; });
+      if(c.r!=null) o.r=z(c.r,100); if(c.w!=null) o.w=z(c.w); if(c.h!=null) o.h=z(c.h); }
+    else { o.w=z(c.w,300); o.dp=z(c.dp,40); o.len=z(c.len); o.dir=c.dir==='quer'?'quer':'laengs'; o.seite=c.seite==='oben'?'oben':'unten'; o.enden=['zu','offen','links','rechts'].includes(c.enden)?c.enden:'zu'; }
+    return o;
+  });
   S.extras = Object.assign({bohr:false,custom:false,lack:false}, S.extras||{});
+  S.extras.bohr=!!S.extras.bohr; S.extras.lack=!!S.extras.lack;
   if(S.extras.custom) throw fehler('Eigene Skizze geht nur als Anfrage', 400);
-  if(!Array.isArray(S.edges)||S.edges.length!==4) S.edges=['abs','abs','abs','abs'];
-  if(!Array.isArray(S.cornerR)||S.cornerR.length!==4) S.cornerR=[0,0,0,0];
-  if(!Array.isArray(S.lfR)||S.lfR.length!==5) S.lfR=[0,0,0,0,0];
-  S.machine = String(S.machine||'').slice(0,120);
+  const EDGE_OK = ['abs','nicht','f45','fase','halbrund','roh','rund'];
+  if(!Array.isArray(S.edges)||S.edges.length!==4||!S.edges.every(e=>EDGE_OK.includes(e))) S.edges=['abs','abs','abs','abs'];
+  const rad = (a,n) => Array.isArray(a)&&a.length===n ? a.map(v=>{ const x=Math.round(+v||0); return isFinite(x)&&x>=0&&x<=300 ? x : 0; }) : new Array(n).fill(0);
+  S.cornerR = rad(S.cornerR,4); S.lfR = rad(S.lfR,5);
+  S.edgeR = [3,6,9].includes(+S.edgeR) ? +S.edgeR : 3;
+  S.mpxSurface = S.mpxSurface==='hpl' ? 'hpl' : 'natur';
+  S.absColor = String(S.absColor||'dekor').slice(0,20);
+  S.dekor = String(S.dekor||'').slice(0,40); S.thick = String(S.thick||'').slice(0,4);
+  if(!['none','laser','sticker'].includes(S.massband)) S.massband='none';
+  S.massbandNull = S.massbandNull==='rechts' ? 'rechts' : 'links';
+  if(!['48x18.1','52x18.1','61.7x18.1','auto'].includes(S.maschineMass)) S.maschineMass='52x18.1';
+  S.machine = String(S.machine||'').replace(/[\r\n]+/g,' ').slice(0,120);
   return S;
 }
 
@@ -271,11 +305,11 @@ export async function checkout(body, env, ctx){
     }],
     presentmentCurrencyCode: waehrung,
     shippingLine: versand,
-    tags: ['konfigurator', `kfg-${body.version||'?'}`, `sprache-${sprache}`],
-    note: `Konfigurator-Bestellung · ${body.url || ''}`,
+    tags: ['konfigurator', `kfg-${versionSauber(body.version)}`, `sprache-${sprache}`],
+    note: `Konfigurator-Bestellung · ${konfigUrl(body.url)}`,
     customAttributes: [
-      { key:'_kfg_config_url', value: String(body.url||'').slice(0,2000) },
-      { key:'_kfg_version', value: String(body.version||'') },
+      { key:'_kfg_config_url', value: konfigUrl(body.url) },
+      { key:'_kfg_version', value: versionSauber(body.version) },
       { key:'_kfg_sprache', value: sprache },
       { key:'_kfg_daten', value: base },
       ...(freigabeUrl ? [{ key:'_kfg_token', value: token }] : []),
@@ -290,6 +324,14 @@ export async function checkout(body, env, ctx){
   }
   return { checkoutUrl: draft.invoiceUrl, draftOrderId: draft.id, preis: c.total, waehrung };
 }
+
+/* Nur Links auf die eigenen Seiten landen in Notiz und Attributen — der Browser
+   koennte sonst beliebige Adressen in den Shopify-Auftrag schreiben. */
+function konfigUrl(u){
+  try{ const x = new URL(String(u||'')); if(x.protocol==='https:' && /^(www\.)?kessler-pro\.com$|^kessler-pro-com\.webflow\.io$/.test(x.hostname)) return x.href.slice(0,2000); }catch(e){}
+  return '';
+}
+function versionSauber(v){ return String(v||'?').replace(/[^0-9A-Za-z.\-]/g,'').slice(0,20) || '?'; }
 
 const ABLAUF_TEXT = {
   de: 'Nach dem Zahlungseingang bekommst du per E-Mail die technische Zeichnung deiner Platte. Bitte prüfe die Maße und bestätige sie über den Link — ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben, dann fertigen wir.',

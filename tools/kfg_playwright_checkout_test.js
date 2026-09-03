@@ -44,7 +44,7 @@ let ok=0, bad=[]; const check=(n,c,i)=>{ if(c) ok++; else bad.push(n+(i?' → '+
   await page.evaluate(()=>window.KFG.setConfig({mat:'dekor',dekor:'buk',thick:'25',form:'lform',lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'schraeg'},cuts:[],lfR:[50,0,0,0,0]}));
   check('L-Form: Jetzt bezahlen, Fertigung nach Mass', (await page.textContent('#cta')).trim()==='Jetzt bezahlen' && (await page.textContent('#delivDate'))==='Fertigung nach Maß', [await page.textContent('#cta'), await page.textContent('#delivDate')]);
   await page.click('#cta'); await page.waitForTimeout(1500);
-  check('POST an /checkout mit Konfiguration und Preis', post && post.konfig && post.konfig.form==='lform' && post.kanal==='eur' && Math.abs(post.preis-214.7)<0.005 && /kessler-pro-scripts|127\.0\.0\.1/.test(post.base||'x'), post && {preis:post.preis, base:post.base, form:post.konfig.form, lfR:post.konfig.lfR});
+  check('POST an /checkout mit Konfiguration und Preis', post && post.konfig && post.konfig.form==='lform' && post.kanal==='eur' && Math.abs(post.preis-229.7)<0.005 && /kessler-pro-scripts|127\.0\.0\.1/.test(post.base||'x'), post && {preis:post.preis, base:post.base, form:post.konfig.form, lfR:post.konfig.lfR});
   check('Weiterleitung zur checkoutUrl', /bezahlt\.html$/.test(page.url()), page.url());
   /* ④ Endpunkt kaputt → Rueckfall */
   await page.route('**/checkout', async r=>{ if(r.request().method()==='OPTIONS') return r.fulfill({status:204, headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST'}}); await new Promise(f=>setTimeout(f,1200)); r.fulfill({status:500, contentType:'application/json', headers:{'Access-Control-Allow-Origin':'*'}, body:'{"fehler":"kaputt"}'}); });

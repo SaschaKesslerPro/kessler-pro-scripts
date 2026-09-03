@@ -6,8 +6,8 @@
       "pl",
       "en"
     ],
-    "anzahl": 270,
-    "muster": 49
+    "anzahl": 273,
+    "muster": 52
   },
   "pl": {
     "Ab Lager": "Z magazynu",
@@ -279,7 +279,10 @@
     "Abstand von B zur Plattenkante · 0 = Schräge bis zur Kante": "Odległość punktu B od krawędzi blatu · 0 = skos aż do krawędzi",
     "5 bis 85° — zur Plattenkante": "5 do 85° — względem krawędzi blatu",
     "ABS-Kante geklebt": "krawędź ABS klejona",
-    "Kante ohne ABS": "krawędź bez ABS"
+    "Kante ohne ABS": "krawędź bez ABS",
+    "inkl. MwSt., kostenloser Versand": "z VAT, darmowa dostawa",
+    "Lagergröße versandkostenfrei · nach Maß 19,99 €": "Rozmiar magazynowy bez kosztów dostawy · na wymiar 84,90 zł",
+    "Versand Maßanfertigung (pauschal)": "Dostawa produktu na wymiar (ryczałt)"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -551,7 +554,10 @@
     "Abstand von B zur Plattenkante · 0 = Schräge bis zur Kante": "Distance from B to the edge of the top · 0 = bevel runs to the edge",
     "5 bis 85° — zur Plattenkante": "5 to 85° — relative to the edge of the top",
     "ABS-Kante geklebt": "glued ABS edge",
-    "Kante ohne ABS": "edge without ABS"
+    "Kante ohne ABS": "edge without ABS",
+    "inkl. MwSt., kostenloser Versand": "incl. VAT, free shipping",
+    "Lagergröße versandkostenfrei · nach Maß 19,99 €": "Stock size ships free · made to measure 19,99 €",
+    "Versand Maßanfertigung (pauschal)": "Shipping made-to-measure (flat rate)"
   },
   "muster": {
     "pl": [
@@ -750,6 +756,18 @@
       [
         "^Punkte A und B der Schräge werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
         "Punkty A i B skosu są zaokrąglane automatycznie: R$1 — $2 (zasada produkcji)."
+      ],
+      [
+        "^inkl\\. MwSt\\., zzgl\\. (.+) Versand$",
+        "z VAT, plus dostawa $1"
+      ],
+      [
+        "^Versand (.+) pauschal$",
+        "Dostawa $1 ryczałt"
+      ],
+      [
+        "^A/B R(\\d+) \\(Fertigungsregel\\)$",
+        "A/B R$1 (zasada produkcji)"
       ]
     ],
     "en": [
@@ -948,6 +966,18 @@
       [
         "^Punkte A und B der Schräge werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
         "Points A and B of the bevel are rounded automatically: R$1 — $2 (production rule)."
+      ],
+      [
+        "^inkl\\. MwSt\\., zzgl\\. (.+) Versand$",
+        "incl. VAT, plus $1 shipping"
+      ],
+      [
+        "^Versand (.+) pauschal$",
+        "Shipping $1 flat rate"
+      ],
+      [
+        "^A/B R(\\d+) \\(Fertigungsregel\\)$",
+        "A/B R$1 (production rule)"
       ]
     ]
   }

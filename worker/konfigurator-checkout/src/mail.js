@@ -17,6 +17,7 @@
    MAIL_KOPIE (optional, BCC intern). */
 
 export async function sendeMail(env, m){
+  m = Object.assign({}, m, { betreff: String(m.betreff||'').replace(/[\r\n]+/g,' ').slice(0,200) });   /* keine Header-Injektion ueber Namen */
   if(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) return sendeSmtp(env, m);
   if(env.RESEND_API_KEY) return sendeResend(env, m);
   return { uebersprungen:true, grund:'kein SMTP_HOST/SMTP_USER/SMTP_PASS und kein RESEND_API_KEY' };

@@ -32,7 +32,7 @@ NAMEN = [
   'massbandEintrag','massbandPreis','massbandName','massbandStrecke',
   'cutLen','cutPrice','cutBox','cutMass','cutTypName','presetCount','kanalLfmPreis','kanalPunkte','polyAbs',
   'maschineMass','maxTiefe','cutMinEdge','cutAbstaende','konturAbstand',
-  'cornerSum',
+  'cornerSum','lfAutoEcken','lfIstDiagonalEcke',
 ]
 
 lines = SRC.split('\n')

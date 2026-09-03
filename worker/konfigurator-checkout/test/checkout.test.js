@@ -32,7 +32,7 @@ check('Position: Titel, Preis, Waehrung', /Tischplatte nach Maß · Möbelplatte
 check('Attribute: Form & Maß mit Lage', li.customAttributes.some(a=>a.key==='Form & Maß' && /Ausklinkung 80 × 50 cm hinten rechts · gerade/.test(a.value)), li.customAttributes);
 check('Attribute: _kfg_preis-Aufteilung', li.customAttributes.some(a=>a.key==='_kfg_preis' && /Platte 170.90 .* Ausklinkung 28.90/.test(a.value)), li.customAttributes);
 check('Gewicht plausibel (1,8 m2 x 25 mm ≈ 31,5 kg)', li.weight.value>25 && li.weight.value<40, li.weight);
-check('Versand Sperrgut 24,90 (bis 42 kg) fuer 200x90', letzterAufruf.variables.input.shippingLine && letzterAufruf.variables.input.shippingLine.price==='24.90', letzterAufruf.variables.input.shippingLine);
+check('Versand Massanfertigung pauschal 19,99 fuer 200x90', letzterAufruf.variables.input.shippingLine && letzterAufruf.variables.input.shippingLine.price==='19.99' && /pauschal/.test(letzterAufruf.variables.input.shippingLine.title), letzterAufruf.variables.input.shippingLine);
 check('Rohdaten in Stuecken vollstaendig', (()=>{ const t=li.customAttributes.filter(a=>/^_kfg_konfig_\d$/.test(a.key)).sort((x,y)=>x.key.localeCompare(y.key)).map(a=>a.value).join(''); try{ const o=JSON.parse(t); return o.lf && o.lf.L===200; }catch(e){ return false; } })(), li.customAttributes.filter(a=>/_kfg_konfig/.test(a.key)).length);
 check('Widerruf + Lieferzeit als Attribut', li.customAttributes.some(a=>a.key==='Hinweis'&&/Widerruf/.test(a.value)) && li.customAttributes.some(a=>a.key==='Lieferzeit'), li.customAttributes.map(a=>a.key));
 check('Presentment EUR, Tags, Notiz', letzterAufruf.variables.input.presentmentCurrencyCode==='EUR' && letzterAufruf.variables.input.tags.includes('konfigurator') && /kfg-1\.17\.0/.test(letzterAufruf.variables.input.tags.join()), letzterAufruf.variables.input);
@@ -47,7 +47,7 @@ catch(e){ check('Manipulierter Preis abgelehnt (409)', e.status===409, e.message
 const L = { ...S, form:'rect', L:120, B:60, lf:{L:180,B:120,aw:90,ah:60,pos:null,schnitt:'gerade'} };
 r = await checkout({ kanal:'pln', sprache:'pl', preis:313.9, konfig:L }, env, null);
 check('Lager PL 313,90 zl', r.preis===313.9 && r.waehrung==='PLN' && letzterAufruf.variables.input.lineItems[0].originalUnitPriceWithCurrency.currencyCode==='PLN', r);
-check('Lager 120x60: Versand frei (bis 110x50? nein → Sperrgut PL 39,90)', letzterAufruf.variables.input.shippingLine.price==='39.90', letzterAufruf.variables.input.shippingLine);
+check('PL: Versand pauschal 84,90 zl', letzterAufruf.variables.input.shippingLine.price==='84.90' && /ryczałt/.test(letzterAufruf.variables.input.shippingLine.title), letzterAufruf.variables.input.shippingLine);
 check('Token nur einmal geholt (Cache)', tokenAufrufe===1, tokenAufrufe);
 check('Lager-SKU als Attribut', letzterAufruf.variables.input.lineItems[0].customAttributes.some(a=>a.key==='_kfg_lager_sku' && a.value==='5907255093892'));
 
@@ -62,7 +62,7 @@ check('Naehtisch: Maschine, Massband, Ecken, Bearbeitung', attr.some(a=>a.key===
 
 /* ④b kleine Platte 100x50: Versand frei */
 r = await checkout({ kanal:'eur', konfig:{ ...S, form:'rect', L:100, B:50 } }, env, null);
-check('100x50: kostenloser Versand', letzterAufruf.variables.input.shippingLine.price==='0.00' && /Kostenloser/.test(letzterAufruf.variables.input.shippingLine.title), letzterAufruf.variables.input.shippingLine);
+check('100x50 nach Mass: ebenfalls pauschal 19,99', letzterAufruf.variables.input.shippingLine.price==='19.99', letzterAufruf.variables.input.shippingLine);
 
 /* ⑤ Eigene Skizze → Anfrage */
 try{ await checkout({ kanal:'eur', konfig:{ ...S, extras:{bohr:false,custom:true,lack:false} } }, env, null); check('Skizze abgelehnt', false); }
@@ -71,6 +71,25 @@ catch(e){ check('Skizze → 400', e.status===400, e.message); }
 /* ⑥ Masse ausserhalb */
 try{ await checkout({ kanal:'eur', konfig:{ ...S, form:'rect', L:900 } }, env, null); check('Mass abgelehnt', false); }
 catch(e){ check('Mass 900 → 400', e.status===400, e.message); }
+
+/* ⑦ Sicherheitscheck 03.09.: Manipulationen am Client duerfen den Preis nicht druecken */
+const basis = { ...S, form:'rect', L:150, B:70, cuts:[] };
+r = await checkout({ kanal:'eur', konfig: basis }, env, null); const pBasis = r.preis;
+try{ await checkout({ kanal:'eur', konfig:{ ...basis, cuts:[{ t:'r', cx:50, cy:30, w:-80, h:-40 }] } }, env, null); check('negativer Ausschnitt abgelehnt', false); }
+catch(e){ check('negativer Ausschnitt → 400', e.status===400, e.message); }
+try{ await checkout({ kanal:'eur', konfig:{ ...basis, cuts:[{ t:'k', cx:50, cy:30, w:-9000, dp:-50, len:10 }] } }, env, null); check('negativer Kanal abgelehnt', false); }
+catch(e){ check('negativer Kanal → 400', e.status===400, e.message); }
+try{ await checkout({ kanal:'eur', konfig:{ ...basis, cuts:[{ t:'c', cx:50, cy:30, d:6, preset:'gratis' }] } }, env, null); check('unbekannte Vorlage abgelehnt', false); }
+catch(e){ check('unbekannte Vorlage → 400', e.status===400, e.message); }
+r = await checkout({ kanal:'eur', konfig:{ ...basis, cornerR:[-50,'x',1e9,30] } }, env, null);
+check('kaputte Radien werden bereinigt, Preis nicht kleiner als Basis', r.preis>=pBasis, { p:r.preis, pBasis });
+r = await checkout({ kanal:'eur', konfig:{ ...basis, edges:['gratis','abs','abs','abs'] } }, env, null);
+check('unbekanntes Kantenprofil → Vorgabe ABS', r.preis===pBasis, { p:r.preis, pBasis });
+r = await checkout({ kanal:'eur', version:'1.17.5"><script>', url:'https://boese.example/phish', base:'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@0000000', konfig: basis }, env, null);
+const inp = letzterAufruf.variables.input;
+check('fremde URL nicht in Notiz/Attribut', !/boese/.test(inp.note) && !inp.customAttributes.some(a=>/boese/.test(a.value)), inp.note);
+check('Version in Tags bereinigt', inp.tags.includes('kfg-1.17.5script'), inp.tags);
+check('Preisdaten aus dem Bundle, nicht vom Client', /^bundle /.test(inp.customAttributes.find(a=>a.key==='_kfg_daten').value), inp.customAttributes.find(a=>a.key==='_kfg_daten'));
 
 console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b=>console.log('  ✗', b));
 process.exit(bad.length?1:0);
