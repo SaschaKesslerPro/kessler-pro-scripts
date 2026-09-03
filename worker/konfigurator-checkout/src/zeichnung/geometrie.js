@@ -24,11 +24,16 @@ export function kontur(k) {
     if (lf.schraeg && sb > 0) { pts = [[0, 0], [L - aw, 0], [L - aw, sb], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
     else if (lf.schraeg) { pts = [[0, 0], [L - aw, 0], [L, ah], [L, B], [0, B]]; ord = [0, 1, 2, 3, 4]; }
     else { pts = [[0, 0], [L - aw, 0], [L - aw, ah], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
+    // Radius je Punkt: Innenecke = Fertigungsradius; bei der Schraege bekommen beide
+    // Endpunkte (A aussen, B innen) mindestens den Fertigungsradius (Senior 03.09.).
+    const radK = lf.radien || [], rmin = lf.innenradius || 0;
+    const diag = lf.schraeg ? (sb > 0 ? [2, 3] : [1, 2]) : [];
+    let rad = pts.map((_, i) => ord[i] < 0 ? rmin : (diag.indexOf(i) >= 0 ? Math.max(rmin, +radK[ord[i]] || 0) : (+radK[ord[i]] || 0)));
+    let auto = pts.map((_, i) => ord[i] < 0 || (diag.indexOf(i) >= 0 && (+radK[ord[i]] || 0) < rmin));   // Radius aus der Fertigungsregel
     const mx = lf.pos === 'hl' || lf.pos === 'vl', my = lf.pos === 'vr' || lf.pos === 'vl';
     pts = pts.map(([x, y]) => [mx ? L - x : x, my ? B - y : y]);
-    if (mx !== my) { pts.reverse(); ord.reverse(); }
-    const rad = lf.radien || [];
-    return pts.map(([x, y], i) => ({ x, y, r: ord[i] < 0 ? (lf.innenradius || 0) : (+rad[ord[i]] || 0), ord: ord[i] }));
+    if (mx !== my) { pts.reverse(); ord.reverse(); rad.reverse(); auto.reverse(); }
+    return pts.map(([x, y], i) => ({ x, y, r: rad[i], ord: ord[i], auto: auto[i] }));
   }
   const B = k.laenge_mm, H = k.breite_mm;
   return [
@@ -72,9 +77,9 @@ export function verrunden(pts) {
       const cm = { x: c.x + bis.x * (r / Math.sin(theta / 2)), y: c.y + bis.y * (r / Math.sin(theta / 2)) };
       const dIn = { x: c.x - p.x, y: c.y - p.y }, dOut = { x: q.x - c.x, y: q.y - c.y };
       const cross = dIn.x * dOut.y - dIn.y * dOut.x;
-      out.push({ ecke: c, t1, t2, r, c: cm, cross, sweep: Math.PI - theta, ord: c.ord });
+      out.push({ ecke: c, t1, t2, r, c: cm, cross, sweep: Math.PI - theta, ord: c.ord, auto: !!c.auto });
     } else {
-      out.push({ ecke: c, t1: { x: c.x, y: c.y }, t2: { x: c.x, y: c.y }, r: 0, c: null, cross: 0, sweep: 0, ord: c.ord });
+      out.push({ ecke: c, t1: { x: c.x, y: c.y }, t2: { x: c.x, y: c.y }, r: 0, c: null, cross: 0, sweep: 0, ord: c.ord, auto: !!c.auto });
     }
   }
   return out;

@@ -391,7 +391,7 @@ export function zeichnung(k, sprache) {
     const cx = e.ecke.x, cy = e.ecke.y;
     let dx = cx < B / 2 ? -1 : 1, dy = cy < H / 2 ? -1 : 1;
     if (e.ord < 0) { dx = notchRechts ? 1 : -1; dy = notchOben ? -1 : 1; }
-    const lbl = e.ord < 0 ? `R ${mm(e.r)}*` : `R ${mm(e.r)}`;
+    const lbl = (e.ord < 0 || e.auto) ? `R ${mm(e.r)}*` : `R ${mm(e.r)}`;   // * = Fertigungsregel
     s += txt(X(cx) + dx * 2.4, Y(cy) + dy * 2.4 + (dy > 0 ? 2.2 : 0),
       lbl, { size: 2.5, fill: F.mass, bold: true, anchor: dx > 0 ? 'start' : 'end' });
   }

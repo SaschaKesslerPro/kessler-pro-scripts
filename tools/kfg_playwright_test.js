@@ -69,8 +69,12 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'schraeg'}});
   check('L schraeg Summe 194,80', Math.abs(parseP(r.price)-194.8)<0.005, r.price);
   check('L schraeg Zeile 94 cm 23,90', r.rows.some(x=>/Ausklinkung schräg \(94 cm Schnitt\)/.test(x[0]) && parseP(x[1])===23.9), JSON.stringify(r.rows));
-  const winkel=await page.evaluate(()=>document.getElementById('inLW').value+'|'+document.getElementById('fLW').style.display+'|'+document.getElementById('lfInnerNote').style.display);
-  check('Winkelfeld sichtbar, 32°, Innenecken-Hinweis weg', winkel==='32||none', winkel);
+  const winkel=await page.evaluate(()=>document.getElementById('inLW').value+'|'+document.getElementById('fLW').style.display+'|'+document.getElementById('lfInnerNote').textContent);
+  check('Winkelfeld sichtbar, 32°, Hinweis A/B R50 (ABS)', /^32\|\|Punkte A und B der Schräge werden automatisch verrundet: R50 — ABS-Kante geklebt/.test(winkel), winkel);
+  r=await set({...clean, mat:'mpx',dekor:'sperrholz-natur',thick:'40',form:'lform', edges:['f45','f45','f45','f45'], lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'gerade'}});
+  check('Multiplex ohne ABS: Innenecke R10', /Innenecke wird automatisch verrundet: R10 — Kante ohne ABS/.test(await page.evaluate(()=>document.getElementById('lfInnerNote').textContent)), await page.evaluate(()=>document.getElementById('lfInnerNote').textContent));
+  r=await set({...clean, mat:'mpx',dekor:'sperrholz-natur',thick:'40',form:'lform', edges:['abs','abs','abs','abs'], lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'gerade'}});
+  check('Multiplex mit ABS: Innenecke R50', /R50 — ABS-Kante geklebt/.test(await page.evaluate(()=>document.getElementById('lfInnerNote').textContent)));
   const posChips=await page.evaluate(()=>[...document.querySelectorAll('#lfPosChips .kfg_chip')].map(b=>b.textContent+(b.classList.contains('is-active')?'*':'')).join(','));
   check('Lage-Chips: nur vorne, vorne links aktiv (v1.17.2)', posChips==='vorne rechts,vorne links*', posChips);
   /* Ecken je Ecke bei der L-Form */

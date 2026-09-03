@@ -9,7 +9,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.17.3';
+  var VERSION = '1.17.4';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -430,6 +430,11 @@ function lfSchraeg(){ return S.lf.schnitt==='schraeg'; }
    sb = Abstand von B zur Plattenkante (cm, entlang der Tiefe). 0 = B liegt auf
    der Kante, die Schraege geht durch (Stand bis v1.17.2). Damit sind Tiefe
    und Winkel der Ausklinkung unabhaengig: tan(Winkel) = (ah - sb) / aw. */
+/* Fertigungsradius der Ausklinkung (Senior 03.09.): alles, was mit PVC/ABS
+   geklebt ist, braucht an der Innenecke und bei der Schraege an A und B
+   mindestens R50; Platten ohne PVC (Multiplex roh/gefraest) und Compact R10.
+   Die L-Form traegt eine Kante umlaufend, darum genuegt edges[0]. In cm. */
+function lfMinR(){ return S.edges[0]==='abs' ? 5 : 1; }
 function lfSb(){ const ah=Math.max(1,Math.min(+S.lf.ah, +S.lf.B-1)); return lfSchraeg() ? Math.max(0, Math.min(Math.round(+S.lf.sb||0), ah-1)) : 0; }
 /* Kontur in Plattenkoordinaten (cm, Ursprung hinten links, y nach vorn), im
    Uhrzeigersinn. ord = Nummer der Aussenecke (0..4) oder -1 fuer die Innenecke.
@@ -443,10 +448,16 @@ function lfPts(){
   if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* A=(L,ah), B=(L-aw,sb) */
   else if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
   else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
+  /* Radius je Punkt (cm): Innenecke = Fertigungsradius; bei der Schraege bekommen
+     beide Endpunkte (A aussen, B innen) mindestens den Fertigungsradius, sonst
+     der vom Kunden gewaehlte Radius der Aussenecke. */
+  const rmin=lfMinR(), schr=lfSchraeg();
+  const diag=schr ? (sb>0 ? [2,3] : [1,2]) : [];
+  let rad=pts.map((_,i)=>ord[i]<0 ? rmin : (diag.indexOf(i)>=0 ? Math.max(rmin, lfCornerR(ord[i])/10) : lfCornerR(ord[i])/10));
   const mx=(pos==='hl'||pos==='vl'), my=(pos==='vr'||pos==='vl');
   pts=pts.map(([x,y])=>[mx?L-x:x, my?B-y:y]);
-  if(mx!==my){ pts.reverse(); ord.reverse(); }
-  return {pts, ord, L, B, aw, ah, pos, sb};
+  if(mx!==my){ pts.reverse(); ord.reverse(); rad.reverse(); }
+  return {pts, ord, rad, L, B, aw, ah, pos, sb};
 }
 /* Schnittlaenge (m) des L-Schnitts und Umfang (m) der fertigen Kontur */
 function lfGeo(){
@@ -733,11 +744,11 @@ function drawStage(){
       stroke="${edgeCol(S.edges[0])}" stroke-width="5"><title>Kante: ${edgeLabel(S.edges[0])}</title></circle>`;
     inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');
   } else if(S.form==='lform'){
-    const lg=lfPts(), ri=(S.mat==='dekor'?5:1)*sc;
-    /* Kontur aus Lage und Schnitt; jede Aussenecke mit ihrem eigenen Radius,
-       die Innenecke (nur beim geraden L) mit dem Fertigungsradius R50 / R10. */
+    const lg=lfPts();
+    /* Kontur aus Lage und Schnitt; Radien je Punkt aus lfPts (Kundenradius der
+       Aussenecke, Fertigungsradius an Innenecke und an A/B der Schraege). */
     const ptsL=lg.pts.map(([px,py])=>[x+px*sc, y+py*sc]);
-    const radL=lg.ord.map(o=>o<0 ? ri : Math.min(lfCornerR(o)/10*sc, pw/3, ph/3));
+    const radL=lg.rad.map(r=>Math.min(r*sc, pw/3, ph/3));
     const pd=roundPoly(ptsL, radL);
     inner+=`<clipPath id="plateClip"><path d="${pd}"/></clipPath>`;
     inner+=`<image href="${tex}" x="${x-pw*0.08}" y="${y-ph*0.08}" width="${pw*1.16}" height="${ph*1.16}" preserveAspectRatio="xMidYMid slice" clip-path="url(#plateClip)"/>`;
@@ -1208,11 +1219,11 @@ function plateShape(){
     sh.lineTo(x,y+ra); if(ra) sh.quadraticCurveTo(x,y,x+ra,y);
   } else { sh.moveTo(x,y); sh.lineTo(x+w,y); sh.lineTo(x+w,y+h); sh.lineTo(x,y+h); sh.closePath(); }
   if(S.form==='lform'){
-    const lg=lfPts(), L2=lg.L/10, B2=lg.B/10, ri=(S.mat==='dekor'?0.5:0.1);
+    const lg=lfPts(), L2=lg.L/10, B2=lg.B/10;
     const sh2=new THREE.Shape();
     /* Plattenkoordinaten (cm, y nach vorn) -> Shape (dm, y nach hinten), wie addCutHoles */
     const pts=lg.pts.map(([px,py])=>[-L2/2+px/10, B2/2-py/10]);
-    const rad=lg.ord.map(o=>o<0 ? ri : Math.min(lfCornerR(o)/100, L2/3, B2/3));
+    const rad=lg.rad.map(r=>Math.min(r/10, L2/3, B2/3));
     polyToShape(sh2, pts, rad);
     addCutHoles(sh2);
     return sh2;
@@ -1485,7 +1496,7 @@ function buildMassband(){
 function massbandStrecke(){
   if(S.mat!=='szwal'||S.massband==='none'||S.form==='round') return null;
   const d=dims(); let pts, rad;
-  if(S.form==='lform'){ const g=lfPts(); pts=g.pts; rad=g.ord.map(o=>o<0?0:lfCornerR(o)/10); }
+  if(S.form==='lform'){ const g=lfPts(); pts=g.pts; rad=g.rad.slice(); }
   else { pts=[[0,0],[d.w,0],[d.w,d.h],[0,d.h]]; rad=[0,1,2,3].map(i=>cornerR(i)/10); }
   const n=pts.length, e=1e-6; let best=null;
   for(let i=0;i<n;i++){ const j=(i+1)%n, a=pts[i], b=pts[j];
@@ -1579,7 +1590,10 @@ function buildLfControls(){
   const fs=$('fLS'); if(fs) fs.style.display=lfSchraeg()?'':'none';
   const iw=$('inLW'); if(iw && document.activeElement!==iw) iw.value=lfGeo().winkel;
   const is=$('inLS'); if(is && document.activeElement!==is) is.value=lfSb();
-  const note=$('lfInnerNote'); if(note) note.style.display=lfSchraeg()?'none':'';
+  const note=$('lfInnerNote'); if(note){ const r=lfMinR()*10, abs=S.edges[0]==='abs';
+    note.textContent=(lfSchraeg()
+      ? `Punkte A und B der Schräge werden automatisch verrundet: R${r} — ${abs?'ABS-Kante geklebt':'Kante ohne ABS'} (Fertigungsregel).`
+      : `Innenecke wird automatisch verrundet: R${r} — ${abs?'ABS-Kante geklebt':'Kante ohne ABS'} (Fertigungsregel).`); }
 }
 /* Schritt 05 haelt bei Naehtischplatten nur Montagebohrung und Maschinen-
    Ausschnitt bereit (Senior 30.07.) — Kuechenausschnitte, Kabeldurchlaesse,

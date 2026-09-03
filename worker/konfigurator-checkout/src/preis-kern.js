@@ -329,6 +329,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function lfSchraeg(){ return S.lf.schnitt==='schraeg'; }
 
+  function lfMinR(){ return S.edges[0]==='abs' ? 5 : 1; }
+
   function lfSb(){ const ah=Math.max(1,Math.min(+S.lf.ah, +S.lf.B-1)); return lfSchraeg() ? Math.max(0, Math.min(Math.round(+S.lf.sb||0), ah-1)) : 0; }
 
   function lfPts(){
@@ -339,10 +341,16 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* A=(L,ah), B=(L-aw,sb) */
     else if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
     else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
+    /* Radius je Punkt (cm): Innenecke = Fertigungsradius; bei der Schraege bekommen
+       beide Endpunkte (A aussen, B innen) mindestens den Fertigungsradius, sonst
+       der vom Kunden gewaehlte Radius der Aussenecke. */
+    const rmin=lfMinR(), schr=lfSchraeg();
+    const diag=schr ? (sb>0 ? [2,3] : [1,2]) : [];
+    let rad=pts.map((_,i)=>ord[i]<0 ? rmin : (diag.indexOf(i)>=0 ? Math.max(rmin, lfCornerR(ord[i])/10) : lfCornerR(ord[i])/10));
     const mx=(pos==='hl'||pos==='vl'), my=(pos==='vr'||pos==='vl');
     pts=pts.map(([x,y])=>[mx?L-x:x, my?B-y:y]);
-    if(mx!==my){ pts.reverse(); ord.reverse(); }
-    return {pts, ord, L, B, aw, ah, pos, sb};
+    if(mx!==my){ pts.reverse(); ord.reverse(); rad.reverse(); }
+    return {pts, ord, rad, L, B, aw, ah, pos, sb};
   }
 
   function lfGeo(){
@@ -386,7 +394,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function massbandStrecke(){
     if(S.mat!=='szwal'||S.massband==='none'||S.form==='round') return null;
     const d=dims(); let pts, rad;
-    if(S.form==='lform'){ const g=lfPts(); pts=g.pts; rad=g.ord.map(o=>o<0?0:lfCornerR(o)/10); }
+    if(S.form==='lform'){ const g=lfPts(); pts=g.pts; rad=g.rad.slice(); }
     else { pts=[[0,0],[d.w,0],[d.w,d.h],[0,d.h]]; rad=[0,1,2,3].map(i=>cornerR(i)/10); }
     const n=pts.length, e=1e-6; let best=null;
     for(let i=0;i<n;i++){ const j=(i+1)%n, a=pts[i], b=pts[j];

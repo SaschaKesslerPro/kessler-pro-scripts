@@ -90,17 +90,21 @@ export function konfigZuZeichnung(S, meta = {}) {
   }
   if (S.form === 'lform') {
     const g = K.lfGeo();
-    const innen = S.mat === 'dekor' ? 50 : 10;
+    /* Fertigungsradius nach Kante (Senior 03.09.): ABS/PVC geklebt R50, sonst R10 —
+       gilt an der Innenecke und bei der Schraege an A und B. */
+    const innen = S.edges[0] === 'abs' ? 50 : 10;
     k.lform = {
       L: cm(S.lf.L), B: cm(S.lf.B), aw: cm(S.lf.aw), ah: cm(S.lf.ah),
       pos: S.lf.pos || 'vr',   /* Vorgabe seit v1.17.2: vorne rechts (Senior 03.09.) */
       schraeg: !!g.schraeg, winkel: g.winkel,
       sb: g.schraeg ? cm(g.sb || 0) : 0,            /* Punkt B: Abstand zur Plattenkante (v1.17.3) */
-      innenradius: (g.schraeg && !(g.sb > 0)) ? 0 : innen,   /* Innenecke: beim geraden L und am Punkt B */
+      innenradius: innen,                          /* Innenecke bzw. Mindestradius an A und B */
       radien: (S.lfR || [0, 0, 0, 0, 0]).map((v) => +v || 0),
     };
-    if (!g.schraeg) hw(`Innenecke der Ausklinkung R ${innen} mm (Fertigungsregel)`, `Narożnik wewnętrzny wycięcia R ${innen} mm (zasada produkcji)`, `Inner corner of the notch R ${innen} mm (production rule)`);
-    else if (g.sb > 0) hw(`Schräge von A bis B, Punkt B ${cm(g.sb)} mm von der Plattenkante · Übergang bei B R ${innen} mm (Fertigungsregel)`, `Skos od A do B, punkt B ${cm(g.sb)} mm od krawędzi blatu · przejście w B R ${innen} mm (zasada produkcji)`, `Bevel from A to B, point B ${cm(g.sb)} mm from the edge · transition at B R ${innen} mm (production rule)`);
+    const kanteTxt = S.edges[0] === 'abs' ? ['ABS-Kante geklebt', 'krawędź ABS klejona', 'glued ABS edge'] : ['Kante ohne ABS', 'krawędź bez ABS', 'edge without ABS'];
+    if (!g.schraeg) hw(`Innenecke der Ausklinkung R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Narożnik wewnętrzny wycięcia R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Inner corner of the notch R ${innen} mm — ${kanteTxt[2]} (production rule)`);
+    else if (g.sb > 0) hw(`Schräge von A bis B, Punkt B ${cm(g.sb)} mm von der Plattenkante · A und B mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos od A do B, punkt B ${cm(g.sb)} mm od krawędzi blatu · A i B co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel from A to B, point B ${cm(g.sb)} mm from the edge · A and B at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
+    else hw(`Schräge durchgehend · Übergänge mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos na całej długości · przejścia co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel over the full depth · transitions at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
   }
 
   // Bearbeitungen (cm -> mm). Rechteck: x/y = Ecke hinten links des Ausschnitts.
