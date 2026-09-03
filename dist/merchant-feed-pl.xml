@@ -3,7 +3,7 @@
 <channel>
   <title>Kessler PRO — Produkty (PL/PLN)</title>
   <link>https://www.kessler-pro.com</link>
-  <description>Kessler PRO Produktfeed (generiert 2026-09-03 07:37 UTC)</description>
+  <description>Kessler PRO Produktfeed (generiert 2026-09-03 12:29 UTC)</description>
   <item>
     <g:id>10915009331546</g:id>
     <g:title>Compact-Tischplatte rund | Ø 130 cm | Schwarzer Marmor | 12 mm</g:title>
@@ -291,7 +291,6 @@
     <g:product_type>Blaty Compact</g:product_type>
     <g:google_product_category>6910</g:google_product_category>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a92a49353b434c02718591a_compact-rund-grau-winkel.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a92a49353b434c027185924_compact-rund-grau-kante.jpeg</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a92a427cd1cab63350d0542_compact-eckig-grau-material.jpeg</g:additional_image_link>
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O120</g:item_group_id>
@@ -880,7 +879,6 @@
     <g:google_product_category>6910</g:google_product_category>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a928a6edae089660df7151e_compact-eckig-weiss-winkel_8cfb8a6d-4940-43aa-b492-23604823522c.jpeg</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a928a6fdae089660df71526_compact-eckig-weiss-kante_ab3f9c64-1d9a-4842-a8e6-aba02db1eb7e.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a928a6edae089660df7151b_compact-eckig-weiss-material_a3230488-923c-4ddf-8894-b0f3f1ee7e11.jpeg</g:additional_image_link>
     <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-12mm-80x80</g:item_group_id>
     <g:shipping_weight>11 kg</g:shipping_weight>
@@ -5332,6 +5330,7 @@
     <g:product_type>Płyty meblowe</g:product_type>
     <g:google_product_category>6910</g:google_product_category>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e1867fe867e12d4e59148_5908453741813_2.jpeg</g:additional_image_link>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e1867fe867e12d4e5915e_5908453741813_3.jpeg</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e1867fe867e12d4e59135_5908453741813_4.jpeg</g:additional_image_link>
     <g:material>Płyta wiórowa laminowana melaminą</g:material>
     <g:color>Dąb</g:color>
@@ -7572,8 +7571,6 @@
     <g:product_type>Płyty meblowe</g:product_type>
     <g:google_product_category>6910</g:google_product_category>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a903bc154b9b3af7e283c82_5907255093809_2.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e169324b5eebef33aebe1_5907255093755_3.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e169324b5eebef33aebed_5907255093755_4.jpeg</g:additional_image_link>
     <g:material>Płyta wiórowa laminowana melaminą</g:material>
     <g:color>Klon</g:color>
     <g:item_group_id>PLATTE-25mm-70x70</g:item_group_id>
@@ -7769,7 +7766,6 @@
     <g:gtin>5907255093670</g:gtin>
     <g:product_type>Multiplex</g:product_type>
     <g:google_product_category>6910</g:google_product_category>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e166465d5bf00e0a37290_5907255093670_2.jpeg</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e166465d5bf00e0a37289_5907255093670_3.jpeg</g:additional_image_link>
     <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e166465d5bf00e0a37297_5907255093670_4.jpeg</g:additional_image_link>
     <g:material>Sklejka (multipleks)</g:material>
