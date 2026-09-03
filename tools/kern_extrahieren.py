@@ -76,7 +76,7 @@ fuss = '''
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,
            massbandStrecke, massbandName, cutPrice, cutMass, cutTypName, presetCount, cutAbstaende,
-           dekorList, ensureDekor, kanal, auf90 };
+           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR };
 }
 export { preisKern };
 '''

@@ -363,7 +363,8 @@ function attributeFuer(S, K, c, body, waehrung){
   add('Kante', (uniq.length===1 ? (KANTE_NAME[uniq[0]]||uniq[0]) : S.edges.map((e,i)=>'ABCD'[i]+': '+(KANTE_NAME[e]||e)).join(' · '))
     + (S.edges.includes('abs') && S.absColor && S.absColor!=='dekor' ? ` · ABS-Farbe ${S.absColor}` : '')
     + (S.extras.lack ? ' · lackiert' : ''));
-  if(K.cornerCount()>0) add('Ecken', K.cornerLabel());
+  { const na = K.lfAutoEcken ? K.lfAutoEcken() : 0, auto = na>0 ? `A/B R${K.lfMinR()*10} (Fertigungsregel)` : '';
+    if(K.cornerCount()>0 || na>0) add('Ecken', K.cornerCount()>0 ? `${K.cornerLabel()}${auto ? ' · ' + auto : ''}` : auto); }
   if(S.mat==='szwal'){
     const st = K.massbandStrecke();
     add('Maßband', K.massbandName() + (st ? ` · ${st.len} cm · Nullpunkt ${S.massbandNull||'links'}` : ''));
