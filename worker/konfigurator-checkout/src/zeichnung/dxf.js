@@ -124,7 +124,7 @@ export function dxf(k, opt = {}) {
       : `${t('kanten')} ${t('vorne')} / ${t('hinten')} / ${t('links')} / ${t('rechts')}: `
         + ['vorne', 'hinten', 'links', 'rechts'].map((x) => kv(kk[x])).join(' / ');
     const mass = rund ? `D ${B}` : k.form === 'lform'
-      ? `L ${B} x ${H}  ${t('ausklinkung')} ${k.lform.aw} x ${k.lform.ah} ${k.lform.pos}${k.lform.schraeg ? ` ${t('schraeg')} ${k.lform.winkel}deg` : ''}`
+      ? `L ${B} x ${H}  ${t('ausklinkung')} ${k.lform.aw} x ${k.lform.ah} ${k.lform.pos}${k.lform.schraeg ? ` ${t('schraeg')} ${k.lform.winkel}deg${k.lform.sb > 0 ? ` B ${k.lform.sb}` : ''}` : ''}`
       : `${B} x ${H}`;
     const zeilen = [
       `${k.zeichnungsnummer || ''} V${k.version || 1}   ${k.bestellnummer || ''}  ${t('position')} ${k.position || 1}`,

@@ -329,23 +329,27 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function lfSchraeg(){ return S.lf.schnitt==='schraeg'; }
 
+  function lfSb(){ const ah=Math.max(1,Math.min(+S.lf.ah, +S.lf.B-1)); return lfSchraeg() ? Math.max(0, Math.min(Math.round(+S.lf.sb||0), ah-1)) : 0; }
+
   function lfPts(){
     const L=+S.lf.L, B=+S.lf.B, pos=lfPos();
     const aw=Math.max(1,Math.min(+S.lf.aw, L-1)), ah=Math.max(1,Math.min(+S.lf.ah, B-1));
     let pts, ord;
-    if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
+    const sb=lfSb();
+    if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* A=(L,ah), B=(L-aw,sb) */
+    else if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
     else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
     const mx=(pos==='hl'||pos==='vl'), my=(pos==='vr'||pos==='vl');
     pts=pts.map(([x,y])=>[mx?L-x:x, my?B-y:y]);
     if(mx!==my){ pts.reverse(); ord.reverse(); }
-    return {pts, ord, L, B, aw, ah, pos};
+    return {pts, ord, L, B, aw, ah, pos, sb};
   }
 
   function lfGeo(){
     const g=lfPts(), L=g.L/100, B=g.B/100, aw=g.aw/100, ah=g.ah/100;
-    if(lfSchraeg()){ const s=Math.hypot(aw,ah);
-      return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:Math.round(Math.atan2(ah,aw)*180/Math.PI)}; }
-    return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:90};
+    if(lfSchraeg()){ const sb=g.sb/100, t=ah-sb, s=Math.hypot(aw,t)+sb;      /* Schraege A-B plus gerades Stueck B-Kante */
+      return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:Math.round(Math.atan2(t,aw)*180/Math.PI), sb:g.sb}; }
+    return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:90, sb:0};
   }
 
   function lfSchnittCm(){ return Math.round(lfGeo().schnitt*100); }
@@ -370,7 +374,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     const u=mx?px:g.L-px, v=my?g.B-py:py;          /* auf "hinten rechts" normiert: u vom Notch-Rand, v von hinten */
     if(u>g.aw||v>g.ah) return false;
     if(!lfSchraeg()) return true;
-    return v < g.ah*(1-u/g.aw);                    /* zwischen Ecke und Diagonale */
+    return v < g.sb + (g.ah-g.sb)*(1-u/g.aw);      /* zwischen Ecke und Schraege A-B (B bei Tiefe sb) */
   }
 
   function massbandEintrag(){ return MASSBAND.find(m=>m[0]===S.massband)||MASSBAND[0]; }

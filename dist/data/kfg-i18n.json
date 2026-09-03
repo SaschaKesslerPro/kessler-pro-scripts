@@ -1,920 +1,934 @@
 {
- "_meta": {
-  "name": "Kessler PRO — Konfigurator, Sprachdatei",
-  "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft.",
-  "sprachen": [
-   "pl",
-   "en"
-  ],
-  "anzahl": 265,
-  "muster": 46
- },
- "pl": {
-  "Ab Lager": "Z magazynu",
-  "Kante & Material im Detail": "Obrzeże i materiał w szczegółach",
-  "Vorschaubild": "Podgląd",
-  "Draufsicht, maßstabsgetreu · Kanten und Ecken anklickbar": "Widok z góry, w skali · krawędzie i narożniki klikalne",
-  "Draufsicht, maßstabsgetreu · Kanten anklickbar": "Widok z góry, w skali · krawędzie klikalne",
-  "Dein Preis": "Twoja cena",
-  "Preis ab (zzgl. Sonderarbeiten)": "Cena od (bez prac dodatkowych)",
-  "inkl. MwSt., kostenloser Versand bis 120 cm": "z VAT, darmowa wysyłka do 120 cm",
-  "Preis-Aufschlüsselung": "Rozbicie ceny",
-  "Deine Konfiguration": "Twoja konfiguracja",
-  "In den Warenkorb": "Do koszyka",
-  "Unverbindlich anfragen": "Zapytaj niezobowiązująco",
-  "Manufaktur seit 1897": "Manufaktura od 1897",
-  "CNC-präzise Kanten": "Krawędzie cięte CNC",
-  "Versand bis 120 cm gratis": "Wysyłka do 120 cm gratis",
-  "Konfiguration teilen": "Udostępnij konfigurację",
-  "Per E-Mail senden": "Wyślij e-mailem",
-  "Versand bis ": "Wysyłka do ",
-  "DHL, ab Lager": "DHL, z magazynu",
-  "Angebot in 24 h": "Oferta w 24 h",
-  "Versandkosten im Angebot": "Koszty wysyłki w ofercie",
-  "Fertigung · Angebot in 24 h": "Produkcja · oferta w 24 h",
-  "im Angebot": "w ofercie",
-  "Ab Lager · lieferbar in 3 bis 5 Tagen": "Z magazynu · wysyłka w 3 do 5 dni",
-  "Individuelle Fertigung · Angebot in 24 h": "Produkcja indywidualna · oferta w 24 h",
-  "CNC-Fertigung · Preis steht fest": "Produkcja CNC · cena ustalona",
-  "CNC-Fertigung nach Maß": "Produkcja CNC na wymiar",
-  "Material & Dekor": "Materiał i dekor",
-  "Oberfläche": "Powierzchnia",
-  "Birke natur": "Brzoza natura",
-  "geschliffen": "szlifowana",
-  "HPL-Laminat": "Laminat HPL",
-  "alle Dekore": "wszystkie dekory",
-  "Klarlack": "Lakier bezbarwny",
-  "Angebot": "Oferta",
-  "ABS-Kantenfarbe": "Kolor obrzeża ABS",
-  "Unsicher beim Dekor?": "Nie wiesz, jaki dekor?",
-  "Musterbox mit 4 Dekoren — 4,90 €, voll angerechnet beim Kauf": "Zestaw 4 próbek — 4,90 €, w całości odliczane przy zakupie",
-  "Muster bestellen": "Zamów próbki",
-  "Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind für 18 und 25 mm verfügbar.": "Oryginalne zdjęcia produktów z archiwum Kessler. Kolorowe obrzeża ABS są dostępne dla 18 i 25 mm.",
-  "Auf Multiplex lässt sich jedes Laminat unserer Möbelplatten-Palette aufkleben, die Kante bleibt sichtbare Birkenschicht.": "Na sklejkę można nakleić każdy laminat z naszej palety płyt meblowych, krawędź pozostaje widoczną warstwą brzozy.",
-  "Form": "Kształt",
-  "Rechteck": "Prostokąt",
-  "Rund": "Okrągły",
-  "L-Form": "Kształt L",
-  "Nähmaschinen-Platte": "Blat pod maszynę do szycia",
-  "Ecken abrunden": "Zaokrąglij narożniki",
-  "Radius je Ecke": "Promień dla każdego narożnika",
-  "Maß": "Wymiar",
-  "Länge": "Długość",
-  "Breite": "Szerokość",
-  "Höhe": "Wysokość",
-  "Durchmesser Ø": "Średnica Ø",
-  "Gesamtlänge": "Długość całkowita",
-  "Gesamtbreite": "Szerokość całkowita",
-  "Ausklinkung Breite": "Szerokość wycięcia",
-  "Ausklinkung Tiefe": "Głębokość wycięcia",
-  "Innenecke wird automatisch verrundet: R50 bei Möbelplatte · R10 bei Multiplex & Compact (Fertigungsregel).": "Narożnik wewnętrzny jest zaokrąglany automatycznie: R50 przy płycie meblowej · R10 przy sklejce i compact (reguła produkcji).",
-  "Plattenbreite": "Szerokość płyty",
-  "Plattentiefe": "Głębokość płyty",
-  "Maschinen-Ausschnitt (Tiefe 18 cm)": "Wycięcie pod maszynę (głębokość 18 cm)",
-  "Standardmaße —": "Wymiary standardowe —",
-  "jedes andere Maß ist möglich": "każdy inny wymiar jest możliwy",
-  "Ab Lager — sofort lieferbar:": "Z magazynu — od ręki:",
-  "Richtig messen — so geht's": "Jak mierzyć poprawnie",
-  "Miss die gewünschte Fläche an der breitesten Stelle und rechne bei Wandmontage 5 mm Luft ein. Bei Gestellen: Plattenüberstand 5–15 cm je Seite einplanen. Unsicher? Ruf uns an — wir prüfen dein Maß kostenlos vor der Fertigung.": "Zmierz powierzchnię w najszerszym miejscu, a przy montażu do ściany doliczy 5 mm luzu. Przy stelażach zaplanuj 5 do 15 cm nawisu płyty na stronę. Nie masz pewności? Zadzwoń — sprawdzimy Twój wymiar bezpłatnie przed produkcją.",
-  "Größen": "Rozmiary",
-  "Stärke & Kante": "Grubość i obrzeże",
-  "Kantenprofil": "Profil obrzeża",
-  "Rundungsradius der Kante": "Promień zaokrąglenia krawędzi",
-  "ABS-Kante 2 mm · R2": "Obrzeże ABS 2 mm · R2",
-  "serienmäßig": "w standardzie",
-  "Multiplex: sichtbare Birkenschichtkante — leicht gefast ist serienmäßig. 45° gefräst oder halbrund gegen Aufpreis; Seiten auf Wunsch mit ABS oder klarlackiert (Angebot).": "Sklejka: widoczna warstwowa krawędź brzozy — lekka faza w standardzie. Faza 45° lub półokrągła za dopłatą; boki na życzenie z ABS lub lakierowane bezbarwnie (oferta).",
-  "Tipp: Klicke in der 2D-Vorschau direkt auf eine Kante, um sie einzeln zu ändern.": "Wskazówka: kliknij krawędź w podglądzie 2D, aby zmienić ją pojedynczo.",
-  "Ausschnitte & Bohrungen": "Wycięcia i otwory",
-  "Bohrungen & Durchlässe": "Otwory i przepusty",
-  "Montagebohrungen 4× Ø8": "Otwory montażowe 4× Ø8",
-  "vorgebohrt für gängige Gestelle": "nawiercone pod typowe stelaże",
-  "Kabeldurchlass Ø60": "Przepust kablowy Ø60",
-  "Kabeldurchlass Ø80": "Przepust kablowy Ø80",
-  "inkl. Abdeckung, frei positionierbar": "z zaślepką, dowolne położenie",
-  "Armaturenbohrung Ø35": "Otwór pod armaturę Ø35",
-  "für Armatur oder Kabeldose": "pod armaturę lub puszkę kablową",
-  "Küchen-Ausschnitte": "Wycięcia kuchenne",
-  "Steckdosen-Ausschnitt": "Wycięcie pod gniazdo",
-  "26,5 × 10 cm, für USB oder Steckdose": "26,5 × 10 cm, pod USB lub gniazdo",
-  "Spülen-Ausschnitt": "Wycięcie pod zlew",
-  "78 × 43 cm, Küchen-Arbeitsplatte": "78 × 43 cm, blat kuchenny",
-  "Induktionsfeld-Ausschnitt": "Wycięcie pod płytę indukcyjną",
-  "56 × 49 cm, Küchen-Arbeitsplatte": "56 × 49 cm, blat kuchenny",
-  "Individuelle Bearbeitung": "Obróbka indywidualna",
-  "Eigenes Bohrbild": "Własny układ otworów",
-  "frei nach deiner Vorgabe, CNC-gefräst": "dowolnie według Twojego rysunku, frezowane CNC",
-  "Skizze oder Zeichnung hochladen": "Wgraj szkic lub rysunek",
-  "PDF, Foto, DXF — oder einfach später per E-Mail an uns schicken": "PDF, zdjęcie, DXF — albo po prostu prześlij nam później e-mailem",
-  "Mit eigener Skizze wird deine Platte individuell gefertigt — verbindliches Angebot in 24 h.": "Z własnym szkicem Twoja płyta powstaje indywidualnie — wiążąca oferta w 24 h.",
-  "Frei gestalten": "Zaprojektuj dowolnie",
-  "In der Vorschau aufziehen oder hinzufügen — danach jede Position auf den Millimeter genau einstellbar. Der Preis wird sofort berechnet.": "Rozciągnij w podglądzie albo dodaj — potem ustawisz każdą pozycję co do milimetra. Cena liczy się od razu.",
-  "Ausschnitt": "Wycięcie",
-  "Runder Ausschnitt": "Wycięcie okrągłe",
-  "Freie Kontur": "Dowolny kontur",
-  "Kabelkanal fräsen": "Frezuj kanał kablowy",
-  "Kabelkanal": "Kanał kablowy",
-  "Zeichnen-Modus: In der Vorschau aufziehen.": "Tryb rysowania: rozciągnij w podglądzie.",
-  "Kanalbreite": "Szerokość kanału",
-  "Frästiefe": "Głębokość frezowania",
-  "Richtung": "Kierunek",
-  "längs (links → rechts)": "wzdłuż (od lewej do prawej)",
-  "quer (hinten → vorne)": "w poprzek (od tyłu do przodu)",
-  "Seite": "Strona",
-  "Oberseite": "Wierzch",
-  "Unterseite": "Spód",
-  "Enden": "Zakończenia",
-  "Radius": "Promień",
-  "X ab links": "X od lewej",
-  "Y ab hinten": "Y od tyłu",
-  "Anfang an der Kante": "Początek przy krawędzi",
-  "Ende an der Kante": "Koniec przy krawędzi",
-  "beide an der Kante": "oba przy krawędzi",
-  "geschlossen": "zamknięte",
-  "Zu klein: mindestens 3 cm": "Za mało: co najmniej 3 cm",
-  "Zu klein: mindestens 3 cm aufziehen": "Za mało: rozciągnij na co najmniej 3 cm",
-  "Zu kurz: mindestens 5 cm": "Za krótko: co najmniej 5 cm",
-  "Ziehe den Ausschnitt in der Vorschau auf": "Rozciągnij wycięcie w podglądzie",
-  "Weitere Punkte klicken · Doppelklick schließt die Kontur": "Klikaj kolejne punkty · dwuklik zamyka kontur",
-  "Doppelklick schließt": "dwuklik zamyka",
-  "weiter klicken": "klikaj dalej",
-  "3D-Ansicht konnte nicht geladen werden": "Nie udało się wczytać widoku 3D",
-  "Möbelplatte: Außenradius mind. R30, angepasst": "Płyta meblowa: promień zewnętrzny min. R30, dopasowano",
-  "Möbelplatte (ABS-Kante): Außenradien mind. R30. Kleinere Radien sind fertigungstechnisch nicht möglich.": "Płyta meblowa (obrzeże ABS): promienie zewnętrzne min. R30. Mniejsze promienie nie są możliwe technologicznie.",
-  "Ausklinkungen aktuell nur beim Rechteck": "Wycięcia narożne obecnie tylko przy prostokącie",
-  "Kabelkanal aktuell nur bei eckigen Formen": "Kanał kablowy obecnie tylko przy kształtach kanciastych",
-  "Kabelkanal hinzugefügt — Länge, Breite und Lage stellst du unten ein": "Dodano kanał kablowy — długość, szerokość i położenie ustawisz poniżej",
-  "Innenradius mindestens R5 (Fräserdurchmesser)": "Promień wewnętrzny co najmniej R5 (średnica frezu)",
-  "Tiefer als 60 % der Platte — bitte vorher anfragen": "Głębiej niż 60 % płyty — prosimy o wcześniejsze zapytanie",
-  "So kommt deine Bestellung bei uns an": "Tak trafia do nas Twoje zamówienie",
-  "Demo · interne Ansicht": "Demo · widok wewnętrzny",
-  "Fertigungszeichnung — automatisch aus der Konfiguration erzeugt (inkl. Ausschnitt-Abstände)": "Rysunek produkcyjny — generowany automatycznie z konfiguracji (z odstępami wycięć)",
-  "Weiß": "Biały",
-  "Alaska Weiß": "Alaska biały",
-  "Kiefer Weiß": "Sosna bielona",
-  "Kaschmir": "Kaszmir",
-  "Grau": "Szary",
-  "Asche Grau": "Popielaty",
-  "Dunkelgrau": "Ciemnoszary",
-  "Schwarz": "Czarny",
-  "Ahorn": "Klon",
-  "Buche": "Buk",
-  "Eiche Sonoma": "Dąb sonoma",
-  "Eiche Artison": "Dąb artison",
-  "Eiche Hickory": "Dąb hikora",
-  "Weißer Marmor": "Biały marmur",
-  "Schwarzer Marmor": "Czarny marmur",
-  "Grün": "Zielony",
-  "Rot": "Czerwony",
-  "Gelb": "Żółty",
-  "Blau": "Niebieski",
-  "Dekorgleich": "Zgodny z dekorem",
-  "Standard": "Standard",
-  "Möbelplatte": "Płyta meblowa",
-  "Multiplex Birke": "Sklejka brzozowa",
-  "Compact / HPL": "Compact / HPL",
-  "hinten": "z tyłu",
-  "rechts": "z prawej",
-  "vorne": "z przodu",
-  "links": "z lewej",
-  "Kante": "Krawędź",
-  "Ecke": "narożnik",
-  "Leicht gefast": "Lekko fazowana",
-  "Gefast 45°": "Faza 45°",
-  "Halbrund": "Półokrągła",
-  "Geschliffen": "Szlifowana",
-  "optional": "opcjonalnie",
-  "Lagerartikel": "Artykuł magazynowy",
-  "ABS-Kante 2 mm": "Obrzeże ABS 2 mm",
-  "ABS-Kante": "Obrzeże ABS",
-  "Größen ab Lager": "rozmiarów z magazynu",
-  "18/25/36 mm": "18/25/36 mm",
-  "Eck-Ausklinkung": "wycięcie narożne",
-  "hinten links": "z tyłu po lewej",
-  "hinten rechts": "z tyłu po prawej",
-  "vorne rechts": "z przodu po prawej",
-  "vorne links": "z przodu po lewej",
-  "Gesamt inkl. MwSt.": "Razem z VAT",
-  "Eckig": "Ostry",
-  "alle Ecken": "wszystkie narożniki",
-  "alle vier": "wszystkie cztery",
-  "gemischt": "mieszane",
-  "inklusive": "w cenie",
-  "Kanten je Seite": "Krawędzie osobno dla każdego boku",
-  "Vorschau der konfigurierten Tischplatte": "Podgląd skonfigurowanego blatu",
-  "Weniger": "Mniej",
-  "Mehr": "Więcej",
-  "Schließen": "Zamknij",
-  "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Opisz krótko, czego potrzebujesz — np. „wycięcie narożne 20×15 cm z tyłu po lewej”.",
-  ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", podobnie wycięcie narożne i wycięcie w kształcie U: podaj je w kroku 05 w polu „Własny układ otworów / szkic”. Produkcja ze sklejki, laminatu i obrzeża ABS.",
-  "Nähtischplatte": "Blat pod maszynę do szycia",
-  "ab 89 € · 21 mm · 4 Farben": "od 89 € · 21 mm · 4 kolory",
-  "Gewebestruktur Weiß": "Biały ze strukturą tkaniny",
-  "Nicht gefräst": "Bez frezowania",
-  "Gefräst 45°": "Frezowana 45°",
-  "+ 5 €/lfm": "+ 5 €/mb",
-  "+ 10 €/lfm": "+ 10 €/mb",
-  "+ 16 €/lfm": "+ 16 €/mb",
-  "Kante natur, aber lackiert": "Krawędź naturalna, ale lakierowana",
-  "unsere Lackierung, seidenmatt — schützt die offene Schichtkante": "nasz lakier, satynowy — chroni odsłoniętą krawędź warstwową",
-  "Kante lackiert": "Krawędź lakierowana",
-  "Maßband an der Vorderkante": "Miarka na przedniej krawędzi",
-  "Kein Maßband": "Bez miarki",
-  "Maßband gelasert": "Miarka wypalana laserem",
-  "Aufkleberkante": "Miarka naklejana",
-  "+ 15 €": "+ 15 €",
-  "+ 10 €": "+ 10 €",
-  "Ausschnitt für die Maschine": "Wycięcie pod maszynę",
-  "Maße musst du keine angeben — sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Nie musisz podawać wymiarów — wystarczy, że napiszesz, jaka maszyna ma zostać wpuszczona, wycięcie dopasujemy my. Miejsce ustalasz sam: przesuń wycięcie w podglądzie, odległości od wszystkich czterech krawędzi pokazują się obok.",
-  "Nähmaschine — Hersteller und Modell": "Maszyna do szycia — producent i model",
-  "z. B. Bernina 770 QE oder Juki TL-2200": "np. Bernina 770 QE lub Juki TL-2200",
-  "Maschinen-Ausschnitt hinzufügen": "Dodaj wycięcie pod maszynę",
-  "Maschinen-Ausschnitt entfernen": "Usuń wycięcie pod maszynę",
-  "im Plattenpreis": "w cenie blatu",
-  "Maßband": "Miarka",
-  "Nähmaschine": "Maszyna do szycia",
-  "— vom Kunden noch nicht angegeben —": "— klient jeszcze nie podał —",
-  "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "z VAT, darmowa wysyłka do 110 × 50 cm",
-  "Versand bis 110 × 50 cm gratis": "Wysyłka do 110 × 50 cm gratis",
-  "Kantenbearbeitung": "Obróbka krawędzi",
-  "Kantenbearbeitung, lackiert": "Obróbka krawędzi, lakierowana",
-  "+ 8 €/lfm": "+ 8 €/mb",
-  "auf Anfrage": "na zapytanie",
-  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Widoczna krawędź warstwowa: bez frezowania w standardzie, frezowana 45° kosztuje 5 €/mb, półokrągła 8 €/mb. Lakierowane to 5, 10 i 16 €/mb — mamy dokładnie jeden lakier. Alternatywnie obrzeże ABS w wybranym kolorze.",
-  "Lage der Ausklinkung": "Położenie wycięcia",
-  "Schnitt": "Cięcie",
-  "Gerade": "Proste",
-  "Schräg": "Skośne",
-  "Winkel der Schräge": "Kąt skosu",
-  "5 bis 85° — zur hinteren Kante": "5 do 85° — względem tylnej krawędzi",
-  "Ausklinkung": "wycięcie",
-  "schräg": "skośne",
-  "alle fünf": "wszystkie pięć",
-  "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym nie ma narożnika wewnętrznego.",
-  "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Narożnik wewnętrzny jest zaokrąglany automatycznie według reguły produkcji.",
-  "Liegt in der Ausklinkung — bitte verschieben": "Leży w wycięciu — przesuń",
-  "Nullpunkt links": "Zero po lewej",
-  "Nullpunkt rechts": "Zero po prawej",
-  "Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.": "Miarka naklejana siedzi na czole przedniej krawędzi — w widoku z góry zaznaczona tylko linią, widoczna w widoku 3D.",
-  "Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.": "Miarka wypalana laserem leży na wierzchu wzdłuż przedniej krawędzi.",
-  "Es ist höchstens 100 cm lang und endet vor den Eckradien.": "Ma najwyżej 100 cm długości i kończy się przed zaokrągleniami narożników.",
-  "Maßband auf der Kante": "Miarka na krawędzi",
-  "Maß des Ausschnitts": "Wymiar wycięcia",
-  "Nach Maschine": "Według maszyny",
-  "wir messen": "zmierzymy",
-  "+ 40,00 € pauschal": "+ 40,00 € ryczałt",
-  "Standardmaß": "wymiar standardowy",
-  "Wähle ein Standardmaß oder lass uns nach deiner Maschine messen — Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Wybierz wymiar standardowy albo pozwól nam zmierzyć według Twojej maszyny — producenta i model potrzebujemy w każdym przypadku. Miejsce wycięcia ustalasz sam: przesuń je w podglądzie, odległości od wszystkich czterech krawędzi pokazują się obok.",
-  "ab 19,90 € · 18/25/36 mm": "od 19,90 € · 18/25/36 mm",
-  "ab 69 € · 12 mm": "od 69 € · 12 mm",
-  "ab 29,90 € · 21/40 mm · alle Dekore": "od 29,90 € · 21/40 mm · wszystkie dekory",
-  "Ecken": "narożniki",
-  "Sondermaß": "Wymiar niestandardowy",
-  "Jetzt bezahlen": "Zapłać teraz",
-  "Fertigung nach Maß": "Produkcja na wymiar",
-  "Versandkosten im Checkout": "Koszt wysyłki w kasie",
-  "Nach Maß gefertigt": "Wykonane na wymiar",
-  "Warenkorb wird vorbereitet …": "Przygotowujemy koszyk …",
-  "Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail": "Płatność chwilowo niedostępna — przyjmiemy Twoje zapytanie e-mailem"
- },
- "en": {
-  "Ab Lager": "From stock",
-  "Kante & Material im Detail": "Edge & material in detail",
-  "Vorschaubild": "Preview image",
-  "Draufsicht, maßstabsgetreu · Kanten und Ecken anklickbar": "Top view, to scale · edges and corners are clickable",
-  "Draufsicht, maßstabsgetreu · Kanten anklickbar": "Top view, to scale · edges are clickable",
-  "Dein Preis": "Your price",
-  "Preis ab (zzgl. Sonderarbeiten)": "Price from (excl. special work)",
-  "inkl. MwSt., kostenloser Versand bis 120 cm": "incl. VAT, free shipping up to 120 cm",
-  "Preis-Aufschlüsselung": "Price breakdown",
-  "Deine Konfiguration": "Your configuration",
-  "In den Warenkorb": "Add to cart",
-  "Unverbindlich anfragen": "Request a quote",
-  "Manufaktur seit 1897": "Workshop since 1897",
-  "CNC-präzise Kanten": "CNC-precise edges",
-  "Versand bis 120 cm gratis": "Free shipping up to 120 cm",
-  "Konfiguration teilen": "Share configuration",
-  "Per E-Mail senden": "Send by email",
-  "Versand bis ": "Delivery by ",
-  "DHL, ab Lager": "DHL, from stock",
-  "Angebot in 24 h": "Quote within 24 h",
-  "Versandkosten im Angebot": "Shipping costs in the quote",
-  "Fertigung · Angebot in 24 h": "Production · quote within 24 h",
-  "im Angebot": "in the quote",
-  "Ab Lager · lieferbar in 3 bis 5 Tagen": "In stock · ships in 3 to 5 days",
-  "Individuelle Fertigung · Angebot in 24 h": "Custom production · quote within 24 h",
-  "CNC-Fertigung · Preis steht fest": "CNC production · price is fixed",
-  "CNC-Fertigung nach Maß": "CNC production made to measure",
-  "Material & Dekor": "Material & decor",
-  "Oberfläche": "Surface",
-  "Birke natur": "Natural birch",
-  "geschliffen": "sanded",
-  "HPL-Laminat": "HPL laminate",
-  "alle Dekore": "all decors",
-  "Klarlack": "Clear lacquer",
-  "Angebot": "Quote",
-  "ABS-Kantenfarbe": "ABS edge colour",
-  "Unsicher beim Dekor?": "Unsure about the decor?",
-  "Musterbox mit 4 Dekoren — 4,90 €, voll angerechnet beim Kauf": "Sample box with 4 decors — €4.90, fully credited against your purchase",
-  "Muster bestellen": "Order samples",
-  "Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind für 18 und 25 mm verfügbar.": "Original product photos from the Kessler archive. Coloured ABS edges are available for 18 and 25 mm.",
-  "Auf Multiplex lässt sich jedes Laminat unserer Möbelplatten-Palette aufkleben, die Kante bleibt sichtbare Birkenschicht.": "Any laminate from our furniture board range can be bonded to plywood; the edge stays visible birch.",
-  "Form": "Shape",
-  "Rechteck": "Rectangle",
-  "Rund": "Round",
-  "L-Form": "L-shape",
-  "Nähmaschinen-Platte": "Sewing machine top",
-  "Ecken abrunden": "Round the corners",
-  "Radius je Ecke": "Radius per corner",
-  "Maß": "Size",
-  "Länge": "Length",
-  "Breite": "Width",
-  "Höhe": "Height",
-  "Durchmesser Ø": "Diameter Ø",
-  "Gesamtlänge": "Overall length",
-  "Gesamtbreite": "Overall width",
-  "Ausklinkung Breite": "Notch width",
-  "Ausklinkung Tiefe": "Notch depth",
-  "Innenecke wird automatisch verrundet: R50 bei Möbelplatte · R10 bei Multiplex & Compact (Fertigungsregel).": "The inner corner is rounded automatically: R50 on furniture board · R10 on plywood and compact (production rule).",
-  "Plattenbreite": "Board width",
-  "Plattentiefe": "Board depth",
-  "Maschinen-Ausschnitt (Tiefe 18 cm)": "Machine cut out (18 cm deep)",
-  "Standardmaße —": "Standard sizes —",
-  "jedes andere Maß ist möglich": "any other size is possible",
-  "Ab Lager — sofort lieferbar:": "From stock — available now:",
-  "Richtig messen — so geht's": "How to measure correctly",
-  "Miss die gewünschte Fläche an der breitesten Stelle und rechne bei Wandmontage 5 mm Luft ein. Bei Gestellen: Plattenüberstand 5–15 cm je Seite einplanen. Unsicher? Ruf uns an — wir prüfen dein Maß kostenlos vor der Fertigung.": "Measure the area at its widest point and allow 5 mm of play for wall mounting. With frames, plan an overhang of 5 to 15 cm per side. Not sure? Call us — we check your measurements free of charge before production.",
-  "Größen": "Sizes",
-  "Stärke & Kante": "Thickness & edge",
-  "Kantenprofil": "Edge profile",
-  "Rundungsradius der Kante": "Edge rounding radius",
-  "ABS-Kante 2 mm · R2": "ABS edge 2 mm · R2",
-  "serienmäßig": "as standard",
-  "Multiplex: sichtbare Birkenschichtkante — leicht gefast ist serienmäßig. 45° gefräst oder halbrund gegen Aufpreis; Seiten auf Wunsch mit ABS oder klarlackiert (Angebot).": "Plywood: visible layered birch edge — a light chamfer comes as standard. A 45° chamfer or half round costs extra; sides with ABS or clear lacquer on request (quote).",
-  "Tipp: Klicke in der 2D-Vorschau direkt auf eine Kante, um sie einzeln zu ändern.": "Tip: click an edge directly in the 2D preview to change it on its own.",
-  "Ausschnitte & Bohrungen": "Cut outs & holes",
-  "Bohrungen & Durchlässe": "Holes & cable ports",
-  "Montagebohrungen 4× Ø8": "Mounting holes 4× Ø8",
-  "vorgebohrt für gängige Gestelle": "pre-drilled for common frames",
-  "Kabeldurchlass Ø60": "Cable port Ø60",
-  "Kabeldurchlass Ø80": "Cable port Ø80",
-  "inkl. Abdeckung, frei positionierbar": "incl. cover, freely positioned",
-  "Armaturenbohrung Ø35": "Tap hole Ø35",
-  "für Armatur oder Kabeldose": "for a tap or a cable outlet",
-  "Küchen-Ausschnitte": "Kitchen cut outs",
-  "Steckdosen-Ausschnitt": "Socket cut out",
-  "26,5 × 10 cm, für USB oder Steckdose": "26.5 × 10 cm, for USB or a socket",
-  "Spülen-Ausschnitt": "Sink cut out",
-  "78 × 43 cm, Küchen-Arbeitsplatte": "78 × 43 cm, kitchen worktop",
-  "Induktionsfeld-Ausschnitt": "Induction hob cut out",
-  "56 × 49 cm, Küchen-Arbeitsplatte": "56 × 49 cm, kitchen worktop",
-  "Individuelle Bearbeitung": "Individual machining",
-  "Eigenes Bohrbild": "Your own hole pattern",
-  "frei nach deiner Vorgabe, CNC-gefräst": "freely to your specification, CNC milled",
-  "Skizze oder Zeichnung hochladen": "Upload a sketch or drawing",
-  "PDF, Foto, DXF — oder einfach später per E-Mail an uns schicken": "PDF, photo, DXF — or simply email it to us later",
-  "Mit eigener Skizze wird deine Platte individuell gefertigt — verbindliches Angebot in 24 h.": "With your own sketch your board is made individually — binding quote within 24 h.",
-  "Frei gestalten": "Design freely",
-  "In der Vorschau aufziehen oder hinzufügen — danach jede Position auf den Millimeter genau einstellbar. Der Preis wird sofort berechnet.": "Drag it out in the preview or add it — then set every position to the millimetre. The price is calculated immediately.",
-  "Ausschnitt": "Cut out",
-  "Runder Ausschnitt": "Round cut out",
-  "Freie Kontur": "Free contour",
-  "Kabelkanal fräsen": "Mill a cable channel",
-  "Kabelkanal": "Cable channel",
-  "Zeichnen-Modus: In der Vorschau aufziehen.": "Drawing mode: drag it out in the preview.",
-  "Kanalbreite": "Channel width",
-  "Frästiefe": "Milling depth",
-  "Richtung": "Direction",
-  "längs (links → rechts)": "lengthwise (left to right)",
-  "quer (hinten → vorne)": "crosswise (back to front)",
-  "Seite": "Side",
-  "Oberseite": "Top side",
-  "Unterseite": "Underside",
-  "Enden": "Ends",
-  "Radius": "Radius",
-  "X ab links": "X from the left",
-  "Y ab hinten": "Y from the back",
-  "Anfang an der Kante": "Start at the edge",
-  "Ende an der Kante": "End at the edge",
-  "beide an der Kante": "both at the edge",
-  "geschlossen": "closed",
-  "Zu klein: mindestens 3 cm": "Too small: at least 3 cm",
-  "Zu klein: mindestens 3 cm aufziehen": "Too small: drag out at least 3 cm",
-  "Zu kurz: mindestens 5 cm": "Too short: at least 5 cm",
-  "Ziehe den Ausschnitt in der Vorschau auf": "Drag the cut out in the preview",
-  "Weitere Punkte klicken · Doppelklick schließt die Kontur": "Click further points · double click closes the contour",
-  "Doppelklick schließt": "double click closes",
-  "weiter klicken": "keep clicking",
-  "3D-Ansicht konnte nicht geladen werden": "The 3D view could not be loaded",
-  "Möbelplatte: Außenradius mind. R30, angepasst": "Furniture board: outer radius min. R30, adjusted",
-  "Möbelplatte (ABS-Kante): Außenradien mind. R30. Kleinere Radien sind fertigungstechnisch nicht möglich.": "Furniture board (ABS edge): outer radii min. R30. Smaller radii are not possible in production.",
-  "Ausklinkungen aktuell nur beim Rechteck": "Notches are currently only available on rectangles",
-  "Kabelkanal aktuell nur bei eckigen Formen": "Cable channels are currently only available on angular shapes",
-  "Kabelkanal hinzugefügt — Länge, Breite und Lage stellst du unten ein": "Cable channel added — set length, width and position below",
-  "Innenradius mindestens R5 (Fräserdurchmesser)": "Inner radius at least R5 (cutter diameter)",
-  "Tiefer als 60 % der Platte — bitte vorher anfragen": "Deeper than 60 % of the board — please ask first",
-  "So kommt deine Bestellung bei uns an": "This is how your order reaches us",
-  "Demo · interne Ansicht": "Demo · internal view",
-  "Fertigungszeichnung — automatisch aus der Konfiguration erzeugt (inkl. Ausschnitt-Abstände)": "Production drawing — generated automatically from the configuration (incl. cut out spacing)",
-  "Weiß": "White",
-  "Alaska Weiß": "Alaska white",
-  "Kiefer Weiß": "Bleached pine",
-  "Kaschmir": "Cashmere",
-  "Grau": "Grey",
-  "Asche Grau": "Ash grey",
-  "Dunkelgrau": "Dark grey",
-  "Schwarz": "Black",
-  "Ahorn": "Maple",
-  "Buche": "Beech",
-  "Eiche Sonoma": "Sonoma oak",
-  "Eiche Artison": "Artisan oak",
-  "Eiche Hickory": "Hickory oak",
-  "Weißer Marmor": "White marble",
-  "Schwarzer Marmor": "Black marble",
-  "Grün": "Green",
-  "Rot": "Red",
-  "Gelb": "Yellow",
-  "Blau": "Blue",
-  "Dekorgleich": "Matching the decor",
-  "Standard": "Standard",
-  "Möbelplatte": "Furniture board",
-  "Multiplex Birke": "Birch plywood",
-  "Compact / HPL": "Compact / HPL",
-  "hinten": "back",
-  "rechts": "right",
-  "vorne": "front",
-  "links": "left",
-  "Kante": "Edge",
-  "Ecke": "corner",
-  "Leicht gefast": "Lightly chamfered",
-  "Gefast 45°": "Chamfered 45°",
-  "Halbrund": "Half round",
-  "Geschliffen": "Sanded",
-  "optional": "optional",
-  "Lagerartikel": "Stock item",
-  "ABS-Kante 2 mm": "ABS edge 2 mm",
-  "ABS-Kante": "ABS edge",
-  "Größen ab Lager": "sizes from stock",
-  "18/25/36 mm": "18/25/36 mm",
-  "Eck-Ausklinkung": "corner notch",
-  "hinten links": "back left",
-  "hinten rechts": "back right",
-  "vorne rechts": "front right",
-  "vorne links": "front left",
-  "Gesamt inkl. MwSt.": "Total incl. VAT",
-  "Eckig": "Square",
-  "alle Ecken": "all corners",
-  "alle vier": "all four",
-  "gemischt": "mixed",
-  "inklusive": "included",
-  "Kanten je Seite": "Edges set per side",
-  "Vorschau der konfigurierten Tischplatte": "Preview of the configured table top",
-  "Weniger": "Fewer",
-  "Mehr": "More",
-  "Schließen": "Close",
-  "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Briefly describe what you need — e.g. “corner notch 20×15 cm at the back left”.",
-  ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", as are a corner notch and a U-shaped cut out: please state them in step 05 under “Your own hole pattern / sketch”. Made from plywood, laminate and an ABS edge.",
-  "Nähtischplatte": "Sewing table top",
-  "ab 89 € · 21 mm · 4 Farben": "from €89 · 21 mm · 4 colours",
-  "Gewebestruktur Weiß": "White, woven texture",
-  "Nicht gefräst": "Not milled",
-  "Gefräst 45°": "Milled 45°",
-  "+ 5 €/lfm": "+ €5/lin. m",
-  "+ 10 €/lfm": "+ €10/lin. m",
-  "+ 16 €/lfm": "+ €16/lin. m",
-  "Kante natur, aber lackiert": "Natural edge, lacquered",
-  "unsere Lackierung, seidenmatt — schützt die offene Schichtkante": "our lacquer, satin matt — protects the exposed layered edge",
-  "Kante lackiert": "Edge lacquered",
-  "Maßband an der Vorderkante": "Measuring tape on the front edge",
-  "Kein Maßband": "No measuring tape",
-  "Maßband gelasert": "Laser-etched measuring tape",
-  "Aufkleberkante": "Adhesive tape strip",
-  "+ 15 €": "+ 15 €",
-  "+ 10 €": "+ 10 €",
-  "Ausschnitt für die Maschine": "Cut-out for the machine",
-  "Maße musst du keine angeben — sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "You do not need to give any dimensions — just tell us which machine will be recessed and we will fit the cut-out. You decide where it sits: drag it in the preview, the distances to all four edges are shown next to it.",
-  "Nähmaschine — Hersteller und Modell": "Sewing machine — make and model",
-  "z. B. Bernina 770 QE oder Juki TL-2200": "e.g. Bernina 770 QE or Juki TL-2200",
-  "Maschinen-Ausschnitt hinzufügen": "Add machine cut-out",
-  "Maschinen-Ausschnitt entfernen": "Remove machine cut-out",
-  "im Plattenpreis": "included in the top price",
-  "Maßband": "Measuring tape",
-  "Nähmaschine": "Sewing machine",
-  "— vom Kunden noch nicht angegeben —": "— not yet given by the customer —",
-  "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "incl. VAT, free shipping up to 110 × 50 cm",
-  "Versand bis 110 × 50 cm gratis": "Free shipping up to 110 × 50 cm",
-  "Kantenbearbeitung": "Edge finishing",
-  "Kantenbearbeitung, lackiert": "Edge finishing, lacquered",
-  "+ 8 €/lfm": "+ €8/lin. m",
-  "auf Anfrage": "on request",
-  "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Visible layered edge: not milled as standard, milled 45° costs €5/lin. m, half-round €8/lin. m. Lacquered it is €5, €10 and €16/lin. m — we have exactly one lacquer. Alternatively an ABS edge in the colour of your choice.",
-  "Lage der Ausklinkung": "Position of the notch",
-  "Schnitt": "Cut",
-  "Gerade": "Straight",
-  "Schräg": "Angled",
-  "Winkel der Schräge": "Angle of the cut",
-  "5 bis 85° — zur hinteren Kante": "5 to 85° — relative to the back edge",
-  "Ausklinkung": "notch",
-  "schräg": "angled",
-  "alle fünf": "all five",
-  "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "L-shape: five outer corners, each selectable on its own. With an angled cut there is no inner corner.",
-  "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. The inner corner is rounded automatically per the production rule.",
-  "Liegt in der Ausklinkung — bitte verschieben": "Sits in the notch — please move it",
-  "Nullpunkt links": "Zero at the left",
-  "Nullpunkt rechts": "Zero at the right",
-  "Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.": "The adhesive tape sits on the face of the front edge — marked only as a line in the top view, visible in the 3D view.",
-  "Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.": "The laser-etched tape lies on the top surface along the front edge.",
-  "Es ist höchstens 100 cm lang und endet vor den Eckradien.": "It is at most 100 cm long and stops short of the corner radii.",
-  "Maßband auf der Kante": "Tape on the edge",
-  "Maß des Ausschnitts": "Size of the cut-out",
-  "Nach Maschine": "To the machine",
-  "wir messen": "we measure",
-  "+ 40,00 € pauschal": "+ €40.00 flat",
-  "Standardmaß": "standard size",
-  "Wähle ein Standardmaß oder lass uns nach deiner Maschine messen — Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Pick a standard size or let us measure to your machine — we need make and model in any case. You decide where the cut-out sits: drag it in the preview, the distances to all four edges are shown next to it.",
-  "ab 19,90 € · 18/25/36 mm": "from €19.90 · 18/25/36 mm",
-  "ab 69 € · 12 mm": "from €69 · 12 mm",
-  "ab 29,90 € · 21/40 mm · alle Dekore": "from €29.90 · 21/40 mm · all decors",
-  "Ecken": "corners",
-  "Sondermaß": "Custom size",
-  "Jetzt bezahlen": "Pay now",
-  "Fertigung nach Maß": "Made to measure",
-  "Versandkosten im Checkout": "Shipping calculated at checkout",
-  "Nach Maß gefertigt": "Made to measure",
-  "Warenkorb wird vorbereitet …": "Preparing your cart …",
-  "Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail": "Payment is not available right now — we will take your request by e-mail"
- },
- "muster": {
-  "pl": [
-   [
-    "^Maschine (.+)$",
-    "Maszyna $1"
-   ],
-   [
-    "^Größe (.+) — Richtwert, wir passen ihn an deine Maschine an\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
-    "Wymiar $1 — wartość orientacyjna, dopasujemy go do Twojej maszyny. Odległości: lewo $2 · prawo $3 · tył $4 · przód $5 cm"
-   ],
-   [
-    "^Maschine: (.+)$",
-    "Maszyna: $1"
-   ],
-   [
-    "^Nähtischplatte (.+)$",
-    "Blat pod maszynę do szycia $1"
-   ],
-   [
-    "^Rechteck (.+)$",
-    "Prostokąt $1"
-   ],
-   [
-    "^Rund Ø (.+)$",
-    "Okrągły Ø $1"
-   ],
-   [
-    "^L-Form (.+)$",
-    "Kształt L $1"
-   ],
-   [
-    "^Nähmaschinen-Platte (.+)$",
-    "Blat do maszyny do szycia $1"
-   ],
-   [
-    "^Radius (.+)$",
-    "Promień $1"
-   ],
-   [
-    "^Ecken (.+)$",
-    "Narożniki $1"
-   ],
-   [
-    "^ABS (.+)$",
-    "ABS $1"
-   ],
-   [
-    "^Kante ([A-D]): (.+)$",
-    "Krawędź $1: $2"
-   ],
-   [
-    "^Kante: (.+)$",
-    "Krawędź: $1"
-   ],
-   [
-    "^Kante ([A-D])$",
-    "Krawędź $1"
-   ],
-   [
-    "^Ecke (.+), klicken zum Abrunden$",
-    "Narożnik $1, kliknij, aby zaokrąglić"
-   ],
-   [
-    "^\\+ (.+) / Stück$",
-    "+ $1 / szt."
-   ],
-   [
-    "^ab (.+)$",
-    "od $1"
-   ],
-   [
-    "^(\\d+) bis (\\d+) cm$",
-    "$1 do $2 cm"
-   ],
-   [
-    "^(\\d+) Größen ab Lager$",
-    "$1 rozmiarów z magazynu"
-   ],
-   [
-    "^Lagerartikel (\\d+)$",
-    "Artykuł magazynowy $1"
-   ],
-   [
-    "^Bitte (\\d+) bis (\\d+) cm eingeben$",
-    "Podaj od $1 do $2 cm"
-   ],
-   [
-    "^(\\d+) gewählt$",
-    "wybrano: $1"
-   ],
-   [
-    "^Ausschnitt hinzugefügt · (.+)$",
-    "Dodano wycięcie · $1"
-   ],
-   [
-    "^Runder Ausschnitt hinzugefügt · (.+)$",
-    "Dodano wycięcie okrągłe · $1"
-   ],
-   [
-    "^Freie Kontur hinzugefügt · (.+)$",
-    "Dodano dowolny kontur · $1"
-   ],
-   [
-    "^Kabelkanal hinzugefügt · (.+)$",
-    "Dodano kanał kablowy · $1"
-   ],
-   [
-    "^Ecke (.+): R(\\d+)$",
-    "Narożnik $1: R$2"
-   ],
-   [
-    "^Ecke (.+) wieder eckig$",
-    "Narożnik $1 znów ostry"
-   ],
-   [
-    "^R(\\d+) · alle Außenecken$",
-    "R$1 · wszystkie narożniki zewnętrzne"
-   ],
-   [
-    "^Versand bis (.+)$",
-    "Wysyłka do $1"
-   ],
-   [
-    "^Kabelkanal (.+) cm$",
-    "Kanał kablowy $1 cm"
-   ],
-   [
-    "^Länge (.+) cm · (.+) je lfm$",
-    "Długość $1 cm · $2 za mb"
-   ],
-   [
-    "^(\\d+) Punkte$",
-    "$1 punktów"
-   ],
-   [
-    "^Kantenfoto (.+), Originalaufnahme aus der Fertigung\\.$",
-    "Zdjęcie krawędzi $1, oryginalne ujęcie z produkcji."
-   ],
-   [
-    "^Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke\\. Gefertigt wird in (.+)\\.$",
-    "Ilustracja pokazuje krawędź w 25 mm, niezależnie od wybranej grubości. Produkujemy w $1."
-   ],
-   [
-    "^\\+ (\\d+(?:,\\d+)?) €/lfm$",
-    "+ $1 €/mb"
-   ],
-   [
-    "^(\\d+(?:,\\d+)?) €/lfm$",
-    "$1 €/mb"
-   ],
-   [
-    "^Ausklinkung schräg \\((\\d+) cm Schnitt\\)$",
-    "Wycięcie skośne ($1 cm cięcia)"
-   ],
-   [
-    "^Ausklinkung \\((\\d+) cm Schnitt\\)$",
-    "Wycięcie ($1 cm cięcia)"
-   ],
-   [
-    "^Eckenrundung (.+) \\((\\d+) (Ecke|Ecken)\\)$",
-    "Zaokrąglenie narożników $1 ($2 $3)"
-   ],
-   [
-    "^Sondermaß (.+) m²$",
-    "Wymiar niestandardowy $1 m²"
-   ],
-   [
-    "^Lagerartikel (.+)$",
-    "Artykuł magazynowy $1"
-   ],
-   [
-    "^Länge hier: (\\d+) cm$",
-    "Długość tutaj: $1 cm"
-   ],
-   [
-    "^Größe (.+) — Standardmaß\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
-    "Wymiar $1 — wymiar standardowy. Odległości: lewo $2 · prawo $3 · tył $4 · przód $5 cm"
-   ],
-   [
-    "^Ecke (.+), klicken zum Begradigen$",
-    "Narożnik $1, kliknij, aby wyprostować"
-   ],
-   [
-    "^Maßband auf der Kante · (\\d+) cm$",
-    "Miarka na krawędzi · $1 cm"
-   ]
-  ],
-  "en": [
-   [
-    "^Maschine (.+)$",
-    "Machine $1"
-   ],
-   [
-    "^Größe (.+) — Richtwert, wir passen ihn an deine Maschine an\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
-    "Size $1 — guide value, we adapt it to your machine. Distances: left $2 · right $3 · back $4 · front $5 cm"
-   ],
-   [
-    "^Maschine: (.+)$",
-    "Machine: $1"
-   ],
-   [
-    "^Nähtischplatte (.+)$",
-    "Sewing table top $1"
-   ],
-   [
-    "^Rechteck (.+)$",
-    "Rectangle $1"
-   ],
-   [
-    "^Rund Ø (.+)$",
-    "Round Ø $1"
-   ],
-   [
-    "^L-Form (.+)$",
-    "L-shape $1"
-   ],
-   [
-    "^Nähmaschinen-Platte (.+)$",
-    "Sewing machine top $1"
-   ],
-   [
-    "^Radius (.+)$",
-    "Radius $1"
-   ],
-   [
-    "^Ecken (.+)$",
-    "Corners $1"
-   ],
-   [
-    "^ABS (.+)$",
-    "ABS $1"
-   ],
-   [
-    "^Kante ([A-D]): (.+)$",
-    "Edge $1: $2"
-   ],
-   [
-    "^Kante: (.+)$",
-    "Edge: $1"
-   ],
-   [
-    "^Kante ([A-D])$",
-    "Edge $1"
-   ],
-   [
-    "^Ecke (.+), klicken zum Abrunden$",
-    "Corner $1, click to round"
-   ],
-   [
-    "^\\+ (.+) / Stück$",
-    "+ $1 / piece"
-   ],
-   [
-    "^ab (.+)$",
-    "from $1"
-   ],
-   [
-    "^(\\d+) bis (\\d+) cm$",
-    "$1 to $2 cm"
-   ],
-   [
-    "^(\\d+) Größen ab Lager$",
-    "$1 sizes from stock"
-   ],
-   [
-    "^Lagerartikel (\\d+)$",
-    "Stock item $1"
-   ],
-   [
-    "^Bitte (\\d+) bis (\\d+) cm eingeben$",
-    "Please enter $1 to $2 cm"
-   ],
-   [
-    "^(\\d+) gewählt$",
-    "$1 selected"
-   ],
-   [
-    "^Ausschnitt hinzugefügt · (.+)$",
-    "Cut out added · $1"
-   ],
-   [
-    "^Runder Ausschnitt hinzugefügt · (.+)$",
-    "Round cut out added · $1"
-   ],
-   [
-    "^Freie Kontur hinzugefügt · (.+)$",
-    "Free contour added · $1"
-   ],
-   [
-    "^Kabelkanal hinzugefügt · (.+)$",
-    "Cable channel added · $1"
-   ],
-   [
-    "^Ecke (.+): R(\\d+)$",
-    "Corner $1: R$2"
-   ],
-   [
-    "^Ecke (.+) wieder eckig$",
-    "Corner $1 square again"
-   ],
-   [
-    "^R(\\d+) · alle Außenecken$",
-    "R$1 · all outer corners"
-   ],
-   [
-    "^Versand bis (.+)$",
-    "Delivery by $1"
-   ],
-   [
-    "^Kabelkanal (.+) cm$",
-    "Cable channel $1 cm"
-   ],
-   [
-    "^Länge (.+) cm · (.+) je lfm$",
-    "Length $1 cm · $2 per linear metre"
-   ],
-   [
-    "^(\\d+) Punkte$",
-    "$1 points"
-   ],
-   [
-    "^Kantenfoto (.+), Originalaufnahme aus der Fertigung\\.$",
-    "Edge photo $1, original shot from production."
-   ],
-   [
-    "^Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke\\. Gefertigt wird in (.+)\\.$",
-    "The image shows the edge at 25 mm, regardless of the thickness chosen. Yours is made in $1."
-   ],
-   [
-    "^\\+ (\\d+(?:,\\d+)?) €/lfm$",
-    "+ €$1/lin. m"
-   ],
-   [
-    "^(\\d+(?:,\\d+)?) €/lfm$",
-    "€$1/lin. m"
-   ],
-   [
-    "^Ausklinkung schräg \\((\\d+) cm Schnitt\\)$",
-    "Angled notch ($1 cm of cut)"
-   ],
-   [
-    "^Ausklinkung \\((\\d+) cm Schnitt\\)$",
-    "Notch ($1 cm of cut)"
-   ],
-   [
-    "^Eckenrundung (.+) \\((\\d+) (Ecke|Ecken)\\)$",
-    "Corner rounding $1 ($2 $3)"
-   ],
-   [
-    "^Sondermaß (.+) m²$",
-    "Custom size $1 m²"
-   ],
-   [
-    "^Lagerartikel (.+)$",
-    "Stock item $1"
-   ],
-   [
-    "^Länge hier: (\\d+) cm$",
-    "Length here: $1 cm"
-   ],
-   [
-    "^Größe (.+) — Standardmaß\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
-    "Size $1 — standard size. Distances: left $2 · right $3 · back $4 · front $5 cm"
-   ],
-   [
-    "^Ecke (.+), klicken zum Begradigen$",
-    "Corner $1, click to square off"
-   ],
-   [
-    "^Maßband auf der Kante · (\\d+) cm$",
-    "Tape on the edge · $1 cm"
-   ]
-  ]
- }
+  "_meta": {
+    "name": "Kessler PRO — Konfigurator, Sprachdatei",
+    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft.",
+    "sprachen": [
+      "pl",
+      "en"
+    ],
+    "anzahl": 268,
+    "muster": 47
+  },
+  "pl": {
+    "Ab Lager": "Z magazynu",
+    "Kante & Material im Detail": "Obrzeże i materiał w szczegółach",
+    "Vorschaubild": "Podgląd",
+    "Draufsicht, maßstabsgetreu · Kanten und Ecken anklickbar": "Widok z góry, w skali · krawędzie i narożniki klikalne",
+    "Draufsicht, maßstabsgetreu · Kanten anklickbar": "Widok z góry, w skali · krawędzie klikalne",
+    "Dein Preis": "Twoja cena",
+    "Preis ab (zzgl. Sonderarbeiten)": "Cena od (bez prac dodatkowych)",
+    "inkl. MwSt., kostenloser Versand bis 120 cm": "z VAT, darmowa wysyłka do 120 cm",
+    "Preis-Aufschlüsselung": "Rozbicie ceny",
+    "Deine Konfiguration": "Twoja konfiguracja",
+    "In den Warenkorb": "Do koszyka",
+    "Unverbindlich anfragen": "Zapytaj niezobowiązująco",
+    "Manufaktur seit 1897": "Manufaktura od 1897",
+    "CNC-präzise Kanten": "Krawędzie cięte CNC",
+    "Versand bis 120 cm gratis": "Wysyłka do 120 cm gratis",
+    "Konfiguration teilen": "Udostępnij konfigurację",
+    "Per E-Mail senden": "Wyślij e-mailem",
+    "Versand bis ": "Wysyłka do ",
+    "DHL, ab Lager": "DHL, z magazynu",
+    "Angebot in 24 h": "Oferta w 24 h",
+    "Versandkosten im Angebot": "Koszty wysyłki w ofercie",
+    "Fertigung · Angebot in 24 h": "Produkcja · oferta w 24 h",
+    "im Angebot": "w ofercie",
+    "Ab Lager · lieferbar in 3 bis 5 Tagen": "Z magazynu · wysyłka w 3 do 5 dni",
+    "Individuelle Fertigung · Angebot in 24 h": "Produkcja indywidualna · oferta w 24 h",
+    "CNC-Fertigung · Preis steht fest": "Produkcja CNC · cena ustalona",
+    "CNC-Fertigung nach Maß": "Produkcja CNC na wymiar",
+    "Material & Dekor": "Materiał i dekor",
+    "Oberfläche": "Powierzchnia",
+    "Birke natur": "Brzoza natura",
+    "geschliffen": "szlifowana",
+    "HPL-Laminat": "Laminat HPL",
+    "alle Dekore": "wszystkie dekory",
+    "Klarlack": "Lakier bezbarwny",
+    "Angebot": "Oferta",
+    "ABS-Kantenfarbe": "Kolor obrzeża ABS",
+    "Unsicher beim Dekor?": "Nie wiesz, jaki dekor?",
+    "Musterbox mit 4 Dekoren — 4,90 €, voll angerechnet beim Kauf": "Zestaw 4 próbek — 4,90 €, w całości odliczane przy zakupie",
+    "Muster bestellen": "Zamów próbki",
+    "Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind für 18 und 25 mm verfügbar.": "Oryginalne zdjęcia produktów z archiwum Kessler. Kolorowe obrzeża ABS są dostępne dla 18 i 25 mm.",
+    "Auf Multiplex lässt sich jedes Laminat unserer Möbelplatten-Palette aufkleben, die Kante bleibt sichtbare Birkenschicht.": "Na sklejkę można nakleić każdy laminat z naszej palety płyt meblowych, krawędź pozostaje widoczną warstwą brzozy.",
+    "Form": "Kształt",
+    "Rechteck": "Prostokąt",
+    "Rund": "Okrągły",
+    "L-Form": "Kształt L",
+    "Nähmaschinen-Platte": "Blat pod maszynę do szycia",
+    "Ecken abrunden": "Zaokrąglij narożniki",
+    "Radius je Ecke": "Promień dla każdego narożnika",
+    "Maß": "Wymiar",
+    "Länge": "Długość",
+    "Breite": "Szerokość",
+    "Höhe": "Wysokość",
+    "Durchmesser Ø": "Średnica Ø",
+    "Gesamtlänge": "Długość całkowita",
+    "Gesamtbreite": "Szerokość całkowita",
+    "Ausklinkung Breite": "Szerokość wycięcia",
+    "Ausklinkung Tiefe": "Głębokość wycięcia",
+    "Innenecke wird automatisch verrundet: R50 bei Möbelplatte · R10 bei Multiplex & Compact (Fertigungsregel).": "Narożnik wewnętrzny jest zaokrąglany automatycznie: R50 przy płycie meblowej · R10 przy sklejce i compact (reguła produkcji).",
+    "Plattenbreite": "Szerokość płyty",
+    "Plattentiefe": "Głębokość płyty",
+    "Maschinen-Ausschnitt (Tiefe 18 cm)": "Wycięcie pod maszynę (głębokość 18 cm)",
+    "Standardmaße —": "Wymiary standardowe —",
+    "jedes andere Maß ist möglich": "każdy inny wymiar jest możliwy",
+    "Ab Lager — sofort lieferbar:": "Z magazynu — od ręki:",
+    "Richtig messen — so geht's": "Jak mierzyć poprawnie",
+    "Miss die gewünschte Fläche an der breitesten Stelle und rechne bei Wandmontage 5 mm Luft ein. Bei Gestellen: Plattenüberstand 5–15 cm je Seite einplanen. Unsicher? Ruf uns an — wir prüfen dein Maß kostenlos vor der Fertigung.": "Zmierz powierzchnię w najszerszym miejscu, a przy montażu do ściany doliczy 5 mm luzu. Przy stelażach zaplanuj 5 do 15 cm nawisu płyty na stronę. Nie masz pewności? Zadzwoń — sprawdzimy Twój wymiar bezpłatnie przed produkcją.",
+    "Größen": "Rozmiary",
+    "Stärke & Kante": "Grubość i obrzeże",
+    "Kantenprofil": "Profil obrzeża",
+    "Rundungsradius der Kante": "Promień zaokrąglenia krawędzi",
+    "ABS-Kante 2 mm · R2": "Obrzeże ABS 2 mm · R2",
+    "serienmäßig": "w standardzie",
+    "Multiplex: sichtbare Birkenschichtkante — leicht gefast ist serienmäßig. 45° gefräst oder halbrund gegen Aufpreis; Seiten auf Wunsch mit ABS oder klarlackiert (Angebot).": "Sklejka: widoczna warstwowa krawędź brzozy — lekka faza w standardzie. Faza 45° lub półokrągła za dopłatą; boki na życzenie z ABS lub lakierowane bezbarwnie (oferta).",
+    "Tipp: Klicke in der 2D-Vorschau direkt auf eine Kante, um sie einzeln zu ändern.": "Wskazówka: kliknij krawędź w podglądzie 2D, aby zmienić ją pojedynczo.",
+    "Ausschnitte & Bohrungen": "Wycięcia i otwory",
+    "Bohrungen & Durchlässe": "Otwory i przepusty",
+    "Montagebohrungen 4× Ø8": "Otwory montażowe 4× Ø8",
+    "vorgebohrt für gängige Gestelle": "nawiercone pod typowe stelaże",
+    "Kabeldurchlass Ø60": "Przepust kablowy Ø60",
+    "Kabeldurchlass Ø80": "Przepust kablowy Ø80",
+    "inkl. Abdeckung, frei positionierbar": "z zaślepką, dowolne położenie",
+    "Armaturenbohrung Ø35": "Otwór pod armaturę Ø35",
+    "für Armatur oder Kabeldose": "pod armaturę lub puszkę kablową",
+    "Küchen-Ausschnitte": "Wycięcia kuchenne",
+    "Steckdosen-Ausschnitt": "Wycięcie pod gniazdo",
+    "26,5 × 10 cm, für USB oder Steckdose": "26,5 × 10 cm, pod USB lub gniazdo",
+    "Spülen-Ausschnitt": "Wycięcie pod zlew",
+    "78 × 43 cm, Küchen-Arbeitsplatte": "78 × 43 cm, blat kuchenny",
+    "Induktionsfeld-Ausschnitt": "Wycięcie pod płytę indukcyjną",
+    "56 × 49 cm, Küchen-Arbeitsplatte": "56 × 49 cm, blat kuchenny",
+    "Individuelle Bearbeitung": "Obróbka indywidualna",
+    "Eigenes Bohrbild": "Własny układ otworów",
+    "frei nach deiner Vorgabe, CNC-gefräst": "dowolnie według Twojego rysunku, frezowane CNC",
+    "Skizze oder Zeichnung hochladen": "Wgraj szkic lub rysunek",
+    "PDF, Foto, DXF — oder einfach später per E-Mail an uns schicken": "PDF, zdjęcie, DXF — albo po prostu prześlij nam później e-mailem",
+    "Mit eigener Skizze wird deine Platte individuell gefertigt — verbindliches Angebot in 24 h.": "Z własnym szkicem Twoja płyta powstaje indywidualnie — wiążąca oferta w 24 h.",
+    "Frei gestalten": "Zaprojektuj dowolnie",
+    "In der Vorschau aufziehen oder hinzufügen — danach jede Position auf den Millimeter genau einstellbar. Der Preis wird sofort berechnet.": "Rozciągnij w podglądzie albo dodaj — potem ustawisz każdą pozycję co do milimetra. Cena liczy się od razu.",
+    "Ausschnitt": "Wycięcie",
+    "Runder Ausschnitt": "Wycięcie okrągłe",
+    "Freie Kontur": "Dowolny kontur",
+    "Kabelkanal fräsen": "Frezuj kanał kablowy",
+    "Kabelkanal": "Kanał kablowy",
+    "Zeichnen-Modus: In der Vorschau aufziehen.": "Tryb rysowania: rozciągnij w podglądzie.",
+    "Kanalbreite": "Szerokość kanału",
+    "Frästiefe": "Głębokość frezowania",
+    "Richtung": "Kierunek",
+    "längs (links → rechts)": "wzdłuż (od lewej do prawej)",
+    "quer (hinten → vorne)": "w poprzek (od tyłu do przodu)",
+    "Seite": "Strona",
+    "Oberseite": "Wierzch",
+    "Unterseite": "Spód",
+    "Enden": "Zakończenia",
+    "Radius": "Promień",
+    "X ab links": "X od lewej",
+    "Y ab hinten": "Y od tyłu",
+    "Anfang an der Kante": "Początek przy krawędzi",
+    "Ende an der Kante": "Koniec przy krawędzi",
+    "beide an der Kante": "oba przy krawędzi",
+    "geschlossen": "zamknięte",
+    "Zu klein: mindestens 3 cm": "Za mało: co najmniej 3 cm",
+    "Zu klein: mindestens 3 cm aufziehen": "Za mało: rozciągnij na co najmniej 3 cm",
+    "Zu kurz: mindestens 5 cm": "Za krótko: co najmniej 5 cm",
+    "Ziehe den Ausschnitt in der Vorschau auf": "Rozciągnij wycięcie w podglądzie",
+    "Weitere Punkte klicken · Doppelklick schließt die Kontur": "Klikaj kolejne punkty · dwuklik zamyka kontur",
+    "Doppelklick schließt": "dwuklik zamyka",
+    "weiter klicken": "klikaj dalej",
+    "3D-Ansicht konnte nicht geladen werden": "Nie udało się wczytać widoku 3D",
+    "Möbelplatte: Außenradius mind. R30, angepasst": "Płyta meblowa: promień zewnętrzny min. R30, dopasowano",
+    "Möbelplatte (ABS-Kante): Außenradien mind. R30. Kleinere Radien sind fertigungstechnisch nicht möglich.": "Płyta meblowa (obrzeże ABS): promienie zewnętrzne min. R30. Mniejsze promienie nie są możliwe technologicznie.",
+    "Ausklinkungen aktuell nur beim Rechteck": "Wycięcia narożne obecnie tylko przy prostokącie",
+    "Kabelkanal aktuell nur bei eckigen Formen": "Kanał kablowy obecnie tylko przy kształtach kanciastych",
+    "Kabelkanal hinzugefügt — Länge, Breite und Lage stellst du unten ein": "Dodano kanał kablowy — długość, szerokość i położenie ustawisz poniżej",
+    "Innenradius mindestens R5 (Fräserdurchmesser)": "Promień wewnętrzny co najmniej R5 (średnica frezu)",
+    "Tiefer als 60 % der Platte — bitte vorher anfragen": "Głębiej niż 60 % płyty — prosimy o wcześniejsze zapytanie",
+    "So kommt deine Bestellung bei uns an": "Tak trafia do nas Twoje zamówienie",
+    "Demo · interne Ansicht": "Demo · widok wewnętrzny",
+    "Fertigungszeichnung — automatisch aus der Konfiguration erzeugt (inkl. Ausschnitt-Abstände)": "Rysunek produkcyjny — generowany automatycznie z konfiguracji (z odstępami wycięć)",
+    "Weiß": "Biały",
+    "Alaska Weiß": "Alaska biały",
+    "Kiefer Weiß": "Sosna bielona",
+    "Kaschmir": "Kaszmir",
+    "Grau": "Szary",
+    "Asche Grau": "Popielaty",
+    "Dunkelgrau": "Ciemnoszary",
+    "Schwarz": "Czarny",
+    "Ahorn": "Klon",
+    "Buche": "Buk",
+    "Eiche Sonoma": "Dąb sonoma",
+    "Eiche Artison": "Dąb artison",
+    "Eiche Hickory": "Dąb hikora",
+    "Weißer Marmor": "Biały marmur",
+    "Schwarzer Marmor": "Czarny marmur",
+    "Grün": "Zielony",
+    "Rot": "Czerwony",
+    "Gelb": "Żółty",
+    "Blau": "Niebieski",
+    "Dekorgleich": "Zgodny z dekorem",
+    "Standard": "Standard",
+    "Möbelplatte": "Płyta meblowa",
+    "Multiplex Birke": "Sklejka brzozowa",
+    "Compact / HPL": "Compact / HPL",
+    "hinten": "z tyłu",
+    "rechts": "z prawej",
+    "vorne": "z przodu",
+    "links": "z lewej",
+    "Kante": "Krawędź",
+    "Ecke": "narożnik",
+    "Leicht gefast": "Lekko fazowana",
+    "Gefast 45°": "Faza 45°",
+    "Halbrund": "Półokrągła",
+    "Geschliffen": "Szlifowana",
+    "optional": "opcjonalnie",
+    "Lagerartikel": "Artykuł magazynowy",
+    "ABS-Kante 2 mm": "Obrzeże ABS 2 mm",
+    "ABS-Kante": "Obrzeże ABS",
+    "Größen ab Lager": "rozmiarów z magazynu",
+    "18/25/36 mm": "18/25/36 mm",
+    "Eck-Ausklinkung": "wycięcie narożne",
+    "hinten links": "z tyłu po lewej",
+    "hinten rechts": "z tyłu po prawej",
+    "vorne rechts": "z przodu po prawej",
+    "vorne links": "z przodu po lewej",
+    "Gesamt inkl. MwSt.": "Razem z VAT",
+    "Eckig": "Ostry",
+    "alle Ecken": "wszystkie narożniki",
+    "alle vier": "wszystkie cztery",
+    "gemischt": "mieszane",
+    "inklusive": "w cenie",
+    "Kanten je Seite": "Krawędzie osobno dla każdego boku",
+    "Vorschau der konfigurierten Tischplatte": "Podgląd skonfigurowanego blatu",
+    "Weniger": "Mniej",
+    "Mehr": "Więcej",
+    "Schließen": "Zamknij",
+    "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Opisz krótko, czego potrzebujesz — np. „wycięcie narożne 20×15 cm z tyłu po lewej”.",
+    ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", podobnie wycięcie narożne i wycięcie w kształcie U: podaj je w kroku 05 w polu „Własny układ otworów / szkic”. Produkcja ze sklejki, laminatu i obrzeża ABS.",
+    "Nähtischplatte": "Blat pod maszynę do szycia",
+    "ab 89 € · 21 mm · 4 Farben": "od 89 € · 21 mm · 4 kolory",
+    "Gewebestruktur Weiß": "Biały ze strukturą tkaniny",
+    "Nicht gefräst": "Bez frezowania",
+    "Gefräst 45°": "Frezowana 45°",
+    "+ 5 €/lfm": "+ 5 €/mb",
+    "+ 10 €/lfm": "+ 10 €/mb",
+    "+ 16 €/lfm": "+ 16 €/mb",
+    "Kante natur, aber lackiert": "Krawędź naturalna, ale lakierowana",
+    "unsere Lackierung, seidenmatt — schützt die offene Schichtkante": "nasz lakier, satynowy — chroni odsłoniętą krawędź warstwową",
+    "Kante lackiert": "Krawędź lakierowana",
+    "Maßband an der Vorderkante": "Miarka na przedniej krawędzi",
+    "Kein Maßband": "Bez miarki",
+    "Maßband gelasert": "Miarka wypalana laserem",
+    "Aufkleberkante": "Miarka naklejana",
+    "+ 15 €": "+ 15 €",
+    "+ 10 €": "+ 10 €",
+    "Ausschnitt für die Maschine": "Wycięcie pod maszynę",
+    "Maße musst du keine angeben — sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Nie musisz podawać wymiarów — wystarczy, że napiszesz, jaka maszyna ma zostać wpuszczona, wycięcie dopasujemy my. Miejsce ustalasz sam: przesuń wycięcie w podglądzie, odległości od wszystkich czterech krawędzi pokazują się obok.",
+    "Nähmaschine — Hersteller und Modell": "Maszyna do szycia — producent i model",
+    "z. B. Bernina 770 QE oder Juki TL-2200": "np. Bernina 770 QE lub Juki TL-2200",
+    "Maschinen-Ausschnitt hinzufügen": "Dodaj wycięcie pod maszynę",
+    "Maschinen-Ausschnitt entfernen": "Usuń wycięcie pod maszynę",
+    "im Plattenpreis": "w cenie blatu",
+    "Maßband": "Miarka",
+    "Nähmaschine": "Maszyna do szycia",
+    "— vom Kunden noch nicht angegeben —": "— klient jeszcze nie podał —",
+    "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "z VAT, darmowa wysyłka do 110 × 50 cm",
+    "Versand bis 110 × 50 cm gratis": "Wysyłka do 110 × 50 cm gratis",
+    "Kantenbearbeitung": "Obróbka krawędzi",
+    "Kantenbearbeitung, lackiert": "Obróbka krawędzi, lakierowana",
+    "+ 8 €/lfm": "+ 8 €/mb",
+    "auf Anfrage": "na zapytanie",
+    "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Widoczna krawędź warstwowa: bez frezowania w standardzie, frezowana 45° kosztuje 5 €/mb, półokrągła 8 €/mb. Lakierowane to 5, 10 i 16 €/mb — mamy dokładnie jeden lakier. Alternatywnie obrzeże ABS w wybranym kolorze.",
+    "Lage der Ausklinkung": "Położenie wycięcia",
+    "Schnitt": "Cięcie",
+    "Gerade": "Proste",
+    "Schräg": "Skośne",
+    "Winkel der Schräge": "Kąt skosu",
+    "5 bis 85° — zur hinteren Kante": "5 do 85° — względem tylnej krawędzi",
+    "Ausklinkung": "wycięcie",
+    "schräg": "skośne",
+    "alle fünf": "wszystkie pięć",
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym nie ma narożnika wewnętrznego.",
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Narożnik wewnętrzny jest zaokrąglany automatycznie według reguły produkcji.",
+    "Liegt in der Ausklinkung — bitte verschieben": "Leży w wycięciu — przesuń",
+    "Nullpunkt links": "Zero po lewej",
+    "Nullpunkt rechts": "Zero po prawej",
+    "Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.": "Miarka naklejana siedzi na czole przedniej krawędzi — w widoku z góry zaznaczona tylko linią, widoczna w widoku 3D.",
+    "Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.": "Miarka wypalana laserem leży na wierzchu wzdłuż przedniej krawędzi.",
+    "Es ist höchstens 100 cm lang und endet vor den Eckradien.": "Ma najwyżej 100 cm długości i kończy się przed zaokrągleniami narożników.",
+    "Maßband auf der Kante": "Miarka na krawędzi",
+    "Maß des Ausschnitts": "Wymiar wycięcia",
+    "Nach Maschine": "Według maszyny",
+    "wir messen": "zmierzymy",
+    "+ 40,00 € pauschal": "+ 40,00 € ryczałt",
+    "Standardmaß": "wymiar standardowy",
+    "Wähle ein Standardmaß oder lass uns nach deiner Maschine messen — Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Wybierz wymiar standardowy albo pozwól nam zmierzyć według Twojej maszyny — producenta i model potrzebujemy w każdym przypadku. Miejsce wycięcia ustalasz sam: przesuń je w podglądzie, odległości od wszystkich czterech krawędzi pokazują się obok.",
+    "ab 19,90 € · 18/25/36 mm": "od 19,90 € · 18/25/36 mm",
+    "ab 69 € · 12 mm": "od 69 € · 12 mm",
+    "ab 29,90 € · 21/40 mm · alle Dekore": "od 29,90 € · 21/40 mm · wszystkie dekory",
+    "Ecken": "narożniki",
+    "Sondermaß": "Wymiar niestandardowy",
+    "Jetzt bezahlen": "Zapłać teraz",
+    "Fertigung nach Maß": "Produkcja na wymiar",
+    "Versandkosten im Checkout": "Koszt wysyłki w kasie",
+    "Nach Maß gefertigt": "Wykonane na wymiar",
+    "Warenkorb wird vorbereitet …": "Przygotowujemy koszyk …",
+    "Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail": "Płatność chwilowo niedostępna — przyjmiemy Twoje zapytanie e-mailem",
+    "Schräge endet bei Punkt B": "Skos kończy się w punkcie B",
+    "Abstand von B zur Plattenkante · 0 = Schräge bis zur Kante": "Odległość punktu B od krawędzi blatu · 0 = skos aż do krawędzi",
+    "5 bis 85° — zur Plattenkante": "5 do 85° — względem krawędzi blatu"
+  },
+  "en": {
+    "Ab Lager": "From stock",
+    "Kante & Material im Detail": "Edge & material in detail",
+    "Vorschaubild": "Preview image",
+    "Draufsicht, maßstabsgetreu · Kanten und Ecken anklickbar": "Top view, to scale · edges and corners are clickable",
+    "Draufsicht, maßstabsgetreu · Kanten anklickbar": "Top view, to scale · edges are clickable",
+    "Dein Preis": "Your price",
+    "Preis ab (zzgl. Sonderarbeiten)": "Price from (excl. special work)",
+    "inkl. MwSt., kostenloser Versand bis 120 cm": "incl. VAT, free shipping up to 120 cm",
+    "Preis-Aufschlüsselung": "Price breakdown",
+    "Deine Konfiguration": "Your configuration",
+    "In den Warenkorb": "Add to cart",
+    "Unverbindlich anfragen": "Request a quote",
+    "Manufaktur seit 1897": "Workshop since 1897",
+    "CNC-präzise Kanten": "CNC-precise edges",
+    "Versand bis 120 cm gratis": "Free shipping up to 120 cm",
+    "Konfiguration teilen": "Share configuration",
+    "Per E-Mail senden": "Send by email",
+    "Versand bis ": "Delivery by ",
+    "DHL, ab Lager": "DHL, from stock",
+    "Angebot in 24 h": "Quote within 24 h",
+    "Versandkosten im Angebot": "Shipping costs in the quote",
+    "Fertigung · Angebot in 24 h": "Production · quote within 24 h",
+    "im Angebot": "in the quote",
+    "Ab Lager · lieferbar in 3 bis 5 Tagen": "In stock · ships in 3 to 5 days",
+    "Individuelle Fertigung · Angebot in 24 h": "Custom production · quote within 24 h",
+    "CNC-Fertigung · Preis steht fest": "CNC production · price is fixed",
+    "CNC-Fertigung nach Maß": "CNC production made to measure",
+    "Material & Dekor": "Material & decor",
+    "Oberfläche": "Surface",
+    "Birke natur": "Natural birch",
+    "geschliffen": "sanded",
+    "HPL-Laminat": "HPL laminate",
+    "alle Dekore": "all decors",
+    "Klarlack": "Clear lacquer",
+    "Angebot": "Quote",
+    "ABS-Kantenfarbe": "ABS edge colour",
+    "Unsicher beim Dekor?": "Unsure about the decor?",
+    "Musterbox mit 4 Dekoren — 4,90 €, voll angerechnet beim Kauf": "Sample box with 4 decors — €4.90, fully credited against your purchase",
+    "Muster bestellen": "Order samples",
+    "Original-Produktfotos aus dem Kessler-Archiv. Farbige ABS-Kanten sind für 18 und 25 mm verfügbar.": "Original product photos from the Kessler archive. Coloured ABS edges are available for 18 and 25 mm.",
+    "Auf Multiplex lässt sich jedes Laminat unserer Möbelplatten-Palette aufkleben, die Kante bleibt sichtbare Birkenschicht.": "Any laminate from our furniture board range can be bonded to plywood; the edge stays visible birch.",
+    "Form": "Shape",
+    "Rechteck": "Rectangle",
+    "Rund": "Round",
+    "L-Form": "L-shape",
+    "Nähmaschinen-Platte": "Sewing machine top",
+    "Ecken abrunden": "Round the corners",
+    "Radius je Ecke": "Radius per corner",
+    "Maß": "Size",
+    "Länge": "Length",
+    "Breite": "Width",
+    "Höhe": "Height",
+    "Durchmesser Ø": "Diameter Ø",
+    "Gesamtlänge": "Overall length",
+    "Gesamtbreite": "Overall width",
+    "Ausklinkung Breite": "Notch width",
+    "Ausklinkung Tiefe": "Notch depth",
+    "Innenecke wird automatisch verrundet: R50 bei Möbelplatte · R10 bei Multiplex & Compact (Fertigungsregel).": "The inner corner is rounded automatically: R50 on furniture board · R10 on plywood and compact (production rule).",
+    "Plattenbreite": "Board width",
+    "Plattentiefe": "Board depth",
+    "Maschinen-Ausschnitt (Tiefe 18 cm)": "Machine cut out (18 cm deep)",
+    "Standardmaße —": "Standard sizes —",
+    "jedes andere Maß ist möglich": "any other size is possible",
+    "Ab Lager — sofort lieferbar:": "From stock — available now:",
+    "Richtig messen — so geht's": "How to measure correctly",
+    "Miss die gewünschte Fläche an der breitesten Stelle und rechne bei Wandmontage 5 mm Luft ein. Bei Gestellen: Plattenüberstand 5–15 cm je Seite einplanen. Unsicher? Ruf uns an — wir prüfen dein Maß kostenlos vor der Fertigung.": "Measure the area at its widest point and allow 5 mm of play for wall mounting. With frames, plan an overhang of 5 to 15 cm per side. Not sure? Call us — we check your measurements free of charge before production.",
+    "Größen": "Sizes",
+    "Stärke & Kante": "Thickness & edge",
+    "Kantenprofil": "Edge profile",
+    "Rundungsradius der Kante": "Edge rounding radius",
+    "ABS-Kante 2 mm · R2": "ABS edge 2 mm · R2",
+    "serienmäßig": "as standard",
+    "Multiplex: sichtbare Birkenschichtkante — leicht gefast ist serienmäßig. 45° gefräst oder halbrund gegen Aufpreis; Seiten auf Wunsch mit ABS oder klarlackiert (Angebot).": "Plywood: visible layered birch edge — a light chamfer comes as standard. A 45° chamfer or half round costs extra; sides with ABS or clear lacquer on request (quote).",
+    "Tipp: Klicke in der 2D-Vorschau direkt auf eine Kante, um sie einzeln zu ändern.": "Tip: click an edge directly in the 2D preview to change it on its own.",
+    "Ausschnitte & Bohrungen": "Cut outs & holes",
+    "Bohrungen & Durchlässe": "Holes & cable ports",
+    "Montagebohrungen 4× Ø8": "Mounting holes 4× Ø8",
+    "vorgebohrt für gängige Gestelle": "pre-drilled for common frames",
+    "Kabeldurchlass Ø60": "Cable port Ø60",
+    "Kabeldurchlass Ø80": "Cable port Ø80",
+    "inkl. Abdeckung, frei positionierbar": "incl. cover, freely positioned",
+    "Armaturenbohrung Ø35": "Tap hole Ø35",
+    "für Armatur oder Kabeldose": "for a tap or a cable outlet",
+    "Küchen-Ausschnitte": "Kitchen cut outs",
+    "Steckdosen-Ausschnitt": "Socket cut out",
+    "26,5 × 10 cm, für USB oder Steckdose": "26.5 × 10 cm, for USB or a socket",
+    "Spülen-Ausschnitt": "Sink cut out",
+    "78 × 43 cm, Küchen-Arbeitsplatte": "78 × 43 cm, kitchen worktop",
+    "Induktionsfeld-Ausschnitt": "Induction hob cut out",
+    "56 × 49 cm, Küchen-Arbeitsplatte": "56 × 49 cm, kitchen worktop",
+    "Individuelle Bearbeitung": "Individual machining",
+    "Eigenes Bohrbild": "Your own hole pattern",
+    "frei nach deiner Vorgabe, CNC-gefräst": "freely to your specification, CNC milled",
+    "Skizze oder Zeichnung hochladen": "Upload a sketch or drawing",
+    "PDF, Foto, DXF — oder einfach später per E-Mail an uns schicken": "PDF, photo, DXF — or simply email it to us later",
+    "Mit eigener Skizze wird deine Platte individuell gefertigt — verbindliches Angebot in 24 h.": "With your own sketch your board is made individually — binding quote within 24 h.",
+    "Frei gestalten": "Design freely",
+    "In der Vorschau aufziehen oder hinzufügen — danach jede Position auf den Millimeter genau einstellbar. Der Preis wird sofort berechnet.": "Drag it out in the preview or add it — then set every position to the millimetre. The price is calculated immediately.",
+    "Ausschnitt": "Cut out",
+    "Runder Ausschnitt": "Round cut out",
+    "Freie Kontur": "Free contour",
+    "Kabelkanal fräsen": "Mill a cable channel",
+    "Kabelkanal": "Cable channel",
+    "Zeichnen-Modus: In der Vorschau aufziehen.": "Drawing mode: drag it out in the preview.",
+    "Kanalbreite": "Channel width",
+    "Frästiefe": "Milling depth",
+    "Richtung": "Direction",
+    "längs (links → rechts)": "lengthwise (left to right)",
+    "quer (hinten → vorne)": "crosswise (back to front)",
+    "Seite": "Side",
+    "Oberseite": "Top side",
+    "Unterseite": "Underside",
+    "Enden": "Ends",
+    "Radius": "Radius",
+    "X ab links": "X from the left",
+    "Y ab hinten": "Y from the back",
+    "Anfang an der Kante": "Start at the edge",
+    "Ende an der Kante": "End at the edge",
+    "beide an der Kante": "both at the edge",
+    "geschlossen": "closed",
+    "Zu klein: mindestens 3 cm": "Too small: at least 3 cm",
+    "Zu klein: mindestens 3 cm aufziehen": "Too small: drag out at least 3 cm",
+    "Zu kurz: mindestens 5 cm": "Too short: at least 5 cm",
+    "Ziehe den Ausschnitt in der Vorschau auf": "Drag the cut out in the preview",
+    "Weitere Punkte klicken · Doppelklick schließt die Kontur": "Click further points · double click closes the contour",
+    "Doppelklick schließt": "double click closes",
+    "weiter klicken": "keep clicking",
+    "3D-Ansicht konnte nicht geladen werden": "The 3D view could not be loaded",
+    "Möbelplatte: Außenradius mind. R30, angepasst": "Furniture board: outer radius min. R30, adjusted",
+    "Möbelplatte (ABS-Kante): Außenradien mind. R30. Kleinere Radien sind fertigungstechnisch nicht möglich.": "Furniture board (ABS edge): outer radii min. R30. Smaller radii are not possible in production.",
+    "Ausklinkungen aktuell nur beim Rechteck": "Notches are currently only available on rectangles",
+    "Kabelkanal aktuell nur bei eckigen Formen": "Cable channels are currently only available on angular shapes",
+    "Kabelkanal hinzugefügt — Länge, Breite und Lage stellst du unten ein": "Cable channel added — set length, width and position below",
+    "Innenradius mindestens R5 (Fräserdurchmesser)": "Inner radius at least R5 (cutter diameter)",
+    "Tiefer als 60 % der Platte — bitte vorher anfragen": "Deeper than 60 % of the board — please ask first",
+    "So kommt deine Bestellung bei uns an": "This is how your order reaches us",
+    "Demo · interne Ansicht": "Demo · internal view",
+    "Fertigungszeichnung — automatisch aus der Konfiguration erzeugt (inkl. Ausschnitt-Abstände)": "Production drawing — generated automatically from the configuration (incl. cut out spacing)",
+    "Weiß": "White",
+    "Alaska Weiß": "Alaska white",
+    "Kiefer Weiß": "Bleached pine",
+    "Kaschmir": "Cashmere",
+    "Grau": "Grey",
+    "Asche Grau": "Ash grey",
+    "Dunkelgrau": "Dark grey",
+    "Schwarz": "Black",
+    "Ahorn": "Maple",
+    "Buche": "Beech",
+    "Eiche Sonoma": "Sonoma oak",
+    "Eiche Artison": "Artisan oak",
+    "Eiche Hickory": "Hickory oak",
+    "Weißer Marmor": "White marble",
+    "Schwarzer Marmor": "Black marble",
+    "Grün": "Green",
+    "Rot": "Red",
+    "Gelb": "Yellow",
+    "Blau": "Blue",
+    "Dekorgleich": "Matching the decor",
+    "Standard": "Standard",
+    "Möbelplatte": "Furniture board",
+    "Multiplex Birke": "Birch plywood",
+    "Compact / HPL": "Compact / HPL",
+    "hinten": "back",
+    "rechts": "right",
+    "vorne": "front",
+    "links": "left",
+    "Kante": "Edge",
+    "Ecke": "corner",
+    "Leicht gefast": "Lightly chamfered",
+    "Gefast 45°": "Chamfered 45°",
+    "Halbrund": "Half round",
+    "Geschliffen": "Sanded",
+    "optional": "optional",
+    "Lagerartikel": "Stock item",
+    "ABS-Kante 2 mm": "ABS edge 2 mm",
+    "ABS-Kante": "ABS edge",
+    "Größen ab Lager": "sizes from stock",
+    "18/25/36 mm": "18/25/36 mm",
+    "Eck-Ausklinkung": "corner notch",
+    "hinten links": "back left",
+    "hinten rechts": "back right",
+    "vorne rechts": "front right",
+    "vorne links": "front left",
+    "Gesamt inkl. MwSt.": "Total incl. VAT",
+    "Eckig": "Square",
+    "alle Ecken": "all corners",
+    "alle vier": "all four",
+    "gemischt": "mixed",
+    "inklusive": "included",
+    "Kanten je Seite": "Edges set per side",
+    "Vorschau der konfigurierten Tischplatte": "Preview of the configured table top",
+    "Weniger": "Fewer",
+    "Mehr": "More",
+    "Schließen": "Close",
+    "Beschreibe kurz, was du brauchst — z. B. „Eck-Ausklinkung 20×15 cm hinten links“.": "Briefly describe what you need — e.g. “corner notch 20×15 cm at the back left”.",
+    ", ebenso Eck-Ausklinkung und U-Ausschnitt: bitte über „Eigenes Bohrbild / Skizze\" in Schritt 05 angeben. Fertigung aus Multiplex + Laminat + ABS-Kante.": ", as are a corner notch and a U-shaped cut out: please state them in step 05 under “Your own hole pattern / sketch”. Made from plywood, laminate and an ABS edge.",
+    "Nähtischplatte": "Sewing table top",
+    "ab 89 € · 21 mm · 4 Farben": "from €89 · 21 mm · 4 colours",
+    "Gewebestruktur Weiß": "White, woven texture",
+    "Nicht gefräst": "Not milled",
+    "Gefräst 45°": "Milled 45°",
+    "+ 5 €/lfm": "+ €5/lin. m",
+    "+ 10 €/lfm": "+ €10/lin. m",
+    "+ 16 €/lfm": "+ €16/lin. m",
+    "Kante natur, aber lackiert": "Natural edge, lacquered",
+    "unsere Lackierung, seidenmatt — schützt die offene Schichtkante": "our lacquer, satin matt — protects the exposed layered edge",
+    "Kante lackiert": "Edge lacquered",
+    "Maßband an der Vorderkante": "Measuring tape on the front edge",
+    "Kein Maßband": "No measuring tape",
+    "Maßband gelasert": "Laser-etched measuring tape",
+    "Aufkleberkante": "Adhesive tape strip",
+    "+ 15 €": "+ 15 €",
+    "+ 10 €": "+ 10 €",
+    "Ausschnitt für die Maschine": "Cut-out for the machine",
+    "Maße musst du keine angeben — sag uns nur, welche Maschine eingelassen wird, den Ausschnitt passen wir an. Wo er sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "You do not need to give any dimensions — just tell us which machine will be recessed and we will fit the cut-out. You decide where it sits: drag it in the preview, the distances to all four edges are shown next to it.",
+    "Nähmaschine — Hersteller und Modell": "Sewing machine — make and model",
+    "z. B. Bernina 770 QE oder Juki TL-2200": "e.g. Bernina 770 QE or Juki TL-2200",
+    "Maschinen-Ausschnitt hinzufügen": "Add machine cut-out",
+    "Maschinen-Ausschnitt entfernen": "Remove machine cut-out",
+    "im Plattenpreis": "included in the top price",
+    "Maßband": "Measuring tape",
+    "Nähmaschine": "Sewing machine",
+    "— vom Kunden noch nicht angegeben —": "— not yet given by the customer —",
+    "inkl. MwSt., kostenloser Versand bis 110 × 50 cm": "incl. VAT, free shipping up to 110 × 50 cm",
+    "Versand bis 110 × 50 cm gratis": "Free shipping up to 110 × 50 cm",
+    "Kantenbearbeitung": "Edge finishing",
+    "Kantenbearbeitung, lackiert": "Edge finishing, lacquered",
+    "+ 8 €/lfm": "+ €8/lin. m",
+    "auf Anfrage": "on request",
+    "Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet 5 €/lfm, halbrund 8 €/lfm. Lackiert sind es 5, 10 und 16 €/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.": "Visible layered edge: not milled as standard, milled 45° costs €5/lin. m, half-round €8/lin. m. Lacquered it is €5, €10 and €16/lin. m — we have exactly one lacquer. Alternatively an ABS edge in the colour of your choice.",
+    "Lage der Ausklinkung": "Position of the notch",
+    "Schnitt": "Cut",
+    "Gerade": "Straight",
+    "Schräg": "Angled",
+    "Winkel der Schräge": "Angle of the cut",
+    "5 bis 85° — zur hinteren Kante": "5 to 85° — relative to the back edge",
+    "Ausklinkung": "notch",
+    "schräg": "angled",
+    "alle fünf": "all five",
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "L-shape: five outer corners, each selectable on its own. With an angled cut there is no inner corner.",
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. The inner corner is rounded automatically per the production rule.",
+    "Liegt in der Ausklinkung — bitte verschieben": "Sits in the notch — please move it",
+    "Nullpunkt links": "Zero at the left",
+    "Nullpunkt rechts": "Zero at the right",
+    "Die Aufkleberkante sitzt auf der Stirnseite der Vorderkante — in der Draufsicht nur als Linie markiert, in der 3D-Ansicht sichtbar.": "The adhesive tape sits on the face of the front edge — marked only as a line in the top view, visible in the 3D view.",
+    "Das gelaserte Maßband liegt auf der Oberseite entlang der Vorderkante.": "The laser-etched tape lies on the top surface along the front edge.",
+    "Es ist höchstens 100 cm lang und endet vor den Eckradien.": "It is at most 100 cm long and stops short of the corner radii.",
+    "Maßband auf der Kante": "Tape on the edge",
+    "Maß des Ausschnitts": "Size of the cut-out",
+    "Nach Maschine": "To the machine",
+    "wir messen": "we measure",
+    "+ 40,00 € pauschal": "+ €40.00 flat",
+    "Standardmaß": "standard size",
+    "Wähle ein Standardmaß oder lass uns nach deiner Maschine messen — Hersteller und Modell brauchen wir in jedem Fall. Wo der Ausschnitt sitzt, legst du selbst fest: in der Vorschau verschieben, die Abstände zu allen vier Kanten stehen daneben.": "Pick a standard size or let us measure to your machine — we need make and model in any case. You decide where the cut-out sits: drag it in the preview, the distances to all four edges are shown next to it.",
+    "ab 19,90 € · 18/25/36 mm": "from €19.90 · 18/25/36 mm",
+    "ab 69 € · 12 mm": "from €69 · 12 mm",
+    "ab 29,90 € · 21/40 mm · alle Dekore": "from €29.90 · 21/40 mm · all decors",
+    "Ecken": "corners",
+    "Sondermaß": "Custom size",
+    "Jetzt bezahlen": "Pay now",
+    "Fertigung nach Maß": "Made to measure",
+    "Versandkosten im Checkout": "Shipping calculated at checkout",
+    "Nach Maß gefertigt": "Made to measure",
+    "Warenkorb wird vorbereitet …": "Preparing your cart …",
+    "Bezahlen gerade nicht möglich — wir nehmen deine Anfrage per E-Mail": "Payment is not available right now — we will take your request by e-mail",
+    "Schräge endet bei Punkt B": "Bevel ends at point B",
+    "Abstand von B zur Plattenkante · 0 = Schräge bis zur Kante": "Distance from B to the edge of the top · 0 = bevel runs to the edge",
+    "5 bis 85° — zur Plattenkante": "5 to 85° — relative to the edge of the top"
+  },
+  "muster": {
+    "pl": [
+      [
+        "^Maschine (.+)$",
+        "Maszyna $1"
+      ],
+      [
+        "^Größe (.+) — Richtwert, wir passen ihn an deine Maschine an\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+        "Wymiar $1 — wartość orientacyjna, dopasujemy go do Twojej maszyny. Odległości: lewo $2 · prawo $3 · tył $4 · przód $5 cm"
+      ],
+      [
+        "^Maschine: (.+)$",
+        "Maszyna: $1"
+      ],
+      [
+        "^Nähtischplatte (.+)$",
+        "Blat pod maszynę do szycia $1"
+      ],
+      [
+        "^Rechteck (.+)$",
+        "Prostokąt $1"
+      ],
+      [
+        "^Rund Ø (.+)$",
+        "Okrągły Ø $1"
+      ],
+      [
+        "^L-Form (.+)$",
+        "Kształt L $1"
+      ],
+      [
+        "^Nähmaschinen-Platte (.+)$",
+        "Blat do maszyny do szycia $1"
+      ],
+      [
+        "^Radius (.+)$",
+        "Promień $1"
+      ],
+      [
+        "^Ecken (.+)$",
+        "Narożniki $1"
+      ],
+      [
+        "^ABS (.+)$",
+        "ABS $1"
+      ],
+      [
+        "^Kante ([A-D]): (.+)$",
+        "Krawędź $1: $2"
+      ],
+      [
+        "^Kante: (.+)$",
+        "Krawędź: $1"
+      ],
+      [
+        "^Kante ([A-D])$",
+        "Krawędź $1"
+      ],
+      [
+        "^Ecke (.+), klicken zum Abrunden$",
+        "Narożnik $1, kliknij, aby zaokrąglić"
+      ],
+      [
+        "^\\+ (.+) / Stück$",
+        "+ $1 / szt."
+      ],
+      [
+        "^ab (.+)$",
+        "od $1"
+      ],
+      [
+        "^(\\d+) bis (\\d+) cm$",
+        "$1 do $2 cm"
+      ],
+      [
+        "^(\\d+) Größen ab Lager$",
+        "$1 rozmiarów z magazynu"
+      ],
+      [
+        "^Lagerartikel (\\d+)$",
+        "Artykuł magazynowy $1"
+      ],
+      [
+        "^Bitte (\\d+) bis (\\d+) cm eingeben$",
+        "Podaj od $1 do $2 cm"
+      ],
+      [
+        "^(\\d+) gewählt$",
+        "wybrano: $1"
+      ],
+      [
+        "^Ausschnitt hinzugefügt · (.+)$",
+        "Dodano wycięcie · $1"
+      ],
+      [
+        "^Runder Ausschnitt hinzugefügt · (.+)$",
+        "Dodano wycięcie okrągłe · $1"
+      ],
+      [
+        "^Freie Kontur hinzugefügt · (.+)$",
+        "Dodano dowolny kontur · $1"
+      ],
+      [
+        "^Kabelkanal hinzugefügt · (.+)$",
+        "Dodano kanał kablowy · $1"
+      ],
+      [
+        "^Ecke (.+): R(\\d+)$",
+        "Narożnik $1: R$2"
+      ],
+      [
+        "^Ecke (.+) wieder eckig$",
+        "Narożnik $1 znów ostry"
+      ],
+      [
+        "^R(\\d+) · alle Außenecken$",
+        "R$1 · wszystkie narożniki zewnętrzne"
+      ],
+      [
+        "^Versand bis (.+)$",
+        "Wysyłka do $1"
+      ],
+      [
+        "^Kabelkanal (.+) cm$",
+        "Kanał kablowy $1 cm"
+      ],
+      [
+        "^Länge (.+) cm · (.+) je lfm$",
+        "Długość $1 cm · $2 za mb"
+      ],
+      [
+        "^(\\d+) Punkte$",
+        "$1 punktów"
+      ],
+      [
+        "^Kantenfoto (.+), Originalaufnahme aus der Fertigung\\.$",
+        "Zdjęcie krawędzi $1, oryginalne ujęcie z produkcji."
+      ],
+      [
+        "^Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke\\. Gefertigt wird in (.+)\\.$",
+        "Ilustracja pokazuje krawędź w 25 mm, niezależnie od wybranej grubości. Produkujemy w $1."
+      ],
+      [
+        "^\\+ (\\d+(?:,\\d+)?) €/lfm$",
+        "+ $1 €/mb"
+      ],
+      [
+        "^(\\d+(?:,\\d+)?) €/lfm$",
+        "$1 €/mb"
+      ],
+      [
+        "^Ausklinkung schräg \\((\\d+) cm Schnitt\\)$",
+        "Wycięcie skośne ($1 cm cięcia)"
+      ],
+      [
+        "^Ausklinkung \\((\\d+) cm Schnitt\\)$",
+        "Wycięcie ($1 cm cięcia)"
+      ],
+      [
+        "^Eckenrundung (.+) \\((\\d+) (Ecke|Ecken)\\)$",
+        "Zaokrąglenie narożników $1 ($2 $3)"
+      ],
+      [
+        "^Sondermaß (.+) m²$",
+        "Wymiar niestandardowy $1 m²"
+      ],
+      [
+        "^Lagerartikel (.+)$",
+        "Artykuł magazynowy $1"
+      ],
+      [
+        "^Länge hier: (\\d+) cm$",
+        "Długość tutaj: $1 cm"
+      ],
+      [
+        "^Größe (.+) — Standardmaß\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+        "Wymiar $1 — wymiar standardowy. Odległości: lewo $2 · prawo $3 · tył $4 · przód $5 cm"
+      ],
+      [
+        "^Ecke (.+), klicken zum Begradigen$",
+        "Narożnik $1, kliknij, aby wyprostować"
+      ],
+      [
+        "^Maßband auf der Kante · (\\d+) cm$",
+        "Miarka na krawędzi · $1 cm"
+      ],
+      [
+        "^B bei (\\d+) cm$",
+        "B przy $1 cm"
+      ]
+    ],
+    "en": [
+      [
+        "^Maschine (.+)$",
+        "Machine $1"
+      ],
+      [
+        "^Größe (.+) — Richtwert, wir passen ihn an deine Maschine an\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+        "Size $1 — guide value, we adapt it to your machine. Distances: left $2 · right $3 · back $4 · front $5 cm"
+      ],
+      [
+        "^Maschine: (.+)$",
+        "Machine: $1"
+      ],
+      [
+        "^Nähtischplatte (.+)$",
+        "Sewing table top $1"
+      ],
+      [
+        "^Rechteck (.+)$",
+        "Rectangle $1"
+      ],
+      [
+        "^Rund Ø (.+)$",
+        "Round Ø $1"
+      ],
+      [
+        "^L-Form (.+)$",
+        "L-shape $1"
+      ],
+      [
+        "^Nähmaschinen-Platte (.+)$",
+        "Sewing machine top $1"
+      ],
+      [
+        "^Radius (.+)$",
+        "Radius $1"
+      ],
+      [
+        "^Ecken (.+)$",
+        "Corners $1"
+      ],
+      [
+        "^ABS (.+)$",
+        "ABS $1"
+      ],
+      [
+        "^Kante ([A-D]): (.+)$",
+        "Edge $1: $2"
+      ],
+      [
+        "^Kante: (.+)$",
+        "Edge: $1"
+      ],
+      [
+        "^Kante ([A-D])$",
+        "Edge $1"
+      ],
+      [
+        "^Ecke (.+), klicken zum Abrunden$",
+        "Corner $1, click to round"
+      ],
+      [
+        "^\\+ (.+) / Stück$",
+        "+ $1 / piece"
+      ],
+      [
+        "^ab (.+)$",
+        "from $1"
+      ],
+      [
+        "^(\\d+) bis (\\d+) cm$",
+        "$1 to $2 cm"
+      ],
+      [
+        "^(\\d+) Größen ab Lager$",
+        "$1 sizes from stock"
+      ],
+      [
+        "^Lagerartikel (\\d+)$",
+        "Stock item $1"
+      ],
+      [
+        "^Bitte (\\d+) bis (\\d+) cm eingeben$",
+        "Please enter $1 to $2 cm"
+      ],
+      [
+        "^(\\d+) gewählt$",
+        "$1 selected"
+      ],
+      [
+        "^Ausschnitt hinzugefügt · (.+)$",
+        "Cut out added · $1"
+      ],
+      [
+        "^Runder Ausschnitt hinzugefügt · (.+)$",
+        "Round cut out added · $1"
+      ],
+      [
+        "^Freie Kontur hinzugefügt · (.+)$",
+        "Free contour added · $1"
+      ],
+      [
+        "^Kabelkanal hinzugefügt · (.+)$",
+        "Cable channel added · $1"
+      ],
+      [
+        "^Ecke (.+): R(\\d+)$",
+        "Corner $1: R$2"
+      ],
+      [
+        "^Ecke (.+) wieder eckig$",
+        "Corner $1 square again"
+      ],
+      [
+        "^R(\\d+) · alle Außenecken$",
+        "R$1 · all outer corners"
+      ],
+      [
+        "^Versand bis (.+)$",
+        "Delivery by $1"
+      ],
+      [
+        "^Kabelkanal (.+) cm$",
+        "Cable channel $1 cm"
+      ],
+      [
+        "^Länge (.+) cm · (.+) je lfm$",
+        "Length $1 cm · $2 per linear metre"
+      ],
+      [
+        "^(\\d+) Punkte$",
+        "$1 points"
+      ],
+      [
+        "^Kantenfoto (.+), Originalaufnahme aus der Fertigung\\.$",
+        "Edge photo $1, original shot from production."
+      ],
+      [
+        "^Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke\\. Gefertigt wird in (.+)\\.$",
+        "The image shows the edge at 25 mm, regardless of the thickness chosen. Yours is made in $1."
+      ],
+      [
+        "^\\+ (\\d+(?:,\\d+)?) €/lfm$",
+        "+ €$1/lin. m"
+      ],
+      [
+        "^(\\d+(?:,\\d+)?) €/lfm$",
+        "€$1/lin. m"
+      ],
+      [
+        "^Ausklinkung schräg \\((\\d+) cm Schnitt\\)$",
+        "Angled notch ($1 cm of cut)"
+      ],
+      [
+        "^Ausklinkung \\((\\d+) cm Schnitt\\)$",
+        "Notch ($1 cm of cut)"
+      ],
+      [
+        "^Eckenrundung (.+) \\((\\d+) (Ecke|Ecken)\\)$",
+        "Corner rounding $1 ($2 $3)"
+      ],
+      [
+        "^Sondermaß (.+) m²$",
+        "Custom size $1 m²"
+      ],
+      [
+        "^Lagerartikel (.+)$",
+        "Stock item $1"
+      ],
+      [
+        "^Länge hier: (\\d+) cm$",
+        "Length here: $1 cm"
+      ],
+      [
+        "^Größe (.+) — Standardmaß\\. Abstände: links (.+) · rechts (.+) · hinten (.+) · vorn (.+) cm$",
+        "Size $1 — standard size. Distances: left $2 · right $3 · back $4 · front $5 cm"
+      ],
+      [
+        "^Ecke (.+), klicken zum Begradigen$",
+        "Corner $1, click to square off"
+      ],
+      [
+        "^Maßband auf der Kante · (\\d+) cm$",
+        "Tape on the edge · $1 cm"
+      ],
+      [
+        "^B bei (\\d+) cm$",
+        "B at $1 cm"
+      ]
+    ]
+  }
 }

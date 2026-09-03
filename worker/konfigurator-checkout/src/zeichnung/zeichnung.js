@@ -506,10 +506,27 @@ export function zeichnung(k, sprache) {
     else s += massV(Y(yN1), Y(yN2), px - 8, mm(ah), { von: px, size: 2.9 });
     // Schraeger Schnitt: Winkel zur hinteren/vorderen Kante
     if (lf.schraeg) {
-      const cx = X((xN1 + xN2) / 2), cy = Y((yN1 + yN2) / 2);
+      const sb = Math.max(0, Math.min(+lf.sb || 0, ah - 1));
       const offx = notchRechts ? 1 : -1, offy = notchOben ? -1 : 1;
-      s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor: 'middle' });
-      s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 4.4, t('schraeg'), { size: 2.3, fill: F.grau, anchor: 'middle' });
+      if (!(sb > 0)) {
+        const cx = X((xN1 + xN2) / 2), cy = Y((yN1 + yN2) / 2);
+        s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor: 'middle' });
+        s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 4.4, t('schraeg'), { size: 2.3, fill: F.grau, anchor: 'middle' });
+      } else {
+        // Punkt B (v1.17.3): A an der Aussenkante, B auf der Innenkante. Winkel an der
+        // Schraege, Mass B -> Plattenkante aussen neben dem Tiefenmass (zweite Ebene).
+        const xA = notchRechts ? B : 0, yA = notchOben ? ah : H - ah;
+        const xB = notchRechts ? B - aw : aw, yB = notchOben ? sb : H - sb;
+        const yK = notchOben ? 0 : H;                                     // Plattenkante der Ausklinkung
+        s += `<circle cx="${n(X(xA))}" cy="${n(Y(yA))}" r="0.9" fill="${F.mass}"/><circle cx="${n(X(xB))}" cy="${n(Y(yB))}" r="0.9" fill="${F.mass}"/>`;
+        s += txt(X(xA) + (notchRechts ? 2.2 : -2.2), Y(yA) + (notchOben ? -1.6 : 3.4), 'A', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
+        s += txt(X(xB) + (notchRechts ? -2.4 : 2.4), Y(yB) + (notchOben ? 3.4 : -1.6), 'B', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
+        const mxP = X((xA + xB) / 2) + offx * 6, myP = Y((yA + yB) / 2) + offy * 3.5;
+        s += txt(mxP, myP + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor: 'middle' });
+        s += txt(mxP, myP + 4.2, t('schraeg'), { size: 2.3, fill: F.grau, anchor: 'middle' });
+        const xM = notchRechts ? px + pb + 19 : px - 16;
+        s += massV(Y(Math.min(yK, yB)), Y(Math.max(yK, yB)), xM, mm(sb), { von: notchRechts ? px + pb : px, size: 2.6 });
+      }
     }
   }
 

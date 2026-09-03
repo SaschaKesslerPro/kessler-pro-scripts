@@ -27,6 +27,7 @@ function zufall(){
     massband:mat==='szwal'?pick(['none','laser','sticker']):'none', massbandNull:pick(['links','rechts']), machine:'', maschineMass:pick(['52x18.1','48x18.1','auto']), cuts:[]};
   if(S.mpxSurface==='hpl') S.dekor=pick(['ahorn','buk','hikora','weiss']);
   S.lf.aw=10+Math.floor(rnd()*(S.lf.L-20)); S.lf.ah=10+Math.floor(rnd()*(S.lf.B-20));
+  S.lf.sb=rnd()<0.5?Math.floor(rnd()*(S.lf.ah-1)):0;   /* Punkt B der Schraege (v1.17.3) */
   /* Lagergroesse mit 35 % Wahrscheinlichkeit */
   if(rnd()<0.35 && (form==='rect'||form==='round')){ const keys=Object.keys(SHOP).filter(k=>k.startsWith(`${mat}|${form}|${mat==='mpx'?'sperrholz-natur':S.dekor}|${S.thick}|`));
     if(keys.length){ const k=pick(keys), mass=k.split('|')[4]; if(form==='round') S.D=+mass.slice(1).replace(',','.'); else { const [a,b]=mass.split('x').map(x=>+x.replace(',','.')); S.L=a; S.B=b; } if(S.mpxSurface==='hpl') S.mpxSurface='natur'; } }

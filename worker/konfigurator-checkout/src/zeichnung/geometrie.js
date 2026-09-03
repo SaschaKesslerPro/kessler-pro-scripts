@@ -20,7 +20,9 @@ export function kontur(k) {
     const aw = Math.max(1, Math.min(lf.aw, L - 1)), ah = Math.max(1, Math.min(lf.ah, B - 1));
     // gebaut fuer "hinten rechts", danach gespiegelt — genau wie lfPts() im Konfigurator
     let pts, ord;
-    if (lf.schraeg) { pts = [[0, 0], [L - aw, 0], [L, ah], [L, B], [0, B]]; ord = [0, 1, 2, 3, 4]; }
+    const sb = lf.schraeg ? Math.max(0, Math.min(+lf.sb || 0, ah - 1)) : 0;   // Punkt B (v1.17.3)
+    if (lf.schraeg && sb > 0) { pts = [[0, 0], [L - aw, 0], [L - aw, sb], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
+    else if (lf.schraeg) { pts = [[0, 0], [L - aw, 0], [L, ah], [L, B], [0, B]]; ord = [0, 1, 2, 3, 4]; }
     else { pts = [[0, 0], [L - aw, 0], [L - aw, ah], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
     const mx = lf.pos === 'hl' || lf.pos === 'vl', my = lf.pos === 'vr' || lf.pos === 'vl';
     pts = pts.map(([x, y]) => [mx ? L - x : x, my ? B - y : y]);

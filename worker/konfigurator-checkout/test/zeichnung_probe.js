@@ -25,6 +25,12 @@ const faelle = {
   'naehtisch_schraeg_vl': [{ mat: 'szwal', dekor: 'sz-gewebe', thick: '21', form: 'lform', lf: { L: 160, B: 90, aw: 50, ah: 30, pos: 'vl', schnitt: 'schraeg' },
     edges: ['f45', 'f45', 'f45', 'f45'], lfR: [10, 10, 0, 0, 0], lack: true, massband: 'laser', massbandNull: 'rechts', maschineMass: '52x18.1',
     cuts: [{ t: 'r', cx: 100, cy: 75, w: 52, h: 18.1, preset: 'maschine' }] }, 'pl', { exemplar: 'produktion', maschine: 'Juki TL-2200' }],
+  /* v1.17.3: Schraege mit Punkt B — Skizze des Seniors: tiefe Ausklinkung vorne links,
+     Schraege nur oben, danach gerade bis zur Kante */
+  'lform_schraeg_B_vl': [{ mat: 'dekor', dekor: 'sonoma-eiche', thick: '25', form: 'lform', lf: { L: 120, B: 200, aw: 40, ah: 150, pos: 'vl', schnitt: 'schraeg', sb: 100 },
+    edges: ['abs', 'abs', 'abs', 'abs'], lfR: [0, 0, 0, 0, 0], absColor: 'schwarz', bohr: false, cuts: [] }, 'de', { exemplar: 'kunde' }],
+  'lform_schraeg_B_hr': [{ mat: 'mpx', dekor: 'sperrholz-natur', thick: '40', form: 'lform', lf: { L: 180, B: 120, aw: 60, ah: 80, pos: 'hr', schnitt: 'schraeg', sb: 45 },
+    edges: ['abs', 'abs', 'abs', 'abs'], lfR: [0, 30, 0, 0, 0], absColor: 'dekor', bohr: true, cuts: [] }, 'pl', { exemplar: 'produktion' }],
   'rund_mpx': [{ mat: 'mpx', dekor: 'sperrholz-natur', thick: '21', form: 'round', D: 90, edges: ['halbrund', 'halbrund', 'halbrund', 'halbrund'], bohr: true,
     cuts: [{ t: 'c', cx: 45, cy: 45, d: 8, preset: 'kabel80' }] }, 'en', { exemplar: 'kunde', freigabe: { name: 'J. Smith', zeit: '2026-09-03 10:12' } }],
   'rect_kanal_poly': [{ mat: 'compact', dekor: 'marmor-weiss', thick: '12', form: 'rect', L: 200, B: 80, edges: ['fase', 'fase', 'fase', 'fase'], cornerR: [20, 20, 20, 20],

@@ -95,10 +95,12 @@ export function konfigZuZeichnung(S, meta = {}) {
       L: cm(S.lf.L), B: cm(S.lf.B), aw: cm(S.lf.aw), ah: cm(S.lf.ah),
       pos: S.lf.pos || 'vr',   /* Vorgabe seit v1.17.2: vorne rechts (Senior 03.09.) */
       schraeg: !!g.schraeg, winkel: g.winkel,
-      innenradius: g.schraeg ? 0 : innen,
+      sb: g.schraeg ? cm(g.sb || 0) : 0,            /* Punkt B: Abstand zur Plattenkante (v1.17.3) */
+      innenradius: (g.schraeg && !(g.sb > 0)) ? 0 : innen,   /* Innenecke: beim geraden L und am Punkt B */
       radien: (S.lfR || [0, 0, 0, 0, 0]).map((v) => +v || 0),
     };
     if (!g.schraeg) hw(`Innenecke der Ausklinkung R ${innen} mm (Fertigungsregel)`, `Narożnik wewnętrzny wycięcia R ${innen} mm (zasada produkcji)`, `Inner corner of the notch R ${innen} mm (production rule)`);
+    else if (g.sb > 0) hw(`Schräge von A bis B, Punkt B ${cm(g.sb)} mm von der Plattenkante · Übergang bei B R ${innen} mm (Fertigungsregel)`, `Skos od A do B, punkt B ${cm(g.sb)} mm od krawędzi blatu · przejście w B R ${innen} mm (zasada produkcji)`, `Bevel from A to B, point B ${cm(g.sb)} mm from the edge · transition at B R ${innen} mm (production rule)`);
   }
 
   // Bearbeitungen (cm -> mm). Rechteck: x/y = Ecke hinten links des Ausschnitts.

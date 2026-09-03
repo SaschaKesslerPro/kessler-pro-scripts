@@ -314,7 +314,7 @@ function attributeFuer(S, K, c, body, waehrung){
   if(S.form==='round') add('Form & Maß', `Rund Ø ${S.D} cm`);
   else if(S.form==='lform'){
     const g = K.lfGeo();
-    add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg ${g.winkel}°` : ' · gerade'}`);
+    add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg ${g.winkel}°${g.sb > 0 ? ` · Punkt B ${g.sb} cm von der Kante` : ''}` : ' · gerade'}`);
   } else add('Form & Maß', `${S.mat==='szwal'?'Nähtischplatte':'Rechteck'} ${d.w} × ${d.h} cm`);
   const kanten = S.form==='round' ? [S.edges[0]] : S.edges;
   const uniq = [...new Set(kanten)];
