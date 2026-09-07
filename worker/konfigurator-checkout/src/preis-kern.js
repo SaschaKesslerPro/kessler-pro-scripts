@@ -338,11 +338,11 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     const aw=Math.max(1,Math.min(+S.lf.aw, L-1)), ah=Math.max(1,Math.min(+S.lf.ah, B-1));
     let pts, ord;
     const sb=lfSb();
-    if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* A=(L,ah), B=(L-aw,sb) */
+    if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* A=(L-aw,sb) innen, B=(L,ah) aussen */
     else if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
     else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
     /* Radius je Punkt (cm): Innenecke = Fertigungsradius; bei der Schraege bekommen
-       beide Endpunkte (A aussen, B innen) mindestens den Fertigungsradius, sonst
+       beide Endpunkte (A innen, B aussen) mindestens den Fertigungsradius, sonst
        der vom Kunden gewaehlte Radius der Aussenecke. */
     const rmin=lfMinR(), schr=lfSchraeg();
     const diag=schr ? (sb>0 ? [2,3] : [1,2]) : [];
@@ -355,9 +355,10 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function lfGeo(){
     const g=lfPts(), L=g.L/100, B=g.B/100, aw=g.aw/100, ah=g.ah/100;
-    if(lfSchraeg()){ const sb=g.sb/100, t=ah-sb, s=Math.hypot(aw,t)+sb;      /* Schraege A-B plus gerades Stueck B-Kante */
-      return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:Math.round(Math.atan2(t,aw)*180/Math.PI), sb:g.sb}; }
-    return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:90, sb:0};
+    if(lfSchraeg()){ const sb=g.sb/100, t=ah-sb, s=Math.hypot(aw,t)+sb;      /* gerades Stueck Kante-A plus Schraege A-B */
+      /* Winkel bei A im Ausschnitt: 90 (gerader Schnitt) + Neigung der Schraege zur Plattenkante */
+      return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:90+Math.round(Math.atan2(t,aw)*180/Math.PI), sb:g.sb}; }
+    return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:180, sb:0};
   }
 
   function lfSchnittCm(){ return Math.round(lfGeo().schnitt*100); }

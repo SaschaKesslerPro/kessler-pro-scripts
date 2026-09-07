@@ -20,12 +20,12 @@ export function kontur(k) {
     const aw = Math.max(1, Math.min(lf.aw, L - 1)), ah = Math.max(1, Math.min(lf.ah, B - 1));
     // gebaut fuer "hinten rechts", danach gespiegelt — genau wie lfPts() im Konfigurator
     let pts, ord;
-    const sb = lf.schraeg ? Math.max(0, Math.min(+lf.sb || 0, ah - 1)) : 0;   // Punkt B (v1.17.3)
+    const sb = lf.schraeg ? Math.max(0, Math.min(+lf.sb || 0, ah - 1)) : 0;   // Punkt A auf der Innenkante (v1.17.3; Buchstaben 07.09. getauscht)
     if (lf.schraeg && sb > 0) { pts = [[0, 0], [L - aw, 0], [L - aw, sb], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
     else if (lf.schraeg) { pts = [[0, 0], [L - aw, 0], [L, ah], [L, B], [0, B]]; ord = [0, 1, 2, 3, 4]; }
     else { pts = [[0, 0], [L - aw, 0], [L - aw, ah], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
     // Radius je Punkt: Innenecke = Fertigungsradius; bei der Schraege bekommen beide
-    // Endpunkte (A aussen, B innen) mindestens den Fertigungsradius (Senior 03.09.).
+    // Endpunkte (A innen, B aussen) mindestens den Fertigungsradius (Senior 03.09.).
     const radK = lf.radien || [], rmin = lf.innenradius || 0;
     const diag = lf.schraeg ? (sb > 0 ? [2, 3] : [1, 2]) : [];
     let rad = pts.map((_, i) => ord[i] < 0 ? rmin : (diag.indexOf(i) >= 0 ? Math.max(rmin, +radK[ord[i]] || 0) : (+radK[ord[i]] || 0)));

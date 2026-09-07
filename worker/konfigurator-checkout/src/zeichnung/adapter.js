@@ -97,13 +97,13 @@ export function konfigZuZeichnung(S, meta = {}) {
       L: cm(S.lf.L), B: cm(S.lf.B), aw: cm(S.lf.aw), ah: cm(S.lf.ah),
       pos: S.lf.pos || 'vr',   /* Vorgabe seit v1.17.2: vorne rechts (Senior 03.09.) */
       schraeg: !!g.schraeg, winkel: g.winkel,
-      sb: g.schraeg ? cm(g.sb || 0) : 0,            /* Punkt B: Abstand zur Plattenkante (v1.17.3) */
+      sb: g.schraeg ? cm(g.sb || 0) : 0,            /* Punkt A: Abstand zur Plattenkante (v1.17.3, Buchstaben 07.09. getauscht) */
       innenradius: innen,                          /* Innenecke bzw. Mindestradius an A und B */
       radien: (S.lfR || [0, 0, 0, 0, 0]).map((v) => +v || 0),
     };
     const kanteTxt = S.edges[0] === 'abs' ? ['ABS-Kante geklebt', 'krawędź ABS klejona', 'glued ABS edge'] : ['Kante ohne ABS', 'krawędź bez ABS', 'edge without ABS'];
     if (!g.schraeg) hw(`Innenecke der Ausklinkung R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Narożnik wewnętrzny wycięcia R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Inner corner of the notch R ${innen} mm — ${kanteTxt[2]} (production rule)`);
-    else if (g.sb > 0) hw(`Schräge von A bis B, Punkt B ${cm(g.sb)} mm von der Plattenkante · A und B mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos od A do B, punkt B ${cm(g.sb)} mm od krawędzi blatu · A i B co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel from A to B, point B ${cm(g.sb)} mm from the edge · A and B at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
+    else if (g.sb > 0) hw(`Schräge von A (${cm(g.sb)} mm von der Plattenkante) bis B an der Außenkante, Winkel bei A ${g.winkel}° · A und B mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos od A (${cm(g.sb)} mm od krawędzi blatu) do B na krawędzi zewnętrznej, kąt w A ${g.winkel}° · A i B co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel from A (${cm(g.sb)} mm from the edge) to B at the outer edge, angle at A ${g.winkel}° · A and B at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
     else hw(`Schräge durchgehend · Übergänge mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos na całej długości · przejścia co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel over the full depth · transitions at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
   }
 
