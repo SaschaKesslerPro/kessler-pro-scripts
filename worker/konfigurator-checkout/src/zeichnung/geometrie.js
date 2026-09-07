@@ -25,7 +25,7 @@ export function kontur(k) {
     else if (lf.schraeg) { pts = [[0, 0], [L - aw, 0], [L, ah], [L, B], [0, B]]; ord = [0, 1, 2, 3, 4]; }
     else { pts = [[0, 0], [L - aw, 0], [L - aw, ah], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
     // Radius je Punkt: Innenecke = Fertigungsradius; bei der Schraege bekommen beide
-    // Endpunkte (A innen, B aussen) mindestens den Fertigungsradius (Senior 03.09.).
+    // Endpunkte (A innen, Ende an der Aussenkante) mindestens den Fertigungsradius (Senior 03.09.).
     const radK = lf.radien || [], rmin = lf.innenradius || 0;
     const diag = lf.schraeg ? (sb > 0 ? [2, 3] : [1, 2]) : [];
     let rad = pts.map((_, i) => ord[i] < 0 ? rmin : (diag.indexOf(i) >= 0 ? Math.max(rmin, +radK[ord[i]] || 0) : (+radK[ord[i]] || 0)));

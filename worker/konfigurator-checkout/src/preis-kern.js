@@ -338,11 +338,11 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     const aw=Math.max(1,Math.min(+S.lf.aw, L-1)), ah=Math.max(1,Math.min(+S.lf.ah, B-1));
     let pts, ord;
     const sb=lfSb();
-    if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* A=(L-aw,sb) innen, B=(L,ah) aussen */
+    if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* B=(L-aw,0) an der Kante, A=(L-aw,sb) innen, Schraege bis (L,ah) */
     else if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
     else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
     /* Radius je Punkt (cm): Innenecke = Fertigungsradius; bei der Schraege bekommen
-       beide Endpunkte (A innen, B aussen) mindestens den Fertigungsradius, sonst
+       beide Endpunkte (A innen, Ende an der Aussenkante) mindestens den Fertigungsradius, sonst
        der vom Kunden gewaehlte Radius der Aussenecke. */
     const rmin=lfMinR(), schr=lfSchraeg();
     const diag=schr ? (sb>0 ? [2,3] : [1,2]) : [];

@@ -281,8 +281,8 @@
     "Lagergröße versandkostenfrei · nach Maß 19,99 €": "Rozmiar magazynowy bez kosztów dostawy · na wymiar 84,90 zł",
     "Versand Maßanfertigung (pauschal)": "Dostawa produktu na wymiar (ryczałt)",
     "Schräge beginnt bei Punkt A": "Skos zaczyna się w punkcie A",
-    "Abstand von A zur Plattenkante · 0 = Schräge bis zur Kante": "Odległość punktu A od krawędzi blatu · 0 = skos aż do krawędzi",
-    "95 bis 175° — bei Punkt A, im Ausschnitt gemessen · 180° = gerade": "95 do 175° — w punkcie A, mierzony w wycięciu · 180° = proste"
+    "Strecke von B (Plattenkante) bis A · 0 = Schräge bis zur Kante": "Odcinek od B (krawędź blatu) do A · 0 = skos aż do krawędzi",
+    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 do 175° — w punkcie A między A–B a skosem, mierzony w wycięciu · 180° = proste"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -556,8 +556,8 @@
     "Lagergröße versandkostenfrei · nach Maß 19,99 €": "Stock size ships free · made to measure 19,99 €",
     "Versand Maßanfertigung (pauschal)": "Shipping made-to-measure (flat rate)",
     "Schräge beginnt bei Punkt A": "Bevel starts at point A",
-    "Abstand von A zur Plattenkante · 0 = Schräge bis zur Kante": "Distance from A to the edge of the top · 0 = bevel runs to the edge",
-    "95 bis 175° — bei Punkt A, im Ausschnitt gemessen · 180° = gerade": "95 to 175° — at point A, measured in the notch · 180° = straight"
+    "Strecke von B (Plattenkante) bis A · 0 = Schräge bis zur Kante": "Distance from B (edge of the top) to A · 0 = bevel runs to the edge",
+    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 to 175° — at point A between A–B and the bevel, measured in the notch · 180° = straight"
   },
   "muster": {
     "pl": [
@@ -754,8 +754,8 @@
         "Narożnik wewnętrzny jest zaokrąglany automatycznie: R$1 — $2 (zasada produkcji)."
       ],
       [
-        "^Punkte A und B der Schräge werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
-        "Punkty A i B skosu są zaokrąglane automatycznie: R$1 — $2 (zasada produkcji)."
+        "^Punkt A und das Ende der Schräge an der Außenkante werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
+        "Punkt A i koniec skosu na krawędzi zewnętrznej są zaokrąglane automatycznie: R$1 — $2 (zasada produkcji)."
       ],
       [
         "^inkl\\. MwSt\\., zzgl\\. (.+) Versand$",
@@ -766,8 +766,8 @@
         "Dostawa $1 ryczałt"
       ],
       [
-        "^A/B R(\\d+) \\(Fertigungsregel\\)$",
-        "A/B R$1 (zasada produkcji)"
+        "^Schräge R(\\d+) \\(Fertigungsregel\\)$",
+        "Skos R$1 (zasada produkcji)"
       ]
     ],
     "en": [
@@ -964,8 +964,8 @@
         "The inner corner is rounded automatically: R$1 — $2 (production rule)."
       ],
       [
-        "^Punkte A und B der Schräge werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
-        "Points A and B of the bevel are rounded automatically: R$1 — $2 (production rule)."
+        "^Punkt A und das Ende der Schräge an der Außenkante werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
+        "Point A and the end of the bevel at the outer edge are rounded automatically: R$1 — $2 (production rule)."
       ],
       [
         "^inkl\\. MwSt\\., zzgl\\. (.+) Versand$",
@@ -976,8 +976,8 @@
         "Shipping $1 flat rate"
       ],
       [
-        "^A/B R(\\d+) \\(Fertigungsregel\\)$",
-        "A/B R$1 (production rule)"
+        "^Schräge R(\\d+) \\(Fertigungsregel\\)$",
+        "Bevel R$1 (production rule)"
       ]
     ]
   }

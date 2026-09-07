@@ -417,14 +417,14 @@ function attributeFuer(S, K, c, body, waehrung){
   if(S.form==='round') add('Form & Maß', `Rund Ø ${S.D} cm`);
   else if(S.form==='lform'){
     const g = K.lfGeo();
-    add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg, Winkel bei A ${g.winkel}°${g.sb > 0 ? ` · Punkt A ${g.sb} cm von der Kante` : ''}` : ' · gerade'}`);
+    add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg, Winkel bei A ${g.winkel}°${g.sb > 0 ? ` · A ${g.sb} cm von B (Plattenkante)` : ''}` : ' · gerade'}`);
   } else add('Form & Maß', `${S.mat==='szwal'?'Nähtischplatte':'Rechteck'} ${d.w} × ${d.h} cm`);
   const kanten = S.form==='round' ? [S.edges[0]] : S.edges;
   const uniq = [...new Set(kanten)];
   add('Kante', (uniq.length===1 ? (KANTE_NAME[uniq[0]]||uniq[0]) : S.edges.map((e,i)=>'ABCD'[i]+': '+(KANTE_NAME[e]||e)).join(' · '))
     + (S.edges.includes('abs') && S.absColor && S.absColor!=='dekor' ? ` · ABS-Farbe ${S.absColor}` : '')
     + (S.extras.lack ? ' · lackiert' : ''));
-  { const na = K.lfAutoEcken ? K.lfAutoEcken() : 0, auto = na>0 ? `A/B R${K.lfMinR()*10} (Fertigungsregel)` : '';
+  { const na = K.lfAutoEcken ? K.lfAutoEcken() : 0, auto = na>0 ? `Schräge R${K.lfMinR()*10} (Fertigungsregel)` : '';
     if(K.cornerCount()>0 || na>0) add('Ecken', K.cornerCount()>0 ? `${K.cornerLabel()}${auto ? ' · ' + auto : ''}` : auto); }
   if(S.mat==='szwal'){
     const st = K.massbandStrecke();

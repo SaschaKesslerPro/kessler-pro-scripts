@@ -515,28 +515,31 @@ export function zeichnung(k, sprache) {
         s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor: 'middle' });
         s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 4.4, t('schraeg'), { size: 2.3, fill: F.grau, anchor: 'middle' });
       } else {
-        // Punkte A/B (v1.17.3, Buchstaben 07.09. nach dem Senior getauscht): A auf der
-        // Innenkante der Ausklinkung (sb von der Plattenkante), B an der Aussenkante.
-        // Winkel als Bogen bei A im Ausschnitt, zwischen geradem Schnitt und Schraege;
-        // Mass A -> Plattenkante aussen neben dem Tiefenmass (zweite Ebene).
+        // Punkte A/B (Senior, 07.09.): B = Ecke der Ausklinkung an der Plattenkante,
+        // A auf der Innenkante der Ausklinkung (sb von B). Von B bis A gerade, ab A die
+        // Schraege bis zur Aussenkante (Endpunkt E ohne Buchstaben). Winkel als Bogen
+        // bei A im Ausschnitt zwischen A-B und der Schraege; Mass B-A aussen neben dem
+        // Tiefenmass (zweite Ebene).
         const xA = notchRechts ? B - aw : aw, yA = notchOben ? sb : H - sb;
-        const xB = notchRechts ? B : 0, yB = notchOben ? ah : H - ah;
-        const yK = notchOben ? 0 : H;                                     // Plattenkante der Ausklinkung
-        s += `<circle cx="${n(X(xA))}" cy="${n(Y(yA))}" r="0.9" fill="${F.mass}"/><circle cx="${n(X(xB))}" cy="${n(Y(yB))}" r="0.9" fill="${F.mass}"/>`;
+        const xE = notchRechts ? B : 0, yE = notchOben ? ah : H - ah;
+        const yK = notchOben ? 0 : H;                                     // Plattenkante der Ausklinkung = B
+        s += `<circle cx="${n(X(xA))}" cy="${n(Y(yA))}" r="0.9" fill="${F.mass}"/><circle cx="${n(X(xA))}" cy="${n(Y(yK))}" r="0.9" fill="${F.mass}"/>`;
         s += txt(X(xA) + (notchRechts ? -2.4 : 2.4), Y(yA) + (notchOben ? 3.4 : -1.6), 'A', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
-        s += txt(X(xB) + (notchRechts ? 2.2 : -2.2), Y(yB) + (notchOben ? -1.6 : 3.4), 'B', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
-        // Winkelbogen bei A: Richtungen A->Plattenkante (gerader Schnitt) und A->B (Schraege),
+        s += txt(X(xA) + (notchRechts ? -2.4 : 2.4), Y(yK) + (notchOben ? -1.6 : 3.4), 'B', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
+        // Winkelbogen bei A: Richtungen A->B (gerader Schnitt) und A->E (Schraege),
         // Bogen auf der Seite des kleineren Winkels = im Ausschnitt. Radius nach Platz.
         const Ax = X(xA), Ay = Y(yA);
         const u = (x, y) => { const dx = x - Ax, dy = y - Ay, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
-        const u1 = u(X(xA), Y(yK)), u2 = u(X(xB), Y(yB));
+        const u1 = u(X(xA), Y(yK)), u2 = u(X(xE), Y(yE));
         const sweep = (u1[0] * u2[1] - u1[1] * u2[0]) > 0 ? 1 : 0;
         const r = Math.max(3, Math.min(7, S(sb) * 0.7, S(aw) * 0.55));
         s += `<path d="M${n(Ax + u1[0] * r)} ${n(Ay + u1[1] * r)} A${n(r)} ${n(r)} 0 0 ${sweep} ${n(Ax + u2[0] * r)} ${n(Ay + u2[1] * r)}" fill="none" stroke="${F.mass}" stroke-width="0.25"/>`;
         let bx = u1[0] + u2[0], by = u1[1] + u2[1]; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-        const tx = Ax + bx * (r + 4.2), ty = Ay + by * (r + 4.2);
-        s += txt(tx, ty + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor: 'middle' });
-        s += txt(tx, ty + 4.2, t('schraeg'), { size: 2.3, fill: F.grau, anchor: 'middle' });
+        // Text hinter dem Bogen, Ankerseite nach Richtung der Winkelhalbierenden (laeuft sonst in den Bogen)
+        const anchor = bx > 0.35 ? 'start' : bx < -0.35 ? 'end' : 'middle', dT = anchor === 'middle' ? r + 4.2 : r + 1.8;
+        const tx = Ax + bx * dT, ty = Ay + by * dT;
+        s += txt(tx, ty + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor });
+        s += txt(tx, ty + 4.2, t('schraeg'), { size: 2.3, fill: F.grau, anchor });
         // Radius-Label von A: hinter dem Bogen am geraden Schnitt, in den Ausschnitt versetzt
         const eA = eckenV && eckenV.find((e) => e.ord < 0);
         if (eA && eA.r > 0) {
