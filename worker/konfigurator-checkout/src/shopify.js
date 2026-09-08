@@ -149,3 +149,71 @@ export async function webhookHmacOk(env, rohkoerper, hmacHeader){
   let diff = 0; for(let i=0;i<b64.length;i++) diff |= b64.charCodeAt(i) ^ hmacHeader.charCodeAt(i);
   return diff === 0;
 }
+
+/* ── Konfigurator-Varianten (Warenkorb-Weg, 07.09.2026) ─────────────────────
+   Je Konfiguration eine eigene Variante des versteckten Basisprodukts mit echtem
+   Preis: PLN als Variantenpreis (Shopwaehrung), EUR als Festpreis in der Preisliste
+   des EU-Markts. So laeuft die Platte durch Shopyflow-Warenkorb und Checkout wie
+   jeder andere Artikel; der Preis kommt nie aus dem Browser. */
+export async function varianteAnlegen(env, { produktId, optionName, optionWert, preisPln, sku, gewichtKg, mediaId }){
+  const q = `mutation kfgVar($p:ID!,$v:[ProductVariantsBulkInput!]!){ productVariantsBulkCreate(productId:$p, variants:$v, strategy:DEFAULT){ productVariants{ id title } userErrors{ field message code } } }`;
+  const v = [{
+    optionValues: [{ optionName, name: optionWert }],
+    price: (+preisPln).toFixed(2), taxable: true, inventoryPolicy: 'CONTINUE',
+    inventoryItem: { sku, tracked: false, requiresShipping: true, measurement: { weight: { unit: 'KILOGRAMS', value: +gewichtKg || 1 } } },
+    ...(mediaId ? { mediaId } : {}),
+  }];
+  const d = await graphql(env, q, { p: produktId, v });
+  const res = d && d.productVariantsBulkCreate;
+  if(!res || (res.userErrors && res.userErrors.length) || !res.productVariants || !res.productVariants[0]) throw fehler('Variante abgelehnt', 502, res && res.userErrors);
+  return res.productVariants[0];
+}
+export async function festpreisSetzen(env, preislisteId, variantId, betrag, waehrung){
+  const q = `mutation kfgPreis($l:ID!,$p:[PriceListPriceInput!]!){ priceListFixedPricesAdd(priceListId:$l, prices:$p){ prices{ variant{ id } price{ amount currencyCode } } userErrors{ field message code } } }`;
+  const d = await graphql(env, q, { l: preislisteId, p: [{ variantId, price: { amount: (+betrag).toFixed(2), currencyCode: waehrung } }] });
+  const res = d && d.priceListFixedPricesAdd;
+  if(!res || (res.userErrors && res.userErrors.length)) throw fehler('Festpreis abgelehnt', 502, res && res.userErrors);
+  return res.prices && res.prices[0];
+}
+export async function versandprofilZuordnen(env, profilId, variantIds){
+  const q = `mutation kfgProfil($id:ID!,$p:DeliveryProfileInput!){ deliveryProfileUpdate(id:$id, profile:$p){ profile{ id } userErrors{ field message } } }`;
+  const d = await graphql(env, q, { id: profilId, p: { variantsToAssociate: variantIds } });
+  const res = d && d.deliveryProfileUpdate;
+  if(!res || (res.userErrors && res.userErrors.length)) throw fehler('Versandprofil abgelehnt', 502, res && res.userErrors);
+  return true;
+}
+/** Konfigurator-Varianten (SKU KFG-…) des Basisprodukts, aelteste zuerst. */
+export async function konfigVariantenAuflisten(env, produktId, max = 250){
+  const q = `query($q:String!,$n:Int!){ productVariants(first:$n, query:$q, sortKey:ID){ nodes{ id sku createdAt } } }`;
+  const d = await graphql(env, q, { q: `product_id:${String(produktId).split('/').pop()} AND sku:KFG-*`, n: Math.min(250, max) });
+  return ((d.productVariants && d.productVariants.nodes) || []).filter(v => /^KFG-/.test(v.sku || ''));
+}
+export async function variantenLoeschen(env, produktId, variantIds){
+  if(!variantIds.length) return 0;
+  const q = `mutation kfgDel($p:ID!,$ids:[ID!]!){ productVariantsBulkDelete(productId:$p, variantsIds:$ids){ userErrors{ field message } } }`;
+  const d = await graphql(env, q, { p: produktId, ids: variantIds });
+  const res = d && d.productVariantsBulkDelete;
+  if(!res || (res.userErrors && res.userErrors.length)) throw fehler('Loeschen abgelehnt', 502, res && res.userErrors);
+  return variantIds.length;
+}
+
+/* ── Storefront API: eigener Warenkorb fuer den Sofortkauf ─────────────────
+   Nur fuer "Sofortkauf": ein frischer Warenkorb mit genau dieser Position, der
+   Kunde landet direkt im Checkout. Der Shopyflow-Warenkorb des Kunden bleibt
+   unberuehrt. Der Storefront-Token ist oeffentlich (steht im Seitenquelltext). */
+export async function storefrontWarenkorb(env, { variantId, attribute, land, sprache }){
+  const token = env.STOREFRONT_TOKEN;
+  if(!token) throw fehler('Storefront-Token fehlt', 503);
+  const q = `mutation kfgCart($in:CartInput!){ cartCreate(input:$in){ cart{ id checkoutUrl } userErrors{ field message code } } }`;
+  const body = { query: q, variables: { in: {
+    lines: [{ merchandiseId: variantId, quantity: 1, attributes: attribute }],
+    buyerIdentity: { countryCode: land },
+  } } };
+  const r = await fetch(`https://${env.SHOPIFY_SHOP}/api/${API_VERSION}/graphql.json`, {
+    method:'POST', headers:{ 'Content-Type':'application/json', 'X-Shopify-Storefront-Access-Token': token, 'Accept-Language': sprache || 'de' },
+    body: JSON.stringify(body) });
+  const d = await r.json().catch(()=>null);
+  const res = d && d.data && d.data.cartCreate;
+  if(!r.ok || !res || (res.userErrors && res.userErrors.length) || !res.cart) throw fehler('Warenkorb abgelehnt', 502, (res && res.userErrors) || (d && d.errors) || r.status);
+  return res.cart;
+}

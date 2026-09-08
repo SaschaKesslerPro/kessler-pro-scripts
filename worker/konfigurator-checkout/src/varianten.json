@@ -1,8 +1,11 @@
 {
   "_meta": {
-    "zweck": "Verstecktes Basisprodukt 'Tischplatte nach Maß' (gid://shopify/Product/10982600540506, nicht veröffentlicht, alle Preise 0,00). Der Worker legt die Draft-Order-Position auf die passende Variante mit priceOverride, damit Warenkorb, Checkout und Bestellbestätigung das Produktfoto des gewählten Dekors zeigen. Schlüssel: <mat|mpx_hpl>|<dekor>. Angelegt 03.09.2026.",
+    "zweck": "Verstecktes Basisprodukt 'Tischplatte nach Maß' (gid://shopify/Product/10982600540506). Seit 07.09.: je Konfiguration legt der Worker eine eigene Variante mit echtem Preis an (SKU KFG-<token>, PLN-Preis + EUR-Festpreis in der EU-Preisliste), damit die Platte im Shopyflow-Warenkorb und im Checkout wie ein normaler Artikel laeuft. Die 32 Basisvarianten (Preis 0,00) sind nur noch Bildtraeger und nicht kaufbar. 'medien' = Dekorfoto je Schluessel <mat|mpx_hpl>|<dekor>.",
     "produkt": "gid://shopify/Product/10982600540506",
-    "warnung": "Nie veröffentlichen — die Varianten kosten 0,00 und bekommen ihren Preis nur über den Worker."
+    "warnung": "Nie veröffentlichen — die Varianten kosten 0,00 und bekommen ihren Preis nur über den Worker.",
+    "option": "Ausführung",
+    "preisliste_eur": "gid://shopify/PriceList/31843025242",
+    "versandprofil": "gid://shopify/DeliveryProfile/138342564186"
   },
   "dekor|buk": "gid://shopify/ProductVariant/54697596420442",
   "dekor|ahorn": "gid://shopify/ProductVariant/54697616703834",
@@ -35,5 +38,39 @@
   "szwal|sz-weiss": "gid://shopify/ProductVariant/54697617359194",
   "szwal|sz-gewebe": "gid://shopify/ProductVariant/54697617391962",
   "szwal|sz-grau": "gid://shopify/ProductVariant/54697617424730",
-  "szwal|sz-schwarz": "gid://shopify/ProductVariant/54697617457498"
+  "szwal|sz-schwarz": "gid://shopify/ProductVariant/54697617457498",
+  "medien": {
+    "dekor|buk": "gid://shopify/MediaImage/62075442561370",
+    "dekor|ahorn": "gid://shopify/MediaImage/62075442594138",
+    "dekor|sosna-bielona": "gid://shopify/MediaImage/62075442626906",
+    "dekor|szary": "gid://shopify/MediaImage/62075442659674",
+    "dekor|schwarz": "gid://shopify/MediaImage/62075442692442",
+    "dekor|sonoma-eiche": "gid://shopify/MediaImage/62075442725210",
+    "dekor|hikora": "gid://shopify/MediaImage/62075442757978",
+    "dekor|weiss": "gid://shopify/MediaImage/62075442790746",
+    "dekor|alaska-weiss": "gid://shopify/MediaImage/62075442823514",
+    "dekor|kaszmir": "gid://shopify/MediaImage/62075442856282",
+    "dekor|eiche-artison": "gid://shopify/MediaImage/62075442889050",
+    "mpx|sperrholz-natur": "gid://shopify/MediaImage/62075442921818",
+    "compact|weiss": "gid://shopify/MediaImage/62075442954586",
+    "compact|szary": "gid://shopify/MediaImage/62075442987354",
+    "compact|czarny": "gid://shopify/MediaImage/62075443020122",
+    "compact|marmor-weiss": "gid://shopify/MediaImage/62075443052890",
+    "compact|marmor-schwarz": "gid://shopify/MediaImage/62075443085658",
+    "szwal|sz-gewebe": "gid://shopify/MediaImage/62075443118426",
+    "szwal|sz-grau": "gid://shopify/MediaImage/62075443151194",
+    "szwal|sz-schwarz": "gid://shopify/MediaImage/62075443183962",
+    "mpx_hpl|buk": "gid://shopify/MediaImage/62075442561370",
+    "mpx_hpl|ahorn": "gid://shopify/MediaImage/62075442594138",
+    "mpx_hpl|sosna-bielona": "gid://shopify/MediaImage/62075442626906",
+    "mpx_hpl|szary": "gid://shopify/MediaImage/62075442659674",
+    "mpx_hpl|schwarz": "gid://shopify/MediaImage/62075442692442",
+    "mpx_hpl|sonoma-eiche": "gid://shopify/MediaImage/62075442725210",
+    "mpx_hpl|hikora": "gid://shopify/MediaImage/62075442757978",
+    "mpx_hpl|weiss": "gid://shopify/MediaImage/62075442790746",
+    "mpx_hpl|alaska-weiss": "gid://shopify/MediaImage/62075442823514",
+    "mpx_hpl|kaszmir": "gid://shopify/MediaImage/62075442856282",
+    "mpx_hpl|eiche-artison": "gid://shopify/MediaImage/62075442889050",
+    "szwal|sz-weiss": "gid://shopify/MediaImage/62075442790746"
+  }
 }

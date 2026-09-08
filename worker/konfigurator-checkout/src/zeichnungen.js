@@ -14,7 +14,7 @@
    nur ueber den internen Link. Beide Tokens laufen ab (LINK_TAGE, Standard 180 Tage
    Kunde / 365 Tage intern); der Auftrag selbst bleibt gespeichert. */
 
-import { konfigAusAttributen, konfigZuZeichnung } from './zeichnung/adapter.js';
+import { konfigAusAttributen, konfigAusRoh, konfigZuZeichnung } from './zeichnung/adapter.js';
 import { zeichnung } from './zeichnung/zeichnung.js';
 import { dxf } from './zeichnung/dxf.js';
 import { svgZuPdf } from './zeichnung/pdf.js';
@@ -36,9 +36,33 @@ const nummerAus = (best) => String(best.nummer || String(best.id).split('/').pop
 export const auftragKey = (nummer) => `auftrag:${nummer}`;
 const dateiKey = (nummer, name) => `datei:${nummer}:${name}`;
 
+const TOKEN_RE = /^[A-Za-z0-9_-]{16,64}$/;
+/* Token der Bestellung: aus dem Draft-Order-Weg an der Bestellung (_kfg_token), im
+   Warenkorb-Weg an jeder Konfigurator-Position. Der erste gefundene wird zum Token
+   des Auftrags; alle weiteren zeigen im KV ebenfalls auf die Bestellnummer, damit
+   jeder "Zeichnung pruefen"-Link aus dem Warenkorb funktioniert. */
 function tokenAus(best){
   const a = (best.attribute||[]).find(x => x.key === '_kfg_token');
-  return a && /^[A-Za-z0-9_-]{16,64}$/.test(a.value) ? a.value : null;
+  if(a && TOKEN_RE.test(a.value)) return a.value;
+  return positionsTokens(best)[0] || null;
+}
+export function positionsTokens(best){
+  const out = [];
+  for(const p of best.positionen || []){ const a = (p.attribute||[]).find(x => x.key === '_kfg_token'); if(a && TOKEN_RE.test(a.value) && !out.includes(a.value)) out.push(a.value); }
+  return out;
+}
+/* Warenkorb-Weg: die Konfiguration liegt serverseitig im KV (kfg:<token>, vom Worker
+   beim Anlegen der Variante geschrieben). Sie hat Vorrang vor den Positionsattributen,
+   die ein Browser ueber die Storefront-API veraendern koennte. */
+async function konfigAusKV(env, pos){
+  const KV = env.ZEICHNUNGEN; if(!KV || pos.kvKonfig) return;
+  const a = (pos.attribute||[]).find(x => x.key === '_kfg_token');
+  if(!a || !TOKEN_RE.test(a.value)) return;
+  const d = await KV.get(`kfg:${a.value}`, 'json').catch(()=>null);
+  if(d && d.S && typeof d.S === 'object'){
+    const ex = d.S.extras || {};
+    pos.kvKonfig = konfigAusRoh({ ...d.S, bohr: d.S.bohr ?? ex.bohr, lack: d.S.lack ?? ex.lack });   /* gleiche Normalisierung wie aus den Attributen */
+  }
 }
 /** 'auftrag' (Zeichnungen da) | 'draft' (Checkout angelegt, Zahlung/Zeichnung noch offen) | null */
 export async function tokenStatus(env, token){
@@ -65,7 +89,8 @@ export function dateiErlaubt(auftrag, rolle, name){
   return /\.png$/.test(name) && (auftrag.positionen || []).some(p => p.dateien && p.dateien.svg === name.replace(/\.png$/, '.svg'));
 }
 export function spracheAus(best){
-  const a = (best.attribute||[]).find(x => x.key === '_kfg_sprache');
+  let a = (best.attribute||[]).find(x => x.key === '_kfg_sprache');
+  if(!a) for(const p of best.positionen || []){ a = (p.attribute||[]).find(x => x.key === '_kfg_sprache'); if(a) break; }
   const s = (a && a.value) || String(best.locale||'').slice(0,2).toLowerCase();
   return ['de','pl','en'].includes(s) ? s : 'de';
 }
@@ -88,7 +113,7 @@ function jetztText(spr){ return fristText(new Date().toISOString(), spr); }
 
 /** Eine Position zeichnen: SVG (Kunde), PDF (Kunde), PDF (Werkstatt PL), DXF. */
 export async function dateienFuerPosition(best, pos, idx, n, spr, freigabe){
-  const S = konfigAusAttributen(pos.attribute);
+  const S = pos.kvKonfig || konfigAusAttributen(pos.attribute);
   if(!S) return null;
   const at = (k) => { const a = pos.attribute.find(x => x.key === k); return a ? a.value : ''; };
   const nummerKurz = String(best.name||'').replace(/^[^0-9]*/, '') || nummerAus(best);
@@ -148,6 +173,7 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
        Freigabe-Link steht dann schon in Shopifys Bestellbestaetigung. */
     token: (alt && alt.token) || tokenAus(best) || zufallToken(),
     tokenIntern: (alt && alt.tokenIntern) || zufallToken(),
+    tokens: positionsTokens(best),
     erstellt: best.erstellt, angelegt: jetzt.toISOString(), frist: new Date(jetzt.getTime() + stunden*3600e3).toISOString(),
     status: 'offen', freigabe: null, aenderung: null, positionen: [], protokoll: [],
   };
@@ -156,7 +182,7 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
   for(const pos of mitKonfig){
     idx++;
     let e;
-    try{ e = await dateienFuerPosition(best, pos, idx, mitKonfig.length, spr, null); }
+    try{ await konfigAusKV(env, pos); e = await dateienFuerPosition(best, pos, idx, mitKonfig.length, spr, null); }
     catch(err){ auftrag.protokoll.push(`Position ${idx}: Zeichnung fehlgeschlagen — ${err.message}`); continue; }
     if(!e) continue;
     erzeugt.push(e);
@@ -172,6 +198,8 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
     await KV.put(auftragKey(nummer), JSON.stringify(auftrag));
     await KV.put(`token:${auftrag.token}`, nummer, { expirationTtl: tage.kunde * 86400 });
     await KV.put(`token:${auftrag.tokenIntern}`, `intern:${nummer}`, { expirationTtl: tage.intern * 86400 });
+    /* Warenkorb-Weg: jede Position hat ihren eigenen Link — alle auf diesen Auftrag zeigen lassen */
+    for(const t of positionsTokens(best)) if(t !== auftrag.token) await KV.put(`token:${t}`, nummer, { expirationTtl: tage.kunde * 86400 });
   }
 
   const urls = urlsFuer(env, auftrag);
@@ -213,8 +241,9 @@ export async function auftragMitRolle(env, nummerOderToken){
   }
   const auftrag = await KV.get(auftragKey(nummer), 'json');
   if(!auftrag) return null;
-  /* Sicherheitsnetz gegen vertauschte KV-Eintraege: der Token muss zum Auftrag gehoeren */
-  if(rolle === 'kunde' && auftrag.token !== nummerOderToken) return null;
+  /* Sicherheitsnetz gegen vertauschte KV-Eintraege: der Token muss zum Auftrag gehoeren
+     (Kunde: Auftragstoken oder ein Positionstoken aus dem Warenkorb-Weg) */
+  if(rolle === 'kunde' && auftrag.token !== nummerOderToken && !(auftrag.tokens||[]).includes(nummerOderToken)) return null;
   if(rolle === 'intern' && auftrag.tokenIntern !== nummerOderToken) return null;
   return { auftrag, rolle };
 }
@@ -261,6 +290,7 @@ export async function freigabeSetzen(env, auftrag, aktion, daten = {}){
       let idx = 0;
       for(const pos of mitKonfig){
         idx++;
+        await konfigAusKV(env, pos);
         const e = await dateienFuerPosition(best, pos, idx, mitKonfig.length, spr, auftrag.freigabe);
         if(!e) continue;
         erzeugt.push(e);

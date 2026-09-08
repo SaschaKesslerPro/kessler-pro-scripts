@@ -282,7 +282,11 @@
     "Versand Maßanfertigung (pauschal)": "Dostawa produktu na wymiar (ryczałt)",
     "Schräge beginnt bei Punkt A": "Skos zaczyna się w punkcie A",
     "Strecke von B (Plattenkante) bis A · 0 = Schräge bis zur Kante": "Odcinek od B (krawędź blatu) do A · 0 = skos aż do krawędzi",
-    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 do 175° — w punkcie A między A–B a skosem, mierzony w wycięciu · 180° = proste"
+    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 do 175° — w punkcie A między A–B a skosem, mierzony w wycięciu · 180° = proste",
+    "Sofortkauf": "Kup teraz",
+    "Kasse wird vorbereitet …": "Przygotowujemy kasę …",
+    "Platte liegt im Warenkorb — du kannst gleich eine weitere konfigurieren": "Blat jest w koszyku — możesz od razu skonfigurować kolejny",
+    "Warenkorb gerade nicht möglich — wir bringen dich direkt zur Kasse": "Koszyk chwilowo niedostępny — przenosimy Cię prosto do kasy"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -557,7 +561,11 @@
     "Versand Maßanfertigung (pauschal)": "Shipping made-to-measure (flat rate)",
     "Schräge beginnt bei Punkt A": "Bevel starts at point A",
     "Strecke von B (Plattenkante) bis A · 0 = Schräge bis zur Kante": "Distance from B (edge of the top) to A · 0 = bevel runs to the edge",
-    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 to 175° — at point A between A–B and the bevel, measured in the notch · 180° = straight"
+    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 to 175° — at point A between A–B and the bevel, measured in the notch · 180° = straight",
+    "Sofortkauf": "Buy now",
+    "Kasse wird vorbereitet …": "Preparing checkout …",
+    "Platte liegt im Warenkorb — du kannst gleich eine weitere konfigurieren": "The top is in your cart — you can configure another one right away",
+    "Warenkorb gerade nicht möglich — wir bringen dich direkt zur Kasse": "Cart not available right now — taking you straight to checkout"
   },
   "muster": {
     "pl": [

@@ -170,6 +170,28 @@ const b3n = await auftragLaden(env, b3.token);
 check('Auto-Freigabe nach Frist', lauf.freigegeben.includes('KP-2026-1036') && b3n.status === 'auto' && b3n.freigabe.auto && gql.some(g => /tagsAdd/.test(g.query) && g.variables.tags.includes(TAG.auto)), lauf);
 check('Auto-Freigabe: nur der ueberfaellige', !lauf.freigegeben.includes('KP-2026-1034') && !lauf.freigegeben.includes('KP-2026-1035'), lauf);
 
+/* ⑥b Warenkorb-Weg: zwei Positionen mit eigenem Token, Konfiguration aus dem KV hat Vorrang vor (manipulierten) Attributen */
+{
+  const tokA = 'warenkorbTokenAAAAAAAAAA', tokB = 'warenkorbTokenBBBBBBBBBB';
+  const S_echt = { mat:'dekor', dekor:'buk', thick:'25', form:'rect', L:50, B:40, edges:['abs','abs','abs','abs'], cornerR:[0,0,0,0], lfR:[0,0,0,0,0], absColor:'dekor', lack:false, bohr:false, massband:'none', massbandNull:'links', maschineMass:'52x18.1', cuts:[] };
+  const S_falsch = { ...S_echt, L:300, B:200 };
+  await env.ZEICHNUNGEN.put(`kfg:${tokA}`, JSON.stringify({ S: S_echt, preis:{ eur: 49.9, pln: 199 }, variantId:'gid://shopify/ProductVariant/1', titel:'T' }));
+  const props = (S, tok) => [{ name:'_kfg_konfig_1', value: JSON.stringify(S) }, { name:'_kfg_token', value: tok }, { name:'_kfg_sprache', value:'en' }];
+  const rest4 = { ...JSON.parse(JSON.stringify(restOrder)), id: 9000000000003, admin_graphql_api_id:'gid://shopify/Order/9000000000003', name:'KP-2026-1037', note_attributes: [],
+    line_items:[{ id:1, admin_graphql_api_id:'gid://shopify/LineItem/1', title:'Tischplatte nach Maß', variant_title:'Möbelplatte · Buche · 25 mm · 50 × 40 cm · #wa', quantity:1, properties: props(S_falsch, tokA) },
+                { id:2, admin_graphql_api_id:'gid://shopify/LineItem/2', title:'Tischplatte nach Maß', variant_title:'Möbelplatte · Buche · 25 mm · 300 × 200 cm · #wb', quantity:1, properties: props(S_falsch, tokB) }] };
+  const b4 = await bestellungVerarbeiten(normBestellung(rest4), env);
+  check('Warenkorb-Auftrag: 2 Positionen, Token = erstes Positionstoken, Sprache aus der Position', b4.positionen.length === 2 && b4.token === tokA && b4.sprache === 'en' && b4.tokens.length === 2, { t: b4.token, n: b4.positionen.length, s: b4.sprache });
+  const svgA = new TextDecoder().decode(await env.ZEICHNUNGEN.get(`datei:9000000000003:${b4.positionen[0].dateien.svg}`, 'arrayBuffer'));
+  const svgB = new TextDecoder().decode(await env.ZEICHNUNGEN.get(`datei:9000000000003:${b4.positionen[1].dateien.svg}`, 'arrayBuffer'));
+  check('Position 1 aus dem KV (500 × 400), nicht aus den manipulierten Attributen (3000)', /500 × 400|500 x 400|>500<|>400</.test(svgA.replace(/<[^>]+>/g,'|')) && !/3000/.test(svgA), svgA.match(/\d{3,4} × \d{3,4}/g));
+  check('Position 2 ohne KV-Eintrag aus den Attributen (3000 × 2000)', /3000/.test(svgB), svgB.match(/\d{3,4} × \d{3,4}/g));
+  const rA = await worker.fetch(new Request(`https://x/freigabe/${tokA}`), env, ctx), rB = await worker.fetch(new Request(`https://x/freigabe/${tokB}`), env, ctx);
+  check('Beide Positionslinks oeffnen die Freigabe-Seite des Auftrags', rA.status === 200 && rB.status === 200 && /KP-2026-1037/.test(await rB.text()));
+  const rZ = await worker.fetch(new Request(`https://x/z/${tokB}/${b4.positionen[0].dateien.kunde_pdf}`), env, ctx);
+  check('Zweiter Positionstoken liefert Kunden-PDF', rZ.status === 200);
+}
+
 /* ⑦ geschuetzte Routen */
 r = await worker.fetch(new Request('https://x/auftrag?order=8372871594330'), env, ctx);
 check('/auftrag ohne key → 403', r.status === 403);

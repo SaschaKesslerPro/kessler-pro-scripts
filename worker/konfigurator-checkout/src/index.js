@@ -1,7 +1,13 @@
 /* Kessler PRO — Checkout-Worker fuer den Tischplatten-Konfigurator
    ─────────────────────────────────────────────────────────────────
    POST /checkout  { version, kanal, sprache, url, preis, konfig, lager, maschine, skizze }
-                  → { checkoutUrl, draftOrderId, preis }
+                  → { checkoutUrl, draftOrderId, preis }          (Sofortkauf-Rueckfall: Draft Order)
+   POST /warenkorb { … wie /checkout, sofort:true|false }
+                  → { variantId, token, titel, preis, waehrung, attribute[, checkoutUrl] }
+                  Legt je Konfiguration eine eigene Variante des versteckten Basisprodukts mit
+                  echtem Preis an (PLN + EUR-Festpreis, Versandprofil "Massanfertigung"); der
+                  Browser legt sie in den Shopyflow-Warenkorb. sofort:true → eigener Storefront-
+                  Warenkorb nur mit dieser Position, Antwort enthaelt die Checkout-URL.
 
    Der Worker nimmt die Konfiguration aus dem Browser, rechnet den Preis mit
    demselben Kern wie der Konfigurator nach (src/preis-kern.js, erzeugt aus
@@ -48,6 +54,8 @@
      SETUP_KEY                Secret — schuetzt /setup, /nachlauf, /auftrag
      FREIGABE_STUNDEN         Frist fuer die automatische Freigabe (72)
      LINK_TAGE                Ablauf der Links in Tagen, "Kunde,intern" (Standard 180,365)
+     STOREFRONT_TOKEN         oeffentlicher Storefront-Token (Sofortkauf-Warenkorb)
+     VARIANTEN_TAGE           Konfigurator-Varianten aelter als n Tage werden nachts geloescht (45)
      ZEICHNUNGEN              KV-Namespace (Bindung)
 */
 import { preisKern } from './preis-kern.js';
@@ -114,6 +122,13 @@ export default {
         try{ body = await req.json(); }catch(e){ return json({ fehler:'kein JSON' }, 400, cors); }
         return json(await checkout(body, env, ctx), 200, cors);
       }
+      if(req.method === 'POST' && pfad === '/warenkorb'){
+        if(!cors['Access-Control-Allow-Origin']) return json({ fehler:'Origin nicht erlaubt' }, 403, cors);
+        if(!(await rateOk(req, env, 'checkout', 12))) return json({ fehler:'Zu viele Anfragen — bitte kurz warten' }, 429, cors);
+        let body;
+        try{ body = await req.json(); }catch(e){ return json({ fehler:'kein JSON' }, 400, cors); }
+        return json(await warenkorb(body, env, ctx), 200, cors);
+      }
       if(req.method === 'POST' && pfad === '/webhook/orders') return webhookOrders(req, env, ctx);
       let m;
       if(req.method === 'GET' && (m = pfad.match(/^\/z\/([A-Za-z0-9_-]{10,})\/([A-Za-z0-9._-]+)$/))) return datei(env, m[1], m[2]);
@@ -134,6 +149,7 @@ export default {
         }
         if(pfad === '/auftrag') return json((await auftragLaden(env, url.searchParams.get('order')||'')) || { fehler:'kein Auftrag' });
         if(pfad === '/cron') return json(await autoFreigabeLauf(env));
+        if(pfad === '/aufraeumen') return json(await variantenAufraeumen(env));
         if(pfad === '/mailtest'){
           const an = url.searchParams.get('an') || env.SHOP_MAIL || 'shop@kessler-pro.com';
           const r = await sendeMail(env, { an, betreff: 'Kessler PRO · Testmail aus dem Konfigurator-Worker', html: '<p>Der Mailversand aus dem Worker funktioniert.</p><p>Weg: ' + (env.SMTP_HOST && env.SMTP_PASS ? 'SMTP ' + env.SMTP_HOST : env.RESEND_API_KEY ? 'Resend' : 'keiner') + '</p>', anhaenge: [{ name:'test.txt', daten: new TextEncoder().encode('Kessler PRO Testanhang') }] });
@@ -148,7 +164,11 @@ export default {
       return json(intern ? { fehler: e.message, detail: e.detail } : { fehler: e.message }, status, cors);
     }
   },
-  async scheduled(ev, env, ctx){ ctx.waitUntil(autoFreigabeLauf(env).then(r => console.log('auto-freigabe', JSON.stringify(r)))); }
+  async scheduled(ev, env, ctx){
+    ctx.waitUntil(autoFreigabeLauf(env).then(r => console.log('auto-freigabe', JSON.stringify(r))));
+    /* einmal nachts: verwaiste Konfigurator-Varianten (nie bestellt, aelter als VARIANTEN_TAGE) loeschen */
+    if(new Date(ev.scheduledTime || Date.now()).getUTCHours() === 2) ctx.waitUntil(variantenAufraeumen(env).then(r => console.log('varianten', JSON.stringify(r))).catch(e => console.error('varianten', e.message)));
+  }
 };
 
 /* ── Webhook: bezahlte Bestellung ─────────────────────────────────────────── */
@@ -313,7 +333,7 @@ export async function checkout(body, env, ctx){
   const c = K.calc();
   if(c.quelle==='offen' || !(c.total>0)) throw fehler('Für diese Konfiguration gibt es keinen festen Preis', 409, c);
   if(K.needsOffer()) throw fehler('Eigene Skizze geht nur als Anfrage', 409);
-  const clientPreis = +body.preis;
+  const clientPreis = body.preis == null || body.preis === '' ? NaN : +body.preis;   /* fehlt → nur Server rechnet */
   if(isFinite(clientPreis) && Math.abs(clientPreis - c.total) > 0.011)
     throw fehler(`Preis weicht ab: Konfigurator ${clientPreis}, Server ${c.total}`, 409, { server:c, client:clientPreis });
   const waehrung = kanal==='pln' ? 'PLN' : 'EUR';
@@ -327,10 +347,11 @@ export async function checkout(body, env, ctx){
   const gewicht = Math.max(1, Math.round(K.areaM2() * (+S.thick||25) * (DICHTE[S.mat]||0.0007) * 1000 * 10) / 10);   /* kg, 1 Nachkommastelle */
   const versand = versandZeile(S, K, gewicht, kanal, env);
 
-  /* Position: bevorzugt die Dekor-Variante des Basisprodukts (Foto im Warenkorb),
-     der Preis wird ueberschrieben. Ohne passende Variante (oder wenn Shopify die
-     Variante ablehnt) eine individuelle Position wie bisher — nur ohne Bild. */
-  const variantId = basisVariante(S);
+  /* Seit 07.09. ist /checkout nur noch der Rueckfall hinter /warenkorb (Sofortkauf ueber
+     den Storefront-Warenkorb). Die 32 Basisvarianten sind seither gesperrt (nicht
+     kaufbar), darum hier eine individuelle Position ohne Variante — Bild gibt es auf
+     diesem Weg nicht, dafuer funktioniert er ohne write_products. */
+  const variantId = null;
   const positionVariante = variantId ? {
     variantId,
     quantity: 1,
@@ -377,12 +398,87 @@ export async function checkout(body, env, ctx){
   return { checkoutUrl: draft.invoiceUrl, draftOrderId: draft.id, preis: c.total, waehrung };
 }
 
-/* Variante des Basisprodukts fuer Material + Dekor (src/varianten.json). Multiplex mit
-   HPL-Laminat nutzt die Dekorfotos der Moebelplatte, Multiplex natur sein eigenes. */
-export function basisVariante(S){
+/* ── Warenkorb-Weg (Senior 07.09.): "In den Warenkorb" + "Sofortkauf" wie auf der PDP ──
+   Je Konfiguration eine eigene Variante mit echtem Preis. Der Preis kommt aus dem Kern
+   (beide Waehrungen), nie aus dem Browser; die Konfiguration liegt zusaetzlich im KV
+   (kfg:<token>) — die Zeichnungs-Pipeline nimmt sie von dort, nicht aus den Attributen
+   der Bestellposition, die der Browser theoretisch veraendern koennte. */
+export async function warenkorb(body, env, ctx){
+  const S = pruefeKonfig(JSON.parse(JSON.stringify(body.konfig||null)));
+  const kanal = body.kanal === 'pln' ? 'pln' : 'eur';
+  const sprache = ['de','pl','en'].includes(body.sprache) ? body.sprache : 'de';
+  const { SHOP, KURVEN, base } = await ladeDaten(body, env, ctx);
+  const Kde = preisKern(S, SHOP, KURVEN, 'de'), Kpl = preisKern(S, SHOP, KURVEN, 'pl');
+  const cde = Kde.calc(), cpl = Kpl.calc();
+  const K = kanal === 'pln' ? Kpl : Kde, c = kanal === 'pln' ? cpl : cde;
+  if(c.quelle==='offen' || !(c.total>0) || !(cde.total>0) || !(cpl.total>0)) throw fehler('Für diese Konfiguration gibt es keinen festen Preis', 409, c);
+  if(K.needsOffer()) throw fehler('Eigene Skizze geht nur als Anfrage', 409);
+  const clientPreis = body.preis == null || body.preis === '' ? NaN : +body.preis;   /* fehlt → nur Server rechnet */
+  if(isFinite(clientPreis) && Math.abs(clientPreis - c.total) > 0.011)
+    throw fehler(`Preis weicht ab: Konfigurator ${clientPreis}, Server ${c.total}`, 409, { server:c, client:clientPreis });
+  const waehrung = kanal==='pln' ? 'PLN' : 'EUR';
+  /* Lagerartikel: die echte Shop-Variante, keine eigene */
+  const hit = K.shopHit();
+  if(hit && hit[1]) return { lager:true, variantId: `gid://shopify/ProductVariant/${hit[1]}`, sku: hit[2], titel: titelFuer(S, K, c), preis: c.total, waehrung };
+
+  const token = zufallToken();
+  const freigabeUrl = env.PUBLIC_URL ? `${String(env.PUBLIC_URL).replace(/\/$/,'')}/freigabe/${token}` : '';
+  const titel = titelFuer(S, K, c);
+  const attribute = attributeFuer(S, K, c, Object.assign({}, body, { __env: env, __freigabeUrl: freigabeUrl }), waehrung);
+  attribute.push({ key:'_kfg_titel', value: titel }, { key:'_kfg_token', value: token }, { key:'_kfg_sprache', value: sprache },
+    { key:'_kfg_version', value: versionSauber(body.version) }, { key:'_kfg_daten', value: base });
+  const gewicht = Math.max(1, Math.round(K.areaM2() * (+S.thick||25) * (DICHTE[S.mat]||0.0007) * 1000 * 10) / 10);
+  const meta = VARIANTEN._meta || {};
+  const schluessel = variantenSchluessel(S);
+  const d = K.dims();
+  const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm` : `${d.w} × ${d.h} cm`;
+  const optionWert = `${MATERIAL[S.mat]}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName} · ${c.thickName} · ${mass} · #${token.replace(/[^A-Za-z0-9]/g,'').slice(0,4)}`.slice(0, 250);
+  const variante = await SH.varianteAnlegen(env, { produktId: meta.produkt, optionName: meta.option || 'Ausführung', optionWert,
+    preisPln: cpl.total, sku: `KFG-${token}`, gewichtKg: gewicht, mediaId: (VARIANTEN.medien||{})[schluessel] || null });
+  try{
+    await SH.festpreisSetzen(env, meta.preisliste_eur, variante.id, cde.total, 'EUR');
+    /* Ohne das Versandprofil ginge die Massplatte versandkostenfrei raus — dann lieber kein Warenkorb (Rueckfall: Sofortkauf per Draft Order) */
+    await SH.versandprofilZuordnen(env, meta.versandprofil, [variante.id]);
+  }catch(e){
+    try{ await SH.variantenLoeschen(env, meta.produkt, [variante.id]); }catch(_){}
+    throw e;
+  }
+  if(env.ZEICHNUNGEN){
+    const tage = 60;
+    const merk = Promise.all([
+      env.ZEICHNUNGEN.put(`kfg:${token}`, JSON.stringify({ S, preis:{ eur: cde.total, pln: cpl.total }, variantId: variante.id, titel, kanal, sprache, version: versionSauber(body.version), erstellt: new Date().toISOString() }), { expirationTtl: tage*86400 }),
+      env.ZEICHNUNGEN.put(`token:${token}`, `cart:${variante.id}`, { expirationTtl: tage*86400 }),
+    ]).catch(()=>{});
+    if(ctx && ctx.waitUntil) ctx.waitUntil(merk); else await merk;
+  }
+  const out = { variantId: variante.id, token, titel, preis: c.total, waehrung, attribute, freigabeUrl };
+  if(body.sofort){
+    const cart = await SH.storefrontWarenkorb(env, { variantId: variante.id, attribute, land: kanal==='pln' ? 'PL' : 'DE', sprache });
+    out.checkoutUrl = cart.checkoutUrl;
+  }
+  return out;
+}
+function variantenSchluessel(S){
   const mat = S.mat === 'mpx' ? (S.mpxSurface === 'hpl' ? 'mpx_hpl' : 'mpx') : S.mat;
   const dekor = S.mat === 'mpx' && S.mpxSurface !== 'hpl' ? 'sperrholz-natur' : S.dekor;
-  const id = VARIANTEN[`${mat}|${dekor}`];
+  return `${mat}|${dekor}`;
+}
+/* Nachts: Konfigurator-Varianten, die aelter als VARIANTEN_TAGE sind, loeschen. Bestellte
+   Positionen behalten ihre Daten in der Bestellung; die Konfiguration liegt im KV. */
+export async function variantenAufraeumen(env){
+  const meta = VARIANTEN._meta || {};
+  const tage = +(env.VARIANTEN_TAGE || 45);
+  const alle = await SH.konfigVariantenAuflisten(env, meta.produkt);
+  const grenze = Date.now() - tage*86400e3;
+  const alt = alle.filter(v => new Date(v.createdAt).getTime() < grenze).map(v => v.id);
+  const n = await SH.variantenLoeschen(env, meta.produkt, alt);
+  return { geprueft: alle.length, geloescht: n, tage };
+}
+
+/* Basisvariante fuer Material + Dekor (src/varianten.json) — seit 07.09. gesperrt und
+   nur noch als Nachschlagewerk fuer die Dekorfotos in Gebrauch. */
+export function basisVariante(S){
+  const id = VARIANTEN[variantenSchluessel(S)];
   return typeof id === 'string' && /^gid:\/\/shopify\/ProductVariant\/\d+$/.test(id) ? id : null;
 }
 
