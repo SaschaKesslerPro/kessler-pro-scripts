@@ -134,7 +134,7 @@ export default {
       if(req.method === 'GET' && (m = pfad.match(/^\/z\/([A-Za-z0-9_-]{10,})\/([A-Za-z0-9._-]+)$/))) return datei(env, m[1], m[2]);
       if((m = pfad.match(/^\/freigabe\/([A-Za-z0-9_-]{10,})$/))) return freigabe(req, env, m[1], url);
       if(req.method === 'GET' && (m = pfad.match(/^\/i\/([A-Za-z0-9_-]{10,})$/))) return internSeite(env, m[1]);
-      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron' || pfad === '/mailtest'){
+      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron' || pfad === '/mailtest' || pfad === '/aufraeumen'){
         if(!env.SETUP_KEY || url.searchParams.get('key') !== env.SETUP_KEY) return json({ fehler:'kein Zugriff' }, 403);
         if(pfad === '/setup/webhooks'){
           const ziel = `${String(env.PUBLIC_URL||'').replace(/\/$/,'')}/webhook/orders`;
