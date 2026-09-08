@@ -439,6 +439,8 @@ export async function warenkorb(body, env, ctx){
     await SH.festpreisSetzen(env, meta.preisliste_eur, variante.id, cde.total, 'EUR');
     /* Ohne das Versandprofil ginge die Massplatte versandkostenfrei raus — dann lieber kein Warenkorb (Rueckfall: Sofortkauf per Draft Order) */
     await SH.versandprofilZuordnen(env, meta.versandprofil, [variante.id]);
+    /* Storefront-Index braucht ein paar Sekunden — sonst legt der Browser die Variante mit Menge 0 in den Warenkorb */
+    await SH.storefrontWarten(env, variante.id, 8000);
   }catch(e){
     try{ await SH.variantenLoeschen(env, meta.produkt, [variante.id]); }catch(_){}
     throw e;

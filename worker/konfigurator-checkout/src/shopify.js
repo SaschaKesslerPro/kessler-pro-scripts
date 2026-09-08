@@ -201,19 +201,41 @@ export async function variantenLoeschen(env, produktId, variantIds){
    Nur fuer "Sofortkauf": ein frischer Warenkorb mit genau dieser Position, der
    Kunde landet direkt im Checkout. Der Shopyflow-Warenkorb des Kunden bleibt
    unberuehrt. Der Storefront-Token ist oeffentlich (steht im Seitenquelltext). */
-export async function storefrontWarenkorb(env, { variantId, attribute, land, sprache }){
+async function storefront(env, query, variables, sprache){
   const token = env.STOREFRONT_TOKEN;
   if(!token) throw fehler('Storefront-Token fehlt', 503);
-  const q = `mutation kfgCart($in:CartInput!){ cartCreate(input:$in){ cart{ id checkoutUrl } userErrors{ field message code } } }`;
-  const body = { query: q, variables: { in: {
-    lines: [{ merchandiseId: variantId, quantity: 1, attributes: attribute }],
-    buyerIdentity: { countryCode: land },
-  } } };
   const r = await fetch(`https://${env.SHOPIFY_SHOP}/api/${API_VERSION}/graphql.json`, {
     method:'POST', headers:{ 'Content-Type':'application/json', 'X-Shopify-Storefront-Access-Token': token, 'Accept-Language': sprache || 'de' },
-    body: JSON.stringify(body) });
+    body: JSON.stringify({ query, variables }) });
   const d = await r.json().catch(()=>null);
-  const res = d && d.data && d.data.cartCreate;
-  if(!r.ok || !res || (res.userErrors && res.userErrors.length) || !res.cart) throw fehler('Warenkorb abgelehnt', 502, (res && res.userErrors) || (d && d.errors) || r.status);
-  return res.cart;
+  if(!r.ok || !d || d.errors) throw fehler('Storefront antwortet nicht', 502, (d && d.errors) || r.status);
+  return d.data;
+}
+const pause = (ms) => new Promise(f => setTimeout(f, ms));
+/** Eine frisch angelegte Variante braucht ein paar Sekunden, bis die Storefront-API
+    sie als kaufbar fuehrt — vorher faellt sie beim cartLinesAdd stumm auf Menge 0.
+    Hier warten, bis availableForSale stimmt (hoechstens maxMs). */
+export async function storefrontWarten(env, variantId, maxMs = 8000){
+  const q = `query($id:ID!){ node(id:$id){ ... on ProductVariant { availableForSale } } }`;
+  const bis = Date.now() + maxMs;
+  for(;;){
+    const d = await storefront(env, q, { id: variantId }).catch(()=>null);
+    if(d && d.node && d.node.availableForSale) return true;
+    if(Date.now() > bis) return false;
+    await pause(600);
+  }
+}
+export async function storefrontWarenkorb(env, { variantId, attribute, land, sprache }){
+  const q = `mutation kfgCart($in:CartInput!){ cartCreate(input:$in){ cart{ id checkoutUrl lines(first:1){ nodes{ quantity } } } userErrors{ field message code } } }`;
+  const eingabe = { lines: [{ merchandiseId: variantId, quantity: 1, attributes: attribute }], buyerIdentity: { countryCode: land } };
+  let res = null;
+  for(let i = 0; i < 6; i++){
+    const d = await storefront(env, q, { in: eingabe }, sprache);
+    res = d && d.cartCreate;
+    if(!res || (res.userErrors && res.userErrors.length) || !res.cart) throw fehler('Warenkorb abgelehnt', 502, res && res.userErrors);
+    const n = res.cart.lines && res.cart.lines.nodes && res.cart.lines.nodes[0] && res.cart.lines.nodes[0].quantity;
+    if(n > 0) return res.cart;
+    await pause(1000);                    /* Variante noch nicht kaufbar — kurz warten, neuer Warenkorb */
+  }
+  throw fehler('Warenkorb bleibt leer — Variante noch nicht kaufbar', 502);
 }

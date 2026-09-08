@@ -12,8 +12,10 @@ globalThis.fetch = async (u, opt) => {
   if(u.endsWith('kfg-produktmatrix.json')) return new Response(matrix, { status:200 });
   if(u.endsWith('kfg-preiskurven.json')) return new Response(kurven, { status:200 });
   if(u.endsWith('/admin/oauth/access_token')){ tokenAufrufe++; return new Response(JSON.stringify({ access_token:'shpca_test', scope:'write_draft_orders,read_products', expires_in:86399 }), { status:200 }); }
-  if(u.includes('/api/2024-10/graphql.json') && !u.includes('/admin/')){ const b = JSON.parse(opt.body); storefront.push({ b, headers: opt.headers });
-    return new Response(JSON.stringify({ data:{ cartCreate:{ cart:{ id:'gid://shopify/Cart/abc', checkoutUrl:'https://checkout.kessler-pro.com/cn/abc' }, userErrors:[] } } }), { status:200 }); }
+  if(u.includes('/api/2024-10/graphql.json') && !u.includes('/admin/')){ const b = JSON.parse(opt.body);
+    if(/availableForSale/.test(b.query)) return new Response(JSON.stringify({ data:{ node:{ availableForSale:true } } }), { status:200 });
+    storefront.push({ b, headers: opt.headers });
+    return new Response(JSON.stringify({ data:{ cartCreate:{ cart:{ id:'gid://shopify/Cart/abc', checkoutUrl:'https://checkout.kessler-pro.com/cn/abc', lines:{ nodes:[{ quantity:1 }] } }, userErrors:[] } } }), { status:200 }); }
   if(u.includes('/admin/api/')){ letzterAufruf = JSON.parse(opt.body); aufrufe.push(letzterAufruf);
     if(opt.headers['X-Shopify-Access-Token']!=='shpca_test') return new Response('{"errors":"kein token"}',{status:401});
     const q = letzterAufruf.query || '';
