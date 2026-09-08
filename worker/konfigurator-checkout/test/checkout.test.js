@@ -137,6 +137,13 @@ aufrufe = [];
 r = await warenkorb({ kanal:'eur', konfig:{ ...L, cornerR:[30,30,30,30] } }, env, null);
 check('Lager + 4 Ecken: keine Lagervariante, eigene Variante mit 69,90 + 39,90', !r.lager && r.variantId!=='gid://shopify/ProductVariant/54306775990618' && Math.abs(r.preis-109.8)<0.001 && aufrufe.some(a=>/productVariantsBulkCreate|productVariantsBulkUpdate/.test(a.query)), r);
 
+/* ⑧c2b Sascha 08.09.: PL-Aufschlaege = EUR x 4,24, aufgerundet auf ,90 (4 Ecken 39,90 € → 169,90 zł) */
+r = await warenkorb({ kanal:'pln', sprache:'pl', konfig:{ ...L, cornerR:[30,30,30,30] } }, env, null);
+check('PL: Lager 313,90 zł + Ecken 169,90 zł = 483,80 zł', Math.abs(r.preis-483.8)<0.001 && r.waehrung==='PLN', r.preis);
+/* ⑧c2c Sascha 08.09.: farbige ABS-Kante = Fertigungsauftrag ohne Aufpreis, nie die nackte Lagervariante */
+r = await warenkorb({ kanal:'eur', konfig:{ ...L, absColor:'gruen' } }, env, null);
+check('ABS Gruen auf Lagergroesse: eigene Variante, Preis unveraendert 69,90, Attribut ABS-Farbe Grün', !r.lager && Math.abs(r.preis-69.9)<0.001 && r.attribute.some(a=>/ABS-Farbe Grün/.test(a.value)), { lager:r.lager, preis:r.preis, kante:r.attribute.filter(a=>/ABS/.test(a.value)).map(a=>a.value) });
+
 /* ⑧c3 Review 08.09. A4: Kabelkanal mit Kantenanschluss rechnet wie der Konfigurator (Enden a/e/ae) */
 const kanalS = { ...L, cuts:[{ t:'k', cx:60, cy:30, len:72, dir:'laengs', w:60, dp:10, seite:'unten', enden:'ae' }] };
 r = await warenkorb({ kanal:'eur', konfig:kanalS }, env, null);

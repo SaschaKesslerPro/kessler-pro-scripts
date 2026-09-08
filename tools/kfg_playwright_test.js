@@ -235,6 +235,41 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
     await mctx.close(); }
   console.log('⑨ Review-Fixes geprueft');
 
+  /* ⑩ v1.18.0: Texturmassstab, PL-Aufschlaege, ABS-Farbe, Vorlagenmass, Link mit Bearbeitungen, mobile Preiszeile */
+  await open('de'); await alleOffen(page);
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:120,B:60});
+  let tx=await page.evaluate(()=>({pat:!!document.querySelector('#stage pattern#texPat'), bilder:document.querySelectorAll('#stage pattern image').length, fill:(document.querySelector('#stage path[fill^="url"]')||{}).getAttribute&&document.querySelector('#stage path[fill^="url"]').getAttribute('fill')}));
+  check('Textur: Buche als 2x2-Muster (4 gespiegelte Kacheln) gefuellt', tx.pat && tx.bilder===4 && tx.fill==='url(#texPat)', JSON.stringify(tx));
+  r=await set({...clean, mat:'compact',dekor:'marmor-weiss',thick:'12',form:'rect',L:200,B:90, edges:['roh','roh','roh','roh']});
+  tx=await page.evaluate(()=>({bilder:document.querySelectorAll('#stage pattern image').length}));
+  check('Textur: Marmor nicht gekachelt (ein Foto)', tx.bilder===1, JSON.stringify(tx));
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:120,B:60, absColor:'gruen'});
+  check('ABS Gruen: kein Lagerartikel, Preis bleibt 69,90 (kein Aufpreis)', !/Ab Lager/.test(r.badge) && parseP(r.price)===69.9, r.badge+' '+r.price);
+  await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:120,B:60, cuts:[{t:'r',preset:'spuele',cx:60,cy:30,w:78,h:43}]});
+  await page.fill('#cutList input[data-f="w"]','900'); await page.press('#cutList input[data-f="w"]','Enter'); await page.waitForTimeout(500);
+  r=await page.evaluate(()=>{ const c=window.KFG.getConfig().cuts[0]; return {preset:c.preset||null, w:c.w, rows:[...document.querySelectorAll('#breakdown tr')].map(tr=>tr.children[0].textContent)}; });
+  check('Vorlage mit geaendertem Mass wird freier Ausschnitt nach Formel', r.preset===null && r.w===90 && r.rows.some(t=>/^Ausschnitt 90 × 43 cm/.test(t)), JSON.stringify(r));
+  r=await set({...clean, mat:'szwal',dekor:'sz-weiss',thick:'21',form:'rect',L:120,B:60, edges:['nicht','nicht','nicht','nicht'], machine:'Bernina 770', extras:{bohr:true,custom:false,lack:false}, cuts:[{t:'r',preset:'maschine',w:52,h:18.1,cx:60,cy:45},{t:'c',preset:'kabel',cx:30,cy:20,d:6,w:6,h:6},{t:'k',cx:60,cy:30,len:50,dir:'laengs',w:60,dp:10,seite:'unten',enden:'a'}]}, true);
+  const hash10=r.hash, preis10=r.price;
+  await page.goto('http://127.0.0.1:8765/_spiegel/de.html'+hash10, {waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—', null, {timeout:20000});
+  r=await page.evaluate(()=>{ const S=window.KFG.getConfig(); return {price:document.getElementById('price').textContent, cuts:S.cuts.map(c=>c.preset||c.t), bohr:S.extras.bohr, machine:S.machine, enden:(S.cuts.find(c=>c.t==='k')||{}).enden}; });
+  check('Geteilter Link bringt Ausschnitte, Bohrung, Maschine und Kanal-Enden mit — Preis identisch', r.price===preis10 && r.cuts.join(',')==='maschine,kabel,k' && r.bohr===true && r.machine==='Bernina 770' && r.enden==='a', JSON.stringify({r,preis10}));
+  await open('pl'); await alleOffen(page);
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:120,B:60, cornerR:[30,30,30,30]});
+  check('PL: 4 Ecken = 169,90 zł (39,90 € x 4,24 auf ,90), Summe 483,80 zł', parseP(r.price)===483.8 && r.rows.some(x=>/Ecken|narożnik|Zaokrąglenie|rogi/i.test(x[0]) && parseP(x[1])===169.9), JSON.stringify({price:r.price, rows:r.rows}));
+  const plTexte10=await page.evaluate(()=>({preset:document.querySelector('.kfg_preset[data-preset="kabel"] .pr').textContent, bohr:document.querySelector('.kfg_check input[data-x="bohr"]').closest('.kfg_check').querySelector('.pr').textContent, mat:document.querySelector('.kfg_mat[data-m="dekor"] small').textContent}));
+  check('PL: statische Preistexte in zł (Durchlass 42,90 zł / szt., Bohrung 42,90 zł, Material od … zł)', /42,90 zł \/ szt\./.test(plTexte10.preset) && /42,90 zł/.test(plTexte10.bohr) && /^od [\d,.]+ zł · /.test(plTexte10.mat), JSON.stringify(plTexte10));
+  { const mctx=await browser.newContext({ viewport:{width:390,height:844}, hasTouch:true, isMobile:true });
+    const mp=await mctx.newPage(); await mp.route('**/*', rt=>/127\.0\.0\.1/.test(rt.request().url())?rt.continue():rt.abort());
+    await mp.goto('http://127.0.0.1:8765/_spiegel/de.html',{waitUntil:'domcontentloaded'});
+    await mp.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—', null, {timeout:20000}); await mp.waitForTimeout(500);
+    await mp.evaluate(()=>window.scrollTo(0, document.getElementById('kfgStep1').getBoundingClientRect().top+window.scrollY-300)); await mp.waitForTimeout(400);
+    const mk=await mp.evaluate(()=>{ const e=document.getElementById('previewKauf'), r=e.getBoundingClientRect(), cs=getComputedStyle(e); return {display:cs.display, sichtbar:r.height>30&&r.width>200, preis:document.getElementById('priceMini').textContent, cta:document.getElementById('ctaMini').textContent}; });
+    check('Mobil: Preiszeile mit Preis und Knopf in der mitwandernden Karte sichtbar', mk.display==='flex' && mk.sichtbar && mk.preis==='69,90 €' && /Warenkorb/.test(mk.cta), JSON.stringify(mk));
+    await mctx.close(); }
+  console.log('⑩ v1.18.0 geprueft');
+
   console.log(`\n${ok} Zusicherungen gruen, ${bad.length} rot`);
   bad.forEach(b=>console.log('  ✗', b));
   console.log('JS-Fehler:', errors.length?errors:'keine');

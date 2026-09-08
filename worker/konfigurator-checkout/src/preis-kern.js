@@ -112,6 +112,10 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function kanal(){ return KFG_LANG==='pl' ? 'pln' : 'eur'; }
 
+  const PLN_KURS = 4.24;                    /* Median der EU-Preisliste, PREISBASIS 13.08. */
+
+  function zl(v){ return kanal()==='pln' ? (v>0 ? auf90(v*PLN_KURS) : 0) : v; }
+
   function auf90(v){ return Math.ceil(v - 0.90 - 1e-9) + 0.90; }
 
   function kurvenDekor(){ return S.mat==='mpx' ? 'sperrholz-natur' : S.dekor; }
@@ -198,9 +202,9 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
         || SHOP[shopKey(S.mat,S.form,dek,S.thick,S.form==='round'?d.w:Math.min(d.w,d.h),Math.max(d.w,d.h))] || null;
   }
 
-  function freierAusschnitt(lfm){ return Math.max(FREI_PRICE.minimum, auf90(FREI_PRICE.basis + FREI_PRICE.lfm*lfm)); }
+  function freierAusschnitt(lfm){ return zl(Math.max(FREI_PRICE.minimum, auf90(FREI_PRICE.basis + FREI_PRICE.lfm*lfm))); }
 
-  function radienpreis(n){ return n<=0 ? 0 : RADIEN_STAFFEL[Math.min(n, RADIEN_STAFFEL.length-1)]; }
+  function radienpreis(n){ return n<=0 ? 0 : zl(RADIEN_STAFFEL[Math.min(n, RADIEN_STAFFEL.length-1)]); }
 
   function rules(){ return RULES[S.mat]; }
 
@@ -213,8 +217,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function isLack(){ return lackAn() && S.edges.some(e=>e!=='abs'); }
 
   function edgeLfm(e){
-    if(lackAn() && LACK_LFM[e]!==undefined) return LACK_LFM[e];
-    return profileOf(e)[2]||0;
+    if(lackAn() && LACK_LFM[e]!==undefined) return zl(LACK_LFM[e]);
+    return zl(profileOf(e)[2]||0);
   }
 
   function dims(){
@@ -263,7 +267,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
        INNERE Schnittlaenge — zwei Innenkanten beim geraden, eine Diagonale beim
        schraegen L. */
     const lschnitt=S.form==='lform'?freierAusschnitt(lfGeo().schnitt):0;
-    let extras=0; if(S.extras.bohr) extras+=X_PRICE.bohr;
+    let extras=0; if(S.extras.bohr) extras+=zl(X_PRICE.bohr);
     extras+=massbandPreis();
     S.cuts.forEach(c2=>{ extras+=cutPrice(c2); });   /* freie Bearbeitungen jetzt mit Sofortpreis */
     ensureDekor();
@@ -279,6 +283,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
        auch ein Kabeldurchlass oder die Montagebohrung — macht daraus einen
        Fertigungsauftrag mit Aufpreis (vorher lief der Permalink ohne den Aufpreis). */
     if(S.extras.custom||isLack()||S.mat==='szwal'||S.form==='lform'||cornerCount()>0||S.cuts.length>0||S.extras.bohr) return false;
+    /* Farbige ABS-Kante gibt es nicht ab Lager — Fertigungsauftrag ohne Aufpreis (Sascha 08.09.) */
+    if(S.mat==='dekor'&&S.absColor!=='dekor'&&S.edges.some(e=>e==='abs')) return false;
     if(S.mat!=='dekor'&&S.mat!=='compact') { /* mpx Festmaße? aktuell keine → nur 18er Liste für dekor */ }
     return !!shopHit();
   }
@@ -393,7 +399,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function massbandEintrag(){ return MASSBAND.find(m=>m[0]===S.massband)||MASSBAND[0]; }
 
-  function massbandPreis(){ return S.mat==='szwal' ? massbandEintrag()[3] : 0; }
+  function massbandPreis(){ return S.mat==='szwal' ? zl(massbandEintrag()[3]) : 0; }
 
   function massbandName(){ return massbandEintrag()[1]; }
 
@@ -433,8 +439,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   }
 
   function cutPrice(c){
-    if(c.preset) return PRESETS[c.preset].price;
-    if(c.t==='k') return Math.round((KANAL_PRICE.basis + kanalLfmPreis(c.w,c.dp)*cutLen(c)/100)*10)/10;
+    if(c.preset) return zl(PRESETS[c.preset].price);
+    if(c.t==='k') return zl(Math.round((KANAL_PRICE.basis + kanalLfmPreis(c.w,c.dp)*cutLen(c)/100)*10)/10);
     return freierAusschnitt(cutLen(c)/100);
   }
 

@@ -54,7 +54,7 @@ function zufall(){
       return {price:document.getElementById('price').textContent, S2, ungueltig:!!document.querySelector('[data-kfg-root] .is-error')}; }, S);
     if(r.ungueltig) continue;                     /* validate() hat abgebrochen — Anzeige ist alt */
     /* der Browser normalisiert (clampCuts, ensureDekor, Radiusregel) — den Kern mit DEMSELBEN Zustand rechnen */
-    const K=preisKern(r.S2,SHOP,KURVEN,'de'); const c=K.calc();
+    const K=preisKern(r.S2,SHOP,KURVEN,/\/pl\.html/.test(URL)?'pl':/\/en\.html/.test(URL)?'en':'de'); const c=K.calc();
     const ist=+r.price.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
     if(Math.abs(ist-c.total)<0.005) ok++; else bad.push({i, browser:r.price, kern:c.total, quelle:c.quelle, mat:S.mat, form:S.form, dekor:S.dekor, thick:S.thick});
   }

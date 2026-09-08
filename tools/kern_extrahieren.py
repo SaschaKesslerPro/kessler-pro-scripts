@@ -22,7 +22,7 @@ NAMEN = [
   'RADIEN_STAFFEL','FREI_PRICE','KANAL_PRICE','PRESETS','X_PRICE',
   'DEKOR_STUFE_ERSATZ','STAERKE_FAKTOR','HPL_ZUSCHLAG','CORNER_NAMES','LF_POS','MASCHINE_MASSE',
   # Preis-Kern
-  'hasOwn','kanal','auf90','kurvenDekor','kurvenSchluessel','kurvenFlaeche','aufDerKurve','deckel','kurvenPreis',
+  'hasOwn','kanal','PLN_KURS','zl','auf90','kurvenDekor','kurvenSchluessel','kurvenFlaeche','aufDerKurve','deckel','kurvenPreis',
   'hitPreis','fm1','shopKey','shopHit','freierAusschnitt','radienpreis',
   'rules','baseEdge','profileOf','lackAn','isLack','edgeLfm',
   'dims','areaM2','perimM','dekorList','ensureDekor','calc','isStandard','needsOffer',
