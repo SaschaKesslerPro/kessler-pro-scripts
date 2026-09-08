@@ -310,7 +310,7 @@ function pruefeKonfig(S){
     else if(c.t==='p'){ if(!Array.isArray(c.pts)||c.pts.length<3||c.pts.length>60) throw fehler('Kontur ungültig', 400);
       o.pts=c.pts.map(pt=>{ if(!Array.isArray(pt)||pt.length<2) throw fehler('Kontur ungültig', 400); const a=+pt[0], b=+pt[1]; if(!isFinite(a)||!isFinite(b)||Math.abs(a)>400||Math.abs(b)>400) throw fehler('Kontur ungültig', 400); return [a,b]; });
       if(c.r!=null) o.r=z(c.r,100); if(c.w!=null) o.w=z(c.w); if(c.h!=null) o.h=z(c.h); }
-    else { o.w=z(c.w,300); o.dp=z(c.dp,40); o.len=z(c.len); o.dir=c.dir==='quer'?'quer':'laengs'; o.seite=c.seite==='oben'?'oben':'unten'; o.enden=['zu','offen','links','rechts'].includes(c.enden)?c.enden:'zu'; }
+    else { o.w=z(c.w,300); o.dp=z(c.dp,40); o.len=z(c.len); o.dir=c.dir==='quer'?'quer':'laengs'; o.seite=c.seite==='oben'?'oben':'unten'; o.enden=['zu','a','e','ae'].includes(c.enden)?c.enden:'zu';   /* wie KANAL_ENDEN im Konfigurator (08.09.: vorher falsche Schluessel → 409 bei jedem Kanal mit Kantenanschluss) */ }
     return o;
   });
   S.extras = Object.assign({bohr:false,custom:false,lack:false}, S.extras||{});
@@ -331,12 +331,27 @@ function pruefeKonfig(S){
   return S;
 }
 
+/* Fertigungsgrenzen je Material (RULES aus dem Kern, wie validate() im Konfigurator):
+   der Browser sperrt die Anzeige, aber nicht den Klick — hier die verbindliche Pruefung. */
+function pruefeFertigungsmasse(S, K){
+  const r = K.rules() || {}, bad = (was) => { throw fehler(`Maß außerhalb des Fertigungsbereichs (${was})`, 400); };
+  if(S.form==='round'){ if(!(S.D>=20 && S.D<=r.maxD)) bad(`Ø 20–${r.maxD} cm`); return; }
+  const L = S.form==='lform' ? S.lf.L : S.L, B = S.form==='lform' ? S.lf.B : S.B;
+  if(!(L>=20 && L<=r.maxL)) bad(`Länge 20–${r.maxL} cm`);
+  if(!(B>=20 && B<=r.maxB)) bad(`Breite 20–${r.maxB} cm`);
+  if(S.form==='lform'){
+    if(!(S.lf.aw>=10 && S.lf.aw<=Math.max(10, L-10))) bad('Ausklinkung Breite');
+    if(!(S.lf.ah>=10 && S.lf.ah<=Math.max(10, B-10))) bad('Ausklinkung Tiefe');
+  }
+}
+
 export async function checkout(body, env, ctx){
   const S = pruefeKonfig(JSON.parse(JSON.stringify(body.konfig||null)));
   const kanal = body.kanal === 'pln' ? 'pln' : 'eur';
   const sprache = ['de','pl','en'].includes(body.sprache) ? body.sprache : 'de';
   const { SHOP, KURVEN, base } = await ladeDaten(body, env, ctx);
   const K = preisKern(S, SHOP, KURVEN, kanal==='pln' ? 'pl' : 'de');
+  pruefeFertigungsmasse(S, K);
   const c = K.calc();
   if(c.quelle==='offen' || !(c.total>0)) throw fehler('Für diese Konfiguration gibt es keinen festen Preis', 409, c);
   if(K.needsOffer()) throw fehler('Eigene Skizze geht nur als Anfrage', 409);
@@ -416,6 +431,7 @@ export async function warenkorb(body, env, ctx){
   const sprache = ['de','pl','en'].includes(body.sprache) ? body.sprache : 'de';
   const { SHOP, KURVEN, base } = await ladeDaten(body, env, ctx);
   const Kde = preisKern(S, SHOP, KURVEN, 'de'), Kpl = preisKern(S, SHOP, KURVEN, 'pl');
+  pruefeFertigungsmasse(S, Kde);
   const cde = Kde.calc(), cpl = Kpl.calc();
   const K = kanal === 'pln' ? Kpl : Kde, c = kanal === 'pln' ? cpl : cde;
   if(c.quelle==='offen' || !(c.total>0) || !(cde.total>0) || !(cpl.total>0)) throw fehler('Für diese Konfiguration gibt es keinen festen Preis', 409, c);
@@ -424,9 +440,12 @@ export async function warenkorb(body, env, ctx){
   if(isFinite(clientPreis) && Math.abs(clientPreis - c.total) > 0.011)
     throw fehler(`Preis weicht ab: Konfigurator ${clientPreis}, Server ${c.total}`, 409, { server:c, client:clientPreis });
   const waehrung = kanal==='pln' ? 'PLN' : 'EUR';
-  /* Lagerartikel: die echte Shop-Variante, keine eigene */
+  /* Lagerartikel: die echte Shop-Variante, keine eigene — aber NUR ohne jede Bearbeitung
+     (wie nurLager() im Konfigurator). Vorher reichte die Lagergroesse: Buche 120x60 + 4 Ecken
+     landete als 69,90-Variante ohne Eckeninfo im Warenkorb (Review 08.09., A2). */
   const hit = K.shopHit();
-  if(hit && hit[1]) return { lager:true, variantId: `gid://shopify/ProductVariant/${hit[1]}`, sku: hit[2], titel: titelFuer(S, K, c), preis: c.total, waehrung };
+  if(hit && hit[1] && K.isStandard() && Math.abs(c.total - c.basis) < 0.005)
+    return { lager:true, variantId: `gid://shopify/ProductVariant/${hit[1]}`, sku: hit[2], titel: titelFuer(S, K, c), preis: c.total, waehrung };
 
   const token = zufallToken();
   const freigabeUrl = env.PUBLIC_URL ? `${String(env.PUBLIC_URL).replace(/\/$/,'')}/freigabe/${token}` : '';

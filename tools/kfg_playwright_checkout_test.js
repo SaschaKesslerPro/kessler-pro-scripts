@@ -79,7 +79,7 @@ let ok=0, bad=[]; const check=(n,c,i)=>{ if(c) ok++; else bad.push(n+(i?' → '+
   const zwischen=await page.evaluate(()=>document.getElementById('cta').disabled+'|'+document.getElementById('cta').textContent);
   await page.waitForTimeout(1600);
   const toast=await page.evaluate(()=>document.getElementById('toast').textContent);
-  check('Fehler: Taste war gesperrt und ist wieder frei', /true\|Warenkorb wird vorbereitet/.test(zwischen) && !(await page.evaluate(()=>document.getElementById('cta').disabled)), zwischen);
+  check('Fehler: Taste war gesperrt und ist wieder frei', /true\|(Warenkorb|Kasse) wird vorbereitet/.test(zwischen) && !(await page.evaluate(()=>document.getElementById('cta').disabled)), zwischen);
   check('Fehler: Hinweis-Toast', /Bezahlen gerade nicht möglich/.test(toast), toast);
   console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b=>console.log('  ✗',b));
   console.log('JS-Fehler:', errors.length?errors:'keine');

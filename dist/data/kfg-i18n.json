@@ -1,13 +1,13 @@
 {
   "_meta": {
     "name": "Kessler PRO — Konfigurator, Sprachdatei",
-    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft.",
+    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft.",
     "sprachen": [
       "pl",
       "en"
     ],
-    "anzahl": 273,
-    "muster": 52
+    "anzahl": 292,
+    "muster": 53
   },
   "pl": {
     "Ab Lager": "Z magazynu",
@@ -286,7 +286,22 @@
     "Sofortkauf": "Kup teraz",
     "Kasse wird vorbereitet …": "Przygotowujemy kasę …",
     "Platte liegt im Warenkorb — du kannst gleich eine weitere konfigurieren": "Blat jest w koszyku — możesz od razu skonfigurować kolejny",
-    "Warenkorb gerade nicht möglich — wir bringen dich direkt zur Kasse": "Koszyk chwilowo niedostępny — przenosimy Cię prosto do kasy"
+    "Warenkorb gerade nicht möglich — wir bringen dich direkt zur Kasse": "Koszyk chwilowo niedostępny — przenosimy Cię prosto do kasy",
+    "Bitte Maße prüfen": "Sprawdź wymiary",
+    "Bitte zuerst die Maße korrigieren": "Najpierw popraw wymiary",
+    "Radius an die Kantenlänge angepasst": "Promień dopasowany do długości krawędzi",
+    "Ausschnitte entfernt — bei runden Platten nicht möglich": "Wycięcia usunięte — niemożliwe przy blatach okrągłych",
+    "Preise konnten gerade nicht geladen werden.": "Nie udało się teraz wczytać cen.",
+    "Preise konnten gerade nicht geladen werden": "Nie udało się teraz wczytać cen",
+    "Erneut laden": "Wczytaj ponownie",
+    "Lade …": "Wczytuję …",
+    "Preis folgt": "Cena wkrótce",
+    "Preise gerade nicht verfügbar": "Ceny chwilowo niedostępne",
+    "Preise sind weiterhin nicht erreichbar — bitte später noch einmal versuchen": "Ceny nadal są niedostępne — spróbuj ponownie później",
+    "Preise geladen": "Ceny wczytane",
+    "3D-Ansicht ist gerade nicht verfügbar": "Widok 3D jest chwilowo niedostępny",
+    "Skizze ausgewählt — bitte an die Anfrage-Mail anhängen": "Szkic wybrany — dołącz go do wiadomości z zapytaniem",
+    "Link zum Kopieren:": "Link do skopiowania:"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -565,7 +580,22 @@
     "Sofortkauf": "Buy now",
     "Kasse wird vorbereitet …": "Preparing checkout …",
     "Platte liegt im Warenkorb — du kannst gleich eine weitere konfigurieren": "The top is in your cart — you can configure another one right away",
-    "Warenkorb gerade nicht möglich — wir bringen dich direkt zur Kasse": "Cart not available right now — taking you straight to checkout"
+    "Warenkorb gerade nicht möglich — wir bringen dich direkt zur Kasse": "Cart not available right now — taking you straight to checkout",
+    "Bitte Maße prüfen": "Please check the dimensions",
+    "Bitte zuerst die Maße korrigieren": "Please correct the dimensions first",
+    "Radius an die Kantenlänge angepasst": "Radius adjusted to the edge length",
+    "Ausschnitte entfernt — bei runden Platten nicht möglich": "Cut outs removed — not possible on round tops",
+    "Preise konnten gerade nicht geladen werden.": "Prices could not be loaded right now.",
+    "Preise konnten gerade nicht geladen werden": "Prices could not be loaded right now",
+    "Erneut laden": "Reload",
+    "Lade …": "Loading …",
+    "Preis folgt": "Price to follow",
+    "Preise gerade nicht verfügbar": "Prices currently unavailable",
+    "Preise sind weiterhin nicht erreichbar — bitte später noch einmal versuchen": "Prices are still unavailable — please try again later",
+    "Preise geladen": "Prices loaded",
+    "3D-Ansicht ist gerade nicht verfügbar": "3D view is currently unavailable",
+    "Skizze ausgewählt — bitte an die Anfrage-Mail anhängen": "Sketch selected — please attach it to the enquiry e-mail",
+    "Link zum Kopieren:": "Link to copy:"
   },
   "muster": {
     "pl": [
@@ -776,6 +806,10 @@
       [
         "^Schräge R(\\d+) \\(Fertigungsregel\\)$",
         "Skos R$1 (zasada produkcji)"
+      ],
+      [
+        "^Ausschnitt (.+) hinzugefügt · (.+)$",
+        "Dodano wycięcie $1 · $2"
       ]
     ],
     "en": [
@@ -986,6 +1020,10 @@
       [
         "^Schräge R(\\d+) \\(Fertigungsregel\\)$",
         "Bevel R$1 (production rule)"
+      ],
+      [
+        "^Ausschnitt (.+) hinzugefügt · (.+)$",
+        "Cut out $1 added · $2"
       ]
     ]
   }

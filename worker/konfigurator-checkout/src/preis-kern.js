@@ -108,6 +108,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   const MASCHINE_MASSE = {'48x18.1':[48,18.1], '52x18.1':[52,18.1], '61.7x18.1':[61.7,18.1], 'auto':[52,18.1]};
 
+  const hasOwn=(o,k)=>k!=null && Object.prototype.hasOwnProperty.call(o,k);
+
   function kanal(){ return KFG_LANG==='pl' ? 'pln' : 'eur'; }
 
   function auf90(v){ return Math.ceil(v - 0.90 - 1e-9) + 0.90; }
@@ -151,6 +153,9 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function deckel(){
     if(S.form!=='rect'&&S.form!=='round') return null;
+    /* HPL auf Multiplex hat keinen Lagerartikel: der Deckel der ROHEN Platte kappte den
+       Laminatzuschlag weg (119x60 HPL = 69,90 wie natur). Review 08.09., A3. */
+    if(S.mat==='mpx'&&S.mpxSurface!=='natur') return null;
     const pre=`${S.mat}|${S.form}|${kurvenDekor()}|${S.thick}|`, d=dims();
     const a=Math.max(d.w,d.h), b=Math.min(d.w,d.h); let best=null;
     for(const k in SHOP){ if(!k.startsWith(pre)) continue;
@@ -238,7 +243,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function ensureDekor(){
     /* Schutz: haelt S.dekor immer innerhalb der aktuell gueltigen Liste.
        Vorher konnte der angezeigte Dekorname vom markierten Swatch abweichen. */
-    if(DEKOR_ALIAS[S.dekor]) S.dekor=DEKOR_ALIAS[S.dekor];
+    if(hasOwn(DEKOR_ALIAS,S.dekor)) S.dekor=DEKOR_ALIAS[S.dekor];
     const l=dekorList(); if(!l.length) return;
     if(!l.some(x=>x[0]===S.dekor)) S.dekor=l[0][0];
   }
@@ -532,6 +537,6 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,
            massbandStrecke, massbandName, cutPrice, cutMass, cutTypName, presetCount, cutAbstaende,
-           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR };
+           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, rules };
 }
 export { preisKern };

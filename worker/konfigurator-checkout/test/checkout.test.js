@@ -132,6 +132,24 @@ aufrufe = [];
 r = await warenkorb({ kanal:'eur', konfig:L }, env, null);
 check('Lager: lager:true, echte Variante, keine Anlage', r.lager===true && r.variantId==='gid://shopify/ProductVariant/54306775990618' && !aufrufe.some(a=>/productVariantsBulkCreate/.test(a.query)), r);
 
+/* ⑧c2 Review 08.09. A2: Lagergroesse MIT Bearbeitung ist kein Lagerartikel → eigene Variante mit vollem Preis */
+aufrufe = [];
+r = await warenkorb({ kanal:'eur', konfig:{ ...L, cornerR:[30,30,30,30] } }, env, null);
+check('Lager + 4 Ecken: keine Lagervariante, eigene Variante mit 69,90 + 39,90', !r.lager && r.variantId!=='gid://shopify/ProductVariant/54306775990618' && Math.abs(r.preis-109.8)<0.001 && aufrufe.some(a=>/productVariantsBulkCreate|productVariantsBulkUpdate/.test(a.query)), r);
+
+/* ⑧c3 Review 08.09. A4: Kabelkanal mit Kantenanschluss rechnet wie der Konfigurator (Enden a/e/ae) */
+const kanalS = { ...L, cuts:[{ t:'k', cx:60, cy:30, len:72, dir:'laengs', w:60, dp:10, seite:'unten', enden:'ae' }] };
+r = await warenkorb({ kanal:'eur', konfig:kanalS }, env, null);
+check('Kanal enden=ae: Preis ueber die volle Plattenlaenge (120 cm), kein 409', r.preis>69.9+30 && r.attribute.some(a=>/Kabelkanal 120 cm/.test(a.value)), { preis:r.preis, attr:r.attribute.filter(a=>/Kanal/i.test(a.value)).map(a=>a.value) });
+
+/* ⑧c4 Review 08.09. A5: Fertigungsgrenzen je Material sind verbindlich */
+for(const [name, konfig] of [['Compact 250x60', { ...L, mat:'compact', thick:'12', dekor:'weiss', edges:['roh','roh','roh','roh'], L:250, B:60 }], ['Multiplex 200x150', { ...L, mat:'mpx', thick:'21', dekor:'sperrholz-natur', edges:['nicht','nicht','nicht','nicht'], L:200, B:150 }], ['Compact rund 150', { ...L, mat:'compact', thick:'12', dekor:'weiss', edges:['roh','roh','roh','roh'], form:'round', D:150 }], ['L-Form Ausklinkung zu breit', { ...S, lf:{ ...S.lf, aw:195 } }]]){
+  try{ await warenkorb({ kanal:'eur', konfig }, env, null); check(name+' abgelehnt', false); }
+  catch(e){ check(name+' → 400 Fertigungsbereich', e.status===400 && /Fertigungsbereich/.test(e.message), e.message); }
+}
+try{ await checkout({ kanal:'eur', konfig:{ ...L, mat:'compact', thick:'12', dekor:'weiss', edges:['roh','roh','roh','roh'], L:250, B:60 } }, env, null); check('checkout Compact 250 abgelehnt', false); }
+catch(e){ check('checkout: Compact 250x60 → 400', e.status===400, e.message); }
+
 /* ⑧d Versandprofil abgelehnt (fehlender Scope) → Variante wieder geloescht, Fehler → Browser faellt auf Sofortkauf/Draft zurueck */
 profilAblehnen = true; aufrufe = [];
 try{ await warenkorb({ kanal:'eur', konfig:S }, env, null); check('Profil abgelehnt → Fehler', false); }

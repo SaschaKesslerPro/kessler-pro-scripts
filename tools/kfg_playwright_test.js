@@ -177,6 +177,64 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   check('EN: Preis in €', /€/.test(en.price), en.price);
   console.log('⑧ EN geprueft');
 
+  /* ⑨ Review 08.09.2026 (v1.17.9): Luecken geschlossen */
+  await open('de');
+  const alleOffen=async(pg)=>pg.evaluate(()=>document.querySelectorAll('[data-kfg-root] .kfg_step').forEach(s=>{ s.classList.add('is-open'); s.dataset.manual='1'; }));
+  await alleOffen(page);
+  r=await set({...clean, mat:'mpx',dekor:'buk',thick:'21',mpxSurface:'hpl',form:'rect',L:119,B:60, edges:['nicht','nicht','nicht','nicht']});
+  check('A3: HPL auf Multiplex 119x60 nicht auf den Lagerpreis der rohen Platte gedeckelt (95,90 statt 69,90)', parseP(r.price)===95.9, r.price);
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:300,B:60});
+  const sperre=await page.evaluate(()=>({price:document.getElementById('price').textContent, cta:document.getElementById('cta').disabled, buy:document.getElementById('ctaBuy').disabled, label:document.getElementById('priceLabel').textContent}));
+  check('A5: ungueltiges Mass → Preis "—", Knoepfe gesperrt', sperre.price==='—' && sperre.cta && sperre.buy && /Maße prüfen/.test(sperre.label), JSON.stringify(sperre));
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:120,B:60});
+  const frei=await page.evaluate(()=>({price:document.getElementById('price').textContent, cta:document.getElementById('cta').disabled}));
+  check('A5: gueltiges Mass → Preis zurueck, Knoepfe frei', frei.price==='69,90 €' && !frei.cta, JSON.stringify(frei));
+  r=await set({...clean, mat:'compact',dekor:'weiss',thick:'12',form:'rect',L:120,B:60,cornerR:[300,300,300,300], edges:['roh','roh','roh','roh']});
+  r=await set({B:30});
+  check('A9: Radius wird nach Massaenderung neu begrenzt (R300 an 30-cm-Kante → R150)', r.S.cornerR.every(v=>v<=150) && r.S.cornerR[0]===150, JSON.stringify(r.S.cornerR));
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:180,B:120,aw:150,ah:100,pos:'hr',schnitt:'gerade',sb:0}, lfR:[0,300,300,300,0]});
+  check('A9: L-Form-Radien gegen die Schenkel begrenzt (30/20 cm → R150/R100)', r.S.lfR.every(v=>v<=150) && r.S.lfR.some(v=>v>0 && v<=100), JSON.stringify(r.S.lfR));
+  await set({...clean, mat:'mpx',dekor:'sperrholz-natur',thick:'21',form:'rect',L:120,B:60, edges:['abs','halbrund','halbrund','halbrund'], cuts:[{t:'c',preset:'kabel',cx:60,cy:30,d:6,w:6,h:6}]});
+  await alleOffen(page); await page.click('#formChips .kfg_chip[data-form="round"]'); await page.waitForTimeout(300);
+  r=await page.evaluate(()=>{ const S=window.KFG.getConfig(); return {edges:S.edges, cuts:S.cuts.length, form:S.form}; });
+  check('A10: Formwechsel auf Rund vereinheitlicht Kanten und entfernt Ausschnitte', r.form==='round' && new Set(r.edges).size===1 && r.cuts===0, JSON.stringify(r));
+  /* B2: Tippen in der Bearbeitungsliste verliert den Fokus nicht mehr */
+  await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'rect',L:120,B:60, cuts:[{t:'c',preset:'kabel',cx:60,cy:30,d:6,w:6,h:6}]});
+  await alleOffen(page); await page.click('#cutList input[data-f="cx"]'); await page.fill('#cutList input[data-f="cx"]',''); await page.type('#cutList input[data-f="cx"]','1'); await page.waitForTimeout(600); await page.type('#cutList input[data-f="cx"]','50'); await page.waitForTimeout(600);
+  r=await page.evaluate(()=>({ae:document.activeElement && document.activeElement.dataset.f, val:document.querySelector('#cutList input[data-f="cx"]').value, cx:window.KFG.getConfig().cuts[0].cx}));
+  check('B2: Feld behaelt beim Tippen den Fokus, Wert 150 mm uebernommen', r.ae==='cx' && r.val==='150' && r.cx===15, JSON.stringify(r));
+  /* B4: kaputter Link toetet den Konfigurator nicht */
+  await page.goto('http://127.0.0.1:8765/_spiegel/de.html#m=constructor&mm=__proto__&d=constructor&e=constructor,abs,abs,abs', {waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—', null, {timeout:20000}).catch(()=>{});
+  r=await page.evaluate(()=>({kfg:!!window.KFG, price:document.getElementById('price').textContent, mat:window.KFG&&window.KFG.getConfig().mat}));
+  check('B4: #m=constructor → Konfigurator startet (Material Standard, Dekor auf gueltigen Wert)', r.kfg && /€/.test(r.price) && r.mat==='dekor', JSON.stringify(r));
+  /* B1: Datenausfall sichtbar, "Erneut laden" holt die Preise nach */
+  { const p2=await ctx.newPage(); let sperren=true;
+    await p2.route('**/*', rt=>{ const u=rt.request().url(); if(/kfg-(produktmatrix|preiskurven)\.json/.test(u)&&sperren) return rt.fulfill({status:503, body:'weg'}); if(/127\.0\.0\.1/.test(u)) return rt.continue(); return rt.abort(); });
+    await p2.goto('http://127.0.0.1:8765/_spiegel/de.html',{waitUntil:'domcontentloaded'});
+    await p2.waitForFunction(()=>window.KFG, null, {timeout:20000});
+    const ausfall=await p2.evaluate(()=>({price:document.getElementById('price').textContent, hinweis:!document.getElementById('datenHinweis').hidden, badge:document.getElementById('badgeText').textContent, cta:document.getElementById('cta').textContent}));
+    check('B1: Datenausfall → Preis "—", Hinweis sichtbar, Anfrage-Knopf', ausfall.price==='—' && ausfall.hinweis && /nicht verfügbar/.test(ausfall.badge) && /anfragen/.test(ausfall.cta), JSON.stringify(ausfall));
+    sperren=false; await p2.click('#datenNeu'); await p2.waitForFunction(()=>document.getElementById('price').textContent==='69,90 €', null, {timeout:10000}).catch(()=>{});
+    const nachher=await p2.evaluate(()=>({price:document.getElementById('price').textContent, hinweis:!document.getElementById('datenHinweis').hidden}));
+    check('B1: "Erneut laden" holt die Preise nach', nachher.price==='69,90 €' && !nachher.hinweis, JSON.stringify(nachher));
+    await p2.close(); }
+  /* B3: Zeichnen auf dem Handy trifft die Platte (Letterboxing) */
+  { const mctx=await browser.newContext({ viewport:{width:390,height:844}, hasTouch:true, isMobile:true });
+    const mp=await mctx.newPage(); await mp.route('**/*', rt=>/127\.0\.0\.1/.test(rt.request().url())?rt.continue():rt.abort());
+    await mp.goto('http://127.0.0.1:8765/_spiegel/de.html',{waitUntil:'domcontentloaded'});
+    await mp.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—', null, {timeout:20000});
+    await mp.evaluate(()=>window.KFG.setConfig({L:120,B:60,cuts:[]})); await mp.waitForTimeout(400);
+    await mp.evaluate(()=>window.scrollTo(0, document.querySelector('[data-kfg-root]').getBoundingClientRect().top+window.scrollY)); await mp.waitForTimeout(400);
+    await alleOffen(mp); await mp.evaluate(()=>document.querySelector('[data-draw="r"]').click()); await mp.waitForTimeout(400);
+    await mp.evaluate(()=>window.scrollTo(0, document.querySelector('[data-kfg-root]').getBoundingClientRect().top+window.scrollY)); await mp.waitForTimeout(400);
+    const pl=await mp.evaluate(()=>{ const e=document.querySelector('#stage .kfg_edge[data-i="0"]').getBoundingClientRect(), l=document.querySelector('#stage .kfg_edge[data-i="3"]').getBoundingClientRect(); return {x:e.left, w:e.width, y:l.top, h:l.height}; });
+    await mp.mouse.move(pl.x+pl.w*0.25, pl.y+pl.h*0.3); await mp.mouse.down(); await mp.mouse.move(pl.x+pl.w*0.5, pl.y+pl.h*0.5, {steps:4}); await mp.mouse.move(pl.x+pl.w*0.75, pl.y+pl.h*0.7, {steps:4}); await mp.mouse.up(); await mp.waitForTimeout(400);
+    const cut=await mp.evaluate(()=>{ const c=window.KFG.getConfig().cuts[0]; return c?{w:c.w,h:c.h,cx:c.cx,cy:c.cy}:null; });
+    check('B3: mobil aufgezogener Ausschnitt 60 x 24 cm (halbe Plattenbreite, 40 % Tiefe)', cut && Math.abs(cut.w-60)<=1.5 && Math.abs(cut.h-24)<=1.5 && Math.abs(cut.cx-60)<=1.5, JSON.stringify(cut));
+    await mctx.close(); }
+  console.log('⑨ Review-Fixes geprueft');
+
   console.log(`\n${ok} Zusicherungen gruen, ${bad.length} rot`);
   bad.forEach(b=>console.log('  ✗', b));
   console.log('JS-Fehler:', errors.length?errors:'keine');
