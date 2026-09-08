@@ -6,8 +6,8 @@
       "pl",
       "en"
     ],
-    "anzahl": 295,
-    "muster": 62
+    "anzahl": 300,
+    "muster": 68
   },
   "pl": {
     "Ab Lager": "Z magazynu",
@@ -304,7 +304,12 @@
     "Link zum Kopieren:": "Link do skopiowania:",
     "Ab Lager · 3 bis 5 Tage": "Z magazynu · 3 do 5 dni",
     "Maß geändert — jetzt freier Ausschnitt nach Formel": "Wymiar zmieniony — teraz dowolne wycięcie wg wzoru",
-    "4 Farben": "4 kolory"
+    "4 Farben": "4 kolory",
+    "Punkte": "punkty",
+    "rechts · Ausklinkung": "po prawej · wycięcie narożne",
+    "links · Ausklinkung": "po lewej · wycięcie narożne",
+    "vorne · Ausklinkung": "z przodu · wycięcie narożne",
+    "hinten · Ausklinkung": "z tyłu · wycięcie narożne"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -601,7 +606,12 @@
     "Link zum Kopieren:": "Link to copy:",
     "Ab Lager · 3 bis 5 Tage": "From stock · 3 to 5 days",
     "Maß geändert — jetzt freier Ausschnitt nach Formel": "Size changed — now a free cut out priced by formula",
-    "4 Farben": "4 colours"
+    "4 Farben": "4 colours",
+    "Punkte": "points",
+    "rechts · Ausklinkung": "right · notch",
+    "links · Ausklinkung": "left · notch",
+    "vorne · Ausklinkung": "front · notch",
+    "hinten · Ausklinkung": "back · notch"
   },
   "muster": {
     "pl": [
@@ -852,6 +862,30 @@
       [
         "^Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet (.+)/lfm, halbrund (.+)/lfm\\. Lackiert sind es (.+), (.+) und (.+)/lfm — wir haben genau eine Lackierung\\. Alternativ eine ABS-Kante in der gewünschten Farbe\\.$",
         "Widoczna krawędź warstwowa: bez frezowania w standardzie, frezowana 45° kosztuje $1/mb, półokrągła $2/mb. Lakierowane to $3, $4 i $5/mb — mamy dokładnie jeden lakier. Alternatywnie obrzeże ABS w wybranym kolorze."
+      ],
+      [
+        "^(.+), ziehen zum Verschieben$",
+        "$1, przeciągnij, aby przesunąć"
+      ],
+      [
+        "^Ausschnitt (.+) cm$",
+        "Wycięcie $1 cm"
+      ],
+      [
+        "^Runder Ausschnitt (.+) cm$",
+        "Wycięcie okrągłe $1 cm"
+      ],
+      [
+        "^Freie Kontur (\\d+) Punkte$",
+        "Dowolny kontur, $1 punktów"
+      ],
+      [
+        "^Kabelkanal (.+)$",
+        "Kanał kablowy $1"
+      ],
+      [
+        "^Ecken: (.+)$",
+        "Narożniki: $1"
       ]
     ],
     "en": [
@@ -1102,6 +1136,30 @@
       [
         "^Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet (.+)/lfm, halbrund (.+)/lfm\\. Lackiert sind es (.+), (.+) und (.+)/lfm — wir haben genau eine Lackierung\\. Alternativ eine ABS-Kante in der gewünschten Farbe\\.$",
         "Visible layered edge: not milled as standard, milled 45° costs $1/lin. m, half-round $2/lin. m. Lacquered it is $3, $4 and $5/lin. m — we have exactly one lacquer. Alternatively an ABS edge in the colour of your choice."
+      ],
+      [
+        "^(.+), ziehen zum Verschieben$",
+        "$1, drag to move"
+      ],
+      [
+        "^Ausschnitt (.+) cm$",
+        "Cut out $1 cm"
+      ],
+      [
+        "^Runder Ausschnitt (.+) cm$",
+        "Round cut out $1 cm"
+      ],
+      [
+        "^Freie Kontur (\\d+) Punkte$",
+        "Free contour, $1 points"
+      ],
+      [
+        "^Kabelkanal (.+)$",
+        "Cable channel $1"
+      ],
+      [
+        "^Ecken: (.+)$",
+        "Corners: $1"
       ]
     ]
   }

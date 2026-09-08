@@ -9,7 +9,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.18.0';
+  var VERSION = '1.18.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -1794,9 +1794,9 @@ function buildCorner(){
     ? (lfSchraeg() ? 'L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.'
                    : 'L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.')
     : '';
-  const txt=[lformNote, r.minCorner>0?r.cornerNote:''].filter(Boolean).join(' ');
-  note.style.display=txt?'block':'none';
-  note.textContent=txt;
+  const teile=[lformNote, r.minCorner>0?r.cornerNote:''].filter(Boolean);
+  note.style.display=teile.length?'block':'none';
+  note.innerHTML=teile.map(t=>`<span>${t}</span>`).join(' ');   /* je Satz ein Textknoten — sonst findet die Uebersetzung den Satz nicht */
 }
 /* Kleines Icon: Quadrat, bei dem genau die gemeinte Ecke gerundet ist */
 function radiusField(i,val,on){
@@ -1920,7 +1920,7 @@ function massSperre(an){
 function render(){
   const gueltig=validate();
   massSperre(!gueltig);
-  if(!gueltig){ syncURL(); return; }
+  if(!gueltig){ syncURL(); uebersetze(); return; }
   clampCuts();          /* zuerst begrenzen, dann anzeigen — sonst zeigt die
                            Liste noch die alten, zu grossen Werte an */
   const std=isStandard(), offer=needsOffer(), c=calc();
@@ -3025,10 +3025,7 @@ function trKern(k){
 
   if(_kfgWM) for(const [re,rp] of _kfgWM){
     const m2=norm.match(re);
-    if(m2) return rp.replace(/\$(\d)/g, (_,i)=>{
-      const g=m2[+i]; if(g===undefined) return '';
-      return _kfgWB[g]!==undefined ? _kfgWB[g] : trSeg(g);
-    });
+    if(m2) return rp.replace(/\$(\d)/g, (_,i)=>{ const g=m2[+i]; return g===undefined ? '' : trGruppe(g,0); });
   }
 
   const seg=trSeg(norm);
@@ -3037,20 +3034,39 @@ function trKern(k){
 }
 /* Zerlegt an " \u00b7 " und uebersetzt jedes Stueck einzeln. Die Oberflaeche baut
    fast alle zusammengesetzten Zeilen mit diesem Trenner. */
-function trSeg(txt){
-  if(!txt || !txt.includes(' \u00b7 ')) return txt;
+/* Trenner der Oberflaeche, vom groben zum feinen: " · " (Zeilen), " + " (Zusaetze),
+   ", " (Aufzaehlungen wie "vorne links, hinten rechts"). Jedes Stueck wird erst als
+   Ganzes gesucht, dann ueber die Muster, dann weiter zerlegt. */
+const TR_TRENNER=[' \u00b7 ',' + ',', '];
+/* Gruppe eines Musters uebersetzen: Ganzes → ohne fuehrendes Symbol ("· Weiß") → zerlegt */
+function trGruppe(g, tiefe){
+  if(_kfgWB[g]!==undefined) return _kfgWB[g];
+  const mm=g.match(/^([^\p{L}\p{N}]+\s*)(.+)$/u);
+  if(mm && _kfgWB[mm[2]]!==undefined) return mm[1]+_kfgWB[mm[2]];
+  if(mm){ const w=trSeg(mm[2],tiefe); if(w!==mm[2]) return mm[1]+w; }
+  return trSeg(g,tiefe);
+}
+function trSeg(txt, tiefe){
+  tiefe=tiefe||0;
+  if(!txt) return txt;
+  const sep=TR_TRENNER.find(t=>txt.includes(t));
+  if(!sep) return txt;
   let treffer=false;
-  const neu=txt.split(' \u00b7 ').map(p=>{
+  const neu=txt.split(sep).map(p=>{
     const q=p.trim();
     let v=_kfgWB[q];
     if(v===undefined){
       const mm=q.match(/^([^\p{L}\p{N}]+\s*)(.+)$/u);
       if(mm && _kfgWB[mm[2]]!==undefined) v=mm[1]+_kfgWB[mm[2]];
     }
+    if(v===undefined && _kfgWM && tiefe<3){
+      for(const [re,rp] of _kfgWM){ const m2=q.match(re); if(m2){ v=rp.replace(/\$(\d)/g,(_,i)=>{ const g=m2[+i]; return g===undefined ? '' : trGruppe(g,tiefe+1); }); break; } }
+    }
+    if(v===undefined && tiefe<3){ const w=trSeg(q,tiefe+1); if(w!==q) v=w; }
     if(v!==undefined){ treffer=true; return v; }
     return p;
   });
-  return treffer ? neu.join(' \u00b7 ') : txt;
+  return treffer ? neu.join(sep) : txt;
 }
 /* Laeuft ueber die fertigen Textknoten. Bewusst NUR unter [data-kfg-root] und
    bewusst ohne MutationObserver: der wuerde bei jedem Neuzeichnen erneut
