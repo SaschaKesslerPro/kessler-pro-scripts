@@ -4,10 +4,13 @@
                   → { checkoutUrl, draftOrderId, preis }          (Sofortkauf-Rueckfall: Draft Order)
    POST /warenkorb { … wie /checkout, sofort:true|false }
                   → { variantId, token, titel, preis, waehrung, attribute[, checkoutUrl] }
-                  Legt je Konfiguration eine eigene Variante des versteckten Basisprodukts mit
-                  echtem Preis an (PLN + EUR-Festpreis, Versandprofil "Massanfertigung"); der
+                  Je Konfiguration eine eigene Variante des versteckten Basisprodukts mit
+                  echtem Preis (PLN + EUR-Festpreis, Versandprofil "Massanfertigung"); der
                   Browser legt sie in den Shopyflow-Warenkorb. sofort:true → eigener Storefront-
                   Warenkorb nur mit dieser Position, Antwort enthaelt die Checkout-URL.
+                  Die Variante ist eine umgeschriebene, vorgewaermte Reserve aus dem Vorrat
+                  (GET /vorrat?key= zeigt/fuellt ihn) — frisch angelegte Varianten sind im
+                  Warenkorb 8–14 s lang "ausverkauft".
 
    Der Worker nimmt die Konfiguration aus dem Browser, rechnet den Preis mit
    demselben Kern wie der Konfigurator nach (src/preis-kern.js, erzeugt aus
@@ -54,8 +57,9 @@
      SETUP_KEY                Secret — schuetzt /setup, /nachlauf, /auftrag
      FREIGABE_STUNDEN         Frist fuer die automatische Freigabe (72)
      LINK_TAGE                Ablauf der Links in Tagen, "Kunde,intern" (Standard 180,365)
-     STOREFRONT_TOKEN         oeffentlicher Storefront-Token (Sofortkauf-Warenkorb)
-     VARIANTEN_TAGE           Konfigurator-Varianten aelter als n Tage werden nachts geloescht (45)
+     STOREFRONT_TOKEN         oeffentlicher Storefront-Token (Sofortkauf-Warenkorb, Kaufbarkeits-Probe)
+     VARIANTEN_TAGE           Konfigurator-Varianten, seit n Tagen unveraendert, werden nachts geloescht (45)
+     VORRAT                   Zielbestand an vorgewaermten Reservevarianten (12) — GET /vorrat?key= fuellt auf
      ZEICHNUNGEN              KV-Namespace (Bindung)
 */
 import { preisKern } from './preis-kern.js';
@@ -134,7 +138,7 @@ export default {
       if(req.method === 'GET' && (m = pfad.match(/^\/z\/([A-Za-z0-9_-]{10,})\/([A-Za-z0-9._-]+)$/))) return datei(env, m[1], m[2]);
       if((m = pfad.match(/^\/freigabe\/([A-Za-z0-9_-]{10,})$/))) return freigabe(req, env, m[1], url);
       if(req.method === 'GET' && (m = pfad.match(/^\/i\/([A-Za-z0-9_-]{10,})$/))) return internSeite(env, m[1]);
-      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron' || pfad === '/mailtest' || pfad === '/aufraeumen'){
+      if(pfad === '/setup/webhooks' || pfad === '/nachlauf' || pfad === '/auftrag' || pfad === '/cron' || pfad === '/mailtest' || pfad === '/aufraeumen' || pfad === '/vorrat'){
         if(!env.SETUP_KEY || url.searchParams.get('key') !== env.SETUP_KEY) return json({ fehler:'kein Zugriff' }, 403);
         if(pfad === '/setup/webhooks'){
           const ziel = `${String(env.PUBLIC_URL||'').replace(/\/$/,'')}/webhook/orders`;
@@ -150,6 +154,7 @@ export default {
         if(pfad === '/auftrag') return json((await auftragLaden(env, url.searchParams.get('order')||'')) || { fehler:'kein Auftrag' });
         if(pfad === '/cron') return json(await autoFreigabeLauf(env));
         if(pfad === '/aufraeumen') return json(await variantenAufraeumen(env));
+        if(pfad === '/vorrat') return json(await vorratAuffuellen(env));
         if(pfad === '/mailtest'){
           const an = url.searchParams.get('an') || env.SHOP_MAIL || 'shop@kessler-pro.com';
           const r = await sendeMail(env, { an, betreff: 'Kessler PRO · Testmail aus dem Konfigurator-Worker', html: '<p>Der Mailversand aus dem Worker funktioniert.</p><p>Weg: ' + (env.SMTP_HOST && env.SMTP_PASS ? 'SMTP ' + env.SMTP_HOST : env.RESEND_API_KEY ? 'Resend' : 'keiner') + '</p>', anhaenge: [{ name:'test.txt', daten: new TextEncoder().encode('Kessler PRO Testanhang') }] });
@@ -166,7 +171,9 @@ export default {
   },
   async scheduled(ev, env, ctx){
     ctx.waitUntil(autoFreigabeLauf(env).then(r => console.log('auto-freigabe', JSON.stringify(r))));
-    /* einmal nachts: verwaiste Konfigurator-Varianten (nie bestellt, aelter als VARIANTEN_TAGE) loeschen */
+    /* stuendlich: Vorrat an vorgewaermten Reservevarianten pruefen und auffuellen */
+    ctx.waitUntil(vorratAuffuellen(env).then(r => console.log('vorrat', JSON.stringify(r))).catch(e => console.error('vorrat', e.message)));
+    /* einmal nachts: verwaiste Konfigurator-Varianten (nie bestellt, seit VARIANTEN_TAGE unveraendert) loeschen */
     if(new Date(ev.scheduledTime || Date.now()).getUTCHours() === 2) ctx.waitUntil(variantenAufraeumen(env).then(r => console.log('varianten', JSON.stringify(r))).catch(e => console.error('varianten', e.message)));
   }
 };
@@ -433,46 +440,76 @@ export async function warenkorb(body, env, ctx){
   const d = K.dims();
   const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm` : `${d.w} × ${d.h} cm`;
   const optionWert = `${MATERIAL[S.mat]}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName} · ${c.thickName} · ${mass} · #${token.replace(/[^A-Za-z0-9]/g,'').slice(0,4)}`.slice(0, 250);
-  const variante = await SH.varianteAnlegen(env, { produktId: meta.produkt, optionName: meta.option || 'Ausführung', optionWert,
-    preisPln: cpl.total, sku: `KFG-${token}`, gewichtKg: gewicht, mediaId: (VARIANTEN.medien||{})[schluessel] || null });
+  const sku = `KFG-${token}`;
+  const daten = { produktId: meta.produkt, optionName: meta.option || 'Ausführung', optionWert, preisPln: cpl.total, sku, gewichtKg: gewicht, mediaId: (VARIANTEN.medien||{})[schluessel] || null };
+  /* Zuerst eine vorgewaermte Reserve umschreiben (sofort kaufbar, ~1 s). Erst wenn der
+     Vorrat leer ist, eine Variante frisch anlegen — die braucht dann 8–14 s, bis der
+     Warenkorb sie annimmt (Details bei RESERVE_SKU in shopify.js). */
+  let variante = null, ausVorrat = false;
+  const reserven = await SH.reservenAuflisten(env, meta.produkt).catch(()=>[]);
+  for(let i = 0; i < 3 && reserven.length && !variante; i++){
+    const r = reserven.splice(Math.floor(Math.random()*reserven.length), 1)[0];
+    try{ variante = await SH.reserveUmschreiben(env, Object.assign({ variantId: r.id }, daten)); ausVorrat = true; }
+    catch(e){ console.warn('reserve', r.id, e.message); }
+  }
+  if(!variante) variante = await SH.varianteAnlegen(env, daten);
+  const land = kanal==='pln' ? 'PL' : 'DE';
+  let cart;
   try{
     await SH.festpreisSetzen(env, meta.preisliste_eur, variante.id, cde.total, 'EUR');
-    /* Ohne das Versandprofil ginge die Massplatte versandkostenfrei raus — dann lieber kein Warenkorb (Rueckfall: Sofortkauf per Draft Order) */
-    await SH.versandprofilZuordnen(env, meta.versandprofil, [variante.id]);
-    /* Storefront-Index braucht ein paar Sekunden — sonst legt der Browser die Variante mit Menge 0 in den Warenkorb */
-    await SH.storefrontWarten(env, variante.id, 8000);
+    /* Ohne das Versandprofil ginge die Massplatte versandkostenfrei raus — dann lieber kein Warenkorb (Rueckfall: Sofortkauf per Draft Order).
+       Reserven haben das Profil schon seit dem Anlegen. */
+    if(!ausVorrat) await SH.versandprofilZuordnen(env, meta.versandprofil, [variante.id]);
+    /* Probe (und beim Sofortkauf gleich der echte Warenkorb): erst zurueckmelden, wenn das
+       Warenkorb-Backend die Variante mit Menge 1 annimmt — sonst legt Shopyflow sie im Browser mit Menge 0 ab */
+    cart = await SH.storefrontWarenkorb(env, { variantId: variante.id, attribute, land, sprache, maxMs: ausVorrat ? 6000 : 15000 });
+    /* Nachkontrolle: hat ein gleichzeitiger Klick dieselbe Reserve erwischt, traegt sie jetzt eine andere SKU */
+    if(ausVorrat && !(await SH.varianteSkuStimmt(env, variante.id, sku))) throw Object.assign(fehler('Reserve gleichzeitig vergeben', 409), { fremd: true });
   }catch(e){
-    try{ await SH.variantenLoeschen(env, meta.produkt, [variante.id]); }catch(_){}
+    /* Aufraeumen — ausser die Variante gehoert inzwischen dem anderen Klick */
+    if(!e.fremd){ try{ await SH.variantenLoeschen(env, meta.produkt, [variante.id]); }catch(_){} }
     throw e;
   }
+  const merk = [];
   if(env.ZEICHNUNGEN){
     const tage = 60;
-    const merk = Promise.all([
+    merk.push(Promise.all([
       env.ZEICHNUNGEN.put(`kfg:${token}`, JSON.stringify({ S, preis:{ eur: cde.total, pln: cpl.total }, variantId: variante.id, titel, kanal, sprache, version: versionSauber(body.version), erstellt: new Date().toISOString() }), { expirationTtl: tage*86400 }),
       env.ZEICHNUNGEN.put(`token:${token}`, `cart:${variante.id}`, { expirationTtl: tage*86400 }),
-    ]).catch(()=>{});
-    if(ctx && ctx.waitUntil) ctx.waitUntil(merk); else await merk;
+    ]).catch(()=>{}));
   }
-  const out = { variantId: variante.id, token, titel, preis: c.total, waehrung, attribute, freigabeUrl };
-  if(body.sofort){
-    const cart = await SH.storefrontWarenkorb(env, { variantId: variante.id, attribute, land: kanal==='pln' ? 'PL' : 'DE', sprache });
-    out.checkoutUrl = cart.checkoutUrl;
-  }
+  /* Vorrat im Hintergrund nachfuellen, damit der naechste Klick wieder eine warme Reserve findet */
+  merk.push(vorratAuffuellen(env).catch(e => console.warn('vorrat', e.message)));
+  if(ctx && ctx.waitUntil) merk.forEach(p => ctx.waitUntil(p)); else await Promise.all(merk);
+  const out = { variantId: variante.id, token, titel, preis: c.total, waehrung, attribute, freigabeUrl, vorrat: ausVorrat };
+  if(body.sofort) out.checkoutUrl = cart.checkoutUrl;
   return out;
+}
+/* Vorrat an Reserven auffuellen (Ziel VORRAT, Standard 12): nach jedem Klick im Hintergrund,
+   stuendlich im Cron und von Hand ueber GET /vorrat?key= */
+export async function vorratAuffuellen(env){
+  const meta = VARIANTEN._meta || {};
+  const ziel = Math.max(0, Math.min(40, +(env.VORRAT || 12)));
+  const vorhanden = await SH.reservenAuflisten(env, meta.produkt);
+  const fehlt = ziel - vorhanden.length;
+  if(fehlt <= 0) return { vorrat: vorhanden.length, ziel, angelegt: 0 };
+  const ids = await SH.reservenAnlegen(env, { produktId: meta.produkt, optionName: meta.option || 'Ausführung', anzahl: fehlt, versandprofil: meta.versandprofil });
+  return { vorrat: vorhanden.length + ids.length, ziel, angelegt: ids.length };
 }
 function variantenSchluessel(S){
   const mat = S.mat === 'mpx' ? (S.mpxSurface === 'hpl' ? 'mpx_hpl' : 'mpx') : S.mat;
   const dekor = S.mat === 'mpx' && S.mpxSurface !== 'hpl' ? 'sperrholz-natur' : S.dekor;
   return `${mat}|${dekor}`;
 }
-/* Nachts: Konfigurator-Varianten, die aelter als VARIANTEN_TAGE sind, loeschen. Bestellte
-   Positionen behalten ihre Daten in der Bestellung; die Konfiguration liegt im KV. */
+/* Nachts: Konfigurator-Varianten, die seit VARIANTEN_TAGE nicht mehr angefasst wurden, loeschen
+   (updatedAt, nicht createdAt — eine Reserve wird erst beim Klick zur Konfiguration). Reserven
+   bleiben. Bestellte Positionen behalten ihre Daten in der Bestellung; die Konfiguration liegt im KV. */
 export async function variantenAufraeumen(env){
   const meta = VARIANTEN._meta || {};
   const tage = +(env.VARIANTEN_TAGE || 45);
   const alle = await SH.konfigVariantenAuflisten(env, meta.produkt);
   const grenze = Date.now() - tage*86400e3;
-  const alt = alle.filter(v => new Date(v.createdAt).getTime() < grenze).map(v => v.id);
+  const alt = alle.filter(v => new Date(v.updatedAt || v.createdAt).getTime() < grenze).map(v => v.id);
   const n = await SH.variantenLoeschen(env, meta.produkt, alt);
   return { geprueft: alle.length, geloescht: n, tage };
 }

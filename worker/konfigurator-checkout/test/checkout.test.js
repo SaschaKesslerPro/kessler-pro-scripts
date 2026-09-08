@@ -7,19 +7,25 @@ const hier = path.dirname(fileURLToPath(import.meta.url)), root = path.resolve(h
 const matrix = fs.readFileSync(path.join(root,'dist/data/kfg-produktmatrix.json'));
 const kurven = fs.readFileSync(path.join(root,'dist/data/kfg-preiskurven.json'));
 let letzterAufruf = null, tokenAufrufe = 0, varianteAblehnen = false, profilAblehnen = false, aufrufe = [], storefront = [];
+/* Vorrat-Attrappe: Reserven im Basisprodukt; leer → der Worker legt frisch an. skuNachher: was die Nachkontrolle liest (null = wie umgeschrieben) */
+let reserven = [], skuNachher = null, warenkorbLeerBis = 0;
 globalThis.fetch = async (u, opt) => {
   u = String(u);
   if(u.endsWith('kfg-produktmatrix.json')) return new Response(matrix, { status:200 });
   if(u.endsWith('kfg-preiskurven.json')) return new Response(kurven, { status:200 });
   if(u.endsWith('/admin/oauth/access_token')){ tokenAufrufe++; return new Response(JSON.stringify({ access_token:'shpca_test', scope:'write_draft_orders,read_products', expires_in:86399 }), { status:200 }); }
   if(u.includes('/api/2024-10/graphql.json') && !u.includes('/admin/')){ const b = JSON.parse(opt.body);
-    if(/availableForSale/.test(b.query)) return new Response(JSON.stringify({ data:{ node:{ availableForSale:true } } }), { status:200 });
     storefront.push({ b, headers: opt.headers });
-    return new Response(JSON.stringify({ data:{ cartCreate:{ cart:{ id:'gid://shopify/Cart/abc', checkoutUrl:'https://checkout.kessler-pro.com/cn/abc', lines:{ nodes:[{ quantity:1 }] } }, userErrors:[] } } }), { status:200 }); }
+    const leer = storefront.length <= warenkorbLeerBis;   /* die ersten n Proben: "ausverkauft" wie bei einer frischen Variante */
+    return new Response(JSON.stringify({ data:{ cartCreate:{ cart:{ id:'gid://shopify/Cart/abc', checkoutUrl:'https://checkout.kessler-pro.com/cn/abc', lines:{ nodes:[{ quantity: leer ? 0 : 1 }] } }, warnings: leer ? [{ code:'MERCHANDISE_OUT_OF_STOCK' }] : [], userErrors:[] } } }), { status:200 }); }
   if(u.includes('/admin/api/')){ letzterAufruf = JSON.parse(opt.body); aufrufe.push(letzterAufruf);
     if(opt.headers['X-Shopify-Access-Token']!=='shpca_test') return new Response('{"errors":"kein token"}',{status:401});
     const q = letzterAufruf.query || '';
-    if(/productVariantsBulkCreate/.test(q)) return new Response(JSON.stringify({ data:{ productVariantsBulkCreate:{ productVariants:[{ id:'gid://shopify/ProductVariant/999000111', title: letzterAufruf.variables.v[0].optionValues[0].name }], userErrors:[] } } }), { status:200 });
+    if(/productVariants\(first/.test(q) && /KFG-RESERVE-/.test(letzterAufruf.variables.q)) return new Response(JSON.stringify({ data:{ productVariants:{ nodes: reserven.map(id => ({ id, sku:'KFG-RESERVE-'+id.split('/').pop(), createdAt:'2026-09-08T06:00:00Z' })) } } }), { status:200 });
+    if(/productVariants\(first/.test(q)) return new Response(JSON.stringify({ data:{ productVariants:{ nodes:[] } } }), { status:200 });
+    if(/productVariantsBulkUpdate/.test(q)){ const v = letzterAufruf.variables.v[0]; return new Response(JSON.stringify({ data:{ productVariantsBulkUpdate:{ productVariants:[{ id:v.id, title:v.optionValues[0].name, sku:v.inventoryItem.sku }], userErrors:[] } } }), { status:200 }); }
+    if(/productVariant\(id/.test(q)){ const um = aufrufe.filter(a=>/productVariantsBulkUpdate/.test(a.query)).pop(); return new Response(JSON.stringify({ data:{ productVariant:{ sku: skuNachher || (um && um.variables.v[0].inventoryItem.sku) } } }), { status:200 }); }
+    if(/productVariantsBulkCreate/.test(q)){ const vs = letzterAufruf.variables.v; return new Response(JSON.stringify({ data:{ productVariantsBulkCreate:{ productVariants: vs.map((v,i) => ({ id: vs.length>1 ? 'gid://shopify/ProductVariant/7770000'+i : 'gid://shopify/ProductVariant/999000111', title: v.optionValues[0].name, sku: v.inventoryItem.sku })), userErrors:[] } } }), { status:200 }); }
     if(/priceListFixedPricesAdd/.test(q)) return new Response(JSON.stringify({ data:{ priceListFixedPricesAdd:{ prices:[{ variant:{ id:'gid://shopify/ProductVariant/999000111' }, price: letzterAufruf.variables.p[0].price }], userErrors:[] } } }), { status:200 });
     if(/deliveryProfileUpdate/.test(q)) return new Response(JSON.stringify(profilAblehnen ? { data:{ deliveryProfileUpdate:{ profile:null, userErrors:[{ field:['profile'], message:'Access denied for deliveryProfileUpdate' }] } } } : { data:{ deliveryProfileUpdate:{ profile:{ id:'gid://shopify/DeliveryProfile/1' }, userErrors:[] } } }), { status:200 });
     if(/productVariantsBulkDelete/.test(q)) return new Response(JSON.stringify({ data:{ productVariantsBulkDelete:{ userErrors:[] } } }), { status:200 });
@@ -136,6 +142,30 @@ profilAblehnen = false;
 aufrufe = [];
 try{ await warenkorb({ kanal:'eur', preis:99.9, konfig:S }, env, null); check('Warenkorb: manipulierter Preis abgelehnt', false); }
 catch(e){ check('Warenkorb: manipulierter Preis abgelehnt (409), keine Variante', e.status===409 && !aufrufe.some(a=>/productVariantsBulkCreate/.test(a.query)), e.message); }
+
+/* ⑧f Vorrat (08.09.): vorgewaermte Reserve wird umgeschrieben statt frisch angelegt; Vorrat wird im Hintergrund aufgefuellt */
+reserven = ['gid://shopify/ProductVariant/5001', 'gid://shopify/ProductVariant/5002']; aufrufe = []; storefront = [];
+r = await warenkorb({ version:'1.17.8', kanal:'eur', sprache:'de', preis:199.8, konfig:S }, env, null);
+const umCall = aufrufe.find(a=>/productVariantsBulkUpdate/.test(a.query)), anlegeCalls = aufrufe.filter(a=>/productVariantsBulkCreate/.test(a.query)), profilCalls = aufrufe.filter(a=>/deliveryProfileUpdate/.test(a.query));
+check('Vorrat: Reserve umgeschrieben, keine Konfig-Variante frisch angelegt', umCall && reserven.includes(umCall.variables.v[0].id) && r.variantId===umCall.variables.v[0].id && r.vorrat===true, { r: r.variantId, um: umCall && umCall.variables.v[0].id });
+const u0 = umCall && umCall.variables.v[0];
+check('Vorrat: Umschreiben setzt Name, PLN-Preis, SKU KFG-Token, kaufbar (tracked false, CONTINUE), Gewicht, Dekorbild', u0 && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(u0.optionValues[0].name) && +u0.price>500 && u0.inventoryItem.sku==='KFG-'+r.token && u0.inventoryItem.tracked===false && u0.inventoryPolicy==='CONTINUE' && u0.inventoryItem.measurement.weight.value>25 && u0.mediaId==='gid://shopify/MediaImage/62075442561370', u0);
+check('Vorrat: EUR-Festpreis gesetzt, Versandprofil nicht erneut (Reserve hat es schon)', aufrufe.some(a=>/priceListFixedPricesAdd/.test(a.query)) && !profilCalls.some(p=>p.variables.p.variantsToAssociate.includes(r.variantId)), profilCalls.map(p=>p.variables.p));
+check('Vorrat: Kaufbarkeits-Probe per cartCreate auch ohne sofort, Nachkontrolle der SKU', storefront.length===1 && storefront[0].b.variables.in.lines[0].merchandiseId===r.variantId && aufrufe.some(a=>/productVariant\(id/.test(a.query)), storefront.length);
+const nach = anlegeCalls.find(a=>a.variables.v.length>1);
+check('Vorrat: 10 Reserven nachgelegt (Ziel 12, 2 vorhanden) — SKU KFG-RESERVE-, nicht kaufbar (tracked, DENY, 0,00), Versandprofil zugeordnet', nach && nach.variables.v.length===10 && nach.variables.v.every(v=>/^KFG-RESERVE-[A-Za-z0-9]{8}$/.test(v.inventoryItem.sku) && v.inventoryItem.tracked===true && v.inventoryPolicy==='DENY' && v.price==='0.00' && /^Reserviert · /.test(v.optionValues[0].name)) && profilCalls.some(p=>p.variables.p.variantsToAssociate.length===10), nach && nach.variables.v.length);
+
+/* ⑧g Zwei Klicks auf dieselbe Reserve: Nachkontrolle sieht fremde SKU → 409, Variante bleibt (gehoert dem anderen) */
+skuNachher = 'KFG-anderer-Klick'; aufrufe = [];
+try{ await warenkorb({ kanal:'eur', konfig:S }, env, null); check('Reserve doppelt → Fehler', false); }
+catch(e){ check('Reserve doppelt vergeben → 409, nicht geloescht', e.status===409 && !aufrufe.some(a=>/productVariantsBulkDelete/.test(a.query)), e.message); }
+skuNachher = null;
+
+/* ⑧h Vorrat leer, frische Variante: Warenkorb-Backend meldet 2× "ausverkauft", dann kaufbar → trotzdem Erfolg */
+reserven = []; storefront = []; warenkorbLeerBis = 2; aufrufe = [];
+r = await warenkorb({ kanal:'pln', sprache:'pl', konfig:S, sofort:true }, env, null);
+check('Frisch angelegt: Probe wiederholt bis Menge 1, dann checkoutUrl', storefront.length===3 && r.checkoutUrl && r.vorrat===false && aufrufe.some(a=>/productVariantsBulkCreate/.test(a.query) && a.variables.v.length===1), storefront.length);
+warenkorbLeerBis = 0;
 
 console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b=>console.log('  ✗', b));
 process.exit(bad.length?1:0);

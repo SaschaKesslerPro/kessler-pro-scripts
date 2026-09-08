@@ -28,6 +28,7 @@ FREIGABE_STUNDEN = "72"
 # Warenkorb-Weg (07.09.): oeffentlicher Storefront-Token (steht im Seitenquelltext, Shopyflow), Aufraeumen der Konfigurator-Varianten nach Tagen
 STOREFRONT_TOKEN = "412ec64ed0b4546aa69f2ed2ee574441"
 VARIANTEN_TAGE = "45"
+VORRAT = "12"                 # vorgewaermte Reservevarianten im Basisprodukt (GET /vorrat?key= fuellt auf)
 
 # Ablage der Zeichnungen (PDF, DXF, SVG) und Auftragsstatus
 [[kv_namespaces]]

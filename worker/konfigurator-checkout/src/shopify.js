@@ -182,11 +182,68 @@ export async function versandprofilZuordnen(env, profilId, variantIds){
   if(!res || (res.userErrors && res.userErrors.length)) throw fehler('Versandprofil abgelehnt', 502, res && res.userErrors);
   return true;
 }
-/** Konfigurator-Varianten (SKU KFG-…) des Basisprodukts, aelteste zuerst. */
+/** Konfigurator-Varianten (SKU KFG-…) des Basisprodukts, aelteste zuerst — ohne die Reserven. */
 export async function konfigVariantenAuflisten(env, produktId, max = 250){
-  const q = `query($q:String!,$n:Int!){ productVariants(first:$n, query:$q, sortKey:ID){ nodes{ id sku createdAt } } }`;
+  const q = `query($q:String!,$n:Int!){ productVariants(first:$n, query:$q, sortKey:ID){ nodes{ id sku createdAt updatedAt } } }`;
   const d = await graphql(env, q, { q: `product_id:${String(produktId).split('/').pop()} AND sku:KFG-*`, n: Math.min(250, max) });
-  return ((d.productVariants && d.productVariants.nodes) || []).filter(v => /^KFG-/.test(v.sku || ''));
+  return ((d.productVariants && d.productVariants.nodes) || []).filter(v => /^KFG-/.test(v.sku || '') && !istReserve(v.sku));
+}
+
+/* ── Vorrat: vorgewaermte Reservevarianten ──────────────────────────────────
+   Gemessen 08.09.2026: eine frisch angelegte Variante gilt im Warenkorb-Backend
+   von Shopify fuer 8–14 s als "ausverkauft" (cartCreate → Menge 0, Warnung
+   MERCHANDISE_OUT_OF_STOCK) — unabhaengig von tracked/inventoryPolicy, auch wenn
+   availableForSale laengst true meldet. Aenderungen an einer bestehenden Variante
+   (Preis, Name, SKU, tracked, Festpreis der Preisliste) greifen dagegen in ~1 s.
+   Deshalb haelt der Worker im Basisprodukt Reserven vor (SKU KFG-RESERVE-…,
+   tracked + DENY ohne Bestand = nicht kaufbar, Preis 0, Versandprofil schon
+   zugeordnet) und schreibt beim Klick nur noch eine davon um. */
+export const RESERVE_SKU = 'KFG-RESERVE-';
+export const istReserve = (sku) => String(sku || '').startsWith(RESERVE_SKU);
+function zufallKurz(n = 8){
+  const a = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', b = new Uint8Array(n); crypto.getRandomValues(b);
+  return Array.from(b, x => a[x % a.length]).join('');
+}
+export async function reservenAuflisten(env, produktId, max = 50){
+  const q = `query($q:String!,$n:Int!){ productVariants(first:$n, query:$q, sortKey:ID){ nodes{ id sku createdAt } } }`;
+  const d = await graphql(env, q, { q: `product_id:${String(produktId).split('/').pop()} AND sku:${RESERVE_SKU}*`, n: Math.min(250, max) });
+  return ((d.productVariants && d.productVariants.nodes) || []).filter(v => istReserve(v.sku));
+}
+export async function reservenAnlegen(env, { produktId, optionName, anzahl, versandprofil }){
+  const q = `mutation kfgRes($p:ID!,$v:[ProductVariantsBulkInput!]!){ productVariantsBulkCreate(productId:$p, variants:$v, strategy:DEFAULT){ productVariants{ id sku } userErrors{ field message code } } }`;
+  const v = Array.from({ length: Math.max(0, Math.min(50, anzahl|0)) }, () => { const rid = zufallKurz(8); return {
+    optionValues: [{ optionName, name: `Reserviert · ${rid}` }],
+    price: '0.00', taxable: true, inventoryPolicy: 'DENY',
+    inventoryItem: { sku: RESERVE_SKU + rid, tracked: true, requiresShipping: true },
+  }; });
+  if(!v.length) return [];
+  const d = await graphql(env, q, { p: produktId, v });
+  const res = d && d.productVariantsBulkCreate;
+  if(!res || (res.userErrors && res.userErrors.length) || !res.productVariants) throw fehler('Reserven abgelehnt', 502, res && res.userErrors);
+  const ids = res.productVariants.map(x => x.id);
+  if(versandprofil && ids.length) await versandprofilZuordnen(env, versandprofil, ids);
+  return ids;
+}
+/** Eine Reserve in die Konfigurations-Variante umschreiben (ein Aufruf: Preis, Name, SKU, Gewicht, Bild, kaufbar). */
+export async function reserveUmschreiben(env, { produktId, variantId, optionName, optionWert, preisPln, sku, gewichtKg, mediaId }){
+  const q = `mutation kfgUm($p:ID!,$v:[ProductVariantsBulkInput!]!){ productVariantsBulkUpdate(productId:$p, variants:$v){ productVariants{ id title sku } userErrors{ field message code } } }`;
+  const v = [{ id: variantId,
+    optionValues: [{ optionName, name: optionWert }],
+    price: (+preisPln).toFixed(2), taxable: true, inventoryPolicy: 'CONTINUE',
+    inventoryItem: { sku, tracked: false, requiresShipping: true, measurement: { weight: { unit: 'KILOGRAMS', value: +gewichtKg || 1 } } },
+    ...(mediaId ? { mediaId } : {}),
+  }];
+  const d = await graphql(env, q, { p: produktId, v });
+  const res = d && d.productVariantsBulkUpdate;
+  const out = res && res.productVariants && res.productVariants[0];
+  if(!res || (res.userErrors && res.userErrors.length) || !out) throw fehler('Reserve abgelehnt', 502, res && res.userErrors);
+  if(out.sku !== sku) throw fehler('Reserve gleichzeitig vergeben', 409, out);
+  return out;
+}
+/** Nachkontrolle gegen den seltenen Fall, dass zwei Klicks dieselbe Reserve erwischt haben: traegt die Variante noch unsere SKU? */
+export async function varianteSkuStimmt(env, variantId, sku){
+  const d = await graphql(env, `query($id:ID!){ productVariant(id:$id){ sku } }`, { id: variantId });
+  return !!(d && d.productVariant && d.productVariant.sku === sku);
 }
 export async function variantenLoeschen(env, produktId, variantIds){
   if(!variantIds.length) return 0;
@@ -212,30 +269,24 @@ async function storefront(env, query, variables, sprache){
   return d.data;
 }
 const pause = (ms) => new Promise(f => setTimeout(f, ms));
-/** Eine frisch angelegte Variante braucht ein paar Sekunden, bis die Storefront-API
-    sie als kaufbar fuehrt — vorher faellt sie beim cartLinesAdd stumm auf Menge 0.
-    Hier warten, bis availableForSale stimmt (hoechstens maxMs). */
-export async function storefrontWarten(env, variantId, maxMs = 8000){
-  const q = `query($id:ID!){ node(id:$id){ ... on ProductVariant { availableForSale } } }`;
+/** Warenkorb mit genau dieser Variante anlegen. Dient zugleich als Probe: erst wenn die
+    Zeile mit Menge 1 zurueckkommt, fuehrt das Warenkorb-Backend die Variante als kaufbar
+    (frisch angelegte Varianten sind dort 8–14 s lang "ausverkauft"; s. Vorrat oben).
+    Wiederholt cartCreate bis maxMs, dann Fehler 502. */
+export async function storefrontWarenkorb(env, { variantId, attribute, land, sprache, maxMs = 6000 }){
+  const q = `mutation kfgCart($in:CartInput!){ cartCreate(input:$in){ cart{ id checkoutUrl lines(first:1){ nodes{ quantity } } } warnings{ code } userErrors{ field message code } } }`;
+  const eingabe = { lines: [{ merchandiseId: variantId, quantity: 1, attributes: attribute || [] }], buyerIdentity: { countryCode: land } };
   const bis = Date.now() + maxMs;
+  let warnung = '';
   for(;;){
-    const d = await storefront(env, q, { id: variantId }).catch(()=>null);
-    if(d && d.node && d.node.availableForSale) return true;
-    if(Date.now() > bis) return false;
-    await pause(600);
-  }
-}
-export async function storefrontWarenkorb(env, { variantId, attribute, land, sprache }){
-  const q = `mutation kfgCart($in:CartInput!){ cartCreate(input:$in){ cart{ id checkoutUrl lines(first:1){ nodes{ quantity } } } userErrors{ field message code } } }`;
-  const eingabe = { lines: [{ merchandiseId: variantId, quantity: 1, attributes: attribute }], buyerIdentity: { countryCode: land } };
-  let res = null;
-  for(let i = 0; i < 6; i++){
     const d = await storefront(env, q, { in: eingabe }, sprache);
-    res = d && d.cartCreate;
+    const res = d && d.cartCreate;
     if(!res || (res.userErrors && res.userErrors.length) || !res.cart) throw fehler('Warenkorb abgelehnt', 502, res && res.userErrors);
     const n = res.cart.lines && res.cart.lines.nodes && res.cart.lines.nodes[0] && res.cart.lines.nodes[0].quantity;
     if(n > 0) return res.cart;
+    warnung = (res.warnings && res.warnings[0] && res.warnings[0].code) || '';
+    if(Date.now() > bis) break;
     await pause(1000);                    /* Variante noch nicht kaufbar — kurz warten, neuer Warenkorb */
   }
-  throw fehler('Warenkorb bleibt leer — Variante noch nicht kaufbar', 502);
+  throw fehler('Warenkorb bleibt leer — Variante noch nicht kaufbar', 502, warnung);
 }
