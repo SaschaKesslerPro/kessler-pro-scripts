@@ -28,7 +28,7 @@ NAMEN = [
   'dims','areaM2','perimM','dekorList','ensureDekor','calc','isStandard','needsOffer',
   'cornerFormOk','cornerPerCorner','cornerR','cornerIdx','cornerCount','cornerMax','cornerName','cornerLabel',
   'clampCorner','setCorner','setAllCorners',
-  'lfPos','lfSchraeg','lfMinR','lfSb','lfPts','lfGeo','lfSchnittCm','lfCornerName','lfCornerR','lfNotchCenter','lfInNotch',
+  'lfPos','lfSchraeg','lfMinR','LF_WINKEL','LF_MIN_AC','lfMasse','lfWinkelMax','lfWinkel','lfU','lfPts','lfGeo','lfSchnittCm','lfCornerName','lfCornerR','lfNotchCenter','lfInNotch',
   'massbandEintrag','massbandPreis','massbandName','massbandStrecke',
   'cutLen','cutPrice','cutBox','cutMass','cutTypName','presetCount','kanalLfmPreis','kanalPunkte','polyAbs',
   'maschineMass','maxTiefe','cutMinEdge','cutAbstaende','konturAbstand',
@@ -76,7 +76,7 @@ fuss = '''
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,
            massbandStrecke, massbandName, cutPrice, cutMass, cutTypName, presetCount, cutAbstaende,
-           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, rules };
+           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, lfWinkel, lfWinkelMax, lfU, rules };
 }
 export { preisKern };
 '''

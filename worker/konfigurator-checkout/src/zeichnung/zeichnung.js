@@ -264,11 +264,21 @@ export function zeichnung(k, sprache) {
   const lf = lform ? k.lform : null;
   const notchOben = lf && (lf.pos === 'hr' || lf.pos === 'hl');
   const notchRechts = lf && (lf.pos === 'hr' || lf.pos === 'vr');
+  // Schraeger Schnitt (Senior 08.09.): B = Ecke der Ausklinkung an der Plattenkante, D = die
+  // Plattenecke daneben, A = Punkt auf der inneren Kante der Ausklinkung (um u nach innen),
+  // C = deren Ende an der Aussenkante. Schraege B→A, A–C bleibt gerade. sx = x-Richtung
+  // "in die Ausklinkung hinein"; Punkte in Plattenkoordinaten (mm).
+  const lfS = lf && lf.schraeg ? (() => {
+    const aw = Math.min(lf.aw, B - 1), ah = Math.min(lf.ah, H - 1);
+    const u = Math.max(0, Math.min(+lf.u || 0, aw - 100)), sx = notchRechts ? 1 : -1;
+    const xB = notchRechts ? B - aw : aw, yK = notchOben ? 0 : H;
+    return { u, sx, xB, yK, xA: xB + sx * u, yA: notchOben ? ah : H - ah, xC: notchRechts ? B : 0, xD: notchRechts ? 0 : B, ac: aw - u };
+  })() : null;
 
   // --- Platzbedarf fuer Massketten je Seite ermitteln, dann massstaeblich einpassen
   const bem = ausschnitte.filter((a) => a.typ !== 'kanal').slice(0, 3);   // bemasste Ausschnitte (Rest in der Tabelle)
-  const ebenenOben   = bem.length + (lform && notchOben ? 1 : 0);
-  const ebenenUnten  = rund ? 0 : 1 + (bohrungen.length ? 1 : 0) + (lform && !notchOben ? 1 : 0);
+  const ebenenOben   = bem.length + (lform && notchOben ? (lfS ? 2 : 1) : 0);
+  const ebenenUnten  = rund ? 0 : 1 + (bohrungen.length ? 1 : 0) + (lform && !notchOben ? (lfS ? 2 : 1) : 0);
   const ebenenLinks  = bem.length + (lform && !notchRechts ? 1 : 0);
   const ebenenRechts = rund ? 0 : 1 + (lform && notchRechts ? 1 : 0);
   const luftO = 6 + ebenenOben * 7;
@@ -388,11 +398,12 @@ export function zeichnung(k, sprache) {
   // bei der Innenecke des L in die Ausklinkung hinein
   if (eckenV) for (const e of eckenV) {
     if (!(e.r > 0)) continue;
-    // Punkt A der Schraege: Radius-Label steht unten im L-Form-Block neben dem Winkelbogen
-    if (e.ord < 0 && lform && lf.schraeg && +lf.sb > 0) continue;
+    // Punkt A der Schraege: Radius-Label steht unten im L-Form-Block in der Ausklinkung
+    if (e.ord < 0 && lfS) continue;
     const cx = e.ecke.x, cy = e.ecke.y;
     let dx = cx < B / 2 ? -1 : 1, dy = cy < H / 2 ? -1 : 1;
     if (e.ord < 0) { dx = notchRechts ? 1 : -1; dy = notchOben ? -1 : 1; }
+    if (lfS && e.ord === 1) { dx = lfS.sx; dy = notchOben ? -1 : 1; }   // B: zur Ausklinkung hin, der Buchstabe B steht auf der anderen Seite
     const lbl = (e.ord < 0 || e.auto) ? `R ${mm(e.r)}*` : `R ${mm(e.r)}`;   // * = Fertigungsregel
     s += txt(X(cx) + dx * 2.4, Y(cy) + dy * 2.4 + (dy > 0 ? 2.2 : 0),
       lbl, { size: 2.5, fill: F.mass, bold: true, anchor: dx > 0 ? 'start' : 'end' });
@@ -490,7 +501,7 @@ export function zeichnung(k, sprache) {
     s += `<rect x="${n(tx - w / 2)}" y="${n(ty - size + 0.4)}" width="${n(w)}" height="${n(size + 1.4)}" fill="#ffffff"/>`;
     s += txt(tx, ty + 1.3, tt, { anchor: 'middle', size, fill: F.mass, bold: true });
   } else {
-    const ebU = lform && !notchOben ? 2 : 1, ebR = lform && notchRechts ? 2 : 1;
+    const ebU = lform && !notchOben ? (lfS ? 3 : 2) : 1, ebR = lform && notchRechts ? 2 : 1;
     s += massH(px, px + pb, py + ph + 3 + 8 * ebU, mm(B), { von: py + ph, size: 3.5 });
     s += massV(py, py + ph, px + pb + 3 + 8 * ebR, mm(H), { von: px + pb, size: 3.5 });
   }
@@ -506,55 +517,47 @@ export function zeichnung(k, sprache) {
     // Tiefe der Ausklinkung: rechts oder links, erste Ebene
     if (notchRechts) s += massV(Y(yN1), Y(yN2), px + pb + 11, mm(ah), { von: px + pb, size: 2.9 });
     else s += massV(Y(yN1), Y(yN2), px - 8, mm(ah), { von: px, size: 2.9 });
-    // Schraeger Schnitt: Winkel zur hinteren/vorderen Kante
-    if (lf.schraeg) {
-      const sb = Math.max(0, Math.min(+lf.sb || 0, ah - 1));
-      const offx = notchRechts ? 1 : -1, offy = notchOben ? -1 : 1;
-      if (!(sb > 0)) {
-        const cx = X((xN1 + xN2) / 2), cy = Y((yN1 + yN2) / 2);
-        s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor: 'middle' });
-        s += txt(cx + offx * S(aw) * 0.22, cy + offy * S(ah) * 0.22 + 4.4, t('schraeg'), { size: 2.3, fill: F.grau, anchor: 'middle' });
-      } else {
-        // Punkte A/B (Senior, 07.09.): B = Ecke der Ausklinkung an der Plattenkante,
-        // A auf der Innenkante der Ausklinkung (sb von B). Von B bis A gerade, ab A die
-        // Schraege bis zur Aussenkante (Endpunkt E ohne Buchstaben). Winkel als Bogen
-        // bei A im Ausschnitt zwischen A-B und der Schraege; Mass B-A aussen neben dem
-        // Tiefenmass (zweite Ebene).
-        const xA = notchRechts ? B - aw : aw, yA = notchOben ? sb : H - sb;
-        const xE = notchRechts ? B : 0, yE = notchOben ? ah : H - ah;
-        const yK = notchOben ? 0 : H;                                     // Plattenkante der Ausklinkung = B
-        s += `<circle cx="${n(X(xA))}" cy="${n(Y(yA))}" r="0.9" fill="${F.mass}"/><circle cx="${n(X(xA))}" cy="${n(Y(yK))}" r="0.9" fill="${F.mass}"/>`;
-        s += txt(X(xA) + (notchRechts ? -2.4 : 2.4), Y(yA) + (notchOben ? 3.4 : -1.6), 'A', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
-        s += txt(X(xA) + (notchRechts ? -2.4 : 2.4), Y(yK) + (notchOben ? -1.6 : 3.4), 'B', { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' });
-        // Winkelbogen bei A: Richtungen A->B (gerader Schnitt) und A->E (Schraege),
-        // Bogen auf der Seite des kleineren Winkels = im Ausschnitt. Radius nach Platz.
+    // Schraeger Schnitt (Senior 08.09.): Punkte B, A, C, Winkelbogen bei B auf der Platte
+    // zwischen Plattenkante (Richtung D) und Schraege, Mass A–C auf der zweiten Ebene.
+    if (lfS) {
+      const { sx, xB, yK, xA, yA, xC, xD, ac } = lfS;
+      const dot = (x, y) => `<circle cx="${n(X(x))}" cy="${n(Y(y))}" r="0.9" fill="${F.mass}"/>`;
+      s += dot(xB, yK) + dot(xA, yA) + dot(xC, yA);
+      const lbl = { size: 2.8, fill: F.mass, bold: true, anchor: 'middle' };
+      s += txt(X(xB) - sx * 2.4, Y(yK) + (notchOben ? -1.6 : 3.4), 'B', lbl);      // aussen, auf der Seite von D
+      s += txt(X(xA) + sx * 2.4, Y(yA) + (notchOben ? -1.6 : 3.4), 'A', lbl);      // in der Ausklinkung, neben der inneren Kante
+      s += txt(X(xC) + sx * 2.6, Y(yA) + 1.0, 'C', lbl);                            // aussen neben der Aussenkante
+      // Winkelbogen bei B: Richtungen B->D (Plattenkante) und B->A (Schraege), Bogen auf der
+      // Seite des kleineren Winkels = auf der Platte. Radius nach Platz.
+      const Bx = X(xB), By = Y(yK);
+      const u = (x, y) => { const dx = x - Bx, dy = y - By, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+      const u1 = u(X(xD), Y(yK)), u2 = u(X(xA), Y(yA));
+      const sweep = (u1[0] * u2[1] - u1[1] * u2[0]) > 0 ? 1 : 0;
+      const r = Math.max(3, Math.min(7, S(H) * 0.4, S(Math.abs(xB - xD)) * 0.5));
+      s += `<path d="M${n(Bx + u1[0] * r)} ${n(By + u1[1] * r)} A${n(r)} ${n(r)} 0 0 ${sweep} ${n(Bx + u2[0] * r)} ${n(By + u2[1] * r)}" fill="none" stroke="${F.mass}" stroke-width="0.25"/>`;
+      let bx = u1[0] + u2[0], by = u1[1] + u2[1]; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
+      // Text hinter dem Bogen, Ankerseite nach Richtung der Winkelhalbierenden (laeuft sonst in den Bogen)
+      const anchor = bx > 0.35 ? 'start' : bx < -0.35 ? 'end' : 'middle', dT = anchor === 'middle' ? r + 4.2 : r + 1.8;
+      const tx = Bx + bx * dT, ty = By + by * dT;
+      s += txt(tx, ty + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor });
+      s += txt(tx, ty + 4.2, t('schraeg'), { size: 2.3, fill: F.grau, anchor });
+      // Radius-Label von A: in der Ausklinkung, auf der Winkelhalbierenden zwischen A->B und A->C
+      const eA = eckenV && eckenV.find((e) => e.ord < 0);
+      if (eA && eA.r > 0) {
         const Ax = X(xA), Ay = Y(yA);
-        const u = (x, y) => { const dx = x - Ax, dy = y - Ay, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
-        const u1 = u(X(xA), Y(yK)), u2 = u(X(xE), Y(yE));
-        const sweep = (u1[0] * u2[1] - u1[1] * u2[0]) > 0 ? 1 : 0;
-        const r = Math.max(3, Math.min(7, S(sb) * 0.7, S(aw) * 0.55));
-        s += `<path d="M${n(Ax + u1[0] * r)} ${n(Ay + u1[1] * r)} A${n(r)} ${n(r)} 0 0 ${sweep} ${n(Ax + u2[0] * r)} ${n(Ay + u2[1] * r)}" fill="none" stroke="${F.mass}" stroke-width="0.25"/>`;
-        let bx = u1[0] + u2[0], by = u1[1] + u2[1]; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-        // Text hinter dem Bogen, Ankerseite nach Richtung der Winkelhalbierenden (laeuft sonst in den Bogen)
-        const anchor = bx > 0.35 ? 'start' : bx < -0.35 ? 'end' : 'middle', dT = anchor === 'middle' ? r + 4.2 : r + 1.8;
-        const tx = Ax + bx * dT, ty = Ay + by * dT;
-        s += txt(tx, ty + 1, `${mm(lf.winkel)}°`, { size: 3.0, fill: F.mass, bold: true, anchor });
-        s += txt(tx, ty + 4.2, t('schraeg'), { size: 2.3, fill: F.grau, anchor });
-        // Radius-Label von A: hinter dem Bogen am geraden Schnitt, in den Ausschnitt versetzt
-        const eA = eckenV && eckenV.find((e) => e.ord < 0);
-        if (eA && eA.r > 0) {
-          const d = u2[0] * u1[0] + u2[1] * u1[1]; let nx = u2[0] - d * u1[0], ny = u2[1] - d * u1[1]; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
-          const lx = Ax + u1[0] * (r + 6.2) + nx * 1.4, ly = Ay + u1[1] * (r + 6.2) + ny * 1.4;
-          s += txt(lx, ly + 1, `R ${mm(eA.r)}*`, { size: 2.5, fill: F.mass, bold: true, anchor: nx > 0.2 ? 'start' : nx < -0.2 ? 'end' : 'middle' });
-        }
-        const xM = notchRechts ? px + pb + 19 : px - 16;
-        s += massV(Y(Math.min(yK, yA)), Y(Math.max(yK, yA)), xM, mm(sb), { von: notchRechts ? px + pb : px, size: 2.6 });
+        const v = (x, y) => { const dx = x - Ax, dy = y - Ay, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+        const v1 = v(Bx, By), v2 = v(X(xC), Ay);
+        let nx = v1[0] + v2[0], ny = v1[1] + v2[1]; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+        s += txt(Ax + nx * 5.2, Ay + ny * 5.2 + 1, `R ${mm(eA.r)}*`, { size: 2.5, fill: F.mass, bold: true, anchor: nx > 0.2 ? 'start' : nx < -0.2 ? 'end' : 'middle' });
       }
+      // Mass A–C (gerades Stueck der inneren Kante), zweite Ebene an der Kante der Ausklinkung
+      const yM = notchOben ? py - 13 : py + ph + 19;
+      s += massH(X(xA), X(xC), yM, mm(ac), { von: Y(yA), size: 2.6 });
     }
   }
 
   // --- Masse der Ausschnitte: x-Ketten oben, y-Ketten links, je eine Ebene
-  const ebeneOben0 = lform && notchOben ? 1 : 0, ebeneLinks0 = lform && !notchRechts ? 1 : 0;
+  const ebeneOben0 = lform && notchOben ? (lfS ? 2 : 1) : 0, ebeneLinks0 = lform && !notchRechts ? 1 : 0;
   bem.forEach((a, i) => {
     const yo = py - 6 - (i + ebeneOben0) * 7;
     if (a.typ === 'rechteck') {
@@ -578,7 +581,7 @@ export function zeichnung(k, sprache) {
   // --- Bohrbild: x-Kette unten, y-Kette rechts (Ebene 2)
   const mittig = bohrungen.length === 1 && Math.abs(bohrungen[0].x - B / 2) < 0.5 && Math.abs(bohrungen[0].y - H / 2) < 0.5;
   if (bohrungen.length && !mittig && !rund) {
-    const ebU = lform && !notchOben ? 2 : 1, ebR = lform && notchRechts ? 2 : 1;
+    const ebU = lform && !notchOben ? (lfS ? 3 : 2) : 1, ebR = lform && notchRechts ? 2 : 1;
     const yb = py + ph + 3 + 8 * (ebU + 1), xb = px + pb + 3 + 8 * (ebR + 1);
     const xs = [...new Set(bohrungen.map((b) => Math.round(b.x * 10) / 10))].sort((a, b) => a - b);
     let prev = 0;

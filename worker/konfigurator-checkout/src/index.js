@@ -295,7 +295,7 @@ function pruefeKonfig(S){
   if(S.form==='rect'){ S.L=num(S.L,20,300); S.B=num(S.B,20,200); }
   if(S.form==='round'){ S.D=num(S.D,20,160); }
   if(S.form==='lform'){ S.lf=S.lf||{}; S.lf.L=num(S.lf.L,20,300); S.lf.B=num(S.lf.B,20,200); S.lf.aw=num(S.lf.aw,1,S.lf.L-1); S.lf.ah=num(S.lf.ah,1,S.lf.B-1); }
-  if(S.form==='lform'){ S.lf.sb = S.lf.sb == null ? 0 : num(S.lf.sb, 0, Math.max(0, S.lf.ah-1)); S.lf.schnitt = S.lf.schnitt==='schraeg' ? 'schraeg' : 'gerade'; if(S.lf.pos!=null && !['hr','hl','vr','vl'].includes(S.lf.pos)) S.lf.pos=null; }
+  if(S.form==='lform'){ delete S.lf.sb; S.lf.winkel = S.lf.winkel == null ? 120 : num(S.lf.winkel, 91, 179); S.lf.schnitt = S.lf.schnitt==='schraeg' ? 'schraeg' : 'gerade'; if(S.lf.pos!=null && !['hr','hl','vr','vl'].includes(S.lf.pos)) S.lf.pos=null; }
   /* Bearbeitungen: nur bekannte Typen und Vorlagen, alle Zahlen endlich, nicht negativ,
      im Plattenmass — sonst liessen sich ueber negative Masse Preise druecken. */
   if(!Array.isArray(S.cuts)) S.cuts=[];
@@ -572,7 +572,7 @@ function attributeFuer(S, K, c, body, waehrung){
   if(S.form==='round') add('Form & Maß', `Rund Ø ${S.D} cm`);
   else if(S.form==='lform'){
     const g = K.lfGeo();
-    add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg, Winkel bei A ${g.winkel}°${g.sb > 0 ? ` · A ${g.sb} cm von B (Plattenkante)` : ''}` : ' · gerade'}`);
+    add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg, Winkel bei B ${g.winkel}° · Schräge B→A, A–C gerade ${f(g.ac)} cm` : ' · gerade'}`);
   } else add('Form & Maß', `${S.mat==='szwal'?'Nähtischplatte':'Rechteck'} ${d.w} × ${d.h} cm`);
   const kanten = S.form==='round' ? [S.edges[0]] : S.edges;
   const uniq = [...new Set(kanten)];

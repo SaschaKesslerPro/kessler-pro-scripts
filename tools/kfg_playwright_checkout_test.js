@@ -47,7 +47,7 @@ let ok=0, bad=[]; const check=(n,c,i)=>{ if(c) ok++; else bad.push(n+(i?' → '+
   check('L-Form: In den Warenkorb, Fertigung nach Mass', (await page.textContent('#cta')).trim()==='In den Warenkorb' && (await page.textContent('#delivDate'))==='Fertigung nach Maß', [await page.textContent('#cta'), await page.textContent('#delivDate')]);
   /* ③a Ohne Shopyflow auf der Seite: "In den Warenkorb" faellt auf den Draft-Order-Checkout zurueck */
   await page.click('#cta'); await page.waitForTimeout(1500);
-  check('Ohne Shopyflow: POST an /checkout mit Konfiguration und Preis', post && post.konfig && post.konfig.form==='lform' && post.kanal==='eur' && Math.abs(post.preis-229.7)<0.005 && /kessler-pro-scripts|127\.0\.0\.1/.test(post.base||'x'), post && {preis:post.preis, base:post.base, form:post.konfig.form, lfR:post.konfig.lfR});
+  check('Ohne Shopyflow: POST an /checkout mit Konfiguration und Preis', post && post.konfig && post.konfig.form==='lform' && post.kanal==='eur' && Math.abs(post.preis-231.7)<0.005 && /kessler-pro-scripts|127\.0\.0\.1/.test(post.base||'x'), post && {preis:post.preis, base:post.base, form:post.konfig.form, lfR:post.konfig.lfR});
   check('Weiterleitung zur checkoutUrl', /bezahlt\.html$/.test(page.url()), page.url());
   /* ③b Mit Shopyflow (nachgebaut): Massplatte -> /warenkorb -> addToCart mit Variante + Attributen, Seite bleibt, Toast */
   await page.goto('http://127.0.0.1:8765/_spiegel/de-checkout.html',{waitUntil:'domcontentloaded'});
@@ -56,7 +56,7 @@ let ok=0, bad=[]; const check=(n,c,i)=>{ if(c) ok++; else bad.push(n+(i?' → '+
   await page.evaluate(()=>window.KFG.setConfig({mat:'dekor',dekor:'buk',thick:'25',form:'lform',lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'schraeg'},cuts:[],lfR:[50,0,0,0,0]}));
   postWk=null; await page.click('#cta'); await page.waitForTimeout(1500);
   const sf=await page.evaluate(()=>({ n: window.__sf.length, li: window.__sf[0] && window.__sf[0].lineItems[0], sid: window.__sf[0] && window.__sf[0].useShopifyId, open: window.__sfOpen, toast: document.getElementById('toast').textContent, disabled: document.getElementById('cta').disabled, url: location.href }));
-  check('Warenkorb: POST an /warenkorb ohne sofort, Konfiguration dabei', postWk && !postWk.sofort && postWk.konfig && postWk.konfig.form==='lform' && Math.abs(postWk.preis-229.7)<0.005, postWk && {preis:postWk.preis, sofort:postWk.sofort});
+  check('Warenkorb: POST an /warenkorb ohne sofort, Konfiguration dabei', postWk && !postWk.sofort && postWk.konfig && postWk.konfig.form==='lform' && Math.abs(postWk.preis-231.7)<0.005, postWk && {preis:postWk.preis, sofort:postWk.sofort});
   check('Warenkorb: Shopyflow.addToCart mit Variante 777, Attributen, useShopifyId, Drawer geoeffnet', sf.n===1 && sf.li.merchandiseId==='gid://shopify/ProductVariant/777' && sf.li.quantity===1 && sf.li.attributes.some(a=>a.key==='_kfg_token') && sf.sid===true && sf.open===1, sf);
   check('Warenkorb: Seite bleibt, Taste wieder frei, Toast "liegt im Warenkorb"', /de-checkout\.html/.test(sf.url) && !sf.disabled && /liegt im Warenkorb/.test(sf.toast), sf);
   /* Lagerartikel: echte Variante direkt in den Warenkorb, kein Worker */

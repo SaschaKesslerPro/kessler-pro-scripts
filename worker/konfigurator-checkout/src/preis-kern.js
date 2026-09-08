@@ -342,34 +342,40 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function lfMinR(){ return S.edges[0]==='abs' ? 5 : 1; }
 
-  function lfSb(){ const ah=Math.max(1,Math.min(+S.lf.ah, +S.lf.B-1)); return lfSchraeg() ? Math.max(0, Math.min(Math.round(+S.lf.sb||0), ah-1)) : 0; }
+  const LF_WINKEL = 120;   /* Vorgabe fuer den Winkel bei B, wenn "schraeg" gewaehlt wird */
+
+  const LF_MIN_AC = 10;    /* cm, die von A–C mindestens gerade bleiben */
+
+  function lfMasse(){ const L=+S.lf.L, B=+S.lf.B; return {L, B, aw:Math.max(1,Math.min(+S.lf.aw, L-1)), ah:Math.max(1,Math.min(+S.lf.ah, B-1))}; }
+
+  function lfWinkelMax(){ const m=lfMasse(); if(!(m.aw>LF_MIN_AC)||!(m.ah>0)) return 91; return Math.max(91, Math.floor(90+Math.atan((m.aw-LF_MIN_AC)/m.ah)*180/Math.PI)); }
+
+  function lfWinkel(){ if(!lfSchraeg()) return 90; const w=Math.round(+S.lf.winkel||LF_WINKEL); return Math.max(91, Math.min(lfWinkelMax(), w)); }
+
+  function lfU(){ if(!lfSchraeg()) return 0; const m=lfMasse(); return Math.max(0, Math.min(m.aw-LF_MIN_AC, m.ah*Math.tan((lfWinkel()-90)*Math.PI/180))); }
 
   function lfPts(){
-    const L=+S.lf.L, B=+S.lf.B, pos=lfPos();
-    const aw=Math.max(1,Math.min(+S.lf.aw, L-1)), ah=Math.max(1,Math.min(+S.lf.ah, B-1));
-    let pts, ord;
-    const sb=lfSb();
-    if(lfSchraeg()&&sb>0){ pts=[[0,0],[L-aw,0],[L-aw,sb],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }   /* B=(L-aw,0) an der Kante, A=(L-aw,sb) innen, Schraege bis (L,ah) */
-    else if(lfSchraeg()){ pts=[[0,0],[L-aw,0],[L,ah],[L,B],[0,B]]; ord=[0,1,2,3,4]; }
-    else { pts=[[0,0],[L-aw,0],[L-aw,ah],[L,ah],[L,B],[0,B]]; ord=[0,1,-1,2,3,4]; }
-    /* Radius je Punkt (cm): Innenecke = Fertigungsradius; bei der Schraege bekommen
-       beide Endpunkte (A innen, Ende an der Aussenkante) mindestens den Fertigungsradius, sonst
-       der vom Kunden gewaehlte Radius der Aussenecke. */
-    const rmin=lfMinR(), schr=lfSchraeg();
-    const diag=schr ? (sb>0 ? [2,3] : [1,2]) : [];
-    let rad=pts.map((_,i)=>ord[i]<0 ? rmin : (diag.indexOf(i)>=0 ? Math.max(rmin, lfCornerR(ord[i])/10) : lfCornerR(ord[i])/10));
+    const m=lfMasse(), L=m.L, B=m.B, aw=m.aw, ah=m.ah, pos=lfPos();
+    const schr=lfSchraeg(), u=lfU();
+    /* D=(0,0) … B=(L-aw,0) an der Kante, A=(L-aw+u,ah) auf der inneren Kante, C=(L,ah);
+       gerader Schnitt: u = 0, A ist die gewoehnliche Innenecke */
+    let pts=[[0,0],[L-aw,0],[L-aw+u,ah],[L,ah],[L,B],[0,B]], ord=[0,1,-1,2,3,4];
+    /* Radius je Punkt (cm): A (Innenecke) = Fertigungsradius; beim schraegen Schnitt
+       bekommt auch B mindestens den Fertigungsradius (Senior 03.09.), sonst der vom
+       Kunden gewaehlte Radius der Aussenecke. */
+    const rmin=lfMinR();
+    let rad=pts.map((_,i)=>ord[i]<0 ? rmin : (schr&&i===1 ? Math.max(rmin, lfCornerR(ord[i])/10) : lfCornerR(ord[i])/10));
     const mx=(pos==='hl'||pos==='vl'), my=(pos==='vr'||pos==='vl');
     pts=pts.map(([x,y])=>[mx?L-x:x, my?B-y:y]);
     if(mx!==my){ pts.reverse(); ord.reverse(); rad.reverse(); }
-    return {pts, ord, rad, L, B, aw, ah, pos, sb};
+    return {pts, ord, rad, L, B, aw, ah, pos, u, winkel:lfWinkel()};
   }
 
   function lfGeo(){
     const g=lfPts(), L=g.L/100, B=g.B/100, aw=g.aw/100, ah=g.ah/100;
-    if(lfSchraeg()){ const sb=g.sb/100, t=ah-sb, s=Math.hypot(aw,t)+sb;      /* gerades Stueck Kante-A plus Schraege A-B */
-      /* Winkel bei A im Ausschnitt: 90 (gerader Schnitt) + Neigung der Schraege zur Plattenkante */
-      return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:90+Math.round(Math.atan2(t,aw)*180/Math.PI), sb:g.sb}; }
-    return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:180, sb:0};
+    if(lfSchraeg()){ const u=g.u/100, s=Math.hypot(u,ah)+(aw-u);      /* Schraege B–A plus gerades Stueck A–C */
+      return {schnitt:s, umfang:2*(L+B)-aw-ah+s, schraeg:true, winkel:g.winkel, u:g.u, ac:g.aw-g.u}; }
+    return {schnitt:aw+ah, umfang:2*(L+B), schraeg:false, winkel:90, u:0, ac:g.aw};
   }
 
   function lfSchnittCm(){ return Math.round(lfGeo().schnitt*100); }
@@ -391,10 +397,9 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function lfInNotch(px,py){
     const g=lfPts(), mx=(g.pos==='hl'||g.pos==='vl'), my=(g.pos==='vr'||g.pos==='vl');
-    const u=mx?px:g.L-px, v=my?g.B-py:py;          /* auf "hinten rechts" normiert: u vom Notch-Rand, v von hinten */
-    if(u>g.aw||v>g.ah) return false;
-    if(!lfSchraeg()) return true;
-    return v < g.sb + (g.ah-g.sb)*(1-u/g.aw);      /* zwischen Ecke und Schraege A-B (B bei Tiefe sb) */
+    const qx=mx?px:g.L-px, qy=my?g.B-py:py;        /* auf "hinten rechts" normiert: qx vom Aussenrand, qy von der Plattenkante */
+    if(qx>g.aw||qy>g.ah) return false;
+    return qx < g.aw - g.u*(qy/g.ah);              /* jenseits der Schraege B–A (B an der Kante, A bei Tiefe ah um u nach innen) */
   }
 
   function massbandEintrag(){ return MASSBAND.find(m=>m[0]===S.massband)||MASSBAND[0]; }
@@ -543,6 +548,6 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,
            massbandStrecke, massbandName, cutPrice, cutMass, cutTypName, presetCount, cutAbstaende,
-           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, rules };
+           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, lfWinkel, lfWinkelMax, lfU, rules };
 }
 export { preisKern };

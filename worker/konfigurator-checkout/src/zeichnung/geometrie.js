@@ -20,14 +20,14 @@ export function kontur(k) {
     const aw = Math.max(1, Math.min(lf.aw, L - 1)), ah = Math.max(1, Math.min(lf.ah, B - 1));
     // gebaut fuer "hinten rechts", danach gespiegelt — genau wie lfPts() im Konfigurator
     let pts, ord;
-    const sb = lf.schraeg ? Math.max(0, Math.min(+lf.sb || 0, ah - 1)) : 0;   // Punkt A auf der Innenkante (v1.17.3; Buchstaben 07.09. getauscht)
-    if (lf.schraeg && sb > 0) { pts = [[0, 0], [L - aw, 0], [L - aw, sb], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
-    else if (lf.schraeg) { pts = [[0, 0], [L - aw, 0], [L, ah], [L, B], [0, B]]; ord = [0, 1, 2, 3, 4]; }
-    else { pts = [[0, 0], [L - aw, 0], [L - aw, ah], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4]; }
-    // Radius je Punkt: Innenecke = Fertigungsradius; bei der Schraege bekommen beide
-    // Endpunkte (A innen, Ende an der Aussenkante) mindestens den Fertigungsradius (Senior 03.09.).
+    // Schraege (Senior 08.09.): B = (L-aw, 0) an der Plattenkante, A = (L-aw+u, ah) auf der
+    // inneren Kante, C = (L, ah); A–C bleibt gerade. u = Versatz von A (mm), 0 = gerader Schnitt.
+    const u = lf.schraeg ? Math.max(0, Math.min(+lf.u || 0, aw - 100)) : 0;   // A–C bleibt mindestens 100 mm gerade (wie LF_MIN_AC im Konfigurator)
+    pts = [[0, 0], [L - aw, 0], [L - aw + u, ah], [L, ah], [L, B], [0, B]]; ord = [0, 1, -1, 2, 3, 4];
+    // Radius je Punkt: A (Innenecke) = Fertigungsradius; bei der Schraege bekommt auch B
+    // mindestens den Fertigungsradius (Senior 03.09.), sonst der Kundenradius der Aussenecke.
     const radK = lf.radien || [], rmin = lf.innenradius || 0;
-    const diag = lf.schraeg ? (sb > 0 ? [2, 3] : [1, 2]) : [];
+    const diag = lf.schraeg ? [1] : [];
     let rad = pts.map((_, i) => ord[i] < 0 ? rmin : (diag.indexOf(i) >= 0 ? Math.max(rmin, +radK[ord[i]] || 0) : (+radK[ord[i]] || 0)));
     let auto = pts.map((_, i) => ord[i] < 0 || (diag.indexOf(i) >= 0 && (+radK[ord[i]] || 0) < rmin));   // Radius aus der Fertigungsregel
     const mx = lf.pos === 'hl' || lf.pos === 'vl', my = lf.pos === 'vr' || lf.pos === 'vl';

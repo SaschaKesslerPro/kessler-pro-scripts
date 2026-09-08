@@ -67,11 +67,25 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   check('L gerade Zeile Ausklinkung 130 cm 28,90', r.rows.some(x=>/Ausklinkung \(130 cm Schnitt\)/.test(x[0]) && parseP(x[1])===28.9), JSON.stringify(r.rows));
   check('L Hash lp/ls/lr', /lp=hr/.test(r.hash)&&/ls=g/.test(r.hash)&&/lr=0-0-0-0-0/.test(r.hash), r.hash);
   r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'schraeg'}});
-  check('L schraeg Summe 224,70 (194,80 + A/B-Radien 29,90, v1.17.5)', Math.abs(parseP(r.price)-224.7)<0.005, r.price);
-  check('L schraeg: Eckenzeile nennt Schräge R50', r.rows.some(x=>/Eckenrundung Schräge R50 \(Fertigungsregel\) \(2 Ecken\)/.test(x[0]) && parseP(x[1])===29.9), JSON.stringify(r.rows));
-  check('L schraeg Zeile 94 cm 23,90', r.rows.some(x=>/Ausklinkung schräg \(94 cm Schnitt\)/.test(x[0]) && parseP(x[1])===23.9), JSON.stringify(r.rows));
-  const winkel=await page.evaluate(()=>document.getElementById('inLW').value+'|'+document.getElementById('fLW').style.display+'|'+document.getElementById('lfInnerNote').textContent);
-  check('Winkelfeld sichtbar, 122° bei A (v1.17.6), Hinweis A/B R50 (ABS)', /^122\|\|Punkt A und das Ende der Schräge an der Außenkante werden automatisch verrundet: R50 — ABS-Kante geklebt/.test(winkel), winkel);
+  /* v1.18.2 (Senior 08.09.): Schraege B→A, A–C gerade, Winkel bei B (Vorgabe 120°):
+     u = 50·tan30° = 28,9 cm, Schnitt = hypot(28,9, 50) + 51,1 = 108,9 → 109 cm */
+  check('L schraeg Summe 226,70 (170,90 + Schnitt 25,90 + A/B-Radien 29,90)', Math.abs(parseP(r.price)-226.7)<0.005, r.price);
+  check('L schraeg: Eckenzeile nennt Schräge R50 (A und B)', r.rows.some(x=>/Eckenrundung Schräge R50 \(Fertigungsregel\) \(2 Ecken\)/.test(x[0]) && parseP(x[1])===29.9), JSON.stringify(r.rows));
+  check('L schraeg Zeile 109 cm 25,90', r.rows.some(x=>/Ausklinkung schräg \(109 cm Schnitt\)/.test(x[0]) && parseP(x[1])===25.9), JSON.stringify(r.rows));
+  const winkel=await page.evaluate(()=>document.getElementById('inLW').value+'|'+document.getElementById('fLW').style.display+'|'+document.getElementById('lfInnerNote').textContent+'|'+document.getElementById('rangeLW').textContent);
+  check('Winkelfeld sichtbar, 120° bei B, Hinweis A/B R50 (ABS), Bereich bis 144° und A–C 51 cm', /^120\|\|Die Schräge läuft von B \(Plattenkante\) nach A; A und B werden automatisch verrundet: R50 — ABS-Kante geklebt.*\|91 bis 144° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade · A–C bleibt 51 cm gerade$/.test(winkel), winkel);
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'schraeg'}}, true);
+  check('L schraeg Hash lw=120', /ls=s/.test(r.hash)&&/lw=120/.test(r.hash)&&!/lsb/.test(r.hash), r.hash);
+  { const g=await page.evaluate(()=>{ const st=document.getElementById('stage').innerHTML; return {A:/>A<\/text>/.test(st),B:/>B<\/text>/.test(st),C:/>C<\/text>/.test(st),w:/>120°<\/text>/.test(st)}; });
+    check('Vorschau: Punkte A, B, C und Winkel 120° beschriftet', g.A&&g.B&&g.C&&g.w, JSON.stringify(g)); }
+  /* Winkel ueber dem Maximum wird still auf das Maximum geklemmt (A–C bleibt 10 cm) */
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'schraeg',winkel:170}});
+  { const w=await page.evaluate(()=>document.getElementById('inLW').value+'|'+document.getElementById('rangeLW').textContent+'|'+document.getElementById('errLW').textContent);
+    check('Winkel 170° → 144° geklemmt (ganze Grad, A–C 11 cm), kein Fehler', /^144\|91 bis 144°.*A–C bleibt 11 cm gerade\|$/.test(w), w);
+    check('Geklemmte Schraege: Schnitt hypot(68,8, 50)+11,2 = 96 cm', r.rows.some(x=>/Ausklinkung schräg \(96 cm Schnitt\)/.test(x[0])), JSON.stringify(r.rows)); }
+  /* Kundenradius an B (Ecke 1) ersetzt den Fertigungsradius dort: nur noch A als Regel-Ecke */
+  r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'schraeg'}, lfR:[0,100,0,0,0]});
+  check('B vom Kunden R100: Zeile "R100 + Schräge R50 (Fertigungsregel) (2 Ecken)" — Regel nur noch an A', r.rows.some(x=>/^Eckenrundung R100 · vorne · Ausklinkung \+ Schräge R50 \(Fertigungsregel\) \(2 Ecken\)$/.test(x[0])), JSON.stringify(r.rows.filter(x=>/Ecken/.test(x[0]))));
   r=await set({...clean, mat:'mpx',dekor:'sperrholz-natur',thick:'40',form:'lform', edges:['f45','f45','f45','f45'], lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'gerade'}});
   check('Multiplex ohne ABS: Innenecke R10', /Innenecke wird automatisch verrundet: R10 — Kante ohne ABS/.test(await page.evaluate(()=>document.getElementById('lfInnerNote').textContent)), await page.evaluate(()=>document.getElementById('lfInnerNote').textContent));
   r=await set({...clean, mat:'mpx',dekor:'sperrholz-natur',thick:'40',form:'lform', edges:['abs','abs','abs','abs'], lf:{L:200,B:90,aw:80,ah:50,pos:'vl',schnitt:'gerade'}});
@@ -164,7 +178,7 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   r=await set({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'lform', lf:{L:200,B:90,aw:80,ah:50,pos:'vr',schnitt:'schraeg'}, lfR:[50,0,0,0,0]});
   const plTexte=await page.evaluate(()=>({pos:[...document.querySelectorAll('#lfPosChips .kfg_chip')].map(b=>b.textContent), cut:[...document.querySelectorAll('#lfCutChips .kfg_chip')].map(b=>b.textContent), lbl:document.querySelector('label[for=inLW]').textContent, rows:[...document.querySelectorAll('#breakdown tr td:first-child')].map(e=>e.textContent), namen:[...document.querySelectorAll('#cornerSel .nm')].map(e=>e.textContent)}));
   check('PL: Lage-Chips uebersetzt', plTexte.pos.join(',')==='z przodu po prawej,z przodu po lewej', plTexte.pos.join(','));
-  check('PL: Schnitt-Chips + Winkel', plTexte.cut.join(',')==='Proste,Skośne' && plTexte.lbl==='Kąt skosu', JSON.stringify([plTexte.cut,plTexte.lbl]));
+  check('PL: Schnitt-Chips + Winkel', plTexte.cut.join(',')==='Proste,Skośne' && plTexte.lbl==='Kąt w punkcie B', JSON.stringify([plTexte.cut,plTexte.lbl]));
   check('PL: Aufschluesselung ohne deutsche Reste', !plTexte.rows.some(t=>/Ausklinkung|Eckenrundung|Sondermaß|Kantenbearbeitung/.test(t)), JSON.stringify(plTexte.rows));
   check('PL: Eckennamen uebersetzt', plTexte.namen.length===5 && !plTexte.namen.some(t=>/hinten|vorne|links|rechts|Ausklinkung/.test(t)), JSON.stringify(plTexte.namen));
   console.log('⑦ PL geprueft');

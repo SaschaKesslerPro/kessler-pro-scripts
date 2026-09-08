@@ -1,13 +1,13 @@
 {
   "_meta": {
     "name": "Kessler PRO — Konfigurator, Sprachdatei",
-    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft. v1.18.0: PL-Aufschläge in zł, mobile Preiszeile — Polnisch ungeprueft.",
+    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft. v1.18.0: PL-Aufschläge in zł, mobile Preiszeile — Polnisch ungeprueft. v1.18.2: Schräge B→A mit Winkel bei B, A–C gerade — Polnisch ungeprueft.",
     "sprachen": [
       "pl",
       "en"
     ],
-    "anzahl": 300,
-    "muster": 68
+    "anzahl": 298,
+    "muster": 71
   },
   "pl": {
     "Ab Lager": "Z magazynu",
@@ -244,12 +244,10 @@
     "Schnitt": "Cięcie",
     "Gerade": "Proste",
     "Schräg": "Skośne",
-    "Winkel der Schräge": "Kąt skosu",
     "5 bis 85° — zur hinteren Kante": "5 do 85° — względem tylnej krawędzi",
     "Ausklinkung": "wycięcie",
     "schräg": "skośne",
     "alle fünf": "wszystkie pięć",
-    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym nie ma narożnika wewnętrznego.",
     "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Narożnik wewnętrzny jest zaokrąglany automatycznie według reguły produkcji.",
     "Liegt in der Ausklinkung — bitte verschieben": "Leży w wycięciu — przesuń",
     "Nullpunkt links": "Zero po lewej",
@@ -280,9 +278,6 @@
     "inkl. MwSt., kostenloser Versand": "z VAT, darmowa dostawa",
     "Lagergröße versandkostenfrei · nach Maß 19,99 €": "Rozmiar magazynowy bez kosztów dostawy · na wymiar 84,90 zł",
     "Versand Maßanfertigung (pauschal)": "Dostawa produktu na wymiar (ryczałt)",
-    "Schräge beginnt bei Punkt A": "Skos zaczyna się w punkcie A",
-    "Strecke von B (Plattenkante) bis A · 0 = Schräge bis zur Kante": "Odcinek od B (krawędź blatu) do A · 0 = skos aż do krawędzi",
-    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 do 175° — w punkcie A między A–B a skosem, mierzony w wycięciu · 180° = proste",
     "Sofortkauf": "Kup teraz",
     "Kasse wird vorbereitet …": "Przygotowujemy kasę …",
     "Platte liegt im Warenkorb — du kannst gleich eine weitere konfigurieren": "Blat jest w koszyku — możesz od razu skonfigurować kolejny",
@@ -309,7 +304,10 @@
     "rechts · Ausklinkung": "po prawej · wycięcie narożne",
     "links · Ausklinkung": "po lewej · wycięcie narożne",
     "vorne · Ausklinkung": "z przodu · wycięcie narożne",
-    "hinten · Ausklinkung": "z tyłu · wycięcie narożne"
+    "hinten · Ausklinkung": "z tyłu · wycięcie narożne",
+    "Winkel bei B": "Kąt w punkcie B",
+    "91 bis 179° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade": "91 do 179° — w punkcie B między krawędzią blatu a skosem · 90° = proste",
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt werden A und B nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym A i B są zaokrąglane automatycznie według reguły produkcji."
   },
   "en": {
     "Ab Lager": "From stock",
@@ -546,12 +544,10 @@
     "Schnitt": "Cut",
     "Gerade": "Straight",
     "Schräg": "Angled",
-    "Winkel der Schräge": "Angle of the cut",
     "5 bis 85° — zur hinteren Kante": "5 to 85° — relative to the back edge",
     "Ausklinkung": "notch",
     "schräg": "angled",
     "alle fünf": "all five",
-    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt gibt es keine Innenecke.": "L-shape: five outer corners, each selectable on its own. With an angled cut there is no inner corner.",
     "L-Form: fünf Außenecken, jede einzeln wählbar. Die Innenecke wird nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. The inner corner is rounded automatically per the production rule.",
     "Liegt in der Ausklinkung — bitte verschieben": "Sits in the notch — please move it",
     "Nullpunkt links": "Zero at the left",
@@ -582,9 +578,6 @@
     "inkl. MwSt., kostenloser Versand": "incl. VAT, free shipping",
     "Lagergröße versandkostenfrei · nach Maß 19,99 €": "Stock size ships free · made to measure 19,99 €",
     "Versand Maßanfertigung (pauschal)": "Shipping made-to-measure (flat rate)",
-    "Schräge beginnt bei Punkt A": "Bevel starts at point A",
-    "Strecke von B (Plattenkante) bis A · 0 = Schräge bis zur Kante": "Distance from B (edge of the top) to A · 0 = bevel runs to the edge",
-    "95 bis 175° — bei Punkt A zwischen A–B und der Schräge, im Ausschnitt gemessen · 180° = gerade": "95 to 175° — at point A between A–B and the bevel, measured in the notch · 180° = straight",
     "Sofortkauf": "Buy now",
     "Kasse wird vorbereitet …": "Preparing checkout …",
     "Platte liegt im Warenkorb — du kannst gleich eine weitere konfigurieren": "The top is in your cart — you can configure another one right away",
@@ -611,7 +604,10 @@
     "rechts · Ausklinkung": "right · notch",
     "links · Ausklinkung": "left · notch",
     "vorne · Ausklinkung": "front · notch",
-    "hinten · Ausklinkung": "back · notch"
+    "hinten · Ausklinkung": "back · notch",
+    "Winkel bei B": "Angle at B",
+    "91 bis 179° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade": "91 to 179° — at point B between the edge of the top and the bevel · 90° = straight",
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt werden A und B nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. With an angled cut, A and B are rounded automatically per the production rule."
   },
   "muster": {
     "pl": [
@@ -800,16 +796,8 @@
         "Miarka na krawędzi · $1 cm"
       ],
       [
-        "^A bei (\\d+) cm$",
-        "A przy $1 cm"
-      ],
-      [
         "^Innenecke wird automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
         "Narożnik wewnętrzny jest zaokrąglany automatycznie: R$1 — $2 (zasada produkcji)."
-      ],
-      [
-        "^Punkt A und das Ende der Schräge an der Außenkante werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
-        "Punkt A i koniec skosu na krawędzi zewnętrznej są zaokrąglane automatycznie: R$1 — $2 (zasada produkcji)."
       ],
       [
         "^inkl\\. MwSt\\., zzgl\\. (.+) Versand$",
@@ -886,6 +874,26 @@
       [
         "^Ecken: (.+)$",
         "Narożniki: $1"
+      ],
+      [
+        "^91 bis (\\d+)° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade · A–C bleibt (\\d+) cm gerade$",
+        "91 do $1° — w punkcie B między krawędzią blatu a skosem · 90° = proste · A–C pozostaje proste na $2 cm"
+      ],
+      [
+        "^Die Schräge läuft von B \\(Plattenkante\\) nach A; A und B werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
+        "Skos biegnie od B (krawędź blatu) do A; A i B są zaokrąglane automatycznie: R$1 — $2 (zasada produkcji)."
+      ],
+      [
+        "^schräg, Winkel bei B (\\d+)°$",
+        "skośne, kąt w B $1°"
+      ],
+      [
+        "^A–C gerade (\\d+) cm$",
+        "A–C proste $1 cm"
+      ],
+      [
+        "^91 bis (\\d+)°$",
+        "91 do $1°"
       ]
     ],
     "en": [
@@ -1074,16 +1082,8 @@
         "Tape on the edge · $1 cm"
       ],
       [
-        "^A bei (\\d+) cm$",
-        "A at $1 cm"
-      ],
-      [
         "^Innenecke wird automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
         "The inner corner is rounded automatically: R$1 — $2 (production rule)."
-      ],
-      [
-        "^Punkt A und das Ende der Schräge an der Außenkante werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
-        "Point A and the end of the bevel at the outer edge are rounded automatically: R$1 — $2 (production rule)."
       ],
       [
         "^inkl\\. MwSt\\., zzgl\\. (.+) Versand$",
@@ -1160,6 +1160,26 @@
       [
         "^Ecken: (.+)$",
         "Corners: $1"
+      ],
+      [
+        "^91 bis (\\d+)° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade · A–C bleibt (\\d+) cm gerade$",
+        "91 to $1° — at point B between the edge of the top and the bevel · 90° = straight · A–C stays straight for $2 cm"
+      ],
+      [
+        "^Die Schräge läuft von B \\(Plattenkante\\) nach A; A und B werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
+        "The bevel runs from B (edge of the top) to A; A and B are rounded automatically: R$1 — $2 (production rule)."
+      ],
+      [
+        "^schräg, Winkel bei B (\\d+)°$",
+        "angled, angle at B $1°"
+      ],
+      [
+        "^A–C gerade (\\d+) cm$",
+        "A–C straight $1 cm"
+      ],
+      [
+        "^91 bis (\\d+)°$",
+        "91 to $1°"
       ]
     ]
   }

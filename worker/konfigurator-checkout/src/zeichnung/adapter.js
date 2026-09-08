@@ -97,14 +97,13 @@ export function konfigZuZeichnung(S, meta = {}) {
       L: cm(S.lf.L), B: cm(S.lf.B), aw: cm(S.lf.aw), ah: cm(S.lf.ah),
       pos: S.lf.pos || 'vr',   /* Vorgabe seit v1.17.2: vorne rechts (Senior 03.09.) */
       schraeg: !!g.schraeg, winkel: g.winkel,
-      sb: g.schraeg ? cm(g.sb || 0) : 0,            /* Punkt A: Abstand zur Plattenkante (v1.17.3, Buchstaben 07.09. getauscht) */
+      u: g.schraeg ? Math.round((g.u || 0) * 10) : 0,   /* Versatz von A gegenueber der Ausklinkungskante, mm (Senior 08.09.) */
       innenradius: innen,                          /* Innenecke bzw. Mindestradius an A und B */
       radien: (S.lfR || [0, 0, 0, 0, 0]).map((v) => +v || 0),
     };
     const kanteTxt = S.edges[0] === 'abs' ? ['ABS-Kante geklebt', 'krawędź ABS klejona', 'glued ABS edge'] : ['Kante ohne ABS', 'krawędź bez ABS', 'edge without ABS'];
     if (!g.schraeg) hw(`Innenecke der Ausklinkung R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Narożnik wewnętrzny wycięcia R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Inner corner of the notch R ${innen} mm — ${kanteTxt[2]} (production rule)`);
-    else if (g.sb > 0) hw(`Gerader Schnitt von B (Plattenkante) bis A, ${cm(g.sb)} mm; ab A Schräge bis zur Außenkante, Winkel bei A ${g.winkel}° · A und Ende der Schräge mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Cięcie proste od B (krawędź blatu) do A, ${cm(g.sb)} mm; od A skos do krawędzi zewnętrznej, kąt w A ${g.winkel}° · A i koniec skosu co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Straight cut from B (edge of the top) to A, ${cm(g.sb)} mm; from A bevel to the outer edge, angle at A ${g.winkel}° · A and end of the bevel at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
-    else hw(`Schräge durchgehend · Übergänge mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos na całej długości · przejścia co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel over the full depth · transitions at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
+    else hw(`Schräge von B (Plattenkante) nach A, Winkel bei B ${g.winkel}°; A–C gerade ${Math.round(cm(g.ac))} mm · A und B mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos od B (krawędź blatu) do A, kąt w B ${g.winkel}°; A–C proste ${Math.round(cm(g.ac))} mm · A i B co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel from B (edge of the top) to A, angle at B ${g.winkel}°; A–C straight ${Math.round(cm(g.ac))} mm · A and B at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
   }
 
   // Bearbeitungen (cm -> mm). Rechteck: x/y = Ecke hinten links des Ausschnitts.
