@@ -9,7 +9,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.18.2';
+  var VERSION = '1.18.3';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e39f969405f6a1adc0f10ea5b6a7957711631f55';
@@ -887,12 +887,19 @@ function drawStage(){
        Winkelbogen bei B auf der Platte, zwischen Plattenkante (Richtung D) und Schraege. */
     if(lfSchraeg()){
       const mx=links, my=vorn, P=([px2,py2])=>[x+(mx?lg.L-px2:px2)*sc, y+(my?lg.B-py2:py2)*sc];
-      const D=P([0,0]), Bp=P([lg.L-lg.aw,0]), A=P([lg.L-lg.aw+lg.u,lg.ah]), C=P([lg.L,lg.ah]);
+      const D=P([0,0]), Bp=P([lg.L-lg.aw,0]), A=P([lg.L-lg.aw+lg.u,lg.ah]);
       const f1=v=>Math.round(v*10)/10;
-      const lab=(p,t,dx,dy)=>`<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="3.5" fill="#1E1E1E"/><text class="dim-text" x="${f1(p[0]+dx)}" y="${f1(p[1]+dy)}" text-anchor="middle">${t}</text>`;
-      inner+=lab(Bp,'B',links?-9:9,vorn?16:-8);        /* B: ausserhalb der Plattenkante, zur Ausklinkung hin */
-      inner+=lab(A,'A',links?-9:9,vorn?12:-6);         /* A: in der Ausklinkung, neben der inneren Kante */
-      inner+=lab(C,'C',links?7:-7,vorn?19:-11);        /* C: in der Ausklinkung, unter/ueber dem Punkt (aussen stuende es in der Masslinie) */
+      /* Marke sitzt auf der GERUNDETEN Kontur (Bogenmitte), nicht auf der theoretischen
+         Ecke — sonst schwebt der Punkt neben der Kante. Buchstabe auf der
+         Winkelhalbierenden nach aussen, also nie auf der Platte. */
+      const lab=(i,t,ri)=>{ const e=eckRundung(ptsL,radL,i), m=e.mitte, d=14, r=ri||e.aus;
+        return `<circle cx="${f1(m[0])}" cy="${f1(m[1])}" r="3" fill="#1E1E1E" stroke="#F2F0EB" stroke-width="1.2"/>`
+          +`<text class="dim-text" x="${f1(m[0]+r[0]*d)}" y="${f1(m[1]+r[1]*d+5)}" text-anchor="middle">${t}</text>`; };
+      /* C liegt an der Aussenkante — dort steht schon die Masskette. Sein Buchstabe
+         geht deshalb in die Ausklinkung hinein statt auf der Winkelhalbierenden nach aussen. */
+      const iC=lg.ord.indexOf(2), pC=ptsL[iC], nc=lfNotchCenter();
+      let cx2=x+nc[0]*sc-pC[0], cy2=y+nc[1]*sc-pC[1]; const cl=Math.hypot(cx2,cy2)||1;
+      inner+=lab(lg.ord.indexOf(1),'B')+lab(lg.ord.indexOf(-1),'A')+lab(iC,'C',[cx2/cl,cy2/cl]);
       /* Bogen groesser als die Verrundung R50 an B (5 cm), damit er nicht in der Rundung liegt */
       inner+=winkelBogen(Bp,D,A,Math.min(30,lg.ah*sc*0.45,(lg.L-lg.aw)*sc*0.45),`${lg.winkel}°`);
     }
@@ -1212,26 +1219,41 @@ function roundPath(x,y,w,h,r){
 /* Polygon mit gerundeten Ecken — fuer die L-Form, deren Kontur kein Rechteck ist.
    r kann Zahl oder Array sein; konkave Ecken bekommen automatisch die andere
    Bogenrichtung, damit die Innenecke nicht nach aussen beult. */
+/* Verrundung einer Ecke. Die Tangentenlaenge ist t = r / tan(theta/2) — nur bei
+   90 Grad ist sie gleich dem Radius. Bis v1.18.2 stand hier t = r; an flachen
+   Ecken (die Schraege der L-Form) wurde der Bogen dadurch zu einer Beule, und die
+   Werkstattzeichnung (die schon richtig rechnete) zeigte etwas anderes als die
+   Vorschau. theta = Winkel zwischen den beiden Kanten, aus/mitte fuer Marken. */
+function eckRundung(pts, rad, i){
+  const n=pts.length, p=pts[i], a=pts[(i-1+n)%n], b=pts[(i+1)%n];
+  const v1=[a[0]-p[0],a[1]-p[1]], v2=[b[0]-p[0],b[1]-p[1]];
+  const l1=Math.hypot(v1[0],v1[1])||1, l2=Math.hypot(v2[0],v2[1])||1;
+  const u1=[v1[0]/l1,v1[1]/l1], u2=[v2[0]/l2,v2[1]/l2];
+  const theta=Math.acos(Math.max(-1,Math.min(1,u1[0]*u2[0]+u1[1]*u2[1])));
+  const kreuz=v1[0]*v2[1]-v1[1]*v2[0], konvex=kreuz<0;   /* im Uhrzeigersinn: konvex = negativ */
+  let bx=u1[0]+u2[0], by=u1[1]+u2[1]; const bl=Math.hypot(bx,by)||1; bx/=bl; by/=bl;
+  let r=Math.max(0, (Array.isArray(rad)?rad[i]:rad)||0), t=0;
+  if(r>0 && theta>1e-6 && Math.abs(theta-Math.PI)>1e-6){
+    const th=Math.tan(theta/2); t=r/th;
+    const tmax=Math.min(l1,l2)/2;                        /* laenger als die halbe Kante geht nicht */
+    if(t>tmax){ t=tmax; r=t*th; }
+  } else { r=0; }
+  const p1=[p[0]+u1[0]*t, p[1]+u1[1]*t], p2=[p[0]+u2[0]*t, p[1]+u2[1]*t];
+  /* Punkt, an dem die gerundete Kontur der Ecke am naechsten kommt (Bogenmitte) */
+  const sin=Math.sin(theta/2)||1;
+  const mitte = r>0 ? [p[0]+bx*(r/sin-r), p[1]+by*(r/sin-r)] : [p[0],p[1]];
+  /* Winkelhalbierende nach aussen (weg vom Material) — bei konvexen Ecken zeigt bx/by nach innen */
+  const aus = konvex ? [-bx,-by] : [bx,by];
+  return {p1,p2,r,t,mitte,aus,sweep:konvex?1:0};
+}
 function roundPoly(pts, r){
-  const n=pts.length, rad=Array.isArray(r)?r:pts.map(()=>r);
-  const seg=[];
-  for(let i=0;i<n;i++){
-    const p=pts[i], a=pts[(i-1+n)%n], b=pts[(i+1)%n];
-    const v1=[a[0]-p[0],a[1]-p[1]], v2=[b[0]-p[0],b[1]-p[1]];
-    const l1=Math.hypot(...v1)||1, l2=Math.hypot(...v2)||1;
-    const rr=Math.min(rad[i]||0, l1/2, l2/2);
-    const p1=[p[0]+v1[0]/l1*rr, p[1]+v1[1]/l1*rr];
-    const p2=[p[0]+v2[0]/l2*rr, p[1]+v2[1]/l2*rr];
-    const kreuz=v1[0]*v2[1]-v1[1]*v2[0];
-    /* Im SVG-Koordinatensystem (y nach unten) und bei im Uhrzeigersinn
-       angegebenen Punkten ist das Kreuzprodukt bei konvexen Ecken negativ. */
-    seg.push({p1,p2,rr,sweep:kreuz<0?1:0});
-  }
+  const n=pts.length, rad=Array.isArray(r)?r:pts.map(()=>r), seg=[];
+  for(let i=0;i<n;i++) seg.push(eckRundung(pts, rad, i));
   let d=`M ${seg[0].p2}`;
   for(let i=1;i<=n;i++){
     const cur=seg[i%n];
     d+=` L ${cur.p1}`;
-    if(cur.rr>0.5) d+=` A ${cur.rr} ${cur.rr} 0 0 ${cur.sweep} ${cur.p2}`;
+    if(cur.r>0.5) d+=` A ${cur.r} ${cur.r} 0 0 ${cur.sweep} ${cur.p2}`;
     else d+=` L ${cur.p2}`;
   }
   return d+' Z';
@@ -1333,13 +1355,9 @@ function addPresetHoles(sh){
 /* Polygon in eine THREE.Shape uebertragen, Ecken nach Radius verrundet */
 function polyToShape(sh, pts, rad){
   const n=pts.length;
-  const t=pts.map((p,i)=>{
-    const a=pts[(i-1+n)%n], b=pts[(i+1)%n];
-    const v1=[a[0]-p[0],a[1]-p[1]], v2=[b[0]-p[0],b[1]-p[1]];
-    const l1=Math.hypot(v1[0],v1[1])||1, l2=Math.hypot(v2[0],v2[1])||1;
-    const r=Math.min(rad[i]||0, l1/2, l2/2);
-    return { p, r, p1:[p[0]+v1[0]/l1*r, p[1]+v1[1]/l1*r], p2:[p[0]+v2[0]/l2*r, p[1]+v2[1]/l2*r] };
-  });
+  /* Tangentenlaenge wie in eckRundung (r / tan(theta/2)) — sonst wird die Rundung
+     an flachen Ecken zur Beule und 3D weicht von der 2D-Kontur ab. */
+  const t=pts.map((p,i)=>{ const e=eckRundung(pts, rad, i); return { p, r:e.r, p1:e.p1, p2:e.p2 }; });
   sh.moveTo(t[0].p2[0], t[0].p2[1]);
   for(let i=1;i<=n;i++){
     const c=t[i%n];
