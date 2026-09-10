@@ -21,6 +21,7 @@ NAMEN = [
   'EDGE_MPX','LACK_LFM','EDGEPROFILES','EDGE_ALIAS','MASSBAND',
   'RADIEN_STAFFEL','FREI_PRICE','KANAL_PRICE','PRESETS','X_PRICE',
   'DEKOR_STUFE_ERSATZ','STAERKE_FAKTOR','HPL_ZUSCHLAG','CORNER_NAMES','LF_POS','MASCHINE_MASSE',
+  'BS_DEF_W','BS_MIN_C','BS_REST','BS_CORNER_NAMES',
   # Preis-Kern
   'hasOwn','kanal','PLN_KURS','zl','auf90','kurvenDekor','kurvenSchluessel','kurvenFlaeche','aufDerKurve','deckel','kurvenPreis',
   'hitPreis','fm1','shopKey','shopHit','freierAusschnitt','radienpreis',
@@ -33,6 +34,9 @@ NAMEN = [
   'cutLen','cutPrice','cutBox','cutMass','cutTypName','presetCount','kanalLfmPreis','kanalPunkte','polyAbs',
   'maschineMass','maxTiefe','cutMinEdge','cutAbstaende','konturAbstand',
   'cornerSum','lfAutoEcken','lfIstDiagonalEcke',
+  # Bauchausschnitt (v1.19.0) — calc()/cornerSum() greifen darauf zu
+  'bsVorlauf','bsWinkel','bsCornerR','bsSenkrecht','bsBGebunden','bsGeo','bsSchnittCm','bsPts',
+  'bsAutoEcken','bsCenter','bsImAusschnitt','formPts',
 ]
 
 lines = SRC.split('\n')

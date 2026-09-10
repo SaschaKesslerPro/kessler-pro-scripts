@@ -108,6 +108,15 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   const MASCHINE_MASSE = {'48x18.1':[48,18.1], '52x18.1':[52,18.1], '61.7x18.1':[61.7,18.1], 'auto':[52,18.1]};
 
+  const BS_DEF_W = 135;      /* Vorgabe: Vorlauf gleich Tiefe */
+
+  const BS_MIN_C = 10;       /* cm — damit die beiden Innenecken Platz fuer die Verrundung haben */
+
+  const BS_REST  = 10;       /* cm — die hinter dem Ausschnitt stehen bleiben muessen */
+
+  const BS_CORNER_NAMES = ['hinten links','hinten rechts','vorne rechts',
+                           'Ausschnitt rechts','Ausschnitt links','vorne links'];
+
   const hasOwn=(o,k)=>k!=null && Object.prototype.hasOwnProperty.call(o,k);
 
   function kanal(){ return KFG_LANG==='pl' ? 'pln' : 'eur'; }
@@ -224,18 +233,21 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function dims(){
     if(S.form==='round') return {w:+S.D,h:+S.D};
     if(S.form==='lform') return {w:+S.lf.L,h:+S.lf.B};
+    if(S.form==='bauch') return {w:+S.bs.L,h:+S.bs.BR};
     return {w:+S.L,h:+S.B};
   }
 
   function areaM2(){
     if(S.form==='round') return Math.PI*Math.pow(S.D/200,2);
     if(S.form==='lform') return S.lf.L*S.lf.B/1e4;
+    if(S.form==='bauch') return S.bs.L*S.bs.BR/1e4;
     return S.L*S.B/1e4;
   }
 
   function perimM(){
     if(S.form==='round') return Math.PI*S.D/100;
     if(S.form==='lform') return lfGeo().umfang;
+    if(S.form==='bauch') return bsGeo().umfang;
     const d=dims(); return 2*(d.w+d.h)/100;
   }
 
@@ -266,7 +278,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     /* Der Schnitt, der das L erzeugt: Formel der freien Ausschnitte auf die
        INNERE Schnittlaenge — zwei Innenkanten beim geraden, eine Diagonale beim
        schraegen L. */
-    const lschnitt=S.form==='lform'?freierAusschnitt(lfGeo().schnitt):0;
+    const lschnitt=S.form==='lform'?freierAusschnitt(lfGeo().schnitt)
+                  :S.form==='bauch'?freierAusschnitt(bsGeo().schnitt):0;
     let extras=0; if(S.extras.bohr) extras+=zl(X_PRICE.bohr);
     extras+=massbandPreis();
     S.cuts.forEach(c2=>{ extras+=cutPrice(c2); });   /* freie Bearbeitungen jetzt mit Sofortpreis */
@@ -282,7 +295,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     /* "Ab Lager" heisst: die Platte geht so aus dem Regal. Jede Bearbeitung —
        auch ein Kabeldurchlass oder die Montagebohrung — macht daraus einen
        Fertigungsauftrag mit Aufpreis (vorher lief der Permalink ohne den Aufpreis). */
-    if(S.extras.custom||isLack()||S.mat==='szwal'||S.form==='lform'||cornerCount()>0||S.cuts.length>0||S.extras.bohr) return false;
+    if(S.extras.custom||isLack()||S.mat==='szwal'||S.form==='lform'||S.form==='bauch'||cornerCount()>0||S.cuts.length>0||S.extras.bohr) return false;
     /* Farbige ABS-Kante gibt es nicht ab Lager — Fertigungsauftrag ohne Aufpreis (Sascha 08.09.) */
     if(S.mat==='dekor'&&S.absColor!=='dekor'&&S.edges.some(e=>e==='abs')) return false;
     if(S.mat!=='dekor'&&S.mat!=='compact') { /* mpx Festmaße? aktuell keine → nur 18er Liste für dekor */ }
@@ -291,29 +304,30 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function needsOffer(){ return S.extras.custom || calc().quelle==='offen'; }
 
-  function cornerFormOk(){ return S.form==='rect'||S.form==='lform'; }
+  function cornerFormOk(){ return S.form==='rect'||S.form==='lform'||S.form==='bauch'; }
 
   function cornerPerCorner(){ return cornerFormOk(); }
 
   function cornerR(i){
     if(!cornerFormOk()) return 0;
     if(S.form==='lform') return lfCornerR(i);
+    if(S.form==='bauch') return bsCornerR(i);
     return Math.max(0, +S.cornerR[i]||0);
   }
 
-  function cornerIdx(){ return S.form==='lform' ? [0,1,2,3,4] : [0,1,2,3]; }
+  function cornerIdx(){ return S.form==='lform' ? [0,1,2,3,4] : S.form==='bauch' ? [0,1,2,3,4,5] : [0,1,2,3]; }
 
   function cornerCount(){ return cornerIdx().filter(i=>cornerR(i)>0).length; }
 
   function cornerMax(){ return Math.max(0,...cornerIdx().map(cornerR)); }
 
-  function cornerName(i){ return S.form==='lform' ? lfCornerName(i) : CORNER_NAMES[i]; }
+  function cornerName(i){ return S.form==='lform' ? lfCornerName(i) : S.form==='bauch' ? BS_CORNER_NAMES[i] : CORNER_NAMES[i]; }
 
   function cornerLabel(){
     const idx=cornerIdx(), on=idx.filter(i=>cornerR(i)>0);
     if(!on.length) return 'eckig';
     const uniq=[...new Set(on.map(cornerR))];
-    if(uniq.length===1) return `R${uniq[0]} · ${on.length===idx.length?(idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`;
+    if(uniq.length===1) return `R${uniq[0]} · ${on.length===idx.length?(idx.length===6?'alle sechs':idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`;
     return on.map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ');
   }
 
@@ -326,13 +340,16 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function setCorner(i,r){
     if(S.form==='lform'){ if(!Array.isArray(S.lfR)||S.lfR.length!==5) S.lfR=[0,0,0,0,0]; S.lfR[i]=clampCorner(r); }
+    else if(S.form==='bauch'){ if(!Array.isArray(S.bsR)||S.bsR.length!==6) S.bsR=[0,0,0,0,0,0]; S.bsR[i]=clampCorner(r); }
     else S.cornerR[i]=clampCorner(r);
     S.corner=cornerMax();
   }
 
   function setAllCorners(r){
     const v=clampCorner(r);
-    if(S.form==='lform') S.lfR=[0,1,2,3,4].map(()=>v); else S.cornerR=[0,1,2,3].map(()=>v);
+    if(S.form==='lform') S.lfR=[0,1,2,3,4].map(()=>v);
+    else if(S.form==='bauch') S.bsR=[0,1,2,3,4,5].map(()=>v);
+    else S.cornerR=[0,1,2,3].map(()=>v);
     S.corner=cornerMax();
   }
 
@@ -411,7 +428,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function massbandStrecke(){
     if(S.mat!=='szwal'||S.massband==='none'||S.form==='round') return null;
     const d=dims(); let pts, rad;
-    if(S.form==='lform'){ const g=lfPts(); pts=g.pts; rad=g.rad.slice(); }
+    const fp=formPts();
+    if(fp){ pts=fp.pts; rad=fp.rad.slice(); }
     else { pts=[[0,0],[d.w,0],[d.w,d.h],[0,d.h]]; rad=[0,1,2,3].map(i=>cornerR(i)/10); }
     const n=pts.length, e=1e-6; let best=null;
     for(let i=0;i<n;i++){ const j=(i+1)%n, a=pts[i], b=pts[j];
@@ -519,9 +537,9 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   }
 
   function konturAbstand(px,py,dx,dy){
-    const d=dims();
-    if(S.form!=='lform'){ return dx>0?d.w-px:dx<0?px:dy>0?d.h-py:py; }
-    const g=lfPts(), n=g.pts.length; let best=Infinity;
+    const d=dims(), g=formPts();
+    if(!g){ return dx>0?d.w-px:dx<0?px:dy>0?d.h-py:py; }
+    const n=g.pts.length; let best=Infinity;
     for(let i=0;i<n;i++){ const a=g.pts[i], b=g.pts[(i+1)%n];
       const ex=b[0]-a[0], ey=b[1]-a[1], den=dx*ey-dy*ex; if(Math.abs(den)<1e-9) continue;
       const t=((a[0]-px)*ey-(a[1]-py)*ex)/den, u=((a[0]-px)*dy-(a[1]-py)*dx)/den;
@@ -529,7 +547,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     return isFinite(best)?best:(dx>0?d.w-px:dx<0?px:dy>0?d.h-py:py);
   }
 
-  function cornerSum(){ return radienpreis(cornerCount()+lfAutoEcken()); }
+  function cornerSum(){ return radienpreis(cornerCount()+lfAutoEcken()+bsAutoEcken()); }
 
   function lfAutoEcken(){
     if(S.form!=='lform'||!lfSchraeg()) return 0;
@@ -544,6 +562,79 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     const schief=(p,q)=>Math.abs(p[0]-q[0])>1e-6 && Math.abs(p[1]-q[1])>1e-6;
     return schief(a,b)||schief(b,c);
   }
+
+  function bsVorlauf(g){ if(!(g>90)) return 0; const r=(180-g)*Math.PI/180; return r<=1e-9?0:1/Math.tan(r); }
+
+  function bsWinkel(k){ const w=Math.round(+S.bs['w'+k]||BS_DEF_W); return Math.max(90,Math.min(179,w)); }
+
+  function bsCornerR(o){ return Math.max(0, +((S.bsR||[])[o])||0); }
+
+  function bsSenkrecht(){ return bsVorlauf(bsWinkel(1))+bsVorlauf(bsWinkel(2)) < 1e-9; }
+
+  function bsBGebunden(){ return !!S.bs.mittig || bsSenkrecht(); }
+
+  function bsGeo(){
+    const L=Math.max(20,+S.bs.L||0), BR=Math.max(20,+S.bs.BR||0), c=Math.max(1,+S.bs.c||0);
+    const w1=bsWinkel(1), w2=bsWinkel(2), k1=bsVorlauf(w1), k2=bsVorlauf(w2), ks=k1+k2;
+    let a=Math.max(0,+S.bs.a||0), b, t;
+    if(ks<1e-9){                                  /* zwei senkrechte Schnitte: Tiefe ist frei */
+      t=Math.max(0.1,+S.bs.t||0);
+      if(S.bs.mittig) a=(L-c)/2;
+      b=L-a-c;
+    } else if(S.bs.mittig){
+      if(S.bs.treiber==='t'){ t=Math.max(0.1,+S.bs.t||0); a=(L-c-t*ks)/2; }
+      else t=(L-2*a-c)/ks;
+      b=a;
+    } else if(S.bs.treiber==='t'){
+      t=Math.max(0.1,+S.bs.t||0); b=L-a-c-t*ks;
+    } else {
+      b=Math.max(0,+S.bs.b||0); t=(L-a-b-c)/ks;
+    }
+    const r1=t*k1, r2=t*k2;
+    const schnitt=(Math.hypot(r1,t)+c+Math.hypot(r2,t))/100;      /* m */
+    const oeffnung=r1+c+r2;                                       /* cm, an der Vorderkante */
+    return {L,BR,a,b,c,t,w1,w2,k1,k2,r1,r2,ks,schnitt,oeffnung,
+            umfang:(2*(L+BR)-oeffnung)/100+schnitt, senkrecht:ks<1e-9};
+  }
+
+  function bsSchnittCm(){ return Math.round(bsGeo().schnitt*100); }
+
+  function bsPts(){
+    const g=bsGeo(), L=g.L, BR=g.BR, rmin=lfMinR();
+    const pts=[[0,0],[L,0],[L,BR],[L-g.b,BR],[L-g.b-g.r2,BR-g.t],[g.a+g.r1,BR-g.t],[g.a,BR],[0,BR]];
+    const ord=[0,1,2,3,-1,-1,4,5];
+    /* Wie bei der L-Form: die Innenecken tragen immer den Fertigungsradius; an
+       einer Schraege bekommt auch die aeussere Ausschnittecke mindestens ihn. */
+    const rad=ord.map(o=>{
+      if(o<0) return rmin;
+      if(o===3) return g.w2>90.5 ? Math.max(rmin, bsCornerR(3)/10) : bsCornerR(3)/10;
+      if(o===4) return g.w1>90.5 ? Math.max(rmin, bsCornerR(4)/10) : bsCornerR(4)/10;
+      return bsCornerR(o)/10;
+    });
+    return Object.assign({pts, ord, rad}, g);
+  }
+
+  function bsAutoEcken(){
+    if(S.form!=='bauch') return 0;
+    /* Genau die Regel der L-Form: jede Ecke, die an einer Schraege liegt, traegt
+       den Fertigungsradius und zaehlt in der Staffel mit — je Schraege sind das
+       zwei (aussen an der Vorderkante, innen am Grund). Bei senkrechten Schnitten
+       gibt es keine Schraege: dann sind die Innenecken wie beim geraden L frei. */
+    const g=bsPts(); let n=0;
+    g.pts.forEach((_,i)=>{ const o=g.ord[i];
+      if(g.rad[i]>0 && (o<0 || bsCornerR(o)<=0) && lfIstDiagonalEcke(g,i)) n++; });
+    return n;
+  }
+
+  function bsCenter(){ const g=bsGeo(); return [g.a+g.r1+g.c/2, g.BR-g.t/2]; }
+
+  function bsImAusschnitt(px,py){
+    const g=bsGeo(); if(!(g.t>0) || py < g.BR-g.t-1e-9) return false;
+    const f=(g.BR-py)/g.t;                    /* 0 an der Vorderkante, 1 am Grund */
+    return px > g.a+g.r1*f+1e-9 && px < g.L-g.b-g.r2*f-1e-9;
+  }
+
+  function formPts(){ return S.form==='lform'?lfPts() : S.form==='bauch'?bsPts() : null; }
 
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,

@@ -1,13 +1,13 @@
 {
   "_meta": {
     "name": "Kessler PRO — Konfigurator, Sprachdatei",
-    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft. v1.18.0: PL-Aufschläge in zł, mobile Preiszeile — Polnisch ungeprueft. v1.18.2: Schräge B→A mit Winkel bei B, A–C gerade — Polnisch ungeprueft.",
+    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft. v1.18.0: PL-Aufschläge in zł, mobile Preiszeile — Polnisch ungeprueft. v1.18.2: Schräge B→A mit Winkel bei B, A–C gerade — Polnisch ungeprueft. v1.19.0: Bauchausschnitt (A/B/C, Tiefe, zwei Winkel, mittig) — Polnisch ungeprueft.",
     "sprachen": [
       "pl",
       "en"
     ],
-    "anzahl": 298,
-    "muster": 71
+    "anzahl": 332,
+    "muster": 83
   },
   "pl": {
     "Ab Lager": "Z magazynu",
@@ -307,7 +307,41 @@
     "hinten · Ausklinkung": "z tyłu · wycięcie narożne",
     "Winkel bei B": "Kąt w punkcie B",
     "91 bis 179° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade": "91 do 179° — w punkcie B między krawędzią blatu a skosem · 90° = proste",
-    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt werden A und B nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym A i B są zaokrąglane automatycznie według reguły produkcji."
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt werden A und B nach Fertigungsregel automatisch verrundet.": "Kształt L: pięć narożników zewnętrznych, każdy do wyboru osobno. Przy cięciu skośnym A i B są zaokrąglane automatycznie według reguły produkcji.",
+    "Bauchausschnitt": "Wycięcie brzuszne",
+    "Rechteck mit Bauchausschnitt": "Prostokąt z wycięciem brzusznym",
+    "A — links": "A — lewa",
+    "B — rechts": "B — prawa",
+    "C — Grund": "C — dno",
+    "Tiefe": "Głębokość",
+    "Winkel links": "Kąt lewy",
+    "Winkel rechts": "Kąt prawy",
+    "Ausschnitt in der Vorderkante": "Wycięcie w krawędzi przedniej",
+    "Ausschnitt mittig": "Wycięcie na środku",
+    "Ausschnitt rechts": "Wycięcie z prawej",
+    "Ausschnitt links": "Wycięcie z lewej",
+    "A und B laufen gleich — ohne Haken bestimmst du jede Länge selbst": "A i B są równe — bez zaznaczenia każdą długość ustalasz sam",
+    "gerades Stück der Vorderkante links vom Ausschnitt": "prosty odcinek krawędzi przedniej na lewo od wycięcia",
+    "gerades Stück der Vorderkante rechts vom Ausschnitt": "prosty odcinek krawędzi przedniej na prawo od wycięcia",
+    "errechnet — mittig aus Länge, C und Tiefe": "obliczone — środkowo z długości, C i głębokości",
+    "errechnet — A + B + C und die Schrägen ergeben die Länge": "obliczone — A + B + C i skosy dają długość",
+    "läuft mit A mit": "równe A",
+    "errechnet aus A, B, C und den beiden Winkeln": "obliczone z A, B, C i obu kątów",
+    "Grund des Ausschnitts, parallel zur Vorderkante": "dno wycięcia, równolegle do krawędzi przedniej",
+    "90 bis 179° — 90° = senkrechter Schnitt": "90 do 179° — 90° = cięcie proste",
+    "135° = Vorlauf gleich Tiefe": "135° = wysunięcie równe głębokości",
+    "90 bis 179° — am rechten Ende von C": "90 do 179° — przy prawym końcu C",
+    "90 bis 179°": "90 do 179°",
+    "Zwei senkrechte Schnitte: A + B + C ergeben zusammen die Länge, die Tiefe ist frei.": "Dwa cięcia proste: A + B + C dają razem długość, głębokość jest dowolna.",
+    "Bauchausschnitt: sechs Außenecken, jede einzeln wählbar. Die beiden Innenecken am Grund des Ausschnitts werden nach Fertigungsregel automatisch verrundet.": "Wycięcie brzuszne: sześć narożników zewnętrznych, każdy do wyboru osobno. Oba narożniki wewnętrzne przy dnie wycięcia są zaokrąglane automatycznie zgodnie z regułą produkcji.",
+    "A wird zu klein — Ausschnitt schmäler oder flacher machen": "A staje się za małe — zmniejsz szerokość lub głębokość wycięcia",
+    "B wird zu klein — A, C und die Schrägen passen nicht in die Länge": "B staje się za małe — A, C i skosy nie mieszczą się w długości",
+    "Liegt im Ausschnitt — bitte verschieben": "Leży w wycięciu — przesuń",
+    "alle sechs": "wszystkie sześć",
+    "Der Preis steht fest. Diese Form geben wir vor der Fertigung noch von Hand frei — dein verbindliches Angebot kommt innerhalb von 24 Stunden.": "Cena jest ustalona. Tę formę zwalniamy przed produkcją jeszcze ręcznie — wiążącą ofertę otrzymasz w ciągu 24 godzin.",
+    "Schräge R50 (Fertigungsregel)": "Skos R50 (reguła produkcji)",
+    "Schräge R10 (Fertigungsregel)": "Skos R10 (reguła produkcji)",
+    "A, B und C sind zusammen zu lang für die Platte": "A, B i C są razem za długie dla płyty"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -607,7 +641,41 @@
     "hinten · Ausklinkung": "back · notch",
     "Winkel bei B": "Angle at B",
     "91 bis 179° — bei Punkt B zwischen Plattenkante und Schräge · 90° = gerade": "91 to 179° — at point B between the edge of the top and the bevel · 90° = straight",
-    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt werden A und B nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. With an angled cut, A and B are rounded automatically per the production rule."
+    "L-Form: fünf Außenecken, jede einzeln wählbar. Beim schrägen Schnitt werden A und B nach Fertigungsregel automatisch verrundet.": "L-shape: five outer corners, each selectable on its own. With an angled cut, A and B are rounded automatically per the production rule.",
+    "Bauchausschnitt": "Belly cut-out",
+    "Rechteck mit Bauchausschnitt": "Rectangle with belly cut-out",
+    "A — links": "A — left",
+    "B — rechts": "B — right",
+    "C — Grund": "C — base",
+    "Tiefe": "Depth",
+    "Winkel links": "Angle left",
+    "Winkel rechts": "Angle right",
+    "Ausschnitt in der Vorderkante": "Cut-out in the front edge",
+    "Ausschnitt mittig": "Cut-out centred",
+    "Ausschnitt rechts": "Cut-out right",
+    "Ausschnitt links": "Cut-out left",
+    "A und B laufen gleich — ohne Haken bestimmst du jede Länge selbst": "A and B stay equal — unticked you set every length yourself",
+    "gerades Stück der Vorderkante links vom Ausschnitt": "straight run of the front edge left of the cut-out",
+    "gerades Stück der Vorderkante rechts vom Ausschnitt": "straight run of the front edge right of the cut-out",
+    "errechnet — mittig aus Länge, C und Tiefe": "calculated — centred from length, C and depth",
+    "errechnet — A + B + C und die Schrägen ergeben die Länge": "calculated — A + B + C and the slopes add up to the length",
+    "läuft mit A mit": "follows A",
+    "errechnet aus A, B, C und den beiden Winkeln": "calculated from A, B, C and both angles",
+    "Grund des Ausschnitts, parallel zur Vorderkante": "base of the cut-out, parallel to the front edge",
+    "90 bis 179° — 90° = senkrechter Schnitt": "90 to 179° — 90° = square cut",
+    "135° = Vorlauf gleich Tiefe": "135° = run equals depth",
+    "90 bis 179° — am rechten Ende von C": "90 to 179° — at the right end of C",
+    "90 bis 179°": "90 to 179°",
+    "Zwei senkrechte Schnitte: A + B + C ergeben zusammen die Länge, die Tiefe ist frei.": "Two square cuts: A + B + C add up to the length, the depth is free.",
+    "Bauchausschnitt: sechs Außenecken, jede einzeln wählbar. Die beiden Innenecken am Grund des Ausschnitts werden nach Fertigungsregel automatisch verrundet.": "Belly cut-out: six outer corners, each selectable on its own. The two inner corners at the base of the cut-out are rounded automatically per the manufacturing rule.",
+    "A wird zu klein — Ausschnitt schmäler oder flacher machen": "A gets too small — make the cut-out narrower or shallower",
+    "B wird zu klein — A, C und die Schrägen passen nicht in die Länge": "B gets too small — A, C and the slopes do not fit the length",
+    "Liegt im Ausschnitt — bitte verschieben": "Sits inside the cut-out — please move it",
+    "alle sechs": "all six",
+    "Der Preis steht fest. Diese Form geben wir vor der Fertigung noch von Hand frei — dein verbindliches Angebot kommt innerhalb von 24 Stunden.": "The price is fixed. We still release this shape by hand before production — your binding quote arrives within 24 hours.",
+    "Schräge R50 (Fertigungsregel)": "Slope R50 (manufacturing rule)",
+    "Schräge R10 (Fertigungsregel)": "Slope R10 (manufacturing rule)",
+    "A, B und C sind zusammen zu lang für die Platte": "A, B and C together are too long for the board"
   },
   "muster": {
     "pl": [
@@ -894,6 +962,54 @@
       [
         "^91 bis (\\d+)°$",
         "91 do $1°"
+      ],
+      [
+        "^Bauchausschnitt \\((\\d+) cm Schnitt\\)$",
+        "Wycięcie brzuszne ($1 cm cięcia)"
+      ],
+      [
+        "^Bauchausschnitt (.+)$",
+        "Wycięcie brzuszne $1"
+      ],
+      [
+        "^Tiefe ([\\d.,]+)$",
+        "Głębokość $1"
+      ],
+      [
+        "^Tiefe ([\\d.,]+) cm$",
+        "Głębokość $1 cm"
+      ],
+      [
+        "^Ausschnitt (C .+)$",
+        "Wycięcie $1"
+      ],
+      [
+        "^Öffnung an der Vorderkante (.+) cm$",
+        "Otwór przy krawędzi przedniej $1 cm"
+      ],
+      [
+        "^Schnittlänge (\\d+) cm\\.$",
+        "Długość cięcia $1 cm."
+      ],
+      [
+        "^Die beiden Innenecken werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
+        "Oba narożniki wewnętrzne są zaokrąglane automatycznie: R$1 — $2 (reguła produkcji)."
+      ],
+      [
+        "^Auch die äußeren Ausschnittecken an der Schräge bekommen mindestens R(\\d+)\\.$",
+        "Zewnętrzne narożniki wycięcia przy skosie otrzymują co najmniej R$1."
+      ],
+      [
+        "^mindestens (\\d+) cm$",
+        "co najmniej $1 cm"
+      ],
+      [
+        "^1 bis (.+) cm — hinter dem Ausschnitt bleiben (\\d+) cm stehen$",
+        "od 1 do $1 cm — za wycięciem musi zostać $2 cm"
+      ],
+      [
+        "^(\\d+) bis ([\\d.,]+) cm$",
+        "od $1 do $2 cm"
       ]
     ],
     "en": [
@@ -1180,6 +1296,54 @@
       [
         "^91 bis (\\d+)°$",
         "91 to $1°"
+      ],
+      [
+        "^Bauchausschnitt \\((\\d+) cm Schnitt\\)$",
+        "Belly cut-out ($1 cm of cut)"
+      ],
+      [
+        "^Bauchausschnitt (.+)$",
+        "Belly cut-out $1"
+      ],
+      [
+        "^Tiefe ([\\d.,]+)$",
+        "Depth $1"
+      ],
+      [
+        "^Tiefe ([\\d.,]+) cm$",
+        "Depth $1 cm"
+      ],
+      [
+        "^Ausschnitt (C .+)$",
+        "Cut-out $1"
+      ],
+      [
+        "^Öffnung an der Vorderkante (.+) cm$",
+        "Opening at the front edge $1 cm"
+      ],
+      [
+        "^Schnittlänge (\\d+) cm\\.$",
+        "Cut length $1 cm."
+      ],
+      [
+        "^Die beiden Innenecken werden automatisch verrundet: R(\\d+) — (.+) \\(Fertigungsregel\\)\\.$",
+        "The two inner corners are rounded automatically: R$1 — $2 (manufacturing rule)."
+      ],
+      [
+        "^Auch die äußeren Ausschnittecken an der Schräge bekommen mindestens R(\\d+)\\.$",
+        "The outer cut-out corners at the slope also get at least R$1."
+      ],
+      [
+        "^mindestens (\\d+) cm$",
+        "at least $1 cm"
+      ],
+      [
+        "^1 bis (.+) cm — hinter dem Ausschnitt bleiben (\\d+) cm stehen$",
+        "1 to $1 cm — $2 cm must remain behind the cut-out"
+      ],
+      [
+        "^(\\d+) bis ([\\d.,]+) cm$",
+        "$1 to $2 cm"
       ]
     ]
   }

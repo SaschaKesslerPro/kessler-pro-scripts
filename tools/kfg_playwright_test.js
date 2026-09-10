@@ -121,7 +121,9 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
   /* ⑤ Naehtischplatte: L-Form, Massband, Maschine */
   r=await set({...clean, mat:'szwal',dekor:'sz-weiss',thick:'21',form:'rect',L:120,B:60, edges:['nicht','nicht','nicht','nicht'], massband:'laser', cornerR:[0,0,50,50]});
   const formChips=await page.evaluate(()=>[...document.querySelectorAll('#formChips .kfg_chip')].map(b=>b.dataset.form+':'+(b.style.display==='none'?'aus':'an')).join(','));
-  check('Naehtisch Form-Chips: rect an, round aus, lform an', formChips==='rect:an,round:aus,lform:an', formChips);
+  /* v1.19.0: vierter Chip Bauchausschnitt — bei der Naehtischplatte bewusst AN
+     (Bauchausschnitt ist gerade dort der Normalfall), nur Rund bleibt aus. */
+  check('Naehtisch Form-Chips: rect an, round aus, lform an, bauch an', formChips==='rect:an,round:aus,lform:an,bauch:an', formChips);
   let band=await page.evaluate(()=>{ const t=[...document.querySelectorAll('#stage text')].map(e=>e.textContent); const nums=t.filter(x=>/^\d+$/.test(x)).map(Number); return {max:Math.max(...nums), note:document.getElementById('massbandNote').textContent, anz:document.querySelectorAll('#stage line[stroke="#1E1E1E"]').length}; });
   check('Laser-Band 120x60 R50 vorn: endet bei 100', band.max===100 && /Länge hier: 100 cm/.test(band.note), JSON.stringify(band));
   r=await set({...clean, mat:'szwal',dekor:'sz-weiss',thick:'21',form:'rect',L:90,B:60, edges:['nicht','nicht','nicht','nicht'], massband:'laser'});
@@ -283,6 +285,57 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
     check('Mobil: Preiszeile mit Preis und Knopf in der mitwandernden Karte sichtbar', mk.display==='flex' && mk.sichtbar && mk.preis==='69,90 €' && /Warenkorb/.test(mk.cta), JSON.stringify(mk));
     await mctx.close(); }
   console.log('⑩ v1.18.0 geprueft');
+
+  /* ⑪ Bauchausschnitt (v1.19.0, Zeichnung des Seniors 10.09.) — Geometrie, Preis,
+     Zweiwegbindung, Grenzen, Bestellweg, Link und die polnischen Texte. */
+  await open('de');
+  const bsBasis=(bs)=>({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'bauch', bsR:[0,0,0,0,0,0],
+    bs:{L:200,BR:90,a:55,b:55,c:60,t:15,w1:135,w2:135,mittig:false,treiber:'b', ...bs}});
+  const bsFeld=async(id)=>page.evaluate(i=>document.getElementById(i).value, id);
+  r=await set(bsBasis({}));
+  check('Bauch Vorgabe = Zeichnung des Vaters: 236,70 (170,90 + 25,90 + 39,90)', Math.abs(parseP(r.price)-236.7)<0.005, r.price);
+  check('Bauch Zeile 102 cm Schnitt 25,90', r.rows.some(x=>/^Bauchausschnitt \(102 cm Schnitt\)$/.test(x[0]) && parseP(x[1])===25.9), JSON.stringify(r.rows));
+  check('Bauch: vier Schraegen-Ecken nach Fertigungsregel 39,90', r.rows.some(x=>/Schräge R50 \(Fertigungsregel\) \(4 Ecken\)/.test(x[0]) && parseP(x[1])===39.9), JSON.stringify(r.rows));
+  check('Bauch Tiefe errechnet: (200-55-55-60)/2 = 15', (await bsFeld('inBsT'))==='15', await bsFeld('inBsT'));
+  /* Zweiwegbindung: Tiefe treibt, B folgt */
+  r=await set(bsBasis({t:25, treiber:'t'}));
+  check('Bauch Zweiwegbindung: Tiefe 25 → B = 200-55-60-50 = 35', (await bsFeld('inBsB'))==='35', await bsFeld('inBsB'));
+  /* Mittig: A und B laufen gleich */
+  r=await set(bsBasis({t:25, treiber:'t', mittig:true}));
+  check('Bauch mittig: A = B = (200-60-50)/2 = 45', (await bsFeld('inBsA'))==='45' && (await bsFeld('inBsB'))==='45', (await bsFeld('inBsA'))+'/'+(await bsFeld('inBsB')));
+  /* Zwei senkrechte Schnitte: rechteckiger Ausschnitt, keine Schraege, keine Regel-Ecken */
+  r=await set(bsBasis({w1:90,w2:90,a:50,c:100,t:20,treiber:'t'}));
+  check('Bauch 90/90: Schnitt 2x20 + 100 = 140 cm, keine Eckenzeile', r.rows.some(x=>/^Bauchausschnitt \(140 cm Schnitt\)$/.test(x[0])) && !r.rows.some(x=>/Eckenrundung/.test(x[0])), JSON.stringify(r.rows));
+  /* Grenzen */
+  for(const [name,bs] of [['C unter 10',{c:5}], ['Tiefe groesser als Breite-10',{t:85,treiber:'t'}],
+                          ['A+B+C laenger als die Platte',{a:90,b:90}], ['B wird negativ',{t:45,treiber:'t'}],
+                          ['Winkel unter 90',{w1:89}]]){
+    r=await set(bsBasis(bs));
+    const gesperrt=await page.evaluate(()=>document.getElementById('cta').disabled);
+    check('Bauch Grenze greift: '+name, r.price==='—' && gesperrt, name+' → '+r.price+' / gesperrt '+gesperrt);
+  }
+  /* Bestellweg: bis der Worker die Form kennt, nur Anfrage */
+  r=await set(bsBasis({}));
+  const bsKauf=await page.evaluate(()=>({cta:document.getElementById('cta').textContent.trim(),
+    buy:getComputedStyle(document.getElementById('ctaBuy')).display}));
+  check('Bauch geht ueber die Anfrage, kein Sofortkauf', /Unverbindlich anfragen/.test(bsKauf.cta) && bsKauf.buy==='none', JSON.stringify(bsKauf));
+  /* Link teilen und wiederherstellen */
+  r=await set(bsBasis({a:42,b:38,c:55,w1:120,w2:150}), true);
+  const bsHash=r.hash, bsPreis=r.price;
+  check('Bauch Hash traegt bs und bsr', /bs=/.test(bsHash) && /bsr=/.test(bsHash), bsHash);
+  await page.goto('http://127.0.0.1:8765/_spiegel/de.html'+bsHash, {waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—', null, {timeout:20000});
+  const bsS=await page.evaluate(()=>({f:window.KFG.getConfig().form, bs:window.KFG.getConfig().bs, p:document.getElementById('price').textContent}));
+  check('Bauch Link 1:1 wiederhergestellt', bsS.f==='bauch' && bsS.p===bsPreis && +bsS.bs.a===42 && +bsS.bs.b===38 && +bsS.bs.w2===150, JSON.stringify(bsS));
+  /* Polnisch: die neuen Woerter liegen seit v1.19.1 in der Sprachdatei, nicht mehr im Skript */
+  await open('pl');
+  r=await set(bsBasis({}));
+  const bsPl=await page.evaluate(()=>({rows:[...document.querySelectorAll('#breakdown tr td:first-child')].map(e=>e.textContent),
+    label:(document.querySelector('label[for=inBsC]')||{}).textContent||'', chip:[...document.querySelectorAll('#formChips .kfg_chip')].map(b=>b.textContent).join(',')}));
+  check('PL: Bauch-Zeile und Feldnamen uebersetzt', bsPl.rows.some(t=>/Wycięcie brzuszne/.test(t)) && !bsPl.rows.some(t=>/Bauchausschnitt|Eckenrundung/.test(t)), JSON.stringify(bsPl.rows));
+  check('PL: Formchip uebersetzt', /Wycięcie brzuszne/.test(bsPl.chip), bsPl.chip);
+  await open('de');
+  console.log('⑪ Bauchausschnitt geprueft');
 
   console.log(`\n${ok} Zusicherungen gruen, ${bad.length} rot`);
   bad.forEach(b=>console.log('  ✗', b));
