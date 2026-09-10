@@ -117,6 +117,10 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   const BS_CORNER_NAMES = ['hinten links','hinten rechts','vorne rechts',
                            'Ausschnitt rechts','Ausschnitt links','vorne links'];
 
+  const BS_MIN_O = 20;       /* cm — schmaler ist keine Mulde mehr */
+
+  const BS_KURVE = 72;       /* Stuetzpunkte der Welle in der Kontur */
+
   const hasOwn=(o,k)=>k!=null && Object.prototype.hasOwnProperty.call(o,k);
 
   function kanal(){ return KFG_LANG==='pl' ? 'pln' : 'eur'; }
@@ -315,7 +319,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     return Math.max(0, +S.cornerR[i]||0);
   }
 
-  function cornerIdx(){ return S.form==='lform' ? [0,1,2,3,4] : S.form==='bauch' ? [0,1,2,3,4,5] : [0,1,2,3]; }
+  function cornerIdx(){ return S.form==='lform' ? [0,1,2,3,4] : S.form==='bauch' ? bsOrd() : [0,1,2,3]; }
 
   function cornerCount(){ return cornerIdx().filter(i=>cornerR(i)>0).length; }
 
@@ -348,7 +352,8 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function setAllCorners(r){
     const v=clampCorner(r);
     if(S.form==='lform') S.lfR=[0,1,2,3,4].map(()=>v);
-    else if(S.form==='bauch') S.bsR=[0,1,2,3,4,5].map(()=>v);
+    else if(S.form==='bauch'){ if(!Array.isArray(S.bsR)||S.bsR.length!==6) S.bsR=[0,0,0,0,0,0];
+      bsOrd().forEach(i=>{ S.bsR[i]=v; }); }
     else S.cornerR=[0,1,2,3].map(()=>v);
     S.corner=cornerMax();
   }
@@ -571,10 +576,33 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function bsSenkrecht(){ return bsVorlauf(bsWinkel(1))+bsVorlauf(bsWinkel(2)) < 1e-9; }
 
-  function bsBGebunden(){ return !!S.bs.mittig || bsSenkrecht(); }
+  function bsWelle(){ return S.bs.art==='welle'; }
+
+  function bsOrd(){ return bsWelle() ? [0,1,2,5] : [0,1,2,3,4,5]; }
+
+  function bsWelleF(u){ return (1-Math.cos(2*Math.PI*u))/2; }
+
+  function bsWelleLaenge(O,T){
+    if(!(O>0)) return 0;
+    if(!(T>0)) return O;
+    const n=400, h=1/n, k=Math.PI*T/O, f=u=>Math.hypot(1, k*Math.sin(2*Math.PI*u));
+    let sum=f(0)+f(1);
+    for(let i=1;i<n;i++) sum+=(i%2?4:2)*f(i*h);
+    return O*sum*h/3;
+  }
+
+  function bsBGebunden(){ return !!S.bs.mittig || (!bsWelle() && bsSenkrecht()); }
 
   function bsGeo(){
     const L=Math.max(20,+S.bs.L||0), BR=Math.max(20,+S.bs.BR||0), c=Math.max(1,+S.bs.c||0);
+    if(bsWelle()){
+      /* Welle: nichts wird abgeleitet — A, B und Tiefe stehen fuer sich, die
+         Oeffnung folgt aus L - A - B. */
+      const a=Math.max(0,+S.bs.a||0), b=S.bs.mittig?a:Math.max(0,+S.bs.b||0);
+      const t=Math.max(0.1,+S.bs.t||0), O=L-a-b, schnitt=bsWelleLaenge(O,t)/100;
+      return {L,BR,a,b,c:0,t,w1:0,w2:0,k1:0,k2:0,r1:0,r2:0,ks:0,welle:true,senkrecht:false,
+              schnitt, oeffnung:O, umfang:(2*(L+BR)-O)/100+schnitt};
+    }
     const w1=bsWinkel(1), w2=bsWinkel(2), k1=bsVorlauf(w1), k2=bsVorlauf(w2), ks=k1+k2;
     let a=Math.max(0,+S.bs.a||0), b, t;
     if(ks<1e-9){                                  /* zwei senkrechte Schnitte: Tiefe ist frei */
@@ -601,6 +629,18 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function bsPts(){
     const g=bsGeo(), L=g.L, BR=g.BR, rmin=lfMinR();
+    if(g.welle){
+      /* Die Mulde wird als Streckenzug abgelegt — von rechts nach links, damit der
+         Umlauf wie beim Trapez im Uhrzeigersinn bleibt. Die beiden Enden liegen
+         genau auf der Vorderkante und sind KEINE Ecken (Radius 0, kein Name). */
+      const kurve=[];
+      for(let i=0;i<=BS_KURVE;i++){ const u=1-i/BS_KURVE;
+        kurve.push([g.a+u*g.oeffnung, BR-g.t*bsWelleF(u)]); }
+      const pts=[[0,0],[L,0],[L,BR]].concat(kurve, [[0,BR]]);
+      const ord=[0,1,2].concat(kurve.map(()=>-1), [5]);
+      const rad=ord.map(o=>o<0?0:bsCornerR(o)/10);
+      return Object.assign({pts, ord, rad}, g);
+    }
     const pts=[[0,0],[L,0],[L,BR],[L-g.b,BR],[L-g.b-g.r2,BR-g.t],[g.a+g.r1,BR-g.t],[g.a,BR],[0,BR]];
     const ord=[0,1,2,3,-1,-1,4,5];
     /* Wie bei der L-Form: die Innenecken tragen immer den Fertigungsradius; an
@@ -616,6 +656,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
 
   function bsAutoEcken(){
     if(S.form!=='bauch') return 0;
+    if(bsWelle()) return 0;      /* tangentiale Uebergaenge, nichts zu verrunden */
     /* Genau die Regel der L-Form: jede Ecke, die an einer Schraege liegt, traegt
        den Fertigungsradius und zaehlt in der Staffel mit — je Schraege sind das
        zwei (aussen an der Vorderkante, innen am Grund). Bei senkrechten Schnitten
@@ -626,10 +667,12 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     return n;
   }
 
-  function bsCenter(){ const g=bsGeo(); return [g.a+g.r1+g.c/2, g.BR-g.t/2]; }
+  function bsCenter(){ const g=bsGeo(); return g.welle ? [g.a+g.oeffnung/2, g.BR-g.t/2] : [g.a+g.r1+g.c/2, g.BR-g.t/2]; }
 
   function bsImAusschnitt(px,py){
     const g=bsGeo(); if(!(g.t>0) || py < g.BR-g.t-1e-9) return false;
+    if(g.welle){ if(px<=g.a||px>=g.L-g.b) return false;
+      return py > g.BR-g.t*bsWelleF((px-g.a)/g.oeffnung)+1e-9; }
     const f=(g.BR-py)/g.t;                    /* 0 an der Vorderkante, 1 am Grund */
     return px > g.a+g.r1*f+1e-9 && px < g.L-g.b-g.r2*f-1e-9;
   }

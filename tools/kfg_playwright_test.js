@@ -290,7 +290,7 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
      Zweiwegbindung, Grenzen, Bestellweg, Link und die polnischen Texte. */
   await open('de');
   const bsBasis=(bs)=>({...clean, mat:'dekor',dekor:'buk',thick:'25',form:'bauch', bsR:[0,0,0,0,0,0],
-    bs:{L:200,BR:90,a:55,b:55,c:60,t:15,w1:135,w2:135,mittig:false,treiber:'b', ...bs}});
+    bs:{L:200,BR:90,a:55,b:55,c:60,t:15,w1:135,w2:135,mittig:false,treiber:'b',art:'trapez', ...bs}});
   const bsFeld=async(id)=>page.evaluate(i=>document.getElementById(i).value, id);
   r=await set(bsBasis({}));
   check('Bauch Vorgabe = Zeichnung des Vaters: 236,70 (170,90 + 25,90 + 39,90)', Math.abs(parseP(r.price)-236.7)<0.005, r.price);
@@ -334,6 +334,65 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
     label:(document.querySelector('label[for=inBsC]')||{}).textContent||'', chip:[...document.querySelectorAll('#formChips .kfg_chip')].map(b=>b.textContent).join(',')}));
   check('PL: Bauch-Zeile und Feldnamen uebersetzt', bsPl.rows.some(t=>/Wycięcie brzuszne/.test(t)) && !bsPl.rows.some(t=>/Bauchausschnitt|Eckenrundung/.test(t)), JSON.stringify(bsPl.rows));
   check('PL: Formchip uebersetzt', /Wycięcie brzuszne/.test(bsPl.chip), bsPl.chip);
+  await open('de');
+  /* v1.20.0: zweite Schnittart Welle — Kosinusmulde, tangential, ohne Ecken.
+     Bogenlaenge unabhaengig nachgerechnet (feine Summation, 20 000 Schritte). */
+  const welleRef=(L,a2,b2,T)=>{ const O=L-a2-b2, k=Math.PI*T/O, n=20000; let sum=0;
+    for(let i=0;i<n;i++){ const u=(i+0.5)/n; sum+=Math.hypot(1,k*Math.sin(2*Math.PI*u)); }
+    return {O, bogen:O*sum/n}; };
+  r=await set(bsBasis({L:130,BR:90,a:20,b:21,t:11,art:'welle'}));
+  { const R=welleRef(130,20,21,11);
+    check('Welle: Bogenlaenge stimmt mit der Referenz (Zeichnung 130x90)',
+      r.rows.some(x=>new RegExp('^Bauchausschnitt \\('+Math.round(R.bogen)+' cm Schnitt\\)$').test(x[0])),
+      JSON.stringify(r.rows)+' soll '+Math.round(R.bogen));
+    check('Welle: keine Eckenzeile — tangential, nichts zu verrunden', !r.rows.some(x=>/Eckenrundung/.test(x[0])), JSON.stringify(r.rows));
+    check('Welle: Oeffnung im Hinweis', /Öffnung an der Vorderkante 89 cm/.test(await page.evaluate(()=>document.getElementById('bsNote').textContent)), await page.evaluate(()=>document.getElementById('bsNote').textContent)); }
+  { const ui=await page.evaluate(()=>({c:getComputedStyle(document.getElementById('fBsC')).display,
+      w:getComputedStyle(document.getElementById('fBsW1')).display,
+      chips:[...document.querySelectorAll('#bsArtChips .kfg_chip')].map(x=>x.dataset.ba+(x.classList.contains('is-active')?'*':'')).join(','),
+      ecken:[...document.querySelectorAll('#cornerSel .nm')].map(e=>e.textContent)}));
+    check('Welle: C und Winkel ausgeblendet, Chip aktiv', ui.c==='none' && ui.w==='none' && ui.chips==='trapez,welle*', JSON.stringify(ui));
+    check('Welle: nur die vier Plattenecken sind rundbar', ui.ecken.length===4 && !ui.ecken.some(t=>/Ausschnitt/.test(t)), JSON.stringify(ui.ecken)); }
+  /* mittig laesst B mit A mitlaufen */
+  r=await set(bsBasis({L:130,BR:90,a:25,b:5,t:14,art:'welle',mittig:true}));
+  check('Welle mittig: B laeuft mit A mit', (await bsFeld('inBsB'))==='25', await bsFeld('inBsB'));
+  /* Grenzen der Welle */
+  for(const [name,bs] of [['Mulde unter 20 cm',{L:130,a:60,b:60,art:'welle'}],
+                          ['Tiefe groesser als Breite-10',{L:130,BR:90,t:85,art:'welle'}]]){
+    r=await set(bsBasis(bs));
+    const gesperrt=await page.evaluate(()=>document.getElementById('cta').disabled);
+    check('Welle Grenze greift: '+name, r.price==='—' && gesperrt, name+' → '+r.price+' / gesperrt '+gesperrt);
+  }
+  /* Umschalten haelt die Mulde: Trapez -> Welle -> Trapez fuehrt zurueck */
+  r=await set(bsBasis({}));
+  const trapezPreis=r.price;
+  await page.evaluate(()=>document.querySelector('#bsArtChips .kfg_chip[data-ba=welle]').click());
+  await page.waitForTimeout(500);
+  const wellePreis=await page.evaluate(()=>document.getElementById('price').textContent);
+  await page.evaluate(()=>document.querySelector('#bsArtChips .kfg_chip[data-ba=trapez]').click());
+  await page.waitForTimeout(500);
+  const zurueck=await page.evaluate(()=>document.getElementById('price').textContent);
+  check('Welle: Umschalten hin und zurueck landet wieder beim Trapezpreis', zurueck===trapezPreis && wellePreis!==trapezPreis, [trapezPreis,wellePreis,zurueck].join(' → '));
+  /* Link mit Schnittart */
+  r=await set(bsBasis({L:130,BR:90,a:18,b:24,t:13,art:'welle'}), true);
+  { const h=r.hash, pr=r.price;
+    check('Welle: Hash traegt die Schnittart', /bs=[^&]*(,|%2C)w(&|$)/i.test(h), h);   /* der Hash ist URL-kodiert */
+    await page.goto('http://127.0.0.1:8765/_spiegel/de.html'+h, {waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>window.KFG && document.getElementById('price').textContent!=='—', null, {timeout:20000});
+    const w=await page.evaluate(()=>({art:window.KFG.getConfig().bs.art, p:document.getElementById('price').textContent}));
+    check('Welle: Link 1:1 wiederhergestellt', w.art==='welle' && w.p===pr, JSON.stringify(w)+' vorher '+pr); }
+  /* 3D mit der gesampelten Kontur */
+  r=await set(bsBasis({L:130,BR:90,a:20,b:21,t:11,art:'welle'}));
+  await page.click('#btn3d'); await page.waitForTimeout(3500);
+  { const d=await page.evaluate(()=>{ const x=window.KFG._debug().drei; return {ready:x.ready, failed:x.failed, mesh:!!x.mesh}; });
+    check('Welle: 3D baut die Kontur', d.ready && !d.failed && d.mesh, JSON.stringify(d)); }
+  await page.click('#btn2d'); await page.waitForTimeout(300);
+  /* Polnisch */
+  await open('pl');
+  r=await set(bsBasis({L:130,BR:90,a:20,b:21,t:11,art:'welle'}));
+  { const pl=await page.evaluate(()=>({chips:[...document.querySelectorAll('#bsArtChips .kfg_chip')].map(x=>x.textContent).join(','),
+      note:document.getElementById('bsNote').textContent}));
+    check('PL: Schnittart-Chips und Wellenhinweis uebersetzt', /Fala/.test(pl.chips) && /stycznie/.test(pl.note), JSON.stringify(pl).slice(0,200)); }
   await open('de');
   console.log('⑪ Bauchausschnitt geprueft');
 

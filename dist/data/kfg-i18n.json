@@ -1,13 +1,13 @@
 {
   "_meta": {
     "name": "Kessler PRO — Konfigurator, Sprachdatei",
-    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft. v1.18.0: PL-Aufschläge in zł, mobile Preiszeile — Polnisch ungeprueft. v1.18.2: Schräge B→A mit Winkel bei B, A–C gerade — Polnisch ungeprueft. v1.19.0: Bauchausschnitt (A/B/C, Tiefe, zwei Winkel, mittig) — Polnisch ungeprueft.",
+    "hinweis": "Schluessel ist der exakte deutsche Text. Der Konfigurator laedt die Datei nur bei nicht-deutschen Locales und ersetzt danach die Textknoten unter [data-kfg-root]. Polnisch bitte von Maks gegenlesen lassen — die Eintraege aus v1.16.0 (Naehtischplatte, Kantenprofile, Massband, Maschinen-Ausschnitt) sind noch ungeprueft. Neu in v1.17.0: L-Form (Lage, Schnitt, Winkel, Ecken je Ecke), Massband (Nullpunkt, Laenge), Maschinenmass, Aufschluesselung — Polnisch ebenfalls noch ungeprueft. Neu in v1.17.3: Punkt B der Schraege — Polnisch ungeprueft. Neu in v1.17.9: Maß-Sperre, Datenausfall-Hinweis, 3D/Skizze-Meldungen — Polnisch ungeprueft. v1.18.0: PL-Aufschläge in zł, mobile Preiszeile — Polnisch ungeprueft. v1.18.2: Schräge B→A mit Winkel bei B, A–C gerade — Polnisch ungeprueft. v1.19.0: Bauchausschnitt (A/B/C, Tiefe, zwei Winkel, mittig) — Polnisch ungeprueft. v1.20.0: Bauchausschnitt als Welle (Kosinusmulde) — Polnisch ungeprueft.",
     "sprachen": [
       "pl",
       "en"
     ],
-    "anzahl": 332,
-    "muster": 83
+    "anzahl": 341,
+    "muster": 87
   },
   "pl": {
     "Ab Lager": "Z magazynu",
@@ -341,7 +341,16 @@
     "Der Preis steht fest. Diese Form geben wir vor der Fertigung noch von Hand frei — dein verbindliches Angebot kommt innerhalb von 24 Stunden.": "Cena jest ustalona. Tę formę zwalniamy przed produkcją jeszcze ręcznie — wiążącą ofertę otrzymasz w ciągu 24 godzin.",
     "Schräge R50 (Fertigungsregel)": "Skos R50 (reguła produkcji)",
     "Schräge R10 (Fertigungsregel)": "Skos R10 (reguła produkcji)",
-    "A, B und C sind zusammen zu lang für die Platte": "A, B i C są razem za długie dla płyty"
+    "A, B und C sind zusammen zu lang für die Platte": "A, B i C są razem za długie dla płyty",
+    "Trapez": "Trapez",
+    "gerade Schrägen": "proste skosy",
+    "Welle": "Fala",
+    "rund, ohne Ecken": "okrągła, bez narożników",
+    "gerades Stück der Vorderkante links von der Mulde": "proty odcinek krawędzi przedniej po lewej stronie wgłębienia",
+    "gerades Stück der Vorderkante rechts von der Mulde": "prosty odcinek krawędzi przedniej po prawej stronie wgłębienia",
+    "Die Mulde läuft an beiden Enden tangential aus der Vorderkante heraus — keine Ecke, nichts zu verrunden.": "Wgłębienie wychodzi na obu końcach stycznie z krawędzi przedniej — bez narożnika, nie ma czego zaokrąglać.",
+    "A darf nicht negativ sein": "A nie może być ujemne",
+    "B darf nicht negativ sein": "B nie może być ujemne"
   },
   "en": {
     "Ab Lager": "From stock",
@@ -675,7 +684,16 @@
     "Der Preis steht fest. Diese Form geben wir vor der Fertigung noch von Hand frei — dein verbindliches Angebot kommt innerhalb von 24 Stunden.": "The price is fixed. We still release this shape by hand before production — your binding quote arrives within 24 hours.",
     "Schräge R50 (Fertigungsregel)": "Slope R50 (manufacturing rule)",
     "Schräge R10 (Fertigungsregel)": "Slope R10 (manufacturing rule)",
-    "A, B und C sind zusammen zu lang für die Platte": "A, B and C together are too long for the board"
+    "A, B und C sind zusammen zu lang für die Platte": "A, B and C together are too long for the board",
+    "Trapez": "Trapezoid",
+    "gerade Schrägen": "straight bevels",
+    "Welle": "Wave",
+    "rund, ohne Ecken": "rounded, no corners",
+    "gerades Stück der Vorderkante links von der Mulde": "straight part of the front edge left of the scoop",
+    "gerades Stück der Vorderkante rechts von der Mulde": "straight part of the front edge right of the scoop",
+    "Die Mulde läuft an beiden Enden tangential aus der Vorderkante heraus — keine Ecke, nichts zu verrunden.": "The scoop runs tangentially out of the front edge at both ends — no corner, nothing to round.",
+    "A darf nicht negativ sein": "A must not be negative",
+    "B darf nicht negativ sein": "B must not be negative"
   },
   "muster": {
     "pl": [
@@ -1010,6 +1028,22 @@
       [
         "^(\\d+) bis ([\\d.,]+) cm$",
         "od $1 do $2 cm"
+      ],
+      [
+        "^Mulde ([\\d.,]+) · Tiefe ([\\d.,]+)$",
+        "Wgłębienie $1 · głębokość $2"
+      ],
+      [
+        "^1 bis ([\\d.,]+) cm — tiefste Stelle in der Mitte$",
+        "1 do $1 cm — najgłębsze miejsce pośrodku"
+      ],
+      [
+        "^1 bis ([\\d.,]+) cm — hinter der Mulde bleiben (\\d+) cm stehen$",
+        "1 do $1 cm — za wgłębieniem zostaje $2 cm"
+      ],
+      [
+        "^A und B lassen weniger als (\\d+) cm Mulde übrig$",
+        "A i B pozostawiają mniej niż $1 cm wgłębienia"
       ]
     ],
     "en": [
@@ -1344,6 +1378,22 @@
       [
         "^(\\d+) bis ([\\d.,]+) cm$",
         "$1 to $2 cm"
+      ],
+      [
+        "^Mulde ([\\d.,]+) · Tiefe ([\\d.,]+)$",
+        "Scoop $1 · depth $2"
+      ],
+      [
+        "^1 bis ([\\d.,]+) cm — tiefste Stelle in der Mitte$",
+        "1 to $1 cm — deepest point in the middle"
+      ],
+      [
+        "^1 bis ([\\d.,]+) cm — hinter der Mulde bleiben (\\d+) cm stehen$",
+        "1 to $1 cm — $2 cm remain behind the scoop"
+      ],
+      [
+        "^A und B lassen weniger als (\\d+) cm Mulde übrig$",
+        "A and B leave less than $1 cm of scoop"
       ]
     ]
   }
