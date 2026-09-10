@@ -120,6 +120,15 @@ check('Festpreis 199,80 EUR in der EU-Preisliste', preisCall.variables.p[0].pric
 check('Versandprofil Massanfertigung', profilCall.variables.id==='gid://shopify/DeliveryProfile/138342564186' && profilCall.variables.p.variantsToAssociate[0]===r.variantId, profilCall.variables);
 check('Attribute: sichtbare Zeilen + Zeichnung-pruefen-Link + versteckte _kfg_token/_kfg_titel/_kfg_konfig', r.attribute.some(a=>a.key==='Form & Maß') && r.attribute.some(a=>a.key==='Zeichnung prüfen'&&a.value.endsWith('/freigabe/'+r.token)) && r.attribute.some(a=>a.key==='_kfg_token'&&a.value===r.token) && r.attribute.some(a=>a.key==='_kfg_titel') && r.attribute.some(a=>a.key==='_kfg_konfig_1'), r.attribute.map(a=>a.key));
 check('Kein checkoutUrl ohne sofort', !r.checkoutUrl);
+/* Shopyflow-Notbehelf (10.09.2026): kein Attributwert darf Anfuehrungszeichen
+   direkt vor einem Doppelpunkt tragen — edge.shopyflow.io/v8/cart antwortet sonst
+   mit HTTP 500 und der Warenkorb-Klick scheitert. Die Rohdaten bleiben trotzdem
+   gueltiges JSON, damit Zeichnung und Freigabe unveraendert lesen koennen. */
+{ const boese = r.attribute.filter(a2=>/"(?=:)/.test(a2.value));
+  check('Kein Attributwert mit Anfuehrungszeichen-vor-Doppelpunkt (Shopyflow 500)', boese.length===0, boese.map(a2=>a2.key+' = '+a2.value.slice(0,60)));
+  const roh = r.attribute.filter(a2=>/^_kfg_konfig_\d+$/.test(a2.key)).sort((x,y)=>+x.key.slice(12)-+y.key.slice(12)).map(a2=>a2.value).join('');
+  let k=null; try{ k=JSON.parse(roh); }catch(e){ k=null; }
+  check('Rohdaten bleiben lesbares JSON (Zeichnung/Freigabe)', !!k && k.mat==='dekor' && k.form==='lform' && k.lf && +k.lf.L===200, roh.slice(0,120)); }
 
 /* ⑧b Sofortkauf: eigener Storefront-Warenkorb → Checkout-URL */
 storefront = [];

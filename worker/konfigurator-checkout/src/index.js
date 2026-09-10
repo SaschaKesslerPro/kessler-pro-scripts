@@ -562,10 +562,33 @@ function titelFuer(S, K, c){
   const hit = K.shopHit();
   return `${hit ? 'Tischplatte' : 'Tischplatte nach Maß'} · ${MATERIAL[S.mat]}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName} · ${c.thickName} · ${mass}`;
 }
+/* ── Notbehelf fuer Shopyflow (nachgewiesen 10.09.2026) ─────────────────────
+   Der Warenkorb-Dienst edge.shopyflow.io/v8/cart antwortet mit HTTP 500 und
+   {"error":"SHOPIFY_API_ERROR","message":"Expected string or block string, but it
+   was malformed"}, sobald IRGENDEIN Positionsattribut die Zeichenfolge
+   Anfuehrungszeichen-direkt-vor-Doppelpunkt enthaelt. Nachgestellt mit einem
+   einzigen Attribut: Wert 'a":b' scheitert, 'a"b' und 'a:b' gehen durch. Damit
+   scheitert jedes JSON — also unsere Rohdaten _kfg_konfig_*, und mit ihnen jeder
+   Warenkorb-Klick fuer Massanfertigungen (der Konfigurator faellt dann auf die
+   Kasse zurueck: „Warenkorb gerade nicht moeglich").
+
+   Wir vermeiden die Folge, ohne das Format zu wechseln:
+   - vor jeden STRUKTURELLEN Doppelpunkt ein Leerzeichen ({"a" : 1}),
+   - Anfuehrungszeichen INNERHALB von Zeichenketten als \u0022.
+   Das Ergebnis ist gueltiges JSON, JSON.parse liest es unveraendert — Zeichnung,
+   Freigabe und alte Bestellungen brauchen keine Aenderung. Wenn Shopyflow den
+   Fehler behebt, kann beides hier weg. */
+function sfSicher(v){ return v.replace(/"(?=:)/g, '" '); }
+function jsonOhneQuoteDoppelpunkt(v){
+  const s = (x)=>JSON.stringify(x).replace(/\\"/g, '\\u0022');
+  if(v===null || typeof v!=='object') return s(v);
+  if(Array.isArray(v)) return '['+v.map(jsonOhneQuoteDoppelpunkt).join(',')+']';
+  return '{'+Object.keys(v).map(k=>s(k)+' : '+jsonOhneQuoteDoppelpunkt(v[k])).join(',')+'}';
+}
 function attributeFuer(S, K, c, body, waehrung){
   const f = v => (''+(Math.round(v*10)/10)).replace('.',',');
   const d = K.dims(), a = [];
-  const add = (k,v)=>{ if(v!==undefined && v!==null && String(v)!=='') a.push({ key:k, value:String(v).slice(0,250) }); };
+  const add = (k,v)=>{ if(v!==undefined && v!==null && String(v)!=='') a.push({ key:k, value:sfSicher(String(v)).slice(0,250) }); };
   add('Material', MATERIAL[S.mat] + (S.mat==='mpx' ? (S.mpxSurface==='hpl' ? ' + HPL-Laminat' : ' · Birke natur') : ''));
   add('Dekor', c.dekorName);
   add('Stärke', c.thickName);
@@ -605,7 +628,7 @@ function attributeFuer(S, K, c, body, waehrung){
   if(hit) add('_kfg_lager_sku', hit[2]);
   add('_kfg_preis', `${c.total.toFixed(2)} ${waehrung} = Platte ${c.basis.toFixed(2)} + Kante ${c.kante.toFixed(2)} + Ecken ${c.ecken.toFixed(2)} + Ausklinkung ${c.lschnitt.toFixed(2)} + Bearbeitung ${c.extras.toFixed(2)}`);
   /* Rohdaten in Stuecken — Shopify begrenzt Attributwerte auf 255 Zeichen */
-  const roh = JSON.stringify({ mat:S.mat, dekor:S.dekor, thick:S.thick, form:S.form, L:S.L, B:S.B, D:S.D, lf:S.lf, edges:S.edges, cornerR:S.cornerR, lfR:S.lfR,
+  const roh = jsonOhneQuoteDoppelpunkt({ mat:S.mat, dekor:S.dekor, thick:S.thick, form:S.form, L:S.L, B:S.B, D:S.D, lf:S.lf, edges:S.edges, cornerR:S.cornerR, lfR:S.lfR,
     absColor:S.absColor, lack:S.extras.lack, bohr:S.extras.bohr, massband:S.massband, massbandNull:S.massbandNull, maschineMass:S.maschineMass, cuts:S.cuts });
   for(let i=0, n=1; i<roh.length && n<=8; i+=240, n++) add(`_kfg_konfig_${n}`, roh.slice(i, i+240));
   return a;
