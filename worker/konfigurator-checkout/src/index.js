@@ -669,8 +669,17 @@ function attributeFuer(S, K, c, body, waehrung){
   if(hit) add('_kfg_lager_sku', hit[2]);
   add('_kfg_preis', `${c.total.toFixed(2)} ${waehrung} = Platte ${c.basis.toFixed(2)} + Kante ${c.kante.toFixed(2)} + Ecken ${c.ecken.toFixed(2)} + Ausklinkung ${c.lschnitt.toFixed(2)} + Bearbeitung ${c.extras.toFixed(2)}`);
   /* Rohdaten in Stuecken — Shopify begrenzt Attributwerte auf 255 Zeichen */
-  const roh = jsonOhneQuoteDoppelpunkt({ mat:S.mat, dekor:S.dekor, thick:S.thick, form:S.form, L:S.L, B:S.B, D:S.D, lf:S.lf, edges:S.edges, cornerR:S.cornerR, lfR:S.lfR,
-    absColor:S.absColor, lack:S.extras.lack, bohr:S.extras.bohr, massband:S.massband, massbandNull:S.massbandNull, maschineMass:S.maschineMass, cuts:S.cuts });
+  /* 10.09.2026: bs/bsR fehlten hier. Faellt der KV-Eintrag weg (Ablauf, Miss),
+     baut konfigAusAttributen die Platte aus genau diesen Rohdaten wieder auf —
+     ohne bs zeichnete sie fuer JEDEN Bauchausschnitt den Standard-Trapez statt
+     der bestellten Mulde. Keine fehlende Zeichnung, eine falsche. */
+  const rohObj = { mat:S.mat, dekor:S.dekor, mpxSurface:S.mpxSurface, thick:S.thick, form:S.form, L:S.L, B:S.B, D:S.D, lf:S.lf, edges:S.edges, cornerR:S.cornerR, lfR:S.lfR,
+    absColor:S.absColor, lack:S.extras.lack, bohr:S.extras.bohr, massband:S.massband, massbandNull:S.massbandNull, maschineMass:S.maschineMass, cuts:S.cuts };
+  if(S.form === 'bauch'){ rohObj.bs = S.bs; rohObj.bsR = S.bsR; }
+  const roh = jsonOhneQuoteDoppelpunkt(rohObj);
+  /* 8 Attribute a 240 Zeichen sind die Obergrenze — laeuft die Konfiguration
+     darueber, waere sie beim Wiederaufbau abgeschnitten und damit falsch. */
+  if(roh.length > 8*240) console.warn('Rohkonfiguration zu lang, ' + roh.length + ' Zeichen — Zeichnung faellt auf den KV-Eintrag zurueck');
   for(let i=0, n=1; i<roh.length && n<=8; i+=240, n++) add(`_kfg_konfig_${n}`, roh.slice(i, i+240));
   return a;
 }

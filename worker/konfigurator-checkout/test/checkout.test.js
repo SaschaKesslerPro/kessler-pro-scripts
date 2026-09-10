@@ -213,6 +213,18 @@ warenkorbLeerBis = 0;
     check(`Bauchausschnitt ${name}: angenommen, Preis ${soll.toFixed(2)}`, !f2 && r2 && Math.abs(r2.preis-soll)<0.005, f2 ? f2.message : (r2&&r2.preis));
     check(`Bauchausschnitt ${name}: Form & Maß im Attribut`, !!r2 && r2.attribute.some(a2=>a2.key==='Form & Maß' && /Bauchausschnitt/.test(a2.value)),
       r2 && (r2.attribute.find(a2=>a2.key==='Form & Maß')||{}).value);
+    /* 10.09.2026: bs/bsR fehlten in den Rohdaten. Faellt der KV-Eintrag weg, baut
+       konfigAusAttributen daraus die Platte — ohne bs zeichnete sie den Standard-
+       Trapez statt der bestellten Mulde. Eine falsche Zeichnung, keine fehlende. */
+    { const rohB = !r2 ? '' : r2.attribute.filter(a2=>/^_kfg_konfig_\d+$/.test(a2.key))
+        .sort((x,y)=>+x.key.slice(12)-+y.key.slice(12)).map(a2=>a2.value).join('');
+      let kb=null; try{ kb=JSON.parse(rohB); }catch(e){ kb=null; }
+      const soll2 = B0(bs).bs;
+      check(`Bauchausschnitt ${name}: bs vollstaendig in den Rohdaten`,
+        !!kb && !!kb.bs && kb.bs.art===soll2.art && +kb.bs.L===+soll2.L && +kb.bs.BR===+soll2.BR
+        && +kb.bs.a===+soll2.a && +kb.bs.b===+soll2.b && +kb.bs.t===+soll2.t && Array.isArray(kb.bsR) && kb.bsR.length===6,
+        kb && JSON.stringify(kb.bs));
+      check(`Bauchausschnitt ${name}: Rohdaten passen in 8 Attribute`, rohB.length<=8*240, rohB.length); }
   }
   /* Falscher Preis muss weiterhin auffliegen */
   let f3 = null;
