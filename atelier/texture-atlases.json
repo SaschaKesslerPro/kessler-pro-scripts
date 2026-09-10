@@ -1,0 +1,58 @@
+{
+  "hikora": {
+    "src": "./assets/kfg/atlas/hikora.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/hikora.webp"
+  },
+  "ahorn": {
+    "src": "./assets/kfg/atlas/ahorn.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/ahorn.webp"
+  },
+  "buk": {
+    "src": "./assets/kfg/atlas/buk.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/buk.webp"
+  },
+  "sonoma-eiche": {
+    "src": "./assets/kfg/atlas/sonoma-eiche.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/sonoma-eiche.webp"
+  },
+  "eiche-artison": {
+    "src": "./assets/kfg/atlas/eiche-artison.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/eiche-artison.webp"
+  },
+  "sosna-bielona": {
+    "src": "./assets/kfg/atlas/sosna-bielona.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/sosna-bielona.webp"
+  },
+  "sperrholz-natur": {
+    "src": "./assets/kfg/atlas/sperrholz-natur.webp",
+    "widthCm": 300,
+    "heightCm": 200,
+    "generated": true,
+    "status": "prototype-ki-erweiterung-kein-herstellerscan",
+    "reference": "assets/kfg/top/sperrholz-natur.webp"
+  }
+}

@@ -1,0 +1,49 @@
+/* atelier.css stammt aus der eigenstaendigen Vorschau: sie bringt globale Resets und
+   einen eigenen Header/Footer mit. Auf der Webflow-Seite wuerde beides die Seite
+   uebernehmen. Diese Datei schneidet die Vorschau-Huelle heraus und haengt alles
+   Uebrige unter #atelier bzw. .atelier_dialog. */
+const SCOPE=':is(#atelier,.atelier_dialog)';
+/* Kopf und Fuss der Vorschau - auf der echten Seite kommen sie von Webflow. */
+const DROP=[/^\.draftbar/,/^\.site_header/,/^\.brand/,/^\.header_cart/,/^\.site_footer/,/^\.nav_current/,/^::selection$/,/^body$/];
+/* Diese Selektoren stehen bereits fuer sich - nicht anfassen. */
+const KEEP=[/^#atelier/,/^\.atelier_dialog/,/^body\.preview_open/,/^html/];
+
+function regeln(text){
+  const out=[];let i=0,tiefe=0,puffer='',sel='',start=0;
+  while(i<text.length){
+    const ch=text[i];
+    if(ch==='{'){ if(++tiefe===1){ sel=puffer.trim(); puffer=''; start=i+1; i++; continue; } }
+    else if(ch==='}'){ if(--tiefe===0){ out.push({sel,body:text.slice(start,i),vor:''}); puffer=''; i++; continue; } }
+    puffer+=ch;i++;
+  }
+  if(puffer.trim())out.push({sel:null,body:puffer,vor:''});
+  return out;
+}
+function selektor(one){
+  const s=one.trim();
+  if(!s)return null;
+  if(KEEP.some(r=>r.test(s)))return s;
+  if(DROP.some(r=>r.test(s)))return null;
+  if(s==='dialog::backdrop')return '.atelier_dialog::backdrop';
+  if(s==='*')return SCOPE+' *';
+  return SCOPE+' '+s;
+}
+function block(text){
+  return regeln(text).map(r=>{
+    if(r.sel===null)return '';                                   /* Kommentare zwischen Regeln */
+    if(r.sel.startsWith('@media')||r.sel.startsWith('@supports'))return r.sel+'{'+block(r.body)+'}';
+    if(/^@(font-face|keyframes|-webkit-keyframes|page|property)/.test(r.sel))return r.sel+'{'+r.body+'}';
+    if(r.sel.replace(/\/\*[\s\S]*?\*\//g,'').trim()===':root'){
+      /* Nur die Farbtokens bleiben global; Schrift und Hintergrund gehoeren der Seite. */
+      const vars=r.body.split(';').filter(d=>d.trim().startsWith('--')).join(';');
+      return vars?':root{'+vars+'}':'';
+    }
+    const kommentar=(r.sel.match(/\/\*[\s\S]*?\*\//g)||[]).join('');
+    const rein=r.sel.replace(/\/\*[\s\S]*?\*\//g,'');
+    const sel=rein.split(',').map(selektor).filter(Boolean).join(',');
+    return sel?kommentar+sel+'{'+r.body+'}':'';
+  }).join('');
+}
+export function scopeCss(css){
+  return block(css)+'\n'+SCOPE+"{font-family:Onest,system-ui,-apple-system,'Segoe UI',sans-serif;font-synthesis:none;color:var(--ink);-webkit-font-smoothing:antialiased}";
+}
