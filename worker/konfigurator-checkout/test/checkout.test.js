@@ -201,5 +201,28 @@ r = await warenkorb({ kanal:'pln', sprache:'pl', konfig:S, sofort:true }, env, n
 check('Frisch angelegt: Probe wiederholt bis Menge 1, dann checkoutUrl', storefront.length===3 && r.checkoutUrl && r.vorrat===false && aufrufe.some(a=>/productVariantsBulkCreate/.test(a.query) && a.variables.v.length===1), storefront.length);
 warenkorbLeerBis = 0;
 
+/* ⑨ Bauchausschnitt (v1.19.0 Trapez, v1.20.0 Welle): der Worker muss die Form annehmen,
+   denselben Preis rechnen wie der Konfigurator und die Kontur in die Zeichnung geben. */
+{
+  const B0 = (bs) => ({ ...S, form:'bauch', bsR:[0,0,0,0,0,0],
+    bs:{ L:200, BR:90, a:55, b:55, c:60, t:15, w1:135, w2:135, mittig:false, treiber:'b', art:'trapez', ...bs } });
+  for(const [name, bs, soll] of [['Trapez 200x90', {}, 236.70], ['Welle 130x90', {L:130,BR:90,a:20,b:21,t:11,art:'welle'}, 136.80]]){
+    aufrufe = []; reserven = ['gid://shopify/ProductVariant/900001']; storefront = [];
+    let r2 = null, f2 = null;
+    try { r2 = await warenkorb({ kanal:'eur', konfig:B0(bs), preis:soll }, env, null); } catch(e){ f2 = e; }
+    check(`Bauchausschnitt ${name}: angenommen, Preis ${soll.toFixed(2)}`, !f2 && r2 && Math.abs(r2.preis-soll)<0.005, f2 ? f2.message : (r2&&r2.preis));
+    check(`Bauchausschnitt ${name}: Form & Maß im Attribut`, !!r2 && r2.attribute.some(a2=>a2.key==='Form & Maß' && /Bauchausschnitt/.test(a2.value)),
+      r2 && (r2.attribute.find(a2=>a2.key==='Form & Maß')||{}).value);
+  }
+  /* Falscher Preis muss weiterhin auffliegen */
+  let f3 = null;
+  try { await warenkorb({ kanal:'eur', konfig:B0({}), preis:99.90 }, env, null); } catch(e){ f3 = e; }
+  check('Bauchausschnitt: falscher Preis wird abgewiesen', !!f3 && f3.status===409, f3 && f3.message);
+  /* Grenzen: zu schmale Mulde bei der Welle */
+  let f4 = null;
+  try { await warenkorb({ kanal:'eur', konfig:B0({L:130,a:60,b:60,art:'welle'}), preis:100 }, env, null); } catch(e){ f4 = e; }
+  check('Bauchausschnitt Welle: zu schmale Mulde wird abgewiesen', !!f4, f4 && f4.message);
+}
+
 console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b=>console.log('  ✗', b));
 process.exit(bad.length?1:0);

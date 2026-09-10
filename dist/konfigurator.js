@@ -19,7 +19,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.20.0';
+  var VERSION = '1.20.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   /* Auf den Commit gezogen, der am 10.09.2026 live lief — dort liegen Preiskurven,
@@ -885,7 +885,7 @@ const VERSAND_MASS={eur:'19,99 €', pln:'84,90 zł'};
    der Kunde schon geklickt hat. Bis worker/konfigurator-checkout nachgezogen ist,
    laeuft die Form deshalb BEWUSST ueber die Anfrage: der Preis steht trotzdem fest
    und reist mit. Zum Freischalten genuegt es, diese eine Bedingung zu streichen. */
-const BS_WORKER_BEREIT = false;
+const BS_WORKER_BEREIT = true;
 function kannBezahlen(){ return !!CHECKOUT_URL && !needsOffer() && calc().quelle!=='offen'
   && (S.form!=='bauch' || BS_WORKER_BEREIT); }
 /* Warenkorb-Endpunkt des Workers: gleicher Ursprung wie der Checkout (v1.17.8) */

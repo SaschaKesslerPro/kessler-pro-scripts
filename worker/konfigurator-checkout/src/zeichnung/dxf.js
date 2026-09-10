@@ -123,7 +123,9 @@ export function dxf(k, opt = {}) {
       ? `${t('kanten')} ${t('umlaufend')}: ${kv(kk.umlaufend)}`
       : `${t('kanten')} ${t('vorne')} / ${t('hinten')} / ${t('links')} / ${t('rechts')}: `
         + ['vorne', 'hinten', 'links', 'rechts'].map((x) => kv(kk[x])).join(' / ');
-    const mass = rund ? `D ${B}` : k.form === 'lform'
+    const mass = rund ? `D ${B}` : k.form === 'bauch'
+      ? `L ${B} x ${H}  ${t('f_bauch')} ${k.bauch.welle ? 'Welle' : 'Trapez'} A ${k.bauch.a} B ${k.bauch.b}${k.bauch.welle ? '' : ` C ${k.bauch.c} ${k.bauch.w1}/${k.bauch.w2}deg`} T ${k.bauch.t}`
+      : k.form === 'lform'
       ? `L ${B} x ${H}  ${t('ausklinkung')} ${k.lform.aw} x ${k.lform.ah} ${k.lform.pos}${k.lform.schraeg ? ` ${t('schraeg')} B ${k.lform.winkel}deg  A-C ${k.lform.aw - (k.lform.u || 0)}` : ''}`
       : `${B} x ${H}`;
     const zeilen = [

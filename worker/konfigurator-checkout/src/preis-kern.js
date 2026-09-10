@@ -682,6 +682,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   return { calc, isStandard, needsOffer, shopHit, hitPreis, kurvenPreis, kurvenSchluessel,
            areaM2, perimM, dims, lfGeo, lfPts, cornerCount, cornerLabel, cornerName,
            massbandStrecke, massbandName, cutPrice, cutMass, cutTypName, presetCount, cutAbstaende,
-           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, lfWinkel, lfWinkelMax, lfU, rules };
+           dekorList, ensureDekor, kanal, auf90, lfAutoEcken, lfMinR, lfWinkel, lfWinkelMax, lfU, rules,
+           bsGeo, bsPts, bsWelle, bsOrd, bsAutoEcken, bsSchnittCm };
 }
 export { preisKern };

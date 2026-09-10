@@ -290,12 +290,29 @@ async function ladeDaten(body, env, ctx){
 function pruefeKonfig(S){
   if(!S || typeof S !== 'object') throw fehler('Konfiguration fehlt', 400);
   if(!MATERIAL[S.mat]) throw fehler('Material unbekannt', 400);
-  if(!['rect','round','lform'].includes(S.form)) throw fehler('Form unbekannt', 400);
+  if(!['rect','round','lform','bauch'].includes(S.form)) throw fehler('Form unbekannt', 400);
   const num = (v,min,max)=>{ const n=+v; if(!isFinite(n)||n<min||n>max) throw fehler('Maß außerhalb des Bereichs', 400); return n; };
   if(S.form==='rect'){ S.L=num(S.L,20,300); S.B=num(S.B,20,200); }
   if(S.form==='round'){ S.D=num(S.D,20,160); }
   if(S.form==='lform'){ S.lf=S.lf||{}; S.lf.L=num(S.lf.L,20,300); S.lf.B=num(S.lf.B,20,200); S.lf.aw=num(S.lf.aw,1,S.lf.L-1); S.lf.ah=num(S.lf.ah,1,S.lf.B-1); }
   if(S.form==='lform'){ delete S.lf.sb; S.lf.winkel = S.lf.winkel == null ? 120 : num(S.lf.winkel, 91, 179); S.lf.schnitt = S.lf.schnitt==='schraeg' ? 'schraeg' : 'gerade'; if(S.lf.pos!=null && !['hr','hl','vr','vl'].includes(S.lf.pos)) S.lf.pos=null; }
+  /* Bauchausschnitt (v1.19.0 Trapez, v1.20.0 auch als Welle): sechs Masse, zwei
+     Winkel, Schnittart und die sechs Eckradien. Die Preisrechnung selbst kommt
+     wortgleich aus dem Konfigurator (preis-kern.js), hier wird nur geklemmt. */
+  if(S.form==='bauch'){
+    S.bs = S.bs || {};
+    S.bs.L = num(S.bs.L, 20, 400);  S.bs.BR = num(S.bs.BR, 20, 400);
+    S.bs.a = num(S.bs.a, 0, 400);   S.bs.b  = num(S.bs.b, 0, 400);
+    S.bs.c = num(S.bs.c == null ? 10 : S.bs.c, 1, 400);
+    S.bs.t = num(S.bs.t, 0.1, 400);
+    S.bs.w1 = num(S.bs.w1 == null ? 135 : S.bs.w1, 90, 179);
+    S.bs.w2 = num(S.bs.w2 == null ? 135 : S.bs.w2, 90, 179);
+    S.bs.mittig = !!S.bs.mittig;
+    S.bs.treiber = S.bs.treiber === 't' ? 't' : 'b';
+    S.bs.art = S.bs.art === 'welle' ? 'welle' : 'trapez';
+    if(!Array.isArray(S.bsR) || S.bsR.length !== 6) S.bsR = [0,0,0,0,0,0];
+    S.bsR = S.bsR.map((v)=>num(v == null ? 0 : v, 0, 300));
+  }
   /* Bearbeitungen: nur bekannte Typen und Vorlagen, alle Zahlen endlich, nicht negativ,
      im Plattenmass — sonst liessen sich ueber negative Masse Preise druecken. */
   if(!Array.isArray(S.cuts)) S.cuts=[];
@@ -337,12 +354,28 @@ function pruefeKonfig(S){
 function pruefeFertigungsmasse(S, K){
   const r = K.rules() || {}, bad = (was) => { throw fehler(`Maß außerhalb des Fertigungsbereichs (${was})`, 400); };
   if(S.form==='round'){ if(!(S.D>=20 && S.D<=r.maxD)) bad(`Ø 20–${r.maxD} cm`); return; }
-  const L = S.form==='lform' ? S.lf.L : S.L, B = S.form==='lform' ? S.lf.B : S.B;
+  const L = S.form==='lform' ? S.lf.L : S.form==='bauch' ? S.bs.L : S.L,
+        B = S.form==='lform' ? S.lf.B : S.form==='bauch' ? S.bs.BR : S.B;
   if(!(L>=20 && L<=r.maxL)) bad(`Länge 20–${r.maxL} cm`);
   if(!(B>=20 && B<=r.maxB)) bad(`Breite 20–${r.maxB} cm`);
   if(S.form==='lform'){
     if(!(S.lf.aw>=10 && S.lf.aw<=Math.max(10, L-10))) bad('Ausklinkung Breite');
     if(!(S.lf.ah>=10 && S.lf.ah<=Math.max(10, B-10))) bad('Ausklinkung Tiefe');
+  }
+  /* Bauchausschnitt: dieselben Grenzen wie validate() im Konfigurator. Gerechnet
+     wird mit der abgeleiteten Geometrie, nicht mit den Rohfeldern — beim Trapez
+     folgt B oder die Tiefe aus den anderen Massen. */
+  if(S.form==='bauch'){
+    const g = K.bsGeo();
+    if(!(g.t>=1 && g.t<=B-10)) bad(`Tiefe 1–${Math.max(1,B-10)} cm — hinter dem Ausschnitt bleiben 10 cm`);
+    if(S.bs.art==='welle'){
+      if(!(g.a>=0 && g.b>=0)) bad('A und B dürfen nicht negativ sein');
+      if(!(g.oeffnung>=20)) bad('Mulde mindestens 20 cm');
+    } else {
+      if(!(g.c>=10 && g.c<=L-4)) bad('C 10 cm bis Länge − 4 cm');
+      if(!(g.a>=1)) bad('A wird zu klein');
+      if(!(g.b>=1)) bad('B wird zu klein');
+    }
   }
 }
 
@@ -458,7 +491,8 @@ export async function warenkorb(body, env, ctx){
   const meta = VARIANTEN._meta || {};
   const schluessel = variantenSchluessel(S);
   const d = K.dims();
-  const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm` : `${d.w} × ${d.h} cm`;
+  const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm`
+    : S.form==='bauch' ? `Bauchausschnitt ${S.bs.L} × ${S.bs.BR} cm` : `${d.w} × ${d.h} cm`;
   const optionWert = `${MATERIAL[S.mat]}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName} · ${c.thickName} · ${mass} · #${token.replace(/[^A-Za-z0-9]/g,'').slice(0,4)}`.slice(0, 250);
   const sku = `KFG-${token}`;
   const daten = { produktId: meta.produkt, optionName: meta.option || 'Ausführung', optionWert, preisPln: cpl.total, sku, gewichtKg: gewicht, mediaId: (VARIANTEN.medien||{})[schluessel] || null };
@@ -558,7 +592,8 @@ const ABLAUF_TEXT = {
 /* ── Titel und Attribute aus der Konfiguration (nicht aus dem Browser) ────── */
 function titelFuer(S, K, c){
   const d = K.dims();
-  const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm` : `${d.w} × ${d.h} cm`;
+  const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm`
+    : S.form==='bauch' ? `Bauchausschnitt ${S.bs.L} × ${S.bs.BR} cm` : `${d.w} × ${d.h} cm`;
   const hit = K.shopHit();
   return `${hit ? 'Tischplatte' : 'Tischplatte nach Maß'} · ${MATERIAL[S.mat]}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName} · ${c.thickName} · ${mass}`;
 }
@@ -593,6 +628,12 @@ function attributeFuer(S, K, c, body, waehrung){
   add('Dekor', c.dekorName);
   add('Stärke', c.thickName);
   if(S.form==='round') add('Form & Maß', `Rund Ø ${S.D} cm`);
+  else if(S.form==='bauch'){
+    const g = K.bsGeo();
+    add('Form & Maß', g.welle
+      ? `${g.L} × ${g.BR} cm · Bauchausschnitt als Welle · A ${f(g.a)} · B ${f(g.b)} · Tiefe ${f(g.t)} cm · Mulde ${f(g.oeffnung)} cm · Schnitt ${K.bsSchnittCm()} cm · tangential, keine Ecken`
+      : `${g.L} × ${g.BR} cm · Bauchausschnitt A ${f(g.a)} · C ${f(g.c)} · B ${f(g.b)} · Tiefe ${f(g.t)} cm · Winkel ${g.w1}°/${g.w2}° · Öffnung ${f(g.oeffnung)} cm · Schnitt ${K.bsSchnittCm()} cm`);
+  }
   else if(S.form==='lform'){
     const g = K.lfGeo();
     add('Form & Maß', `L-Form ${S.lf.L} × ${S.lf.B} cm · Ausklinkung ${S.lf.aw} × ${S.lf.ah} cm ${LF_POS[S.lf.pos || 'vr']}${g.schraeg ? ` · schräg, Winkel bei B ${g.winkel}° · Schräge B→A, A–C gerade ${f(g.ac)} cm` : ' · gerade'}`);

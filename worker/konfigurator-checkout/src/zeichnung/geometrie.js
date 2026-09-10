@@ -14,6 +14,18 @@ export function kontur(k) {
     return null;                                  // Kreis — kein Polygon
   }
   const E = k.eckradien_mm || {};
+  /* Bauchausschnitt: die Kontur liegt fertig im Auftrag (aus dem Preis-Kern, also
+     dieselbe, die der Kunde gesehen hat) — Punkte, Reihenfolge und Radien 1:1.
+     ord < 0 sind Punkte ohne Ecke: die beiden Innenecken des Trapezes (dort steht
+     der Fertigungsradius) und die Stuetzpunkte der Welle (Radius 0). */
+  if (k.form === 'bauch') {
+    const bs = k.bauch, rmin = bs.innenradius || 0;
+    return bs.punkte.map((p) => ({
+      x: p.x, y: p.y, ord: p.ord,
+      r: p.r != null ? p.r : (p.ord < 0 ? rmin : 0),
+      auto: p.ord < 0 ? (p.r || 0) > 0 : (p.r || 0) > (bs.radien[p.ord] || 0),
+    }));
+  }
   if (k.form === 'lform') {
     const lf = k.lform;                           // { L, B, aw, ah, pos, schraeg, innenradius, radien:[5] }
     const L = lf.L, B = lf.B;
@@ -46,6 +58,7 @@ export function kontur(k) {
 export function huelle(k) {
   if (k.form === 'rund') return { B: k.durchmesser_mm, H: k.durchmesser_mm };
   if (k.form === 'lform') return { B: k.lform.L, H: k.lform.B };
+  if (k.form === 'bauch') return { B: k.bauch.L, H: k.bauch.BR };
   return { B: k.laenge_mm, H: k.breite_mm };
 }
 

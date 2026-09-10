@@ -45,6 +45,9 @@ export function konfigAusRoh(j) {
     absColor: j.absColor || 'dekor',
     form: j.form, L: +j.L || 120, B: +j.B || 60, D: +j.D || 80,
     lf: Object.assign({ L: 180, B: 120, aw: 90, ah: 60, pos: null, schnitt: 'gerade' }, j.lf || {}),
+    /* Bauchausschnitt (v1.19.0 Trapez, v1.20.0 Welle) */
+    bs: Object.assign({ L: 200, BR: 90, a: 55, b: 55, c: 60, t: 15, w1: 135, w2: 135, mittig: false, treiber: 'b', art: 'trapez' }, j.bs || {}),
+    bsR: Array.isArray(j.bsR) && j.bsR.length === 6 ? j.bsR.map(Number) : [0, 0, 0, 0, 0, 0],
     thick: String(j.thick || '25'),
     corner: 0, cornerR: Array.isArray(j.cornerR) && j.cornerR.length === 4 ? j.cornerR.map(Number) : [0, 0, 0, 0],
     lfR: Array.isArray(j.lfR) && j.lfR.length === 5 ? j.lfR.map(Number) : [0, 0, 0, 0, 0],
@@ -54,7 +57,7 @@ export function konfigAusRoh(j) {
     machine: j.machine || '', maschineMass: j.maschineMass || '52x18.1',
     cuts: Array.isArray(j.cuts) ? j.cuts : [], draw: null, view: '2d',
   };
-  S.corner = Math.max(0, ...(S.form === 'lform' ? S.lfR : S.cornerR));
+  S.corner = Math.max(0, ...(S.form === 'lform' ? S.lfR : S.form === 'bauch' ? S.bsR : S.cornerR));
   return S;
 }
 
@@ -70,7 +73,7 @@ export function konfigZuZeichnung(S, meta = {}) {
     material: S.mat === 'mpx' && S.mpxSurface === 'hpl' ? 'mpx_hpl' : S.mat,
     dekor: S.mat === 'mpx' && S.mpxSurface !== 'hpl' ? 'sperrholz-natur' : S.dekor,
     staerke_mm: +S.thick,
-    form: S.form === 'round' ? 'rund' : S.form === 'lform' ? 'lform' : 'rechteck',
+    form: S.form === 'round' ? 'rund' : S.form === 'lform' ? 'lform' : S.form === 'bauch' ? 'bauch' : 'rechteck',
     laenge_mm: cm(d.w), breite_mm: cm(d.h), durchmesser_mm: cm(S.D),
     ausschnitte: [], bohrungen: [],
     hinweise: { de: [], pl: [], en: [] },
@@ -104,6 +107,30 @@ export function konfigZuZeichnung(S, meta = {}) {
     const kanteTxt = S.edges[0] === 'abs' ? ['ABS-Kante geklebt', 'krawędź ABS klejona', 'glued ABS edge'] : ['Kante ohne ABS', 'krawędź bez ABS', 'edge without ABS'];
     if (!g.schraeg) hw(`Innenecke der Ausklinkung R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Narożnik wewnętrzny wycięcia R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Inner corner of the notch R ${innen} mm — ${kanteTxt[2]} (production rule)`);
     else hw(`Schräge von B (Plattenkante) nach A, Winkel bei B ${g.winkel}°; A–C gerade ${Math.round(cm(g.ac))} mm · A und B mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`, `Skos od B (krawędź blatu) do A, kąt w B ${g.winkel}°; A–C proste ${Math.round(cm(g.ac))} mm · A i B co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`, `Bevel from B (edge of the top) to A, angle at B ${g.winkel}°; A–C straight ${Math.round(cm(g.ac))} mm · A and B at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
+  }
+  /* Bauchausschnitt (v1.19.0 Trapez, v1.20.0 Welle). Die Kontur kommt fertig aus
+     dem Preis-Kern — dieselben Punkte, die der Kunde in der Vorschau gesehen hat. */
+  if (S.form === 'bauch') {
+    const g = K.bsGeo(), p = K.bsPts();
+    const innen = S.edges[0] === 'abs' ? 50 : 10;
+    k.bauch = {
+      L: cm(g.L), BR: cm(g.BR), a: cm(g.a), b: cm(g.b), c: cm(g.c), t: cm(g.t),
+      w1: g.w1, w2: g.w2, welle: !!g.welle, mittig: !!S.bs.mittig,
+      oeffnung: cm(g.oeffnung), schnitt_mm: Math.round(g.schnitt * 1000),
+      innenradius: innen,
+      radien: (S.bsR || [0, 0, 0, 0, 0, 0]).map((v) => +v || 0),
+      /* Kontur in mm, Ursprung hinten links, y nach vorn — im Uhrzeigersinn */
+      punkte: p.pts.map(([x, y], i2) => ({ x: cm(x), y: cm(y), ord: p.ord[i2], r: cm(p.rad[i2]) })),
+    };
+    const kanteTxt = S.edges[0] === 'abs' ? ['ABS-Kante geklebt', 'krawędź ABS klejona', 'glued ABS edge'] : ['Kante ohne ABS', 'krawędź bez ABS', 'edge without ABS'];
+    if (g.welle) hw(
+      `Bauchausschnitt als Welle: Mulde ${cm(g.oeffnung)} mm, Tiefe ${cm(g.t)} mm, Schnittlänge ${Math.round(g.schnitt * 1000)} mm · Kosinusform, läuft an beiden Enden tangential aus der Vorderkante — keine Ecke, keine Verrundung nötig`,
+      `Wycięcie brzuszne jako fala: wgłębienie ${cm(g.oeffnung)} mm, głębokość ${cm(g.t)} mm, długość cięcia ${Math.round(g.schnitt * 1000)} mm · kształt kosinusa, wychodzi na obu końcach stycznie z krawędzi przedniej — bez narożnika, bez zaokrągleń`,
+      `Belly cut-out as a wave: scoop ${cm(g.oeffnung)} mm, depth ${cm(g.t)} mm, cut length ${Math.round(g.schnitt * 1000)} mm · cosine shape, runs out tangentially at both ends — no corner, no rounding needed`);
+    else hw(
+      `Bauchausschnitt als Trapez: A ${cm(g.a)} · C ${cm(g.c)} · B ${cm(g.b)} mm, Tiefe ${cm(g.t)} mm, Winkel ${g.w1}°/${g.w2}° · die beiden Innenecken am Grund mindestens R ${innen} mm — ${kanteTxt[0]} (Fertigungsregel)`,
+      `Wycięcie brzuszne jako trapez: A ${cm(g.a)} · C ${cm(g.c)} · B ${cm(g.b)} mm, głębokość ${cm(g.t)} mm, kąty ${g.w1}°/${g.w2}° · oba narożniki wewnętrzne co najmniej R ${innen} mm — ${kanteTxt[1]} (zasada produkcji)`,
+      `Belly cut-out as a trapezoid: A ${cm(g.a)} · C ${cm(g.c)} · B ${cm(g.b)} mm, depth ${cm(g.t)} mm, angles ${g.w1}°/${g.w2}° · both inner corners at least R ${innen} mm — ${kanteTxt[2]} (production rule)`);
   }
 
   // Bearbeitungen (cm -> mm). Rechteck: x/y = Ecke hinten links des Ausschnitts.

@@ -154,6 +154,7 @@ function marke(x, y, nr) {
 function formName(k) {
   if (k.form === 'rund') return t('f_rund');
   if (k.form === 'lform') return t('f_lform');
+  if (k.form === 'bauch') return t('f_bauch');
   return k.material === 'szwal' ? t('f_naehtisch') : t('f_rechteck');
 }
 
@@ -257,7 +258,8 @@ function beruehrt(a, B, H) {
 
 export function zeichnung(k, sprache) {
   SPR = I.SPRACHEN.includes(sprache || k.sprache) ? (sprache || k.sprache) : 'de';
-  const rund = k.form === 'rund', lform = k.form === 'lform';
+  const rund = k.form === 'rund', lform = k.form === 'lform', bauch = k.form === 'bauch';
+  const bs = bauch ? k.bauch : null;
   const { B, H } = huelle(k);
   const ausschnitte = k.ausschnitte || [];
   const bohrungen = k.bohrungen || [];
@@ -278,7 +280,7 @@ export function zeichnung(k, sprache) {
   // --- Platzbedarf fuer Massketten je Seite ermitteln, dann massstaeblich einpassen
   const bem = ausschnitte.filter((a) => a.typ !== 'kanal').slice(0, 3);   // bemasste Ausschnitte (Rest in der Tabelle)
   const ebenenOben   = bem.length + (lform && notchOben ? (lfS ? 2 : 1) : 0);
-  const ebenenUnten  = rund ? 0 : 1 + (bohrungen.length ? 1 : 0) + (lform && !notchOben ? (lfS ? 2 : 1) : 0);
+  const ebenenUnten  = rund ? 0 : 1 + (bohrungen.length ? 1 : 0) + (lform && !notchOben ? (lfS ? 2 : 1) : 0) + (bauch ? 2 : 0);
   const ebenenLinks  = bem.length + (lform && !notchRechts ? 1 : 0);
   const ebenenRechts = rund ? 0 : 1 + (lform && notchRechts ? 1 : 0);
   const luftO = 6 + ebenenOben * 7;
@@ -308,7 +310,8 @@ export function zeichnung(k, sprache) {
   s += `<rect x="0" y="0" width="${BLATT.b}" height="${BLATT.h}" fill="#ffffff"/>`;
   s += `<rect x="${BLATT.rand / 2}" y="${BLATT.rand / 2}" width="${n(BLATT.b - BLATT.rand)}" `
      + `height="${n(BLATT.h - BLATT.rand)}" fill="none" stroke="${F.linie}" stroke-width="0.5"/>`;
-  const massText = rund ? `Ø ${mm(B)} mm` : lform ? `${t('f_lform')} ${mm(B)} × ${mm(H)} mm` : `${mm(B)} × ${mm(H)} mm`;
+  const massText = rund ? `Ø ${mm(B)} mm` : lform ? `${t('f_lform')} ${mm(B)} × ${mm(H)} mm`
+    : bauch ? `${t('f_bauch')} ${mm(B)} × ${mm(H)} mm` : `${mm(B)} × ${mm(H)} mm`;
   s += txt(BLATT.rand, BLATT.rand + 3.2,
     `${I.bez(I.MATERIAL, k.material, SPR)} ${mm(k.staerke_mm)} mm · ${massText} · ${I.bez(I.DEKOR, k.dekor, SPR)}`,
     { size: 4.4, bold: true });
@@ -331,7 +334,7 @@ export function zeichnung(k, sprache) {
     const pts = kontur(k);
     eckenV = verrunden(pts);
     const pfad = pfadSVG(eckenV, S, px, py);
-    if (lform) {
+    if (lform || bauch) {
       // Bekantung umlaufend: Kontur zuerst dick in Kantenfarbe, dann die Platte darueber
       if (I.istBekantet(umlaufendCode ?? kk.vorne))
         s += `<path d="${pfad}" fill="none" stroke="${F.kante}" stroke-width="2.2" stroke-linejoin="round"/>`;
@@ -403,6 +406,7 @@ export function zeichnung(k, sprache) {
     const cx = e.ecke.x, cy = e.ecke.y;
     let dx = cx < B / 2 ? -1 : 1, dy = cy < H / 2 ? -1 : 1;
     if (e.ord < 0) { dx = notchRechts ? 1 : -1; dy = notchOben ? -1 : 1; }
+    if (bauch && e.ord < 0) { dx = cx < B / 2 ? -1 : 1; dy = 1; }   /* in den Ausschnitt hinein */
     if (lfS && e.ord === 1) { dx = lfS.sx; dy = notchOben ? -1 : 1; }   // B: zur Ausklinkung hin, der Buchstabe B steht auf der anderen Seite
     const lbl = (e.ord < 0 || e.auto) ? `R ${mm(e.r)}*` : `R ${mm(e.r)}`;   // * = Fertigungsregel
     s += txt(X(cx) + dx * 2.4, Y(cy) + dy * 2.4 + (dy > 0 ? 2.2 : 0),
@@ -501,9 +505,29 @@ export function zeichnung(k, sprache) {
     s += `<rect x="${n(tx - w / 2)}" y="${n(ty - size + 0.4)}" width="${n(w)}" height="${n(size + 1.4)}" fill="#ffffff"/>`;
     s += txt(tx, ty + 1.3, tt, { anchor: 'middle', size, fill: F.mass, bold: true });
   } else {
-    const ebU = lform && !notchOben ? (lfS ? 3 : 2) : 1, ebR = lform && notchRechts ? 2 : 1;
+    const ebU = lform && !notchOben ? (lfS ? 3 : 2) : bauch ? (bs.welle ? 2 : 3) : 1,
+          ebR = lform && notchRechts ? 2 : bauch ? 2 : 1;
     s += massH(px, px + pb, py + ph + 3 + 8 * ebU, mm(B), { von: py + ph, size: 3.5 });
     s += massV(py, py + ph, px + pb + 3 + 8 * ebR, mm(H), { von: px + pb, size: 3.5 });
+  }
+
+  /* --- Bauchausschnitt bemassen: A und B auf der ersten Ebene unter der Platte,
+     darunter die Mulde (bzw. C beim Trapez); die Tiefe steht rechts im Ausschnitt.
+     Beim Trapez kommen die beiden Winkel als Bogen an den Enden von C dazu. */
+  if (bauch) {
+    const y1 = py + ph + 11, xA1 = X(bs.a), xB0 = X(B - bs.b), xM = X(bs.a + bs.oeffnung / 2);
+    if (bs.a > 0.5) s += massH(px, xA1, y1, `A ${mm(bs.a)}`, { von: py + ph, size: 2.6 });
+    if (bs.b > 0.5) s += massH(xB0, px + pb, y1, `B ${mm(bs.b)}`, { von: py + ph, size: 2.6 });
+    s += massH(xA1, xB0, y1, mm(bs.oeffnung), { von: py + ph, size: 2.6 });
+    /* Tiefe: rechts neben der Platte, auf der Hoehe des Ausschnitts (wie die
+       Ausklinkungstiefe der L-Form) — im Ausschnitt selbst ist bei flachen Mulden
+       kein Platz fuer Zahl und Pfeile. */
+    s += massV(Y(H - bs.t), Y(H), px + pb + 11, mm(bs.t), { von: px + pb, size: 2.9 });
+    /* Trapez: der Grund C mit den beiden Winkeln, eine Ebene unter A/Öffnung/B */
+    if (!bs.welle) {
+      const xC0 = X(bs.a + (bs.oeffnung - bs.c) / 2), xC1 = X(bs.a + (bs.oeffnung + bs.c) / 2);
+      s += massH(xC0, xC1, y1 + 8, `C ${mm(bs.c)} · ${bs.w1}°/${bs.w2}°`, { von: py + ph, size: 2.6 });
+    }
   }
 
   // --- L-Form: Ausklinkung bemassen
@@ -581,7 +605,10 @@ export function zeichnung(k, sprache) {
   // --- Bohrbild: x-Kette unten, y-Kette rechts (Ebene 2)
   const mittig = bohrungen.length === 1 && Math.abs(bohrungen[0].x - B / 2) < 0.5 && Math.abs(bohrungen[0].y - H / 2) < 0.5;
   if (bohrungen.length && !mittig && !rund) {
-    const ebU = lform && !notchOben ? (lfS ? 3 : 2) : 1, ebR = lform && notchRechts ? 2 : 1;
+    /* Ebenen wie bei den Hauptmassen weiterzaehlen — sonst legt sich die Bohrbild-
+       Kette beim Bauchausschnitt auf die Kette von A / Öffnung / B. */
+    const ebU = lform && !notchOben ? (lfS ? 3 : 2) : bauch ? (bs.welle ? 2 : 3) : 1,
+          ebR = lform && notchRechts ? 2 : bauch ? 2 : 1;
     const yb = py + ph + 3 + 8 * (ebU + 1), xb = px + pb + 3 + 8 * (ebR + 1);
     const xs = [...new Set(bohrungen.map((b) => Math.round(b.x * 10) / 10))].sort((a, b) => a - b);
     let prev = 0;

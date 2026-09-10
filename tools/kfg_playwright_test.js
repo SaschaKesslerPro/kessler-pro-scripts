@@ -314,11 +314,11 @@ const parseP=t=>+t.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
     const gesperrt=await page.evaluate(()=>document.getElementById('cta').disabled);
     check('Bauch Grenze greift: '+name, r.price==='—' && gesperrt, name+' → '+r.price+' / gesperrt '+gesperrt);
   }
-  /* Bestellweg: bis der Worker die Form kennt, nur Anfrage */
+  /* Bestellweg: seit v1.20.1 kennt der Worker die Form — direkt bestellbar */
   r=await set(bsBasis({}));
   const bsKauf=await page.evaluate(()=>({cta:document.getElementById('cta').textContent.trim(),
     buy:getComputedStyle(document.getElementById('ctaBuy')).display}));
-  check('Bauch geht ueber die Anfrage, kein Sofortkauf', /Unverbindlich anfragen/.test(bsKauf.cta) && bsKauf.buy==='none', JSON.stringify(bsKauf));
+  check('Bauch ist direkt bestellbar (Warenkorb und Sofortkauf)', /Warenkorb/.test(bsKauf.cta) && bsKauf.buy!=='none', JSON.stringify(bsKauf));
   /* Link teilen und wiederherstellen */
   r=await set(bsBasis({a:42,b:38,c:55,w1:120,w2:150}), true);
   const bsHash=r.hash, bsPreis=r.price;
