@@ -93,6 +93,8 @@ const LIVE_API=`,
          und muessen einzeln uebergeben werden. */
       translate:function(el){ try{ uebersetze(el||undefined); }catch(_){} },
       lang:function(){ return KFG_LANG; },
+      /* Erst wenn die Wortliste da ist, lohnt ein zweiter Lauf ueber die Dialoge. */
+      wortlisteDa:function(){ return !!_kfgWB; },
       money:fmt,
       shipping:function(){ return { betrag: kanal()==='pln' ? 84.90 : 19.99, text: VERSAND_MASS[kanal()] }; }`;
 core=core.replace('version: VERSION,',`version: VERSION,

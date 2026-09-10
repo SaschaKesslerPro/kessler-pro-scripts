@@ -22,6 +22,15 @@ cart=cart.map(item=>({...item,quantity:Number.isSafeInteger(item.quantity)&&item
 function status(text){$('appStatus').textContent=text;}
 /* PL/EN: Der Kern bringt die Wortliste mit; nach jedem Schreiben laeuft sie hier drueber. */
 function uebersetzen(el){ if(api&&api.translate)api.translate(el); }
+/* Die beiden festen Dialoge stehen an <body> und werden vom Kern nicht erfasst.
+   Beim Start ist die Wortliste oft noch unterwegs - darum genau einmal nachziehen,
+   sobald sie da ist (und beim Oeffnen noch einmal, falls doch etwas fehlt). */
+let dialogeUebersetzt=false;
+function dialogeNachziehen(){
+  if(dialogeUebersetzt||!api||!api.wortlisteDa||!api.wortlisteDa())return;
+  dialogeUebersetzt=true;
+  ['materialDialog','cartDialog'].forEach(id=>{const d=$(id);if(d)uebersetzen(d);});
+}
 function sectionTitle(title,body=''){return `<div class="panel_heading"><h2 tabindex="-1">${title}</h2>${body?`<p>${body}</p>`:''}</div>`;}
 function group(title,desc,id,open=false){return `<details class="option_group" id="${id}"${open?' open':''}><summary><span><b>${title}</b><small>${desc}</small></span>${chevron}</summary><div class="group_body"></div></details>`;}
 
@@ -193,7 +202,7 @@ function sync(){
   // Shared core native choices are kept accessible after every rebuild.
   document.querySelectorAll('#thickChips button,#dekorGrid button,#edgeChips button,#absChips button').forEach(b=>{b.type='button';});
   const key=JSON.stringify({c,p,errors,customText:$('customText').value});if(key!==previousKey){renderReview();previousKey=key;}
-  uebersetzen();
+  uebersetzen();dialogeNachziehen();
 }
 function goStep(next){
   step=Math.max(0,Math.min(3,next));
