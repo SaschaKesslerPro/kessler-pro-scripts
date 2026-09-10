@@ -25,7 +25,7 @@
   /* Auf den Commit gezogen, der am 10.09.2026 live lief — dort liegen Preiskurven,
    Sprachdatei und Bilder, die es unter dem alten Commit noch nicht gab. Greift,
    wenn das Skript NICHT ueber jsDelivr geladen wird (z. B. als Webflow-Asset). */
-var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@4516c73';
+var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@e87ec5d';
   var BASE = (function(){
     try{
       var me = document.currentScript && document.currentScript.src;
