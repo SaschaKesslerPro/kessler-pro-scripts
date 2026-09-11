@@ -169,3 +169,5 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
   #atelier.preview_expanded .close_preview{top:12px;right:12px;padding:10px 14px;font-size:12px;min-height:44px}
   #atelier.preview_expanded .close_preview span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 }
+/* Im Vollbild uebernimmt der Schliessknopf — der Vergroessern-Knopf lag darunter. */
+#atelier.preview_expanded #expandPreview{display:none}
