@@ -100,3 +100,18 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
 #atelier.cta_inline .purchase_bar{opacity:0;transform:translateY(10px);pointer-events:none}
 @media(prefers-reduced-motion:reduce){#atelier .purchase_bar{transition:none}}
 #atelier .demo_explanation:empty{display:none}
+
+/* ── Ein Maß für die ganze Seite (Sascha, 11.09.) ─────────────────────────────
+   Gemessen auf der Staging-Seite: der Inhalt der Seite läuft in .tnm2_wrap
+   (max 1280, Innenabstand 80 / 32 / 16), der Konfigurator lief auf 1416 —
+   knapp 300 px breiter und 68 px weiter links als alles andere. Er nimmt jetzt
+   dasselbe Maß, damit Kopf, Konfigurator und die Abschnitte darunter auf einer
+   Kante stehen. Die Werte spiegeln die Webflow-Haltepunkte (991 / 767). */
+#atelier .atelier_shell{max-width:1280px;margin:0 auto;padding:0 80px}
+@media(max-width:991px){#atelier .atelier_shell{margin:0 auto;padding:0 32px}}
+@media(max-width:767px){#atelier .atelier_shell{margin:0 auto;padding:0 16px}}
+/* Auf dem schmaleren Maß braucht die Steuerspalte den Vorrang vor der Vorschau:
+   die Zeichnung skaliert, die Bedienfelder nicht. */
+@media(min-width:992px){
+  #atelier .workbench{grid-template-columns:1fr 1.06fr;gap:56px}
+}
