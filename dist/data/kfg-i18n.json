@@ -500,7 +500,16 @@
   "Schritt 1 von 4": "Krok 1 z 4",
   "Schritt 2 von 4": "Krok 2 z 4",
   "Schritt 3 von 4": "Krok 3 z 4",
-  "Schritt 4 von 4": "Krok 4 z 4"
+  "Schritt 4 von 4": "Krok 4 z 4",
+  "Platte hinzufügen": "Dodaj płytę",
+  "Deine Platte ist gespeichert.": "Twoja płyta jest zapisana.",
+  "Deine Platte liegt bei deinen Platten. Du kannst die Stückzahl ändern oder eine weitere konfigurieren.": "Twoja płyta trafiła do Twoich płyt. Możesz zmienić ilość albo skonfigurować kolejną.",
+  "Die Platte kommt zuerst zu deinen Platten. Dort stellst du die Stückzahl ein und kannst weitere Konfigurationen ergänzen. Der letzte Schritt legt dann alle zusammen in den Warenkorb des Shops.": "Płyta trafia najpierw do Twoich płyt. Tam ustawisz ilość i dodasz kolejne konfiguracje. Ostatni krok przenosi wszystkie razem do koszyka sklepu.",
+  "Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.": "Ta wersja jest u nas artykułem magazynowym. Trafia do koszyka sklepu bez produkcji na wymiar, wysyłka jest bezpłatna.",
+  "In den Warenkorb des Shops": "Do koszyka sklepu",
+  "Deine Platten sammeln sich hier. Erst der letzte Schritt legt sie in den Warenkorb des Shops.": "Twoje płyty zbierają się tutaj. Dopiero ostatni krok przenosi je do koszyka sklepu.",
+  "Platten gehen in den Warenkorb …": "Płyty trafiają do koszyka …",
+  "Deine konfigurierten Platten. Sie liegen noch nicht im Warenkorb des Shops — das macht der letzte Schritt.": "Twoje skonfigurowane płyty. Nie ma ich jeszcze w koszyku sklepu — robi to ostatni krok."
  },
  "en": {
   "Ab Lager": "From stock",
@@ -992,7 +1001,16 @@
   "Schritt 1 von 4": "Step 1 of 4",
   "Schritt 2 von 4": "Step 2 of 4",
   "Schritt 3 von 4": "Step 3 of 4",
-  "Schritt 4 von 4": "Step 4 of 4"
+  "Schritt 4 von 4": "Step 4 of 4",
+  "Platte hinzufügen": "Add the panel",
+  "Deine Platte ist gespeichert.": "Your panel is saved.",
+  "Deine Platte liegt bei deinen Platten. Du kannst die Stückzahl ändern oder eine weitere konfigurieren.": "Your panel is now with your panels. You can change the quantity or configure another one.",
+  "Die Platte kommt zuerst zu deinen Platten. Dort stellst du die Stückzahl ein und kannst weitere Konfigurationen ergänzen. Der letzte Schritt legt dann alle zusammen in den Warenkorb des Shops.": "The panel goes to your panels first. There you set the quantity and can add further configurations. The last step then moves them all into the shop basket together.",
+  "Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.": "This version is a stock item with us. It goes into the shop basket without custom production, and shipping is free.",
+  "In den Warenkorb des Shops": "Into the shop basket",
+  "Deine Platten sammeln sich hier. Erst der letzte Schritt legt sie in den Warenkorb des Shops.": "Your panels collect here. Only the last step moves them into the shop basket.",
+  "Platten gehen in den Warenkorb …": "Panels are going into the basket …",
+  "Deine konfigurierten Platten. Sie liegen noch nicht im Warenkorb des Shops — das macht der letzte Schritt.": "Your configured panels. They are not in the shop basket yet — the last step does that."
  },
  "muster": {
   "pl": [

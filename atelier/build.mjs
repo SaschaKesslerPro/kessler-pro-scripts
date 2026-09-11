@@ -160,6 +160,12 @@ if(!LIVE){
   if(!ui.includes('<button class="text_button" id="shareConfig">'))throw new Error('Missing shareConfig anchor');
   ui=ui.replace('<button class="text_button" id="shareConfig">',cartKnopf+'<button class="text_button" id="shareConfig">');
   ui=ui.replace('Konfiguration teilen</button>','Konfiguration teilen</button></div>');
+  /* Webflow liefert Ueberschrift und Einleitung der Seite schon. Der Konfigurator
+     wiederholte sie („Deine Tischplatte nach Maß") und schob sich selbst nach
+     unten (Codex, 11.09.). Live bleibt nur die Knopfzeile stehen. */
+  const introAnker='<div class="page_intro"><div><h1>Deine Tischplatte nach Maß</h1><p>Du bestimmst die Details. Wir fertigen deine Platte.</p></div>';
+  if(!ui.includes(introAnker))throw new Error('Missing page_intro anchor');
+  ui=ui.replace(introAnker,'<div class="page_intro is_bare">');
   const css=scopeCss(fs.readFileSync(path.join(dir,'atelier.css'),'utf8'));
   const shell=fs.readFileSync(path.join(dir,'live-shell.js'),'utf8')
     .replace('__ATELIER_CSS__',JSON.stringify(css));

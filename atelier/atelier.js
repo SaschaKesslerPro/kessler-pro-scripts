@@ -164,7 +164,7 @@ function sync(){
   if(!api)return;
   snapshot=api.snapshot();const s=snapshot,c=s.config,p=s.price;
   $('atelier').dataset.view=c.view;
-  setText('draftNote',api.checkout?'Deine Platten sammeln sich hier, bis du zur Kasse gehst. Erst dann gehen sie in den Warenkorb des Shops.':'Designvorschau: Der Warenkorb speichert deinen Entwurf nur in dieser Browsersitzung.');
+  setText('draftNote',api.checkout?'Deine Platten sammeln sich hier. Erst der letzte Schritt legt sie in den Warenkorb des Shops.':'Designvorschau: Der Warenkorb speichert deinen Entwurf nur in dieser Browsersitzung.');
   $('textureTestNote').hidden=!api.textureInfo()?.generated;
   const corners=api.cornerDetails();
   $('cornerLegend').hidden=c.view!=='2d'||!corners.length;
@@ -188,7 +188,7 @@ function sync(){
   setText('priceContext',s.standard?'Deine Platte ab Lager':'Deine Maßanfertigung');
   setText('atelierTax',s.standard?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+versand().text+' Versand');
   $('continueStep').disabled=(!s.valid||errors.length>0)&&step===3;
-  if(step===3)$('continueStep').innerHTML=(s.offer?'Anfrage vorbereiten':editingId?'Änderungen speichern':'In den Warenkorb')+chevron;
+  if(step===3)$('continueStep').innerHTML=(s.offer?'Anfrage vorbereiten':editingId?'Änderungen speichern':'Platte hinzufügen')+chevron;
   setText('priceStatus',!s.valid?'Bitte korrigiere die markierten Maße.':errors.length?'Bitte prüfe die Position deiner Bearbeitungen.':s.offer?'Für diese Ausführung ist ein individuelles Angebot nötig.':s.standard?'Lagerausführung laut Produktdaten.':step===3?'Versand und Fertigungsablauf findest du oben in der Übersicht.':'Nach Maß gefertigt. Versand und Ablauf im Prüfschritt.');
   $('cutErrors').hidden=!errors.length;
   const errorHTML=errors.map(e=>`<p><b>Bearbeitung ${e.index+1}:</b> ${esc(e.message)}</p>`).join('');
@@ -208,7 +208,7 @@ function goStep(next){
   step=Math.max(0,Math.min(3,next));
   for(let i=0;i<4;i++){ $('panel'+i).hidden=i!==step;const b=document.querySelector(`.step_nav [data-step="${i}"]`);b.toggleAttribute('data-complete',i<step);if(i===step)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current'); }
   $('backStep').hidden=step===0;setText('stepProgress',`Schritt ${step+1} von 4`);
-  $('continueStep').innerHTML=[`Weiter zu Form & Maße ${chevron}`,`Weiter zu Kanten & Extras ${chevron}`,`Zur Übersicht ${chevron}`,`${editingId?'Änderungen speichern':'In den Warenkorb'} ${chevron}`][step];
+  $('continueStep').innerHTML=[`Weiter zu Form & Maße ${chevron}`,`Weiter zu Kanten & Extras ${chevron}`,`Zur Übersicht ${chevron}`,`${editingId?'Änderungen speichern':'Platte hinzufügen'} ${chevron}`][step];
   api.setView(step===0?'3d':'2d');sync();
   const heading=$('panel'+step).querySelector('h2');heading.focus({preventScroll:true});
   const target=matchMedia('(max-width:767px)').matches?$('panel'+step):document.querySelector('.step_nav');target.scrollIntoView({behavior:'instant',block:'start'});
@@ -229,7 +229,7 @@ function renderReview(){
   const costs=[['Platte',p.basis],['Kantenbearbeitung',p.kante],['Eckenrundung',p.ecken],['Formzuschnitt',p.lschnitt],['Weitere Bearbeitungen',p.extras]].filter((r,i)=>i===0||r[1]>0);
   const shipping=s.standard?0:versand().betrag;
   $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div><span>Versand</span><b>${shipping?money(shipping):'Kostenfrei'}</b></div><div class="review_total"><span>Gesamt inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total+shipping)}</strong></div></details>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}`;
-  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Lege deine Platte in den Warenkorb und bezahle anschließend im Shopify-Checkout. Du kannst gleiche Platten mehrfach bestellen und unterschiedliche Konfigurationen kombinieren.</p><p>Falls bei der technischen Umsetzung eine Rückfrage entsteht, melden wir uns bei dir.</p>';
+  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Die Platte kommt zuerst zu deinen Platten. Dort stellst du die Stückzahl ein und kannst weitere Konfigurationen ergänzen. Der letzte Schritt legt dann alle zusammen in den Warenkorb des Shops.</p><p>Falls bei der technischen Umsetzung eine Rückfrage entsteht, melden wir uns bei dir.</p>';
   if(s.offer){api.syncLink();$('orderProcess').innerHTML=api.inquiry
     ?'<h3>Deine individuelle Anfrage</h3><p>Für ein eigenes Bohrbild rechnen wir von Hand. Wir bereiten eine E-Mail mit deiner Konfiguration vor — beschreibe darin, was du brauchst, und hänge deine Skizze an.</p>'
     :'<h3>Deine individuelle Anfrage</h3><p>Öffne diese Auswahl im Live-Konfigurator, um ein Angebot anzufragen.</p><a class="secondary_button" target="_blank" rel="noopener" href="https://www.kessler-pro.com/tischplatte-nach-mass'+esc(location.hash)+'">Auswahl im Live-Konfigurator öffnen</a>';}
@@ -268,8 +268,8 @@ function addToCart(){
   const item={id:existing?.id||Date.now(),quantity:existing?.quantity||1,config:structuredClone(snapshot.config),name:snapshot.material.name+' · '+snapshot.price.dekorName,dims:dimsText(snapshot),thick:snapshot.price.thickName,price:snapshot.price.total,shipping:snapshot.standard?0:versand().betrag,hash:location.hash,preview:capturePreview(),cuts:structuredClone(snapshot.cuts),workerBody:api.workerBody(),order:api.orderIntent?api.orderIntent():null};
   if(existing)cart=cart.map(row=>row.id===existing.id?item:row);else cart.push(item);
   editingId=null;persistCart();renderCart();$('cartDialog').showModal();
-  $('cartDialogTitle').textContent=existing?'Deine Platte wurde aktualisiert.':'Deine Platte ist im Warenkorb.';
-  status('Deine Konfiguration ist gespeichert. Du kannst die Stückzahl ändern oder eine weitere Platte konfigurieren.');
+  $('cartDialogTitle').textContent=existing?'Deine Platte wurde aktualisiert.':'Deine Platte ist gespeichert.';
+  status('Deine Platte liegt bei deinen Platten. Du kannst die Stückzahl ändern oder eine weitere konfigurieren.');
 }
 function anotherPlate(){
   editingId=null;window.KFG.setConfig(api.defaultConfig());
@@ -295,7 +295,7 @@ async function zurKasse(){
   checkoutBusy=true;
   const button=document.querySelector('[data-preview-checkout]');
   const label=button?button.innerHTML:'';
-  if(button){button.disabled=true;button.textContent='Warenkorb wird übergeben …';}
+  if(button){button.disabled=true;button.textContent='Platten gehen in den Warenkorb …';}
   const gesamt=cart.length;let fertig=0,fehler=null;
   for(const item of [...cart]){
     try{
@@ -324,7 +324,7 @@ function renderCart(){
   setText('cartCount',String(cart.reduce((sum,item)=>sum+item.quantity,0)));
   setTimeout(()=>uebersetzen($('cartDialog')),0);
   if(!cart.length){$('cartBody').innerHTML='<div class="empty_cart">'+svg('<path d="M4 7h16v14H4zM8 7V5a4 4 0 0 1 8 0v2"/>')+'<h3>Platz für deine erste Platte.</h3><p>Konfiguriere deine Platte und prüfe sie im letzten Schritt.</p><button class="primary_button" data-close>Weiter konfigurieren</button></div>';return;}
-  $('cartBody').innerHTML=cart.map(item=>`<article class="cart_item"><div class="cart_preview">${item.preview}</div><div><h3>${esc(item.name)}</h3><p>${esc(item.dims)} · ${esc(item.thick)}</p>${item.cuts.length?`<p>${item.cuts.length} Bearbeitung${item.cuts.length>1?'en':''}</p>`:''}<div class="cart_quantity"><span>Stückzahl</span><div><button data-quantity-step="-1" data-item="${item.id}" aria-label="Eine Platte weniger"${item.quantity===1?' disabled':''}>−</button><input type="number" inputmode="numeric" min="1" step="1" data-quantity="${item.id}" value="${item.quantity}" aria-label="Stückzahl ${esc(item.name)}"><button data-quantity-step="1" data-item="${item.id}" aria-label="Eine Platte mehr">+</button></div></div><strong>${money(lineTotal(item.price,item.quantity))}</strong><small>${money(item.price)} je Platte · inkl. MwSt.</small><div class="cart_item_actions"><button data-cart-edit="${item.id}">Bearbeiten</button><button data-cart-copy="${item.id}">Kopie anpassen</button><button data-cart-remove="${item.id}">Entfernen</button></div></div></article>`).join('')+`<div class="cart_totals"><span>Platten gesamt <small>${cart.reduce((sum,item)=>sum+item.quantity,0)} Stück · ${cart.length} Konfiguration${cart.length===1?'':'en'}</small></span><strong>${money(cart.reduce((sum,item)=>sum+Math.round(item.price*100)*item.quantity,0)/100)}</strong></div><p class="cart_shipping">Inkl. MwSt. Der Versand wird im Shopify-Checkout für den gesamten Warenkorb berechnet.</p><div class="cart_next"><h3>Möchtest du eine weitere Platte?</h3><button class="secondary_button" data-another-plate>Weitere Platte konfigurieren</button><button class="primary_button" data-preview-checkout>Zur Kasse ${chevron}</button></div><p class="demo_explanation">${api.checkout?'Der Versand wird nach der Übergabe an den Shop für den gesamten Warenkorb berechnet.':'Designvorschau: Der Warenkorb bleibt auf diesem Rechner.'}</p>`;
+  $('cartBody').innerHTML=cart.map(item=>`<article class="cart_item"><div class="cart_preview">${item.preview}</div><div><h3>${esc(item.name)}</h3><p>${esc(item.dims)} · ${esc(item.thick)}</p>${item.cuts.length?`<p>${item.cuts.length} Bearbeitung${item.cuts.length>1?'en':''}</p>`:''}<div class="cart_quantity"><span>Stückzahl</span><div><button data-quantity-step="-1" data-item="${item.id}" aria-label="Eine Platte weniger"${item.quantity===1?' disabled':''}>−</button><input type="number" inputmode="numeric" min="1" step="1" data-quantity="${item.id}" value="${item.quantity}" aria-label="Stückzahl ${esc(item.name)}"><button data-quantity-step="1" data-item="${item.id}" aria-label="Eine Platte mehr">+</button></div></div><strong>${money(lineTotal(item.price,item.quantity))}</strong><small>${money(item.price)} je Platte · inkl. MwSt.</small><div class="cart_item_actions"><button data-cart-edit="${item.id}">Bearbeiten</button><button data-cart-copy="${item.id}">Kopie anpassen</button><button data-cart-remove="${item.id}">Entfernen</button></div></div></article>`).join('')+`<div class="cart_totals"><span>Platten gesamt <small>${cart.reduce((sum,item)=>sum+item.quantity,0)} Stück · ${cart.length} Konfiguration${cart.length===1?'':'en'}</small></span><strong>${money(cart.reduce((sum,item)=>sum+Math.round(item.price*100)*item.quantity,0)/100)}</strong></div><p class="cart_shipping">Inkl. MwSt. Der Versand wird im Shopify-Checkout für den gesamten Warenkorb berechnet.</p><div class="cart_next"><h3>Möchtest du eine weitere Platte?</h3><button class="secondary_button" data-another-plate>Weitere Platte konfigurieren</button><button class="primary_button" data-preview-checkout>In den Warenkorb des Shops ${chevron}</button></div><p class="demo_explanation">${api.checkout?'Der Versand wird nach der Übergabe an den Shop für den gesamten Warenkorb berechnet.':'Designvorschau: Der Warenkorb bleibt auf diesem Rechner.'}</p>`;
 }
 document.addEventListener('click',e=>{
   /* Die Wortliste kommt erst nach dem Start an - die festen Dialoge laufen

@@ -69,15 +69,31 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
   {
     const {ctx,p}=await seite({width:1440,height:1000},'de');
     const r=await p.evaluate(()=>{
-      const a=getComputedStyle(document.querySelector('#atelier h1'));
+      /* Seit 11.09. bringt der Live-Build keine eigene h1 mehr mit — die Ueberschrift
+         steht auf der Webflow-Seite. Geprueft wird die Schrittueberschrift. */
+      const a=getComputedStyle(document.querySelector('#atelier h2'));
       const s=getComputedStyle(document.querySelector('.wf-wrap h2'));
       const k=getComputedStyle(document.getElementById('wfCart'));
-      return {atelier:a.fontFamily,seite:s.fontFamily,seiteFarbe:s.color,knopf:k.backgroundColor,knopfRadius:k.borderRadius};
+      return {atelier:a.fontFamily,seite:s.fontFamily,seiteFarbe:s.color,knopf:k.backgroundColor,
+        knopfRadius:k.borderRadius,eigeneH1:document.querySelectorAll('#atelier h1').length};
     });
     pruef('① Atelier nutzt Onest',/Onest/.test(r.atelier),r.atelier);
+    pruef('① Live-Build ohne eigene Seitenueberschrift', r.eigeneH1===0, String(r.eigeneH1));
     pruef('① Seite behaelt ihre Schrift',/Georgia/.test(r.seite),r.seite);
     pruef('① Seite behaelt ihre Farbe',r.seiteFarbe==='rgb(122, 32, 32)',r.seiteFarbe);
     pruef('① Seitenknopf unveraendert',r.knopf==='rgb(122, 32, 32)'&&r.knopfRadius==='0px',r.knopf+' / '+r.knopfRadius);
+    /* Eine direkt gesetzte Regel der Seite (h1,h2,h3{color;font-family}) schlaegt
+       jede Vererbung. Ohne Riegel faerbt die Seite die Ueberschriften im
+       Konfigurator und in seinen Dialogen mit (gefunden 11.09.). */
+    const d=await p.evaluate(()=>{
+      document.querySelector('[data-dialog="materialDialog"]').click();
+      const h=getComputedStyle(document.querySelector('#materialDialog h2'));
+      const a=getComputedStyle(document.querySelector('#materialDialog article h3'));
+      return {h2Farbe:h.color,h2Schrift:h.fontFamily,h3Farbe:a.color};
+    });
+    pruef('① Seitenfarbe faerbt die Dialoge nicht',
+      d.h2Farbe!=='rgb(122, 32, 32)' && d.h3Farbe!=='rgb(122, 32, 32)', JSON.stringify(d));
+    pruef('① Dialogueberschrift bleibt Onest', /Onest/.test(d.h2Schrift), d.h2Schrift);
     await ctx.close();
   }
 
@@ -165,6 +181,50 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     pruef('④ Attribute vollstaendig uebernommen', r.cart.every(c=>c.attrs>=3), JSON.stringify(r.cart.map(c=>c.attrs)));
     pruef('④ Warenkorb genau einmal geoeffnet', r.offen===1, String(r.offen));
     pruef('④ Entwurfskorb danach leer', r.rest==='0', r.rest);
+    await ctx.close();
+  }
+
+  /* ⑤ Getippte Zahlen muessen ankommen, auch ohne Enter --------------------
+     Codex sah am 11.09. im Radiusfeld 100 stehen, waehrend die Konfiguration bei
+     50 blieb. Die Felder des Kerns uebernehmen auf 'change' — das feuert beim
+     Verlassen, also vor dem Klick auf den naechsten Knopf. Hier nachgestellt wie
+     ein Mensch tippt: fokussieren, Ziffern ueber die Tastatur, KEIN Enter, direkt
+     weiterklicken. Geprueft wird, was tatsaechlich im Korb und im Worker-Rumpf
+     landet — nicht, was im Feld steht. */
+  for(const [name,vp,mobil] of [['Desktop',{width:1440,height:1000},false],['Mobil',{width:390,height:844},true]]){
+    const {ctx,p}=await seite(vp,'de',mobil);
+    await p.evaluate(()=>sessionStorage.removeItem('kessler-atelier-cart'));
+    await p.klick('.step_nav [data-step="2"]');
+    await p.evaluate(()=>{document.getElementById('cornerGroup').open=true;
+      const d=document.querySelector('.individual_corners'); if(d)d.open=true;});
+    await p.waitForTimeout(500);
+    await p.click('#cornerSel input[data-cr="0"]',{clickCount:3});
+    await p.keyboard.type('100',{delay:50});
+    const imFeld=await p.inputValue('#cornerSel input[data-cr="0"]');
+    await p.klick('.step_nav [data-step="1"]');                 /* ohne Enter weiter */
+    await p.click('#inL',{clickCount:3});
+    await p.keyboard.type('163',{delay:50});
+    const lFeld=await p.inputValue('#inL');
+    await p.klick('.step_nav [data-step="3"]');
+    const angezeigt=await p.evaluate(()=>document.getElementById('atelierPrice').textContent);
+    await p.klick('#continueStep');
+    await p.waitForTimeout(900);
+    const korb=await p.evaluate(()=>JSON.parse(sessionStorage.getItem('kessler-atelier-cart')||'[]')
+      .map(i=>({L:i.config.L,r:i.config.cornerR,preis:i.price,wL:i.workerBody.konfig.L,wr:i.workerBody.konfig.cornerR})));
+    const k=korb[0]||{};
+    pruef(`⑤ ${name} getippter Radius kommt an`, String((k.r||[])[0])==='100', `Feld ${imFeld}, Korb ${JSON.stringify(k.r)}`);
+    pruef(`⑤ ${name} getipptes Mass kommt an`, String(k.L)==='163', `Feld ${lFeld}, Korb ${k.L}`);
+    pruef(`⑤ ${name} Worker-Rumpf gleich dem Korb`, String(k.wL)===String(k.L)&&JSON.stringify(k.wr)===JSON.stringify(k.r), JSON.stringify(k));
+    pruef(`⑤ ${name} Preis im Korb gleich dem angezeigten`, angezeigt.includes(String(k.preis).replace('.',',')), `${angezeigt} / ${k.preis}`);
+    /* Die beiden Warenkorbzustaende muessen unterscheidbar bleiben (Codex, 11.09.) */
+    if(!mobil){
+      const w=await p.evaluate(()=>({titel:document.getElementById('cartDialogTitle').textContent,
+        kasse:(document.querySelector('[data-preview-checkout]')||{}).textContent||'',
+        knopf:document.getElementById('continueStep').textContent}));
+      pruef('⑤ Sammlung und Shop-Warenkorb verschieden benannt',
+        /gespeichert/.test(w.titel) && /Warenkorb des Shops/.test(w.kasse) && !/In den Warenkorb$/.test(w.knopf.trim()),
+        JSON.stringify(w));
+    }
     await ctx.close();
   }
 

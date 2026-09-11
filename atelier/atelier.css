@@ -68,3 +68,7 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
 #atelier #atelierCart span{font-variant-numeric:tabular-nums}
 @media(max-width:767px){#atelier .atelier_actions{gap:16px}}
 #atelier #atelierCart span{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Live steht die Ueberschrift auf der Webflow-Seite: nur die Knopfzeile bleibt. */
+#atelier .page_intro.is_bare{justify-content:flex-end;padding:0 0 20px}
+@media(max-width:767px){#atelier .page_intro.is_bare{padding:0 0 12px}#atelier .page_intro.is_bare .atelier_actions{width:100%;justify-content:space-between}}

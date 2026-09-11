@@ -44,6 +44,13 @@ function block(text){
     return sel?kommentar+sel+'{'+r.body+'}':'';
   }).join('');
 }
+/* Die Seite stylt ihre eigenen h1-h6, p, li direkt. Eine direkt gesetzte Regel
+   schlaegt jede Vererbung — ohne diesen Riegel faerbt die Webflow-Seite die
+   Ueberschriften im Konfigurator und in seinen Dialogen mit. Er steht ganz vorn,
+   damit die eigenen Regeln des Ateliers ihn danach ueberschreiben koennen. */
+const RIEGEL=SCOPE+" :is(h1,h2,h3,h4,h5,h6,p,li,dt,dd,summary,label,small,strong,b,em,figcaption)"
+  +"{font-family:inherit;color:inherit;letter-spacing:normal;text-transform:none}";
 export function scopeCss(css){
-  return block(css)+'\n'+SCOPE+"{font-family:Onest,system-ui,-apple-system,'Segoe UI',sans-serif;font-synthesis:none;color:var(--ink);-webkit-font-smoothing:antialiased}";
+  return SCOPE+"{font-family:Onest,system-ui,-apple-system,'Segoe UI',sans-serif;font-synthesis:none;color:var(--ink);-webkit-font-smoothing:antialiased}"
+    +RIEGEL+block(css);
 }

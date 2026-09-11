@@ -33,7 +33,7 @@ function atelierShellAufbauen(api){
     cd.id='cartDialog'; cd.className='atelier_dialog cart_dialog';
     cd.setAttribute('aria-labelledby','cartDialogTitle');
     cd.innerHTML='<div class="dialog_header"><div><h2 id="cartDialogTitle">Deine Platten</h2>'
-      +'<p>Deine Konfigurationen und Stückzahlen. Mit „Zur Kasse“ gehen sie in den Warenkorb des Shops.</p></div>'
+      +'<p>Deine konfigurierten Platten. Sie liegen noch nicht im Warenkorb des Shops — das macht der letzte Schritt.</p></div>'
       +'<button class="icon_button" data-close aria-label="Übersicht schließen">×</button></div><div id="cartBody"></div>';
     document.body.appendChild(cd);
   }
