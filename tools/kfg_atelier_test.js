@@ -277,6 +277,35 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     pruef(`⑥ ${name} gewaehltes Dekor bleibt sichtbar`, zu.aktivSichtbar, JSON.stringify(zu));
     pruef(`⑥ ${name} Knopf nennt die Gesamtzahl`, /Alle Dekore zeigen/.test(zu.knopf)&&/11/.test(zu.knopf), zu.knopf);
     pruef(`⑥ ${name} Standardmasse starten zugeklappt mit Anzahl`, zu.standardZu&&zu.standardAnzahl==='18', JSON.stringify(zu));
+    /* Viele Dekore haben keinen Lagerartikel — dann darf keine leere Schublade
+       stehen bleiben (Sascha, 11.09.). Weiss 25 mm hat null Lagergroessen. */
+    await p.evaluate(()=>{const b=[...document.querySelectorAll('.kfg_dekor')].find(x=>x.dataset.d==='weiss');b.style.display='';b.click();});
+    await p.waitForTimeout(400);
+    const ohne=await p.evaluate(()=>({chips:document.querySelectorAll('#quickChips .kfg_quick-chip').length,
+      versteckt:document.querySelector('.standard_sizes').hidden,
+      anzahl:(document.querySelector('.standard_sizes summary i')||{}).textContent}));
+    pruef(`⑥ ${name} keine leere Standardmass-Schublade`, ohne.chips===0&&ohne.versteckt&&ohne.anzahl==='', JSON.stringify(ohne));
+    /* Die Naehtischplatte war nur ein Textlink und ging unter — jetzt eine Karte. */
+    const mat=await p.evaluate(()=>({karten:[...document.querySelectorAll('.material_choice')].map(b=>b.dataset.material),
+      hilfe:(document.querySelector('.helper_button')||{}).textContent,
+      rahmen:document.querySelector('.helper_button')?getComputedStyle(document.querySelector('.helper_button')).borderTopWidth:'',
+      knopfRahmen:getComputedStyle(document.getElementById('dekorMore')).borderTopWidth,
+      farbname:!!document.getElementById('selectedDecor')}));
+    pruef(`⑥ ${name} Naehtischplatte ist eine Materialkarte`, mat.karten.join()==='dekor,mpx,compact,szwal', JSON.stringify(mat.karten));
+    pruef(`⑥ ${name} Materialberatung ist ein sichtbarer Knopf`, /Welches Material passt/.test(mat.hilfe||'')&&mat.rahmen==='1px', JSON.stringify(mat));
+    pruef(`⑥ ${name} Dekorknopf hat einen Rahmen`, mat.knopfRahmen==='1px', mat.knopfRahmen);
+    pruef(`⑥ ${name} Farbname neben der Ueberschrift ist weg`, !mat.farbname, String(mat.farbname));
+    /* Drehen geht nur in der Produktansicht. */
+    const dreh=await p.evaluate(async()=>{const h=document.querySelector('#atelier .view_hint'),b3=document.getElementById('btn3d');
+      /* Ohne WebGL sperrt der Kern die Produktansicht — dann nur 2D pruefen. */
+      const kann3d=!b3.disabled;let drei=null;
+      if(kann3d){b3.click();await new Promise(r=>setTimeout(r,400));drei=!h.hidden;}
+      document.getElementById('btn2d').click();await new Promise(r=>setTimeout(r,400));
+      return {kann3d,drei,zwei:!h.hidden};});
+    pruef(`⑥ ${name} Drehhinweis nur in der Produktansicht`,
+      !dreh.zwei && (!dreh.kann3d || dreh.drei), JSON.stringify(dreh));
+    await p.evaluate(()=>{const b=[...document.querySelectorAll('.kfg_dekor')].find(x=>x.dataset.d==='buk');b.style.display='';b.click();});
+    await p.waitForTimeout(300);
     await p.klick('#dekorMore');
     const auf=await p.evaluate(()=>({
       sichtbar:[...document.querySelectorAll('.kfg_dekor')].filter(b=>b.getClientRects().length).length,

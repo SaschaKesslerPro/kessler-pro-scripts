@@ -14,8 +14,12 @@ const svg=(content,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none"
 const chevron=svg('<path d="m9 5 7 7-7 7"/>');
 const check=svg('<path d="m5 12 4 4L19 6"/>');
 const expand=svg('<path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/>');
+const frage=svg('<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.3 2.7v1.6"/><path d="M12.7 16.8h.01"/>');
 const shapes={rect:['Rechteck','<rect x="3" y="6" width="18" height="12" rx="1"/>'],round:['Rund','<circle cx="12" cy="12" r="9"/>'],lform:['L-Form','<path d="M3 4h18v7H11v9H3Z"/>'],bauch:['Bauchausschnitt','<path d="M3 5h18v14h-4l-2-5H9l-2 5H3Z"/>']};
-const materials={dekor:{name:'Möbelplatte',desc:'Beschichtet, mit passender ABS-Kante',image:'buk_28',meta:'18 / 25 / 36 mm'},mpx:{name:'Multiplex Birke',desc:'Sichtbare Furnierlagen, natur oder HPL',image:'mpx_21',meta:'21 / 40 mm'},compact:{name:'Compact / HPL',desc:'Schlanker Vollkern, markante Schnittkante',image:'compact_12',meta:'12 mm'}};
+/* Die Naehtischplatte stand bis 11.09. nur hinter einem Textlink "Vorlage fuer
+   Naehtische" — zu dezent, man sah nicht, dass sie waehlbar ist (Sascha).
+   Sie ist im Kern ein eigenes Material und steht jetzt auch als Karte. */
+const materials={dekor:{name:'Möbelplatte',desc:'Beschichtet, mit passender ABS-Kante',image:'buk_28',meta:'18 / 25 / 36 mm'},mpx:{name:'Multiplex Birke',desc:'Sichtbare Furnierlagen, natur oder HPL',image:'mpx_21',meta:'21 / 40 mm'},compact:{name:'Compact / HPL',desc:'Schlanker Vollkern, markante Schnittkante',image:'compact_12',meta:'12 mm'},szwal:{name:'Nähtischplatte',desc:'Mit Ausschnitt für die Maschine und Maßband',image:'szwal_21',meta:'21 mm'}};
 let step=0,api,snapshot,errors=[],timer,started=false,previousKey='',returnFocus=null,editingId=null;
 let cart=[];try{cart=JSON.parse(sessionStorage.getItem('kessler-atelier-cart')||'[]');if(!Array.isArray(cart))cart=[];}catch{}
 cart=cart.map(item=>({...item,quantity:Number.isSafeInteger(item.quantity)&&item.quantity>0?item.quantity:1}));
@@ -56,11 +60,17 @@ function dekorVorschau(){
   knopf.querySelector('i').textContent=offen?'':String(alle.length);
 }
 function standardVorschau(){
-  const zaehler=document.querySelector('.standard_sizes summary i');
-  if(!zaehler)return;
+  const schublade=document.querySelector('.standard_sizes');
+  if(!schublade)return;
+  /* Viele Dekore und Staerken haben gar keinen Lagerartikel — der Kern blendet
+     dann #quickBlock aus. Die Schublade blieb stehen und war leer (Sascha,
+     11.09.: "die Standardmasse sind wieder weg"). Sie verschwindet jetzt mit. */
   const n=document.querySelectorAll('#quickChips .kfg_quick-chip').length;
+  schublade.hidden=!n;
+  const zaehler=schublade.querySelector('summary i');
   const text=n?String(n):'';
-  if(zaehler.textContent!==text)zaehler.textContent=text;
+  if(zaehler&&zaehler.textContent!==text)zaehler.textContent=text;
+  if(!n)schublade.open=false;
 }
 
 function boot(){
@@ -89,10 +99,10 @@ function boot(){
         <section class="flow_panel" id="panel0" aria-label="Material und Oberfläche">
           ${sectionTitle('Was passt zu deiner Platte?')}
           <div class="material_choices" id="materialChoices">${Object.entries(materials).map(([k,m])=>`<button class="material_choice" type="button" data-material="${k}" aria-pressed="false"><img src="${assetUrl('kante/'+m.image+'.webp')}" width="104" height="76" alt=""><span><b>${m.name}</b><small>${m.desc}</small></span><span class="selection_check">${check}</span></button>`).join('')}</div>
-          <div class="material_help"><button class="text_button" data-dialog="materialDialog">Materialien vergleichen</button><button class="text_button" id="sewingTemplate">Vorlage für Nähtische</button></div>
-          <div id="sewingNotice" class="info_note" hidden>Nähtischplatte gewählt. Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras. <button type="button" id="leaveSewing">Zur Möbelplatte</button></div>
-          <div id="surfaceMount"></div><div class="field_heading"><h3>Oberfläche</h3><span id="selectedDecor"></span></div><div id="dekorMount"></div>
-          <div class="thickness_header"><h3>Plattenstärke</h3><button class="text_button" data-dialog="materialDialog">Welche passt?</button></div><div id="thicknessMount"></div>
+          <button type="button" class="helper_button" data-dialog="materialDialog">${frage}<span>Welches Material passt?</span>${chevron}</button>
+          <div id="sewingNotice" class="info_note" hidden>Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.</div>
+          <div id="surfaceMount"></div><div class="field_heading"><h3>Oberfläche</h3></div><div id="dekorMount"></div>
+          <div class="field_heading"><h3>Plattenstärke</h3></div><div id="thicknessMount"></div>
           <button class="sample_help" id="sampleHelp">${svg('<path d="m4 9 8-5 8 5-8 5-8-5Zm0 5 8 5 8-5"/>')}<span>Du möchtest die Oberfläche erst fühlen?<small>Musterbox mit vier Dekoren im Shop ansehen</small></span>${chevron}</button>
         </section>
         <section class="flow_panel" id="panel1" aria-label="Form und Maße" hidden>
@@ -131,7 +141,7 @@ function boot(){
   move('dekorGrid','dekorMount');move('thickChips','thicknessMount');
   const dekorKnopf=document.createElement('button');
   dekorKnopf.type='button';dekorKnopf.id='dekorMore';dekorKnopf.className='reveal_button';
-  dekorKnopf.innerHTML='<span>Alle Dekore zeigen</span><i></i>';
+  dekorKnopf.innerHTML='<span>Alle Dekore zeigen</span><i></i>'+chevron;
   $('dekorMount').append(dekorKnopf);
   dekorKnopf.addEventListener('click',()=>{$('dekorMount').classList.toggle('dekor_open');dekorVorschau();});
   // Preserve the original linked controls and calculations; only arrange their DOM.
@@ -165,8 +175,6 @@ function boot(){
   root.addEventListener('input',schedule);root.addEventListener('change',schedule);root.addEventListener('click',schedule);
   $('continueStep').addEventListener('click',()=>{sync();if(!snapshot.valid||errors.length){goStep(errors.length?2:1);return;}if(step<3)goStep(step+1);else if(snapshot.offer)quotePreview();else addToCart();});
   $('backStep').addEventListener('click',()=>goStep(step-1));
-  $('sewingTemplate').addEventListener('click',()=>{api.material('szwal');schedule();status('Nähtisch-Vorlage geladen.');});
-  $('leaveSewing').addEventListener('click',()=>api.material('dekor'));
   $('shareConfig').addEventListener('click',share);
   $('sampleHelp').addEventListener('click',()=>openSampleDialog());
   $('edgePreview').addEventListener('click',()=>openEdgeDialog());
@@ -223,12 +231,17 @@ function sync(){
   const sewing=c.mat==='szwal',extras=c.cuts.length+(c.extras.bohr?1:0)+(c.massband!=='none'?1:0);
   document.querySelectorAll('[data-material]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.material===c.mat)));
   document.querySelectorAll('[data-shape]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.shape===c.form));b.disabled=sewing&&b.dataset.shape==='round';});
-  $('sewingNotice').hidden=!sewing;$('materialChoices').hidden=sewing;
+  $('sewingNotice').hidden=!sewing;
   $('sewingGroup').hidden=!sewing;$('holesGroup').hidden=c.form==='round';$('kitchenGroup').hidden=sewing||c.form==='round';$('customGroup').hidden=sewing||c.form==='round';$('cornerGroup').hidden=c.form==='round';$('roundInfo').hidden=c.form!=='round';
   setText('previewName',p.dekorName);setText('previewDescription',`${s.material.name}, ${p.thickName}`);
-  setText('viewHint',c.view==='3d'?'Ziehen zum Drehen':'Draufsicht mit Maßen');
+  /* Drehen geht nur in der Produktansicht — in der Masszeichnung stand der
+     Hinweis samt Drehsymbol trotzdem da (Sascha, 11.09.). Massgeblich ist der
+     Umschalter, nicht der Schnappschuss: faellt 3D mangels WebGL weg, schaltet
+     der Kern still auf 2D zurueck, ohne dass hier ein Abgleich ankommt. */
+  const dreidee=$('btn3d')?$('btn3d').classList.contains('is-active'):c.view==='3d';
+  document.querySelector('#atelier .view_hint').hidden=!dreidee;
   setText('factDimensions',dimsText(s));setText('factThickness',p.thickName);setText('factExtras',extras?`${extras} gewählt`:'Keine');
-  setText('selectedDecor',p.dekorName);setText('edgeDescription',s.edgeNames.join(', '));
+  setText('edgeDescription',s.edgeNames.join(', '));
   if($('edgeImage').getAttribute('src')!==s.edgePhoto.src)$('edgeImage').src=s.edgePhoto.src;
   $('edgeImage').alt=`Kantenaufnahme ${p.dekorName}, ${s.material.name}`;
   const closedPrice=!s.valid||errors.length>0||s.offer;

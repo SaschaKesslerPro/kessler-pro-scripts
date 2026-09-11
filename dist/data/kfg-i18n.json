@@ -519,7 +519,9 @@
   "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "Przenosisz wszystkie płyty do koszyka sklepu i płacisz.",
   "Deine Platte inkl. MwSt.": "Twoja płyta z VAT",
   "Alle Dekore zeigen": "Pokaż wszystkie dekory",
-  "Weniger Dekore zeigen": "Pokaż mniej dekorów"
+  "Weniger Dekore zeigen": "Pokaż mniej dekorów",
+  "Mit Ausschnitt für die Maschine und Maßband": "Z wycięciem pod maszynę i taśmą mierniczą",
+  "Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.": "Wycięcie pod maszynę i taśmę mierniczą znajdziesz w Krawędziach i dodatkach."
  },
  "en": {
   "Ab Lager": "From stock",
@@ -1030,7 +1032,9 @@
   "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "You move all panels into the shop basket and pay.",
   "Deine Platte inkl. MwSt.": "Your panel incl. VAT",
   "Alle Dekore zeigen": "Show all decors",
-  "Weniger Dekore zeigen": "Show fewer decors"
+  "Weniger Dekore zeigen": "Show fewer decors",
+  "Mit Ausschnitt für die Maschine und Maßband": "With a cut-out for the machine and a measuring tape",
+  "Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.": "You find the machine cut-out and the measuring tape under Edges & extras."
  },
  "muster": {
   "pl": [

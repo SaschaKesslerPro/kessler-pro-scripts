@@ -107,14 +107,15 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
    knapp 300 px breiter und 68 px weiter links als alles andere. Er nimmt jetzt
    dasselbe Maß, damit Kopf, Konfigurator und die Abschnitte darunter auf einer
    Kante stehen. Die Werte spiegeln die Webflow-Haltepunkte (991 / 767). */
-#atelier .atelier_shell{max-width:1280px;margin:0 auto;padding:0 80px}
+#atelier .atelier_shell{max-width:1400px;margin:0 auto;padding:0 56px}
 @media(max-width:991px){#atelier .atelier_shell{margin:0 auto;padding:0 32px}}
 @media(max-width:767px){#atelier .atelier_shell{margin:0 auto;padding:0 16px}}
-/* Auf dem schmaleren Maß braucht die Steuerspalte den Vorrang vor der Vorschau:
-   die Zeichnung skaliert, die Bedienfelder nicht. */
+/* Vorschau vor Steuerung: die Platte soll ganz im Bild stehen (Sascha, 11.09.). */
 @media(min-width:992px){
-  #atelier .workbench{grid-template-columns:1fr 1.06fr;gap:56px}
+  #atelier .workbench{grid-template-columns:1.1fr 1fr;gap:56px}
+  #atelier .preview_canvas{height:480px}
 }
+@media(max-width:767px){#atelier .preview_canvas{height:220px}}
 
 /* ── Schritt 1 und 2: eine Reihe offen, der Rest auf Knopfdruck ────────────
    Gemessen am 11.09.: 21 / 26 / 42 / 7 Bedienelemente je Schritt. Schritt 3
@@ -122,10 +123,27 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
    Dekorgitter läuft deshalb auf fünf Spalten — geschlossen genau eine Reihe —
    und die Standardmaße starten wie die Gruppen in Schritt 3 zugeklappt. */
 #atelier #dekorGrid{grid-template-columns:repeat(5,minmax(0,1fr))}
-#atelier .reveal_button{display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;padding:12px 0;min-height:48px;border:0;border-top:1px solid var(--line);background:transparent;font-size:13px;text-align:left}
-#atelier .reveal_button i{font-style:normal;font-size:12px;color:var(--body);font-variant-numeric:tabular-nums}
+
+/* ── Knöpfe, die man als Knöpfe erkennt (Sascha, 11.09.) ───────────────────
+   „Alle Dekore zeigen" und die Materialberatung standen als unterstrichener
+   Fließtext da und gingen unter. Beide sind jetzt Flächen mit Rahmen. */
+#atelier .reveal_button,#atelier .helper_button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:13px 18px;border:1px solid #b7b7b9;border-radius:8px;background:#fff;font-size:14px;text-align:left;margin-top:16px}
+#atelier .reveal_button{border-top:1px solid #b7b7b9;justify-content:center}
+#atelier .reveal_button:hover,#atelier .helper_button:hover{background:#f5f5f5}
+#atelier .reveal_button>svg,#atelier .helper_button>svg:last-child{width:16px;height:16px;transform:rotate(90deg);color:var(--body)}
+#atelier .reveal_button>svg{margin-left:6px}
+#atelier .dekor_open .reveal_button>svg{transform:rotate(-90deg)}
+#atelier .helper_button>svg:last-child{margin-left:auto;transform:none}
+#atelier .helper_button>svg:first-child{width:20px;height:20px}
+#atelier .helper_button>span{font-weight:500}
+#atelier .reveal_button i{font-style:normal;font-size:12px;color:var(--body);font-variant-numeric:tabular-nums;background:#f0f0f1;border-radius:10px;padding:2px 9px}
 #atelier .reveal_button i:empty{display:none}
-#atelier .reveal_button:after{content:'+';margin-left:auto;font-size:20px;font-weight:300;line-height:1}
-#atelier .dekor_open .reveal_button:after{content:'−'}
-#atelier .standard_sizes summary i{font-style:normal;font-size:12px;color:var(--body);margin-left:8px;font-variant-numeric:tabular-nums}
+#atelier .standard_sizes summary i{font-style:normal;font-size:12px;color:var(--body);margin-left:8px;font-variant-numeric:tabular-nums;background:#f0f0f1;border-radius:10px;padding:2px 9px}
 #atelier .standard_sizes summary i:empty{display:none}
+#atelier .standard_sizes>summary{gap:8px}
+/* Die Nähtischplatte ist jetzt die vierte Materialkarte — vier Karten in einer
+   Spalte werden lang, deshalb ab 992 px zwei nebeneinander. */
+@media(min-width:992px){
+  #atelier .material_choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+  #atelier .material_choice:nth-child(2){border-top:1px solid var(--line)}
+}
