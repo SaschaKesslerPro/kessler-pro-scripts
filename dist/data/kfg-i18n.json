@@ -517,7 +517,9 @@
   "Musterbox anfragen": "Zapytaj o zestaw próbek",
   "Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.": "Twoja płyta trafia najpierw do Twoich płyt. Tam ustawisz ilość.",
   "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "Przenosisz wszystkie płyty do koszyka sklepu i płacisz.",
-  "Deine Platte inkl. MwSt.": "Twoja płyta z VAT"
+  "Deine Platte inkl. MwSt.": "Twoja płyta z VAT",
+  "Alle Dekore zeigen": "Pokaż wszystkie dekory",
+  "Weniger Dekore zeigen": "Pokaż mniej dekorów"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -1026,7 +1028,9 @@
   "Musterbox anfragen": "Request the sample box",
   "Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.": "Your panel first collects with your panels. You set the quantity there.",
   "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "You move all panels into the shop basket and pay.",
-  "Deine Platte inkl. MwSt.": "Your panel incl. VAT"
+  "Deine Platte inkl. MwSt.": "Your panel incl. VAT",
+  "Alle Dekore zeigen": "Show all decors",
+  "Weniger Dekore zeigen": "Show fewer decors"
  },
  "muster": {
   "pl": [

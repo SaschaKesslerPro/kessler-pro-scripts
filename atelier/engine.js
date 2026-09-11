@@ -25,15 +25,15 @@
   /* Auf den Commit gezogen, der am 10.09.2026 live lief — dort liegen Preiskurven,
    Sprachdatei und Bilder, die es unter dem alten Commit noch nicht gab. Greift,
    wenn das Skript NICHT ueber jsDelivr geladen wird (z. B. als Webflow-Asset). */
-var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@2ee8195';
+var FALLBACK_BASE = '.';
   var BASE = (function(){
     try{
       var me = document.currentScript && document.currentScript.src;
       if(!me){
-        var all = document.querySelectorAll('script[src*="konfigurator"]');
+        var all = document.querySelectorAll('script[src*="konfigurator.js"]');
         me = all.length ? all[all.length-1].src : '';
       }
-      var i = me.indexOf('/dist/konfigurator-atelier.js'); if(i<0) i = me.indexOf('/dist/konfigurator.js');
+      var i = me.indexOf('/dist/konfigurator.js');
       return i > 0 ? me.slice(0, i) : FALLBACK_BASE;
     }catch(e){ return FALLBACK_BASE; }
   })();
@@ -67,7 +67,8 @@ var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-sc
 
   /* GA4 ueber den vorhandenen GTM — Event-Liste von Sascha freigegeben (30.07.).
      Consent Mode v2 queued die Pushes, bis der Nutzer zugestimmt hat. */
-  function ga(ev, p){ try{ (window.dataLayer = window.dataLayer || []).push(Object.assign({event: ev}, p || {})); }catch(_){} }
+  function ga(ev, p){ return;
+ try{ (window.dataLayer = window.dataLayer || []).push(Object.assign({event: ev}, p || {})); }catch(_){} }
 
   function boot(){
     var root = document.querySelector(ROOT_SEL);
@@ -167,7 +168,7 @@ const TEX = Object.fromEntries(["weiss", "schwarz", "kaszmir", "sosna-bielona", 
    Buehne fuer das GEWAEHLTE Dekor. Vorher zogen 11 Draufsichten ~440 KB als
    60-px-Kacheln (Audit 29.07., Fix 3). */
 const TEX_THUMB = Object.fromEntries(Object.entries(TEX).map(([k,u])=>[k,u.replace('/top/','/thumb/')]));
-const ATELIER_ATLASES=Object.fromEntries(Object.entries({"hikora":{"src":"./assets/kfg/atlas/hikora.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/hikora.webp"},"ahorn":{"src":"./assets/kfg/atlas/ahorn.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/ahorn.webp"},"buk":{"src":"./assets/kfg/atlas/buk.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/buk.webp"},"sonoma-eiche":{"src":"./assets/kfg/atlas/sonoma-eiche.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sonoma-eiche.webp"},"eiche-artison":{"src":"./assets/kfg/atlas/eiche-artison.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/eiche-artison.webp"},"sosna-bielona":{"src":"./assets/kfg/atlas/sosna-bielona.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sosna-bielona.webp"},"sperrholz-natur":{"src":"./assets/kfg/atlas/sperrholz-natur.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sperrholz-natur.webp"}}).map(([k,v])=>[k,Object.assign({},v,{src:ASSET+v.src.replace(/^\.\/assets\/kfg\//,'')})]));
+const ATELIER_ATLASES={"hikora":{"src":"./assets/kfg/atlas/hikora.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/hikora.webp"},"ahorn":{"src":"./assets/kfg/atlas/ahorn.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/ahorn.webp"},"buk":{"src":"./assets/kfg/atlas/buk.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/buk.webp"},"sonoma-eiche":{"src":"./assets/kfg/atlas/sonoma-eiche.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sonoma-eiche.webp"},"eiche-artison":{"src":"./assets/kfg/atlas/eiche-artison.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/eiche-artison.webp"},"sosna-bielona":{"src":"./assets/kfg/atlas/sosna-bielona.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sosna-bielona.webp"},"sperrholz-natur":{"src":"./assets/kfg/atlas/sperrholz-natur.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sperrholz-natur.webp"}};
 
 /* Vollbild-Cache: Die Buehne zeigt beim Dekorwechsel SOFORT das (gecachte)
    128-px-Thumb und tauscht auf das Vollbild, sobald es dekodiert ist. Vorher
@@ -875,7 +876,7 @@ const PRESETS = {
    data-kfg-checkout ging bei einem Designer-Publish am 03.09. verloren — die
    Seite fiel fuer alle Sondermasse still auf die Mail-Anfrage zurueck. Attribut
    oder window.KFG_CHECKOUT_URL ueberschreiben weiterhin; "off" schaltet ab. */
-const CHECKOUT_DEFAULT='https://kessler-konfigurator-checkout.kessler-konfigurator-checkout.workers.dev/checkout';
+const CHECKOUT_DEFAULT='';
 const CHECKOUT_URL=(function(){
   try{ const r=document.querySelector('[data-kfg-root]');
     const a=(r&&r.getAttribute('data-kfg-checkout'))||window.KFG_CHECKOUT_URL||'';
@@ -1569,7 +1570,7 @@ function ensure3D(cb){
   if(three.laden){ three.laden.push(cb); return; }
   three.laden=[cb];
   const s=document.createElement('script');
-  s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.src='./vendor/three.min.js';
   s.integrity='sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu'; s.crossOrigin='anonymous';
   s.onload=()=>{ const l=three.laden||[]; three.laden=null; init3D(()=>l.forEach(f=>{ try{ f(); }catch(e){ try{ console.warn('kfg 3D', e && e.message); }catch(_){} } })); };
   s.onerror=()=>{ three.laden=null; three.failed=true; const b=$('btn3d'); if(b) b.disabled=true; toast('3D-Ansicht konnte nicht geladen werden'); setView('2d'); };
@@ -3108,7 +3109,8 @@ function checkoutUrlOk(u){ try{ const x=new URL(String(u)); if(x.hostname===loca
    Der Worker rechnet den Preis selbst nach — der hier mitgeschickte Betrag
    dient nur dem Abgleich. Schlaegt der Aufruf fehl, faellt es auf die
    Mail-Anfrage zurueck, damit der Kunde nie vor einer toten Taste steht. */
-function checkoutStarten(){
+function checkoutStarten(){ toast('Diese Designvorschau löst keine Bestellung aus.'); return;
+
   if(_checkoutLaeuft) return;
   if(typeof _syncURLnow==='function') _syncURLnow();
   const c=calc(), K=JSON.parse(JSON.stringify(S)); delete K.draw; delete K.view;
@@ -3156,14 +3158,15 @@ function knoepfeSperren(text){
 }
 /* Zurueck per Browser-Zurueck aus der Kasse (bfcache): Sperre loesen, Knoepfe neu beschriften */
 window.addEventListener('pageshow',e=>{ if(e.persisted){ _checkoutLaeuft=false; panelSperren(false); [$('cta'),$('ctaBar'),$('ctaBuy'),$('ctaMini')].forEach(b=>{ if(b) b.disabled=false; }); try{ render(); }catch(_){} } });
-async function inWarenkorbLegen(variantId, attribute, menge){
+async function inWarenkorbLegen(variantId, attribute){
   const sf=shopyflow(); if(!sf) throw new Error('kein Warenkorb');
   /* Shopyflow ohne eigenen Timeout: bleibt das Promise haengen, blieben die Knoepfe fuer immer gesperrt (Review 08.09., B5) */
   const frist=new Promise((_,ab)=>setTimeout(()=>ab(new Error('Warenkorb antwortet nicht')),12000));
-  await Promise.race([Promise.resolve(sf.addToCart({ lineItems:[{ merchandiseId: variantId, quantity:(Number.isSafeInteger(menge)&&menge>0?menge:1), attributes: attribute||[] }], useShopifyId:true })), frist]);
-  /* openCart: die Atelier-Oberflaeche oeffnet den Warenkorb selbst, erst am Ende */
+  await Promise.race([Promise.resolve(sf.addToCart({ lineItems:[{ merchandiseId: variantId, quantity:1, attributes: attribute||[] }], useShopifyId:true })), frist]);
+  try{ if(typeof sf.openCart==='function') sf.openCart(); }catch(_){}
 }
-function warenkorbStarten(){
+function warenkorbStarten(){ toast('Diese Designvorschau löst keine Bestellung aus.'); return;
+
   if(_checkoutLaeuft) return;
   const hit=nurLager()&&shopHit(), c=calc();
   _checkoutLaeuft=true;
@@ -3191,7 +3194,8 @@ function warenkorbStarten(){
 }
 /* Sofortkauf: eigener Warenkorb nur mit dieser Platte, direkt zur Kasse — der
    Shopyflow-Warenkorb des Kunden bleibt, wie er ist. Rueckfall: Draft Order. */
-function sofortkaufStarten(){
+function sofortkaufStarten(){ toast('Diese Designvorschau löst keine Bestellung aus.'); return;
+
   if(_checkoutLaeuft) return;
   const hit=nurLager()&&shopHit(), c=calc();
   ga('kfg_sofortkauf',{preis:c.total, typ: hit?'lager':'mass'});
@@ -3889,39 +3893,7 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
       material:function(k){ const b=document.querySelector('#matGrid [data-m="'+k+'"]'); if(b)b.click(); },
       shape:function(k){ const b=document.querySelector('#formChips [data-form="'+k+'"]'); if(b)b.click(); },
       preset:addPreset,
-      cutLabel:cutTypName,
-      assetBase:function(){ return ASSET; },
-      orderIntent:function(){
-        const hit=nurLager()&&shopHit();
-        return { body: bodyFuerWorker(), lager: hit?{variantId:'gid://shopify/ProductVariant/'+hit[1], sku:hit[2]}:null, anfrage: !kannBezahlen() && !hit };
-      },
-      checkout:async function(intent, menge){
-        const m=Number.isSafeInteger(menge)&&menge>0?menge:1;
-        if(!shopyflow()) throw new Error('Der Warenkorb des Shops ist gerade nicht erreichbar');
-        if(intent && intent.lager) return inWarenkorbLegen(intent.lager.variantId, [], m);
-        if(!WARENKORB_URL) throw new Error('Kein Warenkorb-Endpunkt hinterlegt');
-        const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(),20000);
-        try{
-          const r=await fetch(WARENKORB_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(intent.body),signal:ctl.signal});
-          const d=await r.json().catch(()=>null);
-          if(!(r.ok && d && d.variantId)) throw new Error((d&&d.fehler)||'Der Shop hat keine Variante geliefert');
-          /* Der Server rechnet selbst nach: weicht sein Preis ab, wird nichts gelegt. */
-          if(isFinite(+intent.body.preis) && isFinite(+d.preis) && Math.abs(+d.preis - +intent.body.preis) > 0.011)
-            throw new Error('Der Preis hat sich geändert - bitte die Platte neu prüfen');
-          return await inWarenkorbLegen(d.variantId, d.attribute||[], m);
-        } finally { clearTimeout(tm); }
-      },
-      openCart:function(){ const sf=shopyflow(); try{ if(sf && typeof sf.openCart==='function') sf.openCart(); }catch(_){} },
-      inquiry:anfrageMail,
-      /* Die neue Oberflaeche schreibt Text nach dem Render des Kerns - die
-         Wortliste laeuft danach noch einmal darueber. Dialoge liegen an <body>
-         und muessen einzeln uebergeben werden. */
-      translate:function(el){ try{ uebersetze(el||undefined); }catch(_){} },
-      lang:function(){ return KFG_LANG; },
-      /* Erst wenn die Wortliste da ist, lohnt ein zweiter Lauf ueber die Dialoge. */
-      wortlisteDa:function(){ return !!_kfgWB; },
-      money:fmt,
-      shipping:function(){ return { betrag: kanal()==='pln' ? 84.90 : 19.99, text: VERSAND_MASS[kanal()] }; }
+      cutLabel:cutTypName
     },
     getConfig: function(){ return JSON.parse(JSON.stringify(S)); },
     setConfig: function(patch){ Object.assign(S, patch||{}); [["inL",S.L],["inB",S.B],["inD",S.D]].forEach(([id,v])=>{if($(id))$(id).value=v;}); buildAll(); render(); },
@@ -3931,521 +3903,4 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
     _debug: function(){ return { S:S, shopArtikel:Object.keys(SHOP).length, treffer:shopHit(), drei:three }; }
   };
 }
-})();
-
-
-/* ── Atelier-Oberflaeche (Codex-Entwurf 10.09.2026, fuer Webflow gescopt) ── */
-(function(){
-if(window.__KFG_ATELIER)return; window.__KFG_ATELIER=true;
-/* Huelle fuer die Webflow-Seite: das Stylesheet der Vorschau lag als eigene Datei
-   neben index.html, die Dialoge standen fest im HTML. Auf der Seite bringt das
-   Skript beides selbst mit, damit in Webflow nur ein leerer Container noetig ist. */
-(function(){
-  var css=":is(#atelier,.atelier_dialog){font-family:Onest,system-ui,-apple-system,'Segoe UI',sans-serif;font-synthesis:none;color:var(--ink);-webkit-font-smoothing:antialiased}:is(#atelier,.atelier_dialog) :is(h1,h2,h3,h4,h5,h6,p,li,dt,dd,summary,label,small,strong,b,em,figcaption){font-family:inherit;color:inherit;letter-spacing:normal;text-transform:none}:root{--paper:#fff;--surface:#f4f4f5;--ink:#0a0a0a;--body:#5c5c5e;--line:#dcdcdd;--green:#0a7c47;--error:#a72d27;--radius:8px}:is(#atelier,.atelier_dialog) *{box-sizing:border-box}:is(#atelier,.atelier_dialog) button,:is(#atelier,.atelier_dialog) input,:is(#atelier,.atelier_dialog) select,:is(#atelier,.atelier_dialog) textarea{font:inherit}:is(#atelier,.atelier_dialog) button,:is(#atelier,.atelier_dialog) a,:is(#atelier,.atelier_dialog) input,:is(#atelier,.atelier_dialog) select,:is(#atelier,.atelier_dialog) textarea{-webkit-tap-highlight-color:transparent}:is(#atelier,.atelier_dialog) button{cursor:pointer;color:inherit}:is(#atelier,.atelier_dialog) a{color:inherit;text-underline-offset:4px}:is(#atelier,.atelier_dialog) button:disabled{cursor:not-allowed;opacity:.45}:is(#atelier,.atelier_dialog) button:focus-visible,:is(#atelier,.atelier_dialog) a:focus-visible,:is(#atelier,.atelier_dialog) input:focus-visible,:is(#atelier,.atelier_dialog) select:focus-visible,:is(#atelier,.atelier_dialog) summary:focus-visible,:is(#atelier,.atelier_dialog) textarea:focus-visible{outline:2px solid #0a7c47!important;outline-offset:4px}:is(#atelier,.atelier_dialog) input{caret-color:var(--green)}:is(#atelier,.atelier_dialog) [hidden]{display:none!important}:is(#atelier,.atelier_dialog) svg{flex-shrink:0}:is(#atelier,.atelier_dialog) h1,:is(#atelier,.atelier_dialog) h2,:is(#atelier,.atelier_dialog) h3,:is(#atelier,.atelier_dialog) p{margin:0}:is(#atelier,.atelier_dialog) p{line-height:1.6}:is(#atelier,.atelier_dialog) button svg,:is(#atelier,.atelier_dialog) .text_button svg,:is(#atelier,.atelier_dialog) .primary_button svg{width:20px;height:20px}:is(#atelier,.atelier_dialog) button,:is(#atelier,.atelier_dialog) a{touch-action:manipulation}.atelier_dialog::backdrop{background:rgba(10,10,10,.4)}:is(#atelier,.atelier_dialog) .sr_only{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}:is(#atelier,.atelier_dialog) .loading{padding:80px 32px;text-align:center}:is(#atelier,.atelier_dialog) .text_button{padding:0;border:0;background:transparent;display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:13px;text-decoration:underline;text-underline-offset:4px}:is(#atelier,.atelier_dialog) .icon_button{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:8px;font-size:26px;flex-shrink:0}:is(#atelier,.atelier_dialog) .icon_button:hover{background:#e8e8e9}:is(#atelier,.atelier_dialog) .primary_button,:is(#atelier,.atelier_dialog) .secondary_button{min-height:52px;padding:14px 22px;display:inline-flex;align-items:center;justify-content:center;gap:14px;text-decoration:none;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;font-size:14px;font-weight:600;line-height:1.35}:is(#atelier,.atelier_dialog) .secondary_button{background:#fff;color:var(--ink)}:is(#atelier,.atelier_dialog) .primary_button:hover{background:#333}:is(#atelier,.atelier_dialog) .secondary_button:hover{background:#f5f5f5}:is(#atelier,.atelier_dialog) .muted{color:var(--body)}/* Higher specificity isolates this surface from the inherited core's visual rules. */#atelier{min-height:0;--ink:#0a0a0a;--deep:#0a0a0a;--card:#f4f4f5;--alt:#fafafa;--hair:#dcdcdd;--ok:#0a7c47;font-size:15px;line-height:1.5}#atelier *{box-sizing:border-box}#atelier .atelier_shell{max-width:1440px;padding:0;margin:0 auto}#atelier .page_intro{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:40px 0 32px}#atelier h1{font-size:40px;line-height:1.15;letter-spacing:-1.3px;font-weight:500;text-wrap:balance}#atelier .page_intro p{font-size:15px;color:var(--body);margin-top:10px}#atelier .page_intro .text_button{white-space:nowrap}#atelier .step_nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:32px;scroll-margin-top:24px}#atelier .step_nav button{display:flex;align-items:center;gap:12px;padding:19px 8px;border:0;border-bottom:2px solid transparent;background:transparent;color:#636365;font-size:14px;text-align:left;position:relative}#atelier .step_nav button>svg{width:16px;height:16px;color:#b3b3b5;margin-left:auto;margin-right:30px}#atelier .step_nav button[aria-current]{border-bottom-color:var(--ink);color:var(--ink);font-weight:600}#atelier .step_nav button[data-complete] .step_number{color:var(--green)}#atelier .step_number{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}#atelier .workbench{display:grid;grid-template-columns:1.15fr 1fr;gap:64px;align-items:start}#atelier .work_preview{position:sticky;top:24px;min-width:0}#atelier .preview_surface{background:var(--surface);border-radius:16px;overflow:hidden;padding:16px 20px 24px;position:relative}#atelier .preview_toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}#atelier .view_switch{display:flex;gap:0;border:1px solid #d1d1d3;border-radius:8px;overflow:hidden;background:transparent}#atelier .view_switch button{min-height:40px;padding:10px 14px;border:0;background:transparent;font-size:12px;font-weight:500;color:var(--body)}#atelier .view_switch button.is-active{background:#fff;color:var(--ink)}#atelier .preview_canvas{width:100%;position:relative;height:430px;display:flex;align-items:center;justify-content:center}#atelier #stage,#atelier #stage3d{width:100%!important;height:100%!important;max-height:none!important;aspect-ratio:auto;object-fit:contain}#atelier #stage3d{cursor:grab;touch-action:none}#atelier .preview_caption{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:0 8px}#atelier .preview_caption strong{font-weight:500;font-size:26px;letter-spacing:-.6px;display:block}#atelier .preview_caption span{font-size:13px;color:var(--body);display:block}#atelier #viewHint{font-size:11px;text-align:right;padding-bottom:3px}#atelier .preview_facts{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:16px;padding:24px 0;border-bottom:1px solid var(--line)}#atelier .preview_facts span{display:block;font-size:12px;color:var(--body);margin-bottom:5px}#atelier .preview_facts strong{font-size:15px;font-weight:500}#atelier .edge_preview{display:flex;align-items:center;gap:24px;padding:24px 0;border:0;background:transparent;width:100%;text-align:left}#atelier .edge_preview img{width:128px;height:96px;object-fit:cover;border-radius:8px;mix-blend-mode:multiply}#atelier .edge_preview>span{flex:1}#atelier .edge_preview b{display:block;font-size:15px;font-weight:500}#atelier .edge_preview span span{display:block;font-size:13px;color:var(--body);margin:4px 0 10px}#atelier .edge_preview small{font-size:12px;text-decoration:underline;text-underline-offset:4px}#atelier .edge_preview>svg{width:16px}#atelier .preview_note{font-size:12px;line-height:1.6;color:var(--body);max-width:58ch;padding-top:8px}#atelier .work_controls{min-width:0}#atelier .panel_heading{margin:2px 0 24px}#atelier .panel_heading h2{font-size:26px;font-weight:500;letter-spacing:-.65px;line-height:1.2}#atelier .panel_heading h2:focus{outline:none}#atelier .panel_heading p{font-size:14px;color:var(--body);margin-top:8px;line-height:1.6}#atelier .material_choices{display:flex;flex-direction:column;gap:0}#atelier .material_choice{width:100%;border:0;border-bottom:1px solid var(--line);background:#fff;display:flex;align-items:center;gap:18px;text-align:left;padding:12px 8px 12px 0;min-height:92px;border-radius:0;position:relative}#atelier .material_choice:first-child{border-top:1px solid var(--line)}#atelier .material_choice img{width:100px;height:68px;object-fit:cover;border-radius:6px;background:#f4f4f5}#atelier .material_choice>span:nth-child(2){flex:1;min-width:0}#atelier .material_choice b{font-size:16px;font-weight:500;display:block;margin-bottom:4px}#atelier .material_choice small{font-size:12px;color:var(--body);display:block;line-height:1.5}#atelier .selection_check{width:24px;height:24px;border:1px solid #99999b;border-radius:50%;display:grid;place-items:center}#atelier .selection_check svg{width:15px;height:15px;opacity:0}#atelier .material_choice[aria-pressed=\"true\"] .selection_check{background:var(--ink);border-color:var(--ink);color:#fff}#atelier .material_choice[aria-pressed=\"true\"] .selection_check svg{opacity:1}#atelier .material_choice[aria-pressed=\"true\"] b{font-weight:600}#atelier .material_choice:hover{background:#fafafa}#atelier .material_help{display:flex;justify-content:space-between;gap:16px;padding:6px 0 4px}#atelier .material_help button{font-size:12px}#atelier .field_heading,#atelier .thickness_header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:24px 0 12px}#atelier h3{font-size:15px;font-weight:600}#atelier .field_heading>span{font-size:13px;color:var(--body)}#atelier .thickness_header .text_button{font-size:12px;min-height:24px}#atelier #dekorGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px 10px}#atelier .kfg_dekor{display:flex;flex-direction:column;gap:7px;padding:0;border:0;background:transparent;min-width:0;cursor:pointer;color:var(--body);border-radius:0}#atelier .kfg_dekor .sw{width:100%;aspect-ratio:1/1;border-radius:6px;position:relative;display:block;border:1px solid rgba(0,0,0,.08)}#atelier .kfg_dekor.is-active .sw{outline:2px solid var(--ink);outline-offset:3px}#atelier .kfg_dekor img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.08)}#atelier .kfg_dekor.is-active img{outline:2px solid var(--ink);outline-offset:3px}#atelier .kfg_dekor span:not(.sw){font-size:11px;line-height:1.3;text-align:left;min-height:28px}#atelier .kfg_dekor.is-active{color:var(--ink)}#atelier .kfg_chip,#atelier .kfg_quick-chip{min-height:44px;border:1px solid #b7b7b9;border-radius:8px;padding:10px 16px;background:#fff;color:var(--ink);font-size:14px;line-height:1.4;display:inline-flex;align-items:center;justify-content:center;gap:5px}#atelier .kfg_chip small{font-size:12px;color:var(--body);font-weight:400}#atelier .kfg_chip.is-active,#atelier .kfg_quick-chip.is-active{border-color:var(--ink);background:#f4f4f5;box-shadow:inset 0 0 0 1px var(--ink);color:var(--ink)}#atelier .kfg_chips,#atelier #thickChips{display:flex;flex-wrap:wrap;gap:8px;margin:0}#atelier #thickChips .kfg_chip{min-width:100px}#atelier .sample_help{display:flex;align-items:center;text-align:left;gap:14px;width:100%;margin-top:28px;border:0;border-top:1px solid var(--line);background:transparent;padding:18px 0;font-size:13px}#atelier .sample_help>span{flex:1}#atelier .sample_help small{display:block;font-size:12px;color:var(--body);margin-top:4px}#atelier .sample_help>svg:last-child{width:16px}#atelier .step_actions{display:flex;align-items:center;justify-content:space-between;min-height:48px;margin-top:18px}#atelier .step_actions>span{margin-left:auto;font-size:12px;color:var(--body)}#atelier .purchase_bar{border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0 0;margin-top:12px;background:#fff}#atelier .price_block{min-width:0;font-variant-numeric:tabular-nums}#atelier .price_block>span{font-size:12px;color:var(--body);display:block}#atelier .price_block strong{font-size:28px;letter-spacing:-.7px;line-height:1.4;font-weight:600;display:block}#atelier .price_block small{display:block;font-size:11px;line-height:1.5;color:var(--body)}#atelier .primary_button{min-height:52px;padding:14px 20px;background:var(--ink);border:1px solid var(--ink);border-radius:8px;color:#fff;font-size:13px;font-weight:500;display:inline-flex;gap:12px;align-items:center;justify-content:center;white-space:nowrap}#atelier .primary_button>svg{width:16px;height:16px}#atelier .price_status{font-size:12px;color:var(--body);line-height:1.6;margin-top:12px}#atelier .shape_choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:32px}#atelier .shape_choice{min-height:116px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border:1px solid #b7b7b9;background:#fff;border-radius:8px;font-size:12px}#atelier .shape_choice>svg{width:48px;height:48px;stroke-width:.9}#atelier .shape_choice[aria-pressed=\"true\"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:#f4f4f5}#atelier .kfg_step{padding:0!important;border:0!important;background:transparent!important;margin:0!important;border-radius:0!important}#atelier .kfg_step-head{display:none!important}#atelier .kfg_step-body{display:block!important}#atelier .kfg_field{min-width:0}#atelier .kfg_field>label{font-size:13px;font-weight:500;color:var(--ink);display:block;margin-bottom:8px}#atelier .kfg_field .in{border:1px solid #a5a5a8;border-radius:8px;background:#fff;display:flex;align-items:center;padding:0;min-height:54px}#atelier .kfg_field input{width:100%;min-width:0;padding:13px 16px;font-size:17px;line-height:1.4;border:0;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}#atelier .kfg_field .unit{font-size:13px;color:var(--body);padding-right:16px}#atelier .kfg_field .range{display:block;font-size:12px;line-height:1.6;color:var(--body);margin-top:6px}#atelier .kfg_field .err{font-size:13px;color:var(--error);margin-top:5px;line-height:1.5;display:none}#atelier .kfg_field.is-error .err{display:block}#atelier .kfg_field.is-error .in{border-color:var(--error)}#atelier .kfg_dims{gap:24px 16px}#atelier #dimsRect,#atelier #dimsLform,#atelier #dimsBauch{gap:24px 16px;grid-template-columns:repeat(2,minmax(0,1fr))}#atelier .kfg_sublabel{font-size:13px;line-height:1.5;margin:20px 0 10px;color:var(--body)}#atelier .kfg_rule-note,#atelier .kfg_mpx-note{padding:14px 16px;background:#f5f5f5;color:var(--body);font-size:12px;line-height:1.65;border-radius:8px;margin-top:14px}#atelier .kfg_measure{margin-top:28px;border-top:1px solid var(--line);padding-top:8px}#atelier .kfg_measure summary{min-height:44px;display:flex;align-items:center;font-size:13px;cursor:pointer}#atelier .kfg_measure p{font-size:13px;color:var(--body);line-height:1.6;padding:8px 0}#atelier .standard_sizes{border-top:1px solid var(--line);margin-top:28px}#atelier .standard_sizes summary,#atelier .individual_corners>summary{font-size:13px;min-height:48px;display:flex;align-items:center;cursor:pointer}#atelier .standard_sizes summary:after,#atelier .individual_corners>summary:after{content:'+';margin-left:auto;font-size:20px;font-weight:300}#atelier .standard_sizes[open]>summary:after,#atelier .individual_corners[open]>summary:after{content:'−'}#atelier #quickBlock{padding:0 0 12px;margin:0}#atelier #quickBlock>p{display:none}#atelier #quickChips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}#atelier .kfg_quick-chip{font-size:12px;min-height:44px;padding:9px 4px}#atelier .option_group{border-top:1px solid var(--line);margin:0}#atelier .option_group:last-of-type{border-bottom:1px solid var(--line)}#atelier .option_group>summary{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:84px;padding:17px 0;cursor:pointer;list-style:none}#atelier .option_group>summary::-webkit-details-marker{display:none}#atelier .option_group>summary b{font-size:16px;font-weight:500;display:block}#atelier .option_group>summary small{font-size:12px;color:var(--body);display:block;margin-top:4px}#atelier .option_group>summary svg{width:17px;height:17px;transform:rotate(90deg)}#atelier .option_group[open]>summary svg{transform:rotate(-90deg)}#atelier .group_body{padding:0 0 24px}#atelier .kfg_grouplabel{display:none}#atelier .kfg_preset{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:16px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;margin:0;background:transparent}#atelier .kfg_preset>span:first-child{grid-row:1;grid-column:1}#atelier .kfg_preset b{font-size:14px;font-weight:500;display:block;white-space:normal}#atelier .kfg_preset small{font-size:12px;color:var(--body);display:block;line-height:1.5;margin-top:4px;white-space:normal}#atelier .kfg_preset>.pr{grid-row:2;grid-column:1;font-size:12px;color:var(--body)}#atelier .kfg_stepper{grid-column:2;grid-row:1/3;align-self:center;display:flex;align-items:center;border:1px solid #b7b7b9;border-radius:8px;overflow:hidden}#atelier .kfg_stepper button{width:40px;height:44px;min-height:44px;border:0;background:transparent;font-size:17px}#atelier .kfg_stepper [data-count]{min-width:20px;text-align:center;font-size:14px}#atelier .kfg_check{display:flex;align-items:center;gap:12px;border:0;background:#fff;border-radius:0;min-height:64px;padding:14px 0;margin:0}#atelier .kfg_check input{width:20px;height:20px;accent-color:var(--ink)}#atelier .kfg_check b{font-size:14px;font-weight:500}#atelier .kfg_check small{font-size:12px;color:var(--body);line-height:1.5}#atelier .kfg_check .pr{font-size:12px;margin-left:auto}#atelier .kfg_edge-note{font-size:12px;color:var(--body);line-height:1.6;padding-top:20px}#atelier .kfg_corner-sel{gap:8px}#atelier .kfg_corner-sel input{min-height:44px;font-size:16px}#atelier .kfg_corner-sel .cr-all,#atelier .kfg_corner-sel label{min-height:48px;border-color:#a5a5a8}#atelier #cornerBlock>.kfg_sublabel{display:none}#atelier .individual_corners{margin-top:14px}#atelier .kfg_cutrow{border:1px solid #b7b7b9;background:#fafafa;padding:14px 16px;border-radius:8px;margin-top:16px}#atelier .kfg_cutrow-head{font-size:14px;gap:8px;min-height:44px;display:flex;align-items:center;margin-bottom:8px}#atelier .kfg_cutrow-head .del{min-width:44px;min-height:44px;font-size:24px;color:var(--body);margin-left:8px}#atelier .kfg_cutrow-head .pr{font-size:12px}#atelier .kfg_cutrow-head .ic{display:none}#atelier .kfg_cutrow-fields{display:flex;flex-wrap:wrap;gap:12px}#atelier .kfg_cutrow-fields label{font-size:12px;flex:1 1 100px;min-width:90px;max-width:none;color:var(--body)}#atelier .kfg_cutrow-fields .in{border:1px solid #a5a5a8;border-radius:6px;min-height:46px;display:flex;align-items:center;margin-top:6px;background:#fff}#atelier .kfg_cutrow-fields input,#atelier .kfg_cutrow-fields select{min-height:44px;min-width:0;width:100%;font-size:16px;padding:9px;border:0;background:transparent;color:var(--ink)}#atelier .kfg_cutrow-fields i{font-size:12px;padding-right:8px;font-style:normal}#atelier .kfg_cutwarn{font-size:12px;line-height:1.5;margin-top:8px}#atelier .geometry_error{border-color:var(--error);background:#fff4f2}#atelier .validation_errors{padding:16px;background:#fff4f2;border:1px solid #d48c87;border-radius:8px;margin-top:16px;color:var(--error);font-size:13px;line-height:1.6}#atelier .validation_errors p+p{margin-top:10px}#atelier .info_note{font-size:13px;padding:16px;background:#f5f5f5;border-radius:8px;color:var(--body);margin:16px 0;line-height:1.6}#atelier .info_note button{border:0;background:none;text-decoration:underline;padding:8px 0;min-height:44px;color:var(--ink)}#atelier .kfg_custom textarea,#atelier .kfg_machine input{font-size:16px;border:1px solid #a5a5a8;padding:12px;min-height:48px;border-radius:8px;width:100%;background:#fff}#atelier .kfg_upload{min-height:96px;padding:20px;font-size:13px;border:1px dashed #999;border-radius:8px}#atelier .kfg_custom-hint{font-size:12px;color:var(--body);line-height:1.6}#atelier .kfg_machine{display:block;font-size:13px;margin:20px 0}#atelier .kfg_machine input{margin-top:8px}#atelier .review_rows>div{display:grid;grid-template-columns:140px minmax(0,1fr) auto;gap:16px;border-bottom:1px solid var(--line);padding:16px 0;align-items:start}#atelier .review_rows>div>span{font-size:12px;color:var(--body);padding-top:3px}#atelier .review_rows strong{font-size:14px;font-weight:500;line-height:1.6}#atelier .review_rows button{font-size:12px;text-decoration:underline;text-underline-offset:4px;min-height:44px;padding:0;border:0;background:none;margin-top:-9px}#atelier .review_costs{margin-top:28px}#atelier .review_costs>summary{font-weight:500;font-size:16px;cursor:pointer;min-height:44px}#atelier .review_costs>div{display:flex;justify-content:space-between;gap:16px;padding:7px 0;font-size:13px;font-variant-numeric:tabular-nums}#atelier .review_costs b{font-weight:500}#atelier .review_costs>.review_total{border-top:1px solid var(--line);margin-top:12px;padding:16px 0;align-items:center}#atelier .review_total strong{font-size:24px;font-weight:600}#atelier .order_process{margin-top:24px;padding:22px;background:#f4f4f5;border-radius:8px}#atelier .order_process p,#atelier .order_process li{font-size:13px;color:var(--body);line-height:1.7;margin-top:8px}#atelier .order_process ol{padding-left:20px;margin:10px 0 14px}#atelier .demo_explanation{font-size:12px;color:var(--body);line-height:1.6;margin-top:16px}#atelier .error_note{font-size:13px;color:var(--error);margin-top:16px}#atelier .dim-line{stroke:#626265}#atelier .dim-text{fill:#303033;font-family:Onest,sans-serif;font-size:15px;stroke:#f4f4f5;stroke-width:3px;paint-order:stroke}#atelier #stage .kfg_edge{cursor:pointer}/* Focused drawing view. */body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{position:fixed;inset:24px;z-index:30;display:flex;flex-direction:column;align-items:center;background:#fff;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:16px}#atelier.preview_expanded .preview_surface{width:100%;height:100%;display:flex;flex-direction:column}#atelier.preview_expanded .preview_canvas{flex:1;height:auto;min-height:0}#atelier.preview_expanded .preview_facts,#atelier.preview_expanded .edge_preview,#atelier.preview_expanded .preview_note{display:none}#atelier.preview_expanded:before{content:'';position:fixed;inset:0;background:#0006;z-index:29}.atelier_dialog{width:940px;max-width:calc(100% - 40px);max-height:90vh;border:0;border-radius:16px;padding:32px;background:#fff;color:var(--ink);font-family:Onest,sans-serif}:is(#atelier,.atelier_dialog) .dialog_header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:24px}:is(#atelier,.atelier_dialog) .dialog_header h2,.atelier_dialog>h2{font-size:28px;letter-spacing:-.7px;font-weight:500}:is(#atelier,.atelier_dialog) .dialog_header p{font-size:13px;color:var(--body);margin-top:8px}:is(#atelier,.atelier_dialog) .material_compare{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}:is(#atelier,.atelier_dialog) .material_compare article{min-width:0}:is(#atelier,.atelier_dialog) .material_compare img{width:100%;height:160px;object-fit:cover;border-radius:8px}:is(#atelier,.atelier_dialog) .material_compare h3{font-size:18px;font-weight:500;margin:20px 0 8px}:is(#atelier,.atelier_dialog) .material_compare p{font-size:13px;color:var(--body);min-height:104px}:is(#atelier,.atelier_dialog) .material_compare dl{font-size:13px;line-height:1.6;display:grid;gap:8px;margin:20px 0 24px}:is(#atelier,.atelier_dialog) .material_compare dt{color:var(--body)}:is(#atelier,.atelier_dialog) .material_compare dd{margin:0;padding-bottom:8px;border-bottom:1px solid var(--line)}:is(#atelier,.atelier_dialog) .material_compare .secondary_button{width:100%;font-size:13px}.atelier_dialog>p{font-size:14px;line-height:1.65;margin:16px 0;color:var(--body)}.atelier_dialog>label{display:block;font-size:13px;margin:24px 0}.atelier_dialog>label input{display:block;width:100%;padding:14px;margin-top:8px;border:1px solid #aaa;border-radius:8px}:is(#atelier,.atelier_dialog) .large_edge{display:block;max-width:100%;max-height:55vh;object-fit:contain;margin:24px auto}:is(#atelier,.atelier_dialog) .cart_dialog{width:660px}:is(#atelier,.atelier_dialog) .cart_item{display:grid;grid-template-columns:180px 1fr;gap:24px;padding:24px 0;border-top:1px solid var(--line)}:is(#atelier,.atelier_dialog) .cart_preview{background:var(--surface);border-radius:8px;height:160px;display:flex;align-items:center}:is(#atelier,.atelier_dialog) .cart_preview svg{width:100%;height:auto}:is(#atelier,.atelier_dialog) .cart_preview .dim-text{font-size:20px;fill:#333;font-family:Onest,sans-serif}:is(#atelier,.atelier_dialog) .cart_preview .dim-line{stroke:#777}:is(#atelier,.atelier_dialog) .cart_item h3{font-size:16px;font-weight:500}:is(#atelier,.atelier_dialog) .cart_item p{font-size:13px;color:var(--body);margin:5px 0}:is(#atelier,.atelier_dialog) .cart_item strong{display:block;margin-top:12px;font-size:20px;font-weight:600}:is(#atelier,.atelier_dialog) .cart_item small{display:block;font-size:11px;color:var(--body);margin-top:4px}:is(#atelier,.atelier_dialog) .cart_item_actions{display:flex;gap:24px}:is(#atelier,.atelier_dialog) .cart_item_actions button{min-height:44px;border:0;background:none;text-decoration:underline;font-size:12px;padding:0}:is(#atelier,.atelier_dialog) .cart_item .secondary_button{font-size:12px;min-height:44px;padding:10px 12px}:is(#atelier,.atelier_dialog) .cart_dialog .demo_explanation{font-size:12px;color:var(--body);line-height:1.65}:is(#atelier,.atelier_dialog) .empty_cart{padding:40px;text-align:center}:is(#atelier,.atelier_dialog) .empty_cart>svg{width:40px;height:40px;margin-bottom:20px}:is(#atelier,.atelier_dialog) .empty_cart h3{font-size:21px;font-weight:500}:is(#atelier,.atelier_dialog) .empty_cart p{font-size:14px;color:var(--body);margin:12px 0 24px}:is(#atelier,.atelier_dialog) .kfg_pop{font-family:Onest,sans-serif}@media(min-width:1600px){#atelier .preview_canvas{height:480px}#atelier .workbench{gap:80px}}@media(max-width:1519px){#atelier .atelier_shell{margin:0 48px}#atelier .workbench{gap:48px}#atelier .preview_canvas{height:390px}}@media(max-width:1199px){#atelier .atelier_shell{margin:0 32px}#atelier .workbench{gap:32px;grid-template-columns:1fr 1fr}#atelier h1{font-size:34px}#atelier .preview_canvas{height:320px}#atelier .material_choice{gap:12px}#atelier .material_choice img{width:84px;height:64px}#atelier .material_choice small{font-size:11px}#atelier .material_choice b{font-size:15px}#atelier #dekorGrid{grid-template-columns:repeat(5,1fr)}#atelier .purchase_bar{flex-wrap:wrap;gap:14px}#atelier .purchase_bar .primary_button{flex:1}#atelier .step_nav button{font-size:12px;gap:8px}#atelier .step_nav button>svg{margin-right:12px}#atelier .review_rows>div{grid-template-columns:110px minmax(0,1fr) auto;gap:8px}#atelier .preview_facts{gap:12px}#atelier .preview_facts strong{font-size:13px}#atelier .edge_preview{gap:16px}#atelier .edge_preview img{width:96px;height:80px}#atelier .edge_preview b{font-size:13px}#atelier .shape_choices{gap:6px}#atelier .shape_choice{font-size:11px;min-height:100px}#atelier .shape_choice>svg{width:40px;height:40px}}@media(max-width:767px){#atelier .atelier_shell{margin:0 20px}#atelier .page_intro{padding:28px 0 22px;gap:12px}#atelier h1{font-size:28px;line-height:1.15;letter-spacing:-.8px;max-width:300px}#atelier .page_intro p{font-size:13px;margin-top:10px;max-width:32ch}#atelier .page_intro .text_button{font-size:0;width:44px;min-width:44px;justify-content:center;text-decoration:none}#atelier .page_intro .text_button svg{width:20px;height:20px}#atelier .step_nav{margin-bottom:20px;grid-template-columns:repeat(4,1fr);scroll-margin-top:16px}#atelier .step_nav button{flex-direction:column;align-items:flex-start;justify-content:flex-start;font-size:10px;gap:6px;padding:12px 2px;min-height:70px}#atelier .step_nav button>svg{display:none}#atelier .step_number{font-size:14px}#atelier .workbench{display:flex;flex-direction:column;gap:28px}#atelier .work_preview{position:static;top:auto;width:100%}#atelier .preview_surface{padding:8px 12px 14px;border-radius:12px}#atelier .preview_toolbar{gap:8px}#atelier .view_switch button{min-height:36px;padding:8px 10px;font-size:10px}#atelier .preview_toolbar .icon_button{width:40px;height:40px}#atelier .preview_canvas{height:190px}#atelier .preview_caption{padding:0;gap:8px}#atelier .preview_caption strong{font-size:19px;letter-spacing:-.4px}#atelier .preview_caption span{font-size:11px}#atelier #viewHint{font-size:10px}#atelier .preview_facts{padding:14px 0;border-bottom:0;gap:10px}#atelier .preview_facts span{font-size:10px;margin-bottom:3px}#atelier .preview_facts strong{font-size:12px}#atelier .edge_preview,#atelier .preview_note{display:none}#atelier .work_controls{width:100%}#atelier .flow_panel{scroll-margin-top:20px}#atelier .panel_heading{margin:0 0 20px}#atelier .panel_heading h2{font-size:23px;letter-spacing:-.6px}#atelier .panel_heading p{font-size:13px}#atelier .material_choice{min-height:86px;padding:10px 4px 10px 0;gap:12px}#atelier .material_choice img{width:84px;height:64px}#atelier .material_choice b{font-size:14px}#atelier .material_choice small{font-size:12px;line-height:1.4}#atelier .selection_check{width:22px;height:22px}#atelier .material_help{gap:12px}#atelier .material_help button{font-size:11px}#atelier #dekorGrid{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 9px}#atelier .kfg_dekor span:not(.sw){font-size:10px}#atelier .field_heading{margin-top:22px}#atelier .field_heading>span{font-size:12px}#atelier .kfg_chip{font-size:13px;padding:10px 12px;min-height:44px}#atelier #thickChips .kfg_chip{min-width:88px;flex:1}#atelier .step_actions{margin-bottom:16px}#atelier .purchase_bar{position:fixed;z-index:15;bottom:0;left:0;right:0;margin:0;padding:12px 20px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #c7c7c9;box-shadow:0 -5px 22px rgba(0,0,0,.04);gap:10px;flex-wrap:nowrap;align-items:center}#atelier .price_block{flex:1}#atelier .price_block>span{font-size:10px}#atelier .price_block strong{font-size:23px;line-height:1.3}#atelier .price_block small{font-size:10px;max-width:155px;line-height:1.4}#atelier .purchase_bar .primary_button{flex:0 1 47%;min-height:48px;padding:10px 12px;font-size:12px;white-space:normal;gap:8px;text-align:left;line-height:1.4}#atelier .purchase_bar .primary_button>svg{width:14px;min-width:14px}#atelier .price_status{font-size:12px}#atelier .shape_choices{gap:8px;grid-template-columns:repeat(2,1fr)}#atelier .shape_choice{min-height:94px;flex-direction:row;gap:10px;font-size:12px}#atelier .shape_choice>svg{width:38px;height:38px}#atelier #dimsRect,#atelier #dimsLform,#atelier #dimsBauch{gap:20px 12px}#atelier .kfg_field input{font-size:16px;padding:12px}#atelier .kfg_field>label{font-size:12px}#atelier .kfg_field .range{font-size:11px}#atelier .kfg_field .unit{font-size:12px;padding-right:12px}#atelier .option_group>summary{min-height:82px}#atelier .option_group>summary b{font-size:15px}#atelier .option_group>summary small{font-size:12px}#atelier .kfg_preset{gap:6px 10px}#atelier .kfg_preset b{font-size:13px}#atelier .kfg_preset small{font-size:12px}#atelier .kfg_stepper button{width:36px}#atelier .kfg_preset>.pr{font-size:12px}#atelier .kfg_cutrow{padding:12px}#atelier .kfg_cutrow-head{font-size:13px}#atelier .kfg_cutrow-fields{gap:10px}#atelier .kfg_cutrow-fields label{font-size:11px;min-width:80px}#atelier .kfg_cutrow-fields input{font-size:16px}#atelier .review_rows>div{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}#atelier .review_rows>div>span{grid-column:1;font-size:12px}#atelier .review_rows strong{grid-column:1;font-size:14px}#atelier .review_rows button{grid-column:2;grid-row:span 2;align-self:center;font-size:12px}#atelier .review_total strong{font-size:23px}#atelier .order_process{padding:18px}#atelier.preview_expanded .work_preview{inset:8px;padding:0;height:calc(100dvh - 16px);width:auto}#atelier.preview_expanded .preview_canvas{height:calc(100dvh - 200px)}#atelier.preview_expanded .preview_surface{border-radius:12px;padding:12px}#atelier.preview_expanded .preview_toolbar .icon_button{width:44px;height:44px}.atelier_dialog{padding:20px;width:100%;max-width:calc(100% - 24px);max-height:90dvh;border-radius:12px}:is(#atelier,.atelier_dialog) .dialog_header{margin-bottom:18px;gap:12px}:is(#atelier,.atelier_dialog) .dialog_header h2,.atelier_dialog>h2{font-size:24px}:is(#atelier,.atelier_dialog) .material_compare{display:block}:is(#atelier,.atelier_dialog) .material_compare article{margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--line)}:is(#atelier,.atelier_dialog) .material_compare img{height:180px}:is(#atelier,.atelier_dialog) .material_compare p{min-height:0;font-size:14px}:is(#atelier,.atelier_dialog) .material_compare dl{grid-template-columns:80px 1fr}:is(#atelier,.atelier_dialog) .material_compare .secondary_button{min-height:48px}:is(#atelier,.atelier_dialog) .cart_item{grid-template-columns:100px 1fr;gap:16px}:is(#atelier,.atelier_dialog) .cart_preview{height:110px}:is(#atelier,.atelier_dialog) .cart_item h3{font-size:14px}:is(#atelier,.atelier_dialog) .cart_item p{font-size:12px}:is(#atelier,.atelier_dialog) .cart_item .secondary_button{font-size:11px}:is(#atelier,.atelier_dialog) .empty_cart{padding:24px 0}:is(#atelier,.atelier_dialog) .large_edge{max-height:50dvh}}@media(prefers-reduced-motion:reduce){:is(#atelier,.atelier_dialog) *,:is(#atelier,.atelier_dialog) *:before,:is(#atelier,.atelier_dialog) *:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}/* Final responsive adjustments: a reachable price rail and native-sized targets. */#atelier .kfg_stepper button{width:44px}#atelier .view_switch button{min-height:44px}#atelier .preview_toolbar .icon_button{width:44px;height:44px}#atelier .toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%);z-index:40;max-width:calc(100% - 40px);width:max-content;padding:14px 20px;border-radius:8px;background:#161616;color:#fff;font-size:13px;line-height:1.5;pointer-events:none;opacity:0}#atelier .toast.show{opacity:1}#atelier .order_process .secondary_button{margin-top:18px;font-size:12px}#atelier .texture_test_note{font-size:12px;color:#5c5c5e;line-height:1.5;margin:12px 0 0}:is(#atelier,.atelier_dialog) .cart_quantity{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;font-size:12px}:is(#atelier,.atelier_dialog) .cart_quantity>div{display:flex;border:1px solid #aaa;border-radius:8px;overflow:hidden}:is(#atelier,.atelier_dialog) .cart_quantity button{width:44px;height:44px;background:#fff;border:0;font-size:18px}:is(#atelier,.atelier_dialog) .cart_quantity input{width:52px;height:44px;min-width:0;text-align:center;border:0;background:#fff;font-size:16px;appearance:textfield;-moz-appearance:textfield}:is(#atelier,.atelier_dialog) .cart_quantity input::-webkit-inner-spin-button,:is(#atelier,.atelier_dialog) .cart_quantity input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}:is(#atelier,.atelier_dialog) .cart_totals{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0 10px;border-top:1px solid var(--line);font-size:16px}:is(#atelier,.atelier_dialog) .cart_totals strong{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}:is(#atelier,.atelier_dialog) .cart_totals small{display:block;font-size:12px;color:var(--body);margin-top:4px}:is(#atelier,.atelier_dialog) .cart_shipping{font-size:12px;color:var(--body);margin-bottom:24px}:is(#atelier,.atelier_dialog) .cart_next{display:flex;flex-wrap:wrap;gap:12px;padding:24px 0;border-top:1px solid var(--line)}:is(#atelier,.atelier_dialog) .cart_next h3{width:100%;font-size:18px;font-weight:500;margin-bottom:4px}:is(#atelier,.atelier_dialog) .cart_next button{flex:1;font-size:13px}:is(#atelier,.atelier_dialog) .cart_item_actions{flex-wrap:wrap;gap:0 18px}@media(max-width:767px){:is(#atelier,.atelier_dialog) .cart_quantity{align-items:flex-start;flex-direction:column;gap:6px}:is(#atelier,.atelier_dialog) .cart_next button{flex:1 1 100%;font-size:14px}:is(#atelier,.atelier_dialog) .cart_totals strong{font-size:24px}:is(#atelier,.atelier_dialog) .cart_item_actions button{font-size:12px}}@media(max-width:767px){#atelier[data-view=\"2d\"] .preview_canvas{height:230px}#atelier[data-view=\"2d\"].preview_expanded .preview_canvas{height:calc(100dvh - 200px)}}@media(max-width:767px){#atelier .page_intro{padding:20px 0 16px}#atelier h1{font-size:26px;max-width:290px}#atelier .page_intro p{display:none}#atelier .step_nav{margin-bottom:16px}#atelier .preview_canvas{height:100px}#atelier .preview_facts{padding:10px 0}#atelier .preview_caption strong{font-size:16px}#atelier .workbench{gap:20px}#atelier .panel_heading{margin-bottom:16px}}@media(min-width:768px){#atelier .purchase_bar{position:fixed;z-index:15;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 64px);max-width:1440px;border:1px solid #dcdcdd;border-radius:12px;padding:16px 24px;box-shadow:0 5px 30px #0000000d;flex-wrap:nowrap;margin:0}#atelier .purchase_bar .primary_button{flex:0 0 auto;min-width:240px}}/* Corner identities stay concise in the drawing; full names have their own legend. */#atelier .corner_legend{margin:0 0 24px;padding:18px 0 0;border-top:1px solid #dedede}#atelier .corner_legend[hidden]{display:none}#atelier .corner_legend_heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px;font-size:12px}#atelier .corner_legend_heading>span{color:#666}#atelier .corner_legend ol{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px;padding:0;margin:0}#atelier .corner_legend li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:7px;font-size:12px;line-height:1.4;min-width:0}#atelier .corner_number{width:20px;height:20px;display:grid;place-items:center;border:1px solid #aaa;border-radius:50%;background:#fff;font-size:11px;font-weight:600}#atelier .corner_name{overflow-wrap:anywhere}#atelier .corner_legend li>strong{text-align:right;font-size:12px;white-space:nowrap}#atelier .corner_legend li small{display:block;font-size:10px;font-weight:400;color:#666}#atelier.preview_expanded.has_corner_legend[data-view=\"2d\"] .preview_canvas{height:calc(100dvh - 380px);min-height:200px}@media(max-width:479px){#atelier .corner_legend ol{gap:12px}#atelier .corner_legend li{grid-template-columns:20px minmax(0,1fr);gap:2px 6px}#atelier .corner_legend li>strong{grid-column:2;text-align:left}#atelier .corner_legend{margin-bottom:20px}}/* Einstieg zum Entwurfskorb neben \"Konfiguration teilen\". */#atelier .atelier_actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap}#atelier #atelierCart{text-decoration:none;font-weight:600}#atelier #atelierCart span{font-variant-numeric:tabular-nums}@media(max-width:767px){#atelier .atelier_actions{gap:16px}}#atelier #atelierCart span{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}/* Live steht die Ueberschrift auf der Webflow-Seite: nur die Knopfzeile bleibt. */#atelier .page_intro.is_bare{justify-content:flex-end;padding:0 0 20px}@media(max-width:767px){#atelier .page_intro.is_bare{padding:0 0 12px}#atelier .page_intro.is_bare .atelier_actions{width:100%;justify-content:space-between}}/* ── Rueckmeldung Sascha, 11.09. ──────────────────────────────────────────── *//* Der leere Kreis war ein Haarstrich und wirkte wie ein Fehler. */#atelier .selection_check{width:26px;height:26px;border:2px solid #9b9b9d;transition:border-color .15s,background .15s}#atelier .material_choice:hover .selection_check{border-color:#5c5c5e}#atelier .material_choice[aria-pressed=\"true\"] .selection_check{border-width:2px}#atelier .selection_check svg{width:14px;height:14px;stroke-width:2.6}/* „Ziehen zum Drehen“ mit Zeichen. */#atelier .view_hint{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--body);white-space:nowrap}#atelier .view_hint svg{width:15px;height:15px;opacity:.7}/* Was nach der Bestellung passiert. */#atelier .order_steps{margin:14px 0 0;padding:0;list-style:none;counter-reset:schritt;display:grid;gap:10px}#atelier .order_steps li{counter-increment:schritt;position:relative;padding-left:34px;font-size:13px;line-height:1.6;color:var(--body)}#atelier .order_steps li:before{content:counter(schritt);position:absolute;left:0;top:-1px;width:22px;height:22px;border-radius:50%;\n  background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600}/* Ohne Fliesstext unter jedem Schritt braucht die Statuszeile keinen festen Platz. */#atelier .price_status:empty{display:none}#atelier .step_actions{margin-top:24px}/* ── Kaufabschluss in der Seite (Sascha, 11.09.) ──────────────────────────── */#atelier .review_shipping{font-size:12px;line-height:1.6;color:var(--body);margin-top:10px}#atelier .review_cta{margin-top:22px}#atelier .review_cta .primary_button{width:100%;min-height:58px;font-size:15px;justify-content:center}/* Die feste Leiste tritt zurueck, solange der Knopf in der Uebersicht zu sehen ist. */#atelier .purchase_bar{transition:opacity .18s ease,transform .18s ease}#atelier.cta_inline .purchase_bar{opacity:0;transform:translateY(10px);pointer-events:none}@media(prefers-reduced-motion:reduce){#atelier .purchase_bar{transition:none}}#atelier .demo_explanation:empty{display:none}/* ── Ein Maß für die ganze Seite (Sascha, 11.09.) ─────────────────────────────\n   Gemessen auf der Staging-Seite: der Inhalt der Seite läuft in .tnm2_wrap\n   (max 1280, Innenabstand 80 / 32 / 16), der Konfigurator lief auf 1416 —\n   knapp 300 px breiter und 68 px weiter links als alles andere. Er nimmt jetzt\n   dasselbe Maß, damit Kopf, Konfigurator und die Abschnitte darunter auf einer\n   Kante stehen. Die Werte spiegeln die Webflow-Haltepunkte (991 / 767). */#atelier .atelier_shell{max-width:1280px;margin:0 auto;padding:0 80px}@media(max-width:991px){#atelier .atelier_shell{margin:0 auto;padding:0 32px}}@media(max-width:767px){#atelier .atelier_shell{margin:0 auto;padding:0 16px}}/* Auf dem schmaleren Maß braucht die Steuerspalte den Vorrang vor der Vorschau:\n   die Zeichnung skaliert, die Bedienfelder nicht. */@media(min-width:992px){#atelier .workbench{grid-template-columns:1fr 1.06fr;gap:56px}}/* ── Schritt 1 und 2: eine Reihe offen, der Rest auf Knopfdruck ────────────\n   Gemessen am 11.09.: 21 / 26 / 42 / 7 Bedienelemente je Schritt. Schritt 3\n   hat die meisten und wirkt am ruhigsten, weil sie in Gruppen liegen. Das\n   Dekorgitter läuft deshalb auf fünf Spalten — geschlossen genau eine Reihe —\n   und die Standardmaße starten wie die Gruppen in Schritt 3 zugeklappt. */#atelier #dekorGrid{grid-template-columns:repeat(5,minmax(0,1fr))}#atelier .reveal_button{display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;padding:12px 0;min-height:48px;border:0;border-top:1px solid var(--line);background:transparent;font-size:13px;text-align:left}#atelier .reveal_button i{font-style:normal;font-size:12px;color:var(--body);font-variant-numeric:tabular-nums}#atelier .reveal_button i:empty{display:none}#atelier .reveal_button:after{content:'+';margin-left:auto;font-size:20px;font-weight:300;line-height:1}#atelier .dekor_open .reveal_button:after{content:'−'}#atelier .standard_sizes summary i{font-style:normal;font-size:12px;color:var(--body);margin-left:8px;font-variant-numeric:tabular-nums}#atelier .standard_sizes summary i:empty{display:none}";
-  var st=document.createElement('style'); st.id='kfgAtelierCss'; st.textContent=css;
-  document.head.appendChild(st);
-})();
-function atelierShellAufbauen(api){
-  var root=document.querySelector('[data-kfg-root]');
-  if(root && !root.id) root.id='atelier';
-  var bild=function(n){ return ((api&&api.assetBase&&api.assetBase())||'assets/kfg/')+'kante/'+n+'.webp'; };
-  if(!document.getElementById('appStatus')){
-    var st=document.createElement('div'); st.id='appStatus'; st.className='sr_only';
-    st.setAttribute('role','status'); st.setAttribute('aria-live','polite');
-    document.body.appendChild(st);
-  }
-  if(!document.getElementById('materialDialog')){
-    var md=document.createElement('dialog');
-    md.id='materialDialog'; md.className='atelier_dialog';
-    md.setAttribute('aria-labelledby','materialDialogTitle');
-    md.innerHTML='<div class="dialog_header"><h2 id="materialDialogTitle">Welches Material passt?</h2>'
-      +'<button class="icon_button" data-close aria-label="Materialberatung schließen">×</button></div>'
-      +'<div class="material_compare">'
-      +'<article><img src="'+bild('buk_28')+'" alt="Möbelplatte mit ABS-Kante" width="300" height="200"><h3>Möbelplatte</h3><p>Eine beschichtete Platte mit umlaufender ABS-Kante. Viele Dekore und drei Stärken für Tisch, Regal oder Theke.</p><dl><dt>Stärken</dt><dd>18, 25 und 36 mm</dd><dt>Kante</dt><dd>ABS 2 mm, auch farbig</dd></dl><button class="secondary_button" data-material-choice="dekor">Möbelplatte wählen</button></article>'
-      +'<article><img src="'+bild('mpx_21')+'" alt="Multiplex mit sichtbaren Furnierlagen" width="300" height="200"><h3>Multiplex Birke</h3><p>Die sichtbaren Furnierlagen machen die Kante zum Teil der Gestaltung. Natur oder mit HPL-Oberfläche wählbar.</p><dl><dt>Stärken</dt><dd>21 und 40 mm</dd><dt>Kante</dt><dd>Offen, profiliert oder mit ABS</dd></dl><button class="secondary_button" data-material-choice="mpx">Multiplex wählen</button></article>'
-      +'<article><img src="'+bild('compact_12')+'" alt="Dünne Compact-Platte mit dunklem Kern" width="300" height="200"><h3>Compact / HPL</h3><p>Ein schlanker Vollkern mit sichtbarer Schnittkante. Zur Auswahl stehen Uni- und Marmordekore.</p><dl><dt>Stärke</dt><dd>12 mm</dd><dt>Kante</dt><dd>Geschliffen, gefast oder halbrund</dd></dl><button class="secondary_button" data-material-choice="compact">Compact wählen</button></article>'
-      +'</div>';
-    document.body.appendChild(md);
-  }
-  if(!document.getElementById('cartDialog')){
-    var cd=document.createElement('dialog');
-    cd.id='cartDialog'; cd.className='atelier_dialog cart_dialog';
-    cd.setAttribute('aria-labelledby','cartDialogTitle');
-    cd.innerHTML='<div class="dialog_header"><div><h2 id="cartDialogTitle">Deine Platten</h2>'
-      +'<p>Deine konfigurierten Platten. Sie liegen noch nicht im Warenkorb des Shops — das macht der letzte Schritt.</p></div>'
-      +'<button class="icon_button" data-close aria-label="Übersicht schließen">×</button></div><div id="cartBody"></div>';
-    document.body.appendChild(cd);
-  }
-  document.querySelectorAll('dialog.atelier_dialog').forEach(function(d){
-    d.addEventListener('click',function(e){ if(e.target===d) d.close(); });
-  });
-}
-
-// Client preview guard. Contour points follow the original engine's rounded path.
-function pointInPolygon(p,poly){
-  let inside=false;
-  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
-    const a=poly[i],b=poly[j];
-    if((a[1]>p[1])!==(b[1]>p[1]) && p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])inside=!inside;
-  }return inside;
-}
-function segmentDistance(p,a,b){
-  const dx=b[0]-a[0],dy=b[1]-a[1],len=dx*dx+dy*dy;
-  const t=len?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/len)):0;
-  return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy);
-}
-function boundaryDistance(p,poly){return Math.min(...poly.map((a,i)=>segmentDistance(p,a,poly[(i+1)%poly.length])));}
-function footprint(c){
-  if(c.t==='p')return (c.pts||[]).map(p=>[c.cx+p[0],c.cy+p[1]]);
-  const w=c.t==='k'?(c.dir==='quer'?c.w/10:c.len):c.w;
-  const h=c.t==='k'?(c.dir==='quer'?c.len:c.w/10):c.h;
-  return [[c.cx-w/2,c.cy-h/2],[c.cx+w/2,c.cy-h/2],[c.cx+w/2,c.cy+h/2],[c.cx-w/2,c.cy+h/2]];
-}
-function cross(a,b,c){return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);}
-function intersect(a,b,c,d){const p=cross(a,b,c),q=cross(a,b,d),r=cross(c,d,a),s=cross(c,d,b);return p*q<0&&r*s<0;}
-function polysCross(a,b){return a.some((p,i)=>b.some((q,j)=>intersect(p,a[(i+1)%a.length],q,b[(j+1)%b.length])));}
-function overlap(a,b){
-  if(a.t==='c'&&b.t==='c')return Math.hypot(a.cx-b.cx,a.cy-b.cy)<(a.d+b.d)/2+0.01;
-  if(b.t==='c')return overlap(b,a);
-  if(a.t==='c'){const p=footprint(b);return pointInPolygon([a.cx,a.cy],p)||boundaryDistance([a.cx,a.cy],p)<=a.d/2+0.01;}
-  const p=footprint(a),q=footprint(b);return polysCross(p,q)||p.some(v=>pointInPolygon(v,q))||q.some(v=>pointInPolygon(v,p));
-}
-function validateCuts(cuts,poly,minEdge=5){
-  const errors=[];
-  cuts.forEach((c,i)=>{
-    let valid=true;
-    if(c.t==='c')valid=Number.isFinite(c.d)&&c.d>0&&Number.isFinite(c.cx)&&Number.isFinite(c.cy);
-    else if(c.t==='p')valid=Number.isFinite(c.cx)&&Number.isFinite(c.cy)&&Array.isArray(c.pts)&&c.pts.length>=3&&c.pts.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite));
-    else valid=[c.cx,c.cy,c.t==='k'?c.len:c.w,c.t==='k'?c.w:c.h].every(Number.isFinite)&&(c.t==='k'?c.len>0&&c.w>0:c.w>0&&c.h>0);
-    if(!valid){errors.push({index:i,message:'Bitte gib gültige Maße für diese Bearbeitung ein.'});return;}
-    if(c.t==='c'){
-      const p=[c.cx,c.cy],dist=boundaryDistance(p,poly);
-      if(!pointInPolygon(p,poly)||dist<c.d/2-0.01)errors.push({index:i,message:'Die Bohrung liegt außerhalb der Platte. Verschiebe sie vollständig auf die Materialfläche.'});
-      else if(dist-c.d/2<minEdge-0.02)errors.push({index:i,message:`Halte mindestens ${minEdge*10} mm Abstand zwischen Bohrungsrand und Plattenkante.`});
-    }else{
-      const p=footprint(c);
-      if(p.some(v=>!pointInPolygon(v,poly))||polysCross(p,poly))errors.push({index:i,message:'Der Ausschnitt liegt außerhalb der Platte. Verschiebe ihn vollständig auf die Materialfläche.'});
-      else if(c.t!=='k'&&p.some(v=>boundaryDistance(v,poly)<minEdge-0.02))errors.push({index:i,message:`Halte mindestens ${minEdge*10} mm Abstand zur Plattenkante.`});
-    }
-    for(let j=0;j<i;j++) if(overlap(c,cuts[j])){errors.push({index:i,message:`Diese Bearbeitung überschneidet sich mit Bearbeitung ${j+1}. Bitte verschiebe oder entferne sie.`});break;}
-  });return errors;
-}
-
-/* The live integration reuses Kessler's existing Worker and Shopyflow cart.
- * It is deliberately not enabled by the local design preview. */
-
-const lineTotal=(price,quantity)=>Math.round(price*100)*quantity/100;
-
-
-
-
-const $=id=>document.getElementById(id);
-/* Live laeuft das Skript ueber jsDelivr: Bilder muessen von dort kommen, nicht vom Webflow-Host. */
-const assetUrl=p=>((api&&api.assetBase&&api.assetBase())||'assets/kfg/')+p;
-const moneyDe=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n);
-/* Waehrung und Versandpauschale gehoeren dem Kern: auf /pl-pl/ sind es Zloty. */
-const money=n=>(api&&api.money?api.money(n):moneyDe(n));
-const versand=()=>(api&&api.shipping?api.shipping():{betrag:19.99,text:'19,99 \u20ac'});
-const number=n=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(n);
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const svg=(content,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${content}</svg>`;
-const chevron=svg('<path d="m9 5 7 7-7 7"/>');
-const check=svg('<path d="m5 12 4 4L19 6"/>');
-const expand=svg('<path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/>');
-const shapes={rect:['Rechteck','<rect x="3" y="6" width="18" height="12" rx="1"/>'],round:['Rund','<circle cx="12" cy="12" r="9"/>'],lform:['L-Form','<path d="M3 4h18v7H11v9H3Z"/>'],bauch:['Bauchausschnitt','<path d="M3 5h18v14h-4l-2-5H9l-2 5H3Z"/>']};
-const materials={dekor:{name:'Möbelplatte',desc:'Beschichtet, mit passender ABS-Kante',image:'buk_28',meta:'18 / 25 / 36 mm'},mpx:{name:'Multiplex Birke',desc:'Sichtbare Furnierlagen, natur oder HPL',image:'mpx_21',meta:'21 / 40 mm'},compact:{name:'Compact / HPL',desc:'Schlanker Vollkern, markante Schnittkante',image:'compact_12',meta:'12 mm'}};
-let step=0,api,snapshot,errors=[],timer,started=false,previousKey='',returnFocus=null,editingId=null;
-let cart=[];try{cart=JSON.parse(sessionStorage.getItem('kessler-atelier-cart')||'[]');if(!Array.isArray(cart))cart=[];}catch{}
-cart=cart.map(item=>({...item,quantity:Number.isSafeInteger(item.quantity)&&item.quantity>0?item.quantity:1}));
-function status(text){$('appStatus').textContent=text;}
-/* PL/EN: Der Kern bringt die Wortliste mit; nach jedem Schreiben laeuft sie hier drueber. */
-function uebersetzen(el){ if(api&&api.translate)api.translate(el); }
-/* Die beiden festen Dialoge stehen an <body> und werden vom Kern nicht erfasst.
-   Beim Start ist die Wortliste oft noch unterwegs - darum genau einmal nachziehen,
-   sobald sie da ist (und beim Oeffnen noch einmal, falls doch etwas fehlt). */
-let dialogeUebersetzt=false;
-function dialogeNachziehen(){
-  if(dialogeUebersetzt||!api||!api.wortlisteDa||!api.wortlisteDa())return;
-  dialogeUebersetzt=true;
-  ['materialDialog','cartDialog'].forEach(id=>{const d=$(id);if(d)uebersetzen(d);});
-}
-function sectionTitle(title,body=''){return `<div class="panel_heading"><h2 tabindex="-1">${title}</h2>${body?`<p>${body}</p>`:''}</div>`;}
-function group(title,desc,id,open=false){return `<details class="option_group" id="${id}"${open?' open':''}><summary><span><b>${title}</b><small>${desc}</small></span>${chevron}</summary><div class="group_body"></div></details>`;}
-
-/* ── Wie viel steht offen? ──────────────────────────────────────────────────
-   Gemessen am 11.09.: Schritt 3 trägt mit 42 die meisten Bedienelemente und
-   wirkt trotzdem am leichtesten, weil sie in fünf geschlossenen Gruppen
-   liegen. Schritt 1 (21) und Schritt 2 (26) legten alles flach aus. Beide
-   bekommen deshalb dasselbe Muster: eine Reihe offen, der Rest auf Knopfdruck. */
-const DEKOR_REIHE=5;
-function dekorVorschau(){
-  const mount=$('dekorMount'),knopf=$('dekorMore');
-  if(!mount||!knopf)return;
-  const alle=[...mount.querySelectorAll('.kfg_dekor')];
-  const offen=mount.classList.contains('dekor_open');
-  const gewaehlt=alle.findIndex(b=>b.classList.contains('is-active'));
-  alle.forEach((b,i)=>{b.style.order='';b.style.display=(offen||i<DEKOR_REIHE||i===gewaehlt)?'':'none';});
-  /* Liegt das gewählte Dekor hinter der Reihe — aus einem geteilten Link oder
-     weil es die Voreinstellung ist —, rückt es nach vorn und das letzte der
-     Reihe rückt dafür heraus. Geschlossen stehen so immer genau fünf. */
-  if(!offen&&gewaehlt>=DEKOR_REIHE){alle[gewaehlt].style.order='-1';alle[DEKOR_REIHE-1].style.display='none';}
-  knopf.hidden=alle.length<=DEKOR_REIHE;
-  knopf.querySelector('span').textContent=offen?'Weniger Dekore zeigen':'Alle Dekore zeigen';
-  knopf.querySelector('i').textContent=offen?'':String(alle.length);
-}
-function standardVorschau(){
-  const zaehler=document.querySelector('.standard_sizes summary i');
-  if(!zaehler)return;
-  const n=document.querySelectorAll('#quickChips .kfg_quick-chip').length;
-  const text=n?String(n):'';
-  if(zaehler.textContent!==text)zaehler.textContent=text;
-}
-
-function boot(){
-  if(started||!window.KFG?.atelier)return;started=true;api=window.KFG.atelier;atelierShellAufbauen(api);
-  const root=$('atelier');
-  const storage=document.createElement('div');storage.id='coreStorage';storage.hidden=true;
-  while(root.firstChild)storage.append(root.firstChild);root.append(storage);
-  const shell=document.createElement('div');shell.className='atelier_shell';
-  shell.innerHTML=`
-    <div class="page_intro is_bare"><div class="atelier_actions"><button class="text_button" id="atelierCart" data-dialog="cartDialog">${svg('<path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/>')}Deine Platten<span id="cartCount">0</span></button><button class="text_button" id="shareConfig">${svg('<path d="M12 16V3m-4 4 4-4 4 4M5 13v7h14v-7"/>')}Konfiguration teilen</button></div></div>
-    <nav class="step_nav" aria-label="Konfigurationsschritte">${['Material & Oberfläche','Form & Maße','Kanten & Extras','Übersicht'].map((label,i)=>`<button type="button" data-step="${i}"${i===0?' aria-current="step"':''}><span class="step_number">${i+1}</span><span>${label}</span>${i<3?chevron:''}</button>`).join('')}</nav>
-    <div class="workbench">
-      <aside class="work_preview" aria-label="Deine Platte">
-        <div class="preview_surface">
-          <div class="preview_toolbar"><div class="view_switch" id="viewSwitch"></div><button type="button" class="icon_button" id="expandPreview" aria-label="Vorschau vergrößern">${expand}</button></div>
-          <div class="preview_canvas" id="canvasMount"></div>
-          <section class="corner_legend" id="cornerLegend" aria-label="Eckenradien" hidden></section>
-          <div class="preview_caption"><div><strong id="previewName">Buche</strong><span id="previewDescription">Möbelplatte, 25 mm</span></div><span class="view_hint">${svg('<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 3v5h-5"/>')}<span id="viewHint">Ziehen zum Drehen</span></span></div>
-        </div>
-        <p class="texture_test_note" id="textureTestNote" hidden>Texturtest: KI-erweiterte Materialvorschau. Das Originaldekor siehst du in der Farbauswahl und im Kantenfoto.</p>
-        <div class="preview_facts"><div><span>Dein Maß</span><strong id="factDimensions"></strong></div><div><span>Stärke</span><strong id="factThickness"></strong></div><div><span>Bearbeitungen</span><strong id="factExtras"></strong></div></div>
-        <button class="edge_preview" id="edgePreview"><img id="edgeImage" width="160" height="110" alt="Kantenaufnahme des gewählten Materials"><span><b>Die Kante macht den Unterschied.</b><span id="edgeDescription"></span><small>Originalaufnahme ansehen</small></span>${chevron}</button>
-        
-      </aside>
-      <div class="work_controls">
-        <section class="flow_panel" id="panel0" aria-label="Material und Oberfläche">
-          ${sectionTitle('Was passt zu deiner Platte?')}
-          <div class="material_choices" id="materialChoices">${Object.entries(materials).map(([k,m])=>`<button class="material_choice" type="button" data-material="${k}" aria-pressed="false"><img src="${assetUrl('kante/'+m.image+'.webp')}" width="104" height="76" alt=""><span><b>${m.name}</b><small>${m.desc}</small></span><span class="selection_check">${check}</span></button>`).join('')}</div>
-          <div class="material_help"><button class="text_button" data-dialog="materialDialog">Materialien vergleichen</button><button class="text_button" id="sewingTemplate">Vorlage für Nähtische</button></div>
-          <div id="sewingNotice" class="info_note" hidden>Nähtischplatte gewählt. Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras. <button type="button" id="leaveSewing">Zur Möbelplatte</button></div>
-          <div id="surfaceMount"></div><div class="field_heading"><h3>Oberfläche</h3><span id="selectedDecor"></span></div><div id="dekorMount"></div>
-          <div class="thickness_header"><h3>Plattenstärke</h3><button class="text_button" data-dialog="materialDialog">Welche passt?</button></div><div id="thicknessMount"></div>
-          <button class="sample_help" id="sampleHelp">${svg('<path d="m4 9 8-5 8 5-8 5-8-5Zm0 5 8 5 8-5"/>')}<span>Du möchtest die Oberfläche erst fühlen?<small>Musterbox mit vier Dekoren im Shop ansehen</small></span>${chevron}</button>
-        </section>
-        <section class="flow_panel" id="panel1" aria-label="Form und Maße" hidden>
-          ${sectionTitle('Welche Form brauchst du?')}
-          <div class="shape_choices">${Object.entries(shapes).map(([k,[n,p]])=>`<button type="button" class="shape_choice" data-shape="${k}" aria-pressed="false">${svg(p)}<span>${n}</span></button>`).join('')}</div>
-          <div class="field_heading"><h3>Deine Maße</h3><span>Alle Plattenmaße in cm</span></div><div id="dimensionsMount"></div>
-        </section>
-        <section class="flow_panel" id="panel2" aria-label="Kanten und Extras" hidden>
-          ${sectionTitle('Der letzte Schliff.')}
-          ${group('Kantenprofil & Farbe','Passend zur Oberfläche oder bewusst anders','edgeGroup',true)}
-          ${group('Ecken abrunden','Alle Ecken gemeinsam oder einzeln einstellen','cornerGroup')}
-          ${group('Bohrungen & Kabeldurchlässe','Kabel führen und das Gestell befestigen','holesGroup')}
-          ${group('Weitere Ausschnitte','Steckdosen, Spüle und Kochfeld','kitchenGroup')}
-          ${group('Individuell bearbeiten','Kabelkanal, Ausschnitte oder eigenes Bohrbild','customGroup')}
-          ${group('Nähmaschine & Maßband','Ausschnitt, Maschinenmodell und Maßband','sewingGroup')}
-          <div id="cutEditorMount"></div><div id="cutErrors" class="validation_errors" role="alert" hidden></div>
-          <div class="info_note" id="roundInfo" hidden>Bei runden Platten stehen Ausschnitte in diesem Konfigurator nicht zur Verfügung.</div>
-        </section>
-        <section class="flow_panel" id="panel3" aria-label="Konfiguration prüfen" hidden>
-          ${sectionTitle('Deine Platte auf einen Blick.')}
-          <div id="reviewContent"></div>
-          <div class="order_process" id="orderProcess"></div>
-          <p class="demo_explanation" id="draftNote"></p>
-        </section>
-        <div class="step_actions"><button id="backStep" class="text_button" type="button" hidden>Zurück</button><span id="stepProgress">Schritt 1 von 4</span></div>
-        <div class="purchase_bar"><div class="price_block"><span id="priceContext">Deine Platte</span><strong id="atelierPrice">–</strong><small id="atelierTax">inkl. MwSt., zzgl. Versand</small></div><button type="button" class="primary_button" id="continueStep">Weiter zu Form & Maße ${chevron}</button></div>
-        <p id="priceStatus" class="price_status" role="status"></p>
-      </div>
-    </div>
-  `;
-  root.append(shell);
-  root.append($('toast'));
-  function move(id,target){const el=$(id);if(el)$(target).append(el);return el;}
-  move('btn3d','viewSwitch').textContent='Produktansicht';move('btn2d','viewSwitch').textContent='Maßzeichnung';
-  move('stage','canvasMount');move('stage3d','canvasMount');
-  move('dekorGrid','dekorMount');move('thickChips','thicknessMount');
-  const dekorKnopf=document.createElement('button');
-  dekorKnopf.type='button';dekorKnopf.id='dekorMore';dekorKnopf.className='reveal_button';
-  dekorKnopf.innerHTML='<span>Alle Dekore zeigen</span><i></i>';
-  $('dekorMount').append(dekorKnopf);
-  dekorKnopf.addEventListener('click',()=>{$('dekorMount').classList.toggle('dekor_open');dekorVorschau();});
-  // Preserve the original linked controls and calculations; only arrange their DOM.
-  const surface=$('mpxSurfaceBlock')||$('surfaceBlock');if(surface)$('surfaceMount').append(surface);
-  move('kfgStep3','dimensionsMount');
-  const edge=$('kfgStep4');$('edgeGroup').querySelector('.group_body').append(edge);
-  $('cornerGroup').querySelector('.group_body').append($('cornerBlock'));
-  function into(id,groupId){const e=$(id);if(e)$(groupId).querySelector('.group_body').append(e);}
-  into('grpDurchlass','holesGroup');const bohr=root.querySelector('[data-x="bohr"]');if(bohr)$('holesGroup').querySelector('.group_body').prepend(bohr.closest('label'));
-  into('grpKueche','kitchenGroup');into('grpCustom','customGroup');into('grpFrei','customGroup');
-  into('grpMaschine','sewingGroup');into('massbandBlock','sewingGroup');
-  move('cutList','cutEditorMount');
-  // Always show mounted bodies; the four new steps own disclosure and focus.
-  for(const id of ['kfgStep3','kfgStep4'])$(id).classList.add('is-open');
-  const quick=$('quickBlock');if(quick){const d=document.createElement('details');d.className='standard_sizes';d.innerHTML='<summary><span>Standardmaße ab Lager — sofort lieferbar</span><i></i></summary>';quick.before(d);d.append(quick);}
-  const individual=$('cornerSelBlock');if(individual){const d=document.createElement('details');d.className='individual_corners';d.innerHTML='<summary>Ecken einzeln einstellen</summary>';individual.before(d);d.append(individual);}
-  // Remove native Unicode placeholders; form illustrations and icons are authored SVGs.
-  const drawNames={drawRect:'Rechteck zeichnen',drawCircle:'Rund zeichnen',drawPoly:'Freie Kontur zeichnen',addKanal:'Kabelkanal hinzufügen'};
-  Object.entries(drawNames).forEach(([id,label])=>{if($(id))$(id).textContent=label;});
-  $('drawPoly').hidden=true;$('drawPoly').disabled=true;
-  // Precision labels should say what the coordinates refer to.
-  $('cutEditorMount').addEventListener('focusin',()=>{if(step!==2)goStep(2);});
-  root.addEventListener('click',e=>{
-    if(e.target.closest('#reviewAdd')){$('continueStep').click();return;}
-    const st=e.target.closest('[data-step]');if(st){goStep(+st.dataset.step);return;}
-    const m=e.target.closest('[data-material]');if(m){api.material(m.dataset.material);status(materials[m.dataset.material].name+' gewählt.');return;}
-    const sh=e.target.closest('[data-shape]');if(sh){api.shape(sh.dataset.shape);api.setView('2d');schedule();return;}
-    const edit=e.target.closest('[data-edit-step]');if(edit)goStep(+edit.dataset.editStep);
-    if(e.target.closest('#drawRect,#drawCircle,#drawPoly')){api.setView('2d');if(matchMedia('(max-width:767px)').matches)setPreviewExpanded(true);}
-  });
-  root.addEventListener('input',schedule);root.addEventListener('change',schedule);root.addEventListener('click',schedule);
-  $('continueStep').addEventListener('click',()=>{sync();if(!snapshot.valid||errors.length){goStep(errors.length?2:1);return;}if(step<3)goStep(step+1);else if(snapshot.offer)quotePreview();else addToCart();});
-  $('backStep').addEventListener('click',()=>goStep(step-1));
-  $('sewingTemplate').addEventListener('click',()=>{api.material('szwal');schedule();status('Nähtisch-Vorlage geladen.');});
-  $('leaveSewing').addEventListener('click',()=>api.material('dekor'));
-  $('shareConfig').addEventListener('click',share);
-  $('sampleHelp').addEventListener('click',()=>openSampleDialog());
-  $('edgePreview').addEventListener('click',()=>openEdgeDialog());
-  $('expandPreview').addEventListener('click',()=>setPreviewExpanded(!root.classList.contains('preview_expanded')));
-  $('viewSwitch').addEventListener('click',()=>schedule());
-  document.addEventListener('keydown',e=>{
-    if(!root.classList.contains('preview_expanded'))return;
-    if(e.key==='Escape')setPreviewExpanded(false);
-    if(e.key==='Tab'){
-      const buttons=[...root.querySelectorAll('.work_preview button')].filter(b=>b.getClientRects().length&&!b.disabled);
-      if(e.shiftKey&&document.activeElement===buttons[0]){e.preventDefault();buttons.at(-1).focus();}
-      else if(!e.shiftKey&&document.activeElement===buttons.at(-1)){e.preventDefault();buttons[0].focus();}
-    }
-  });
-  window.addEventListener('kfg:change',schedule);
-  api.setView('3d');sync();renderCart();
-  ['materialDialog','cartDialog'].forEach(id=>{const d=$(id);if(d)uebersetzen(d);});
-  root.dataset.ready='true';
-}
-function schedule(){clearTimeout(timer);timer=setTimeout(sync,50);}
-/* Solange der Knopf in der Uebersicht zu sehen ist, verdeckt die Kaufleiste nur
-   das Ergebnis. Sie kommt zurueck, sobald er aus dem Bild scrollt. */
-let ctaBeobachter=null;
-function beobachteCta(){
-  const ziel=$('reviewCta'); if(!ziel)return;
-  if(!ctaBeobachter&&'IntersectionObserver' in window){
-    ctaBeobachter=new IntersectionObserver(e=>{
-      $('atelier').classList.toggle('cta_inline', e.some(x=>x.isIntersecting));
-    },{rootMargin:'-12px 0px -12px 0px'});
-  }
-  if(ctaBeobachter){ctaBeobachter.disconnect();ctaBeobachter.observe(ziel);}
-}
-function contour(s){
-  if(s.config.form==='round')return Array.from({length:240},(_,i)=>[s.dims.w/2+Math.cos(i*Math.PI/120)*s.dims.w/2,s.dims.h/2+Math.sin(i*Math.PI/120)*s.dims.h/2]);
-  const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',api.outline());
-  const length=path.getTotalLength(),count=Math.min(3000,Math.ceil(length/0.3));
-  return Array.from({length:count},(_,i)=>{const p=path.getPointAtLength(i*length/count);return[p.x,p.y];});
-}
-function dimsText(s){return s.config.form==='round'?`Ø ${number(s.dims.w)} cm`:`${number(s.dims.w)} × ${number(s.dims.h)} cm`;}
-function setText(id,text){if($(id).textContent!==text)$(id).textContent=text;}
-function sync(){
-  if(!api)return;
-  snapshot=api.snapshot();const s=snapshot,c=s.config,p=s.price;
-  $('atelier').dataset.view=c.view;
-  /* Der Ablaufkasten sagt das inzwischen selbst — die Zeile war doppelt. */
-  setText('draftNote',api.checkout?'':'Designvorschau: Der Warenkorb speichert deinen Entwurf nur in dieser Browsersitzung.');
-  $('textureTestNote').hidden=!api.textureInfo()?.generated;
-  const corners=api.cornerDetails();
-  $('cornerLegend').hidden=c.view!=='2d'||!corners.length;
-  $('atelier').classList.toggle('has_corner_legend',corners.length>0);
-  const legend=corners.length?`<div class="corner_legend_heading"><strong>Eckenradien</strong><span>Radius in mm</span></div><ol>${corners.map(k=>`<li><span class="corner_number">${k.number}</span><span class="corner_name">${esc(k.name)}</span><strong>${k.radius?'R'+number(k.radius):'Eckig'}${k.minimum?'<small>Mindestmaß</small>':''}</strong></li>`).join('')}</ol>`:'';
-  if($('cornerLegend').innerHTML!==legend)$('cornerLegend').innerHTML=legend;
-  errors=s.valid?validateCuts(c.cuts,contour(s),s.minEdge):[];
-  const sewing=c.mat==='szwal',extras=c.cuts.length+(c.extras.bohr?1:0)+(c.massband!=='none'?1:0);
-  document.querySelectorAll('[data-material]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.material===c.mat)));
-  document.querySelectorAll('[data-shape]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.shape===c.form));b.disabled=sewing&&b.dataset.shape==='round';});
-  $('sewingNotice').hidden=!sewing;$('materialChoices').hidden=sewing;
-  $('sewingGroup').hidden=!sewing;$('holesGroup').hidden=c.form==='round';$('kitchenGroup').hidden=sewing||c.form==='round';$('customGroup').hidden=sewing||c.form==='round';$('cornerGroup').hidden=c.form==='round';$('roundInfo').hidden=c.form!=='round';
-  setText('previewName',p.dekorName);setText('previewDescription',`${s.material.name}, ${p.thickName}`);
-  setText('viewHint',c.view==='3d'?'Ziehen zum Drehen':'Draufsicht mit Maßen');
-  setText('factDimensions',dimsText(s));setText('factThickness',p.thickName);setText('factExtras',extras?`${extras} gewählt`:'Keine');
-  setText('selectedDecor',p.dekorName);setText('edgeDescription',s.edgeNames.join(', '));
-  if($('edgeImage').getAttribute('src')!==s.edgePhoto.src)$('edgeImage').src=s.edgePhoto.src;
-  $('edgeImage').alt=`Kantenaufnahme ${p.dekorName}, ${s.material.name}`;
-  const closedPrice=!s.valid||errors.length>0||s.offer;
-  setText('atelierPrice',!s.valid||errors.length?'–':s.offer?'Preis auf Anfrage':money(p.total));
-  setText('priceContext',s.standard?'Deine Platte ab Lager':'Deine Maßanfertigung');
-  setText('atelierTax',s.standard?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+versand().text+' Versand');
-  $('continueStep').disabled=(!s.valid||errors.length>0)&&step===3;
-  if(step===3)$('continueStep').innerHTML=(s.offer?'Anfrage vorbereiten':editingId?'Änderungen speichern':'Platte hinzufügen')+chevron;
-  /* Die Zeile meldet sich nur noch, wenn etwas zu tun ist — Fliesstext ohne
-   Handlungsbedarf stand sonst unter jedem Schritt (Sascha, 11.09.). */
-  setText('priceStatus',!s.valid?'Bitte korrigiere die markierten Maße.':errors.length?'Bitte prüfe die Position deiner Bearbeitungen.':s.offer?'Für diese Ausführung ist ein individuelles Angebot nötig.':'');
-  $('cutErrors').hidden=!errors.length;
-  const errorHTML=errors.map(e=>`<p><b>Bearbeitung ${e.index+1}:</b> ${esc(e.message)}</p>`).join('');
-  if($('cutErrors').innerHTML!==errorHTML)$('cutErrors').innerHTML=errorHTML;
-  document.querySelectorAll('#cutList .kfg_cutrow').forEach((row,i)=>{
-    row.classList.toggle('geometry_error',errors.some(e=>e.index===i));
-    row.querySelectorAll('input').forEach(input=>input.setAttribute('aria-invalid',String(errors.some(e=>e.index===i))));
-    row.querySelectorAll('label').forEach(label=>{const t=label.firstChild;if(t?.nodeType===3){if(t.textContent.includes('X ab links'))t.textContent='Mitte ab links';if(t.textContent.includes('Y ab hinten'))t.textContent='Mitte ab hinten';}});
-  });
-  document.querySelectorAll('.kfg_field input').forEach(input=>{const field=input.closest('.kfg_field'),error=field.querySelector('.err'),range=field.querySelector('.range');input.setAttribute('aria-invalid',String(field.classList.contains('is-error')));const ids=[range?.id,error?.id].filter(Boolean);if(ids.length)input.setAttribute('aria-describedby',ids.join(' '));});
-  // Shared core native choices are kept accessible after every rebuild.
-  document.querySelectorAll('#thickChips button,#dekorGrid button,#edgeChips button,#absChips button').forEach(b=>{b.type='button';});
-  dekorVorschau();standardVorschau();
-  const key=JSON.stringify({c,p,errors,customText:$('customText').value});if(key!==previousKey){renderReview();previousKey=key;}
-  /* renderReview baut den Knopf neu — die Beschriftung kommt danach. */
-  const ri=$('reviewAdd');
-  if(ri&&step===3){ri.innerHTML=$('continueStep').innerHTML;ri.disabled=$('continueStep').disabled;}
-  uebersetzen();dialogeNachziehen();
-}
-function goStep(next){
-  step=Math.max(0,Math.min(3,next));
-  for(let i=0;i<4;i++){ $('panel'+i).hidden=i!==step;const b=document.querySelector(`.step_nav [data-step="${i}"]`);b.toggleAttribute('data-complete',i<step);if(i===step)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current'); }
-  $('backStep').hidden=step===0;setText('stepProgress',`Schritt ${step+1} von 4`);
-  $('continueStep').innerHTML=[`Weiter zu Form & Maße ${chevron}`,`Weiter zu Kanten & Extras ${chevron}`,`Zur Übersicht ${chevron}`,`${editingId?'Änderungen speichern':'Platte hinzufügen'} ${chevron}`][step];
-  api.setView(step===0?'3d':'2d');sync();
-  const heading=$('panel'+step).querySelector('h2');heading.focus({preventScroll:true});
-  if(step!==3)$('atelier').classList.remove('cta_inline');
-  const target=matchMedia('(max-width:767px)').matches?$('panel'+step):document.querySelector('.step_nav');target.scrollIntoView({behavior:'instant',block:'start'});
-  uebersetzen();
-}
-function renderReview(){
-  const s=snapshot,c=s.config,p=s.price;
-  const rows=[['Material & Oberfläche',`${s.material.name} · ${p.dekorName}`,0],['Plattenstärke',p.thickName,0],['Form & Maße',`${shapes[c.form][0]} · ${dimsText(s)}`,1]];
-  if(c.form==='lform')rows.push(['Ausklinkung',`${number(c.lf.aw)} × ${number(c.lf.ah)} cm, ${c.lf.pos==='vl'?'vorne links':'vorne rechts'}${c.lf.schnitt==='schraeg'?`, schräg ${c.lf.winkel}°`:''}`,1]);
-  if(c.form==='bauch')rows.push(['Bauchausschnitt',`${c.bs.art==='welle'?'Geschwungen':'Trapez'} · Tiefe ${number(c.bs.t)} cm`,1]);
-  rows.push(['Kante',s.edgeNames.join(', ')+(c.absColor!=='dekor'?` · ${c.absColor}`:''),2]);
-  if(c.form!=='round')rows.push(['Ecken',s.cornerLabel,2]);
-  if(c.extras.bohr)rows.push(['Montagebohrungen','4 × Ø8 mm',2]);
-  c.cuts.forEach((cut,i)=>rows.push([s.cuts[i].label||'Freier Ausschnitt',`${s.cuts[i].mass}${cut.cx!=null?` · Mitte: ${number(cut.cx*10)} mm ab links, ${number(cut.cy*10)} mm ab hinten`:''}`,2]));
-  if(c.massband!=='none')rows.push(['Maßband',`${c.massband==='laser'?'Gelasert':'Aufkleberkante'}, Nullpunkt ${c.massbandNull}`,2]);
-  if(c.machine)rows.push(['Nähmaschine',c.machine,2]);
-  if(c.extras.custom){rows.push(['Individuelle Anfrage',$('customText').value.trim()||'Eigenes Bohrbild · Details noch ergänzen',2]);if($('uploadInput').files.length)rows.push(['Skizze',$('uploadInput').files[0].name,2]);}
-  const costs=[['Platte',p.basis],['Kantenbearbeitung',p.kante],['Eckenrundung',p.ecken],['Formzuschnitt',p.lschnitt],['Weitere Bearbeitungen',p.extras]].filter((r,i)=>i===0||r[1]>0);
-  /* Der Versand faellt einmal je Bestellung an, nicht je Platte. Als eigene Zeile
-     in dieser Aufstellung ergab er eine zweite, hoehere Gesamtsumme — und die stand
-     neben der Summe in der Kaufleiste (Sascha, 11.09.). Jetzt steht hier der Preis
-     der Platte, der Versand als Hinweis darunter. */
-  const versandHinweis=s.standard?'Versand kostenfrei':'zzgl. '+versand().text+' Versand — einmalig je Bestellung, unabhängig von der Stückzahl';
-  $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div class="review_total"><span>Deine Platte inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total)}</strong></div></details><p class="review_shipping">${versandHinweis}</p>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}<div class="review_cta" id="reviewCta"><button type="button" class="primary_button" id="reviewAdd"></button></div>`;
-  beobachteCta();
-  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
-  if(s.offer){api.syncLink();$('orderProcess').innerHTML=api.inquiry
-    ?'<h3>Deine individuelle Anfrage</h3><p>Für ein eigenes Bohrbild rechnen wir von Hand. Wir bereiten eine E-Mail mit deiner Konfiguration vor — beschreibe darin, was du brauchst, und hänge deine Skizze an.</p>'
-    :'<h3>Deine individuelle Anfrage</h3><p>Öffne diese Auswahl im Live-Konfigurator, um ein Angebot anzufragen.</p><a class="secondary_button" target="_blank" rel="noopener" href="https://www.kessler-pro.com/tischplatte-nach-mass'+esc(location.hash)+'">Auswahl im Live-Konfigurator öffnen</a>';}
-}
-function setPreviewExpanded(on){
-  const root=$('atelier');root.classList.toggle('preview_expanded',on);document.body.classList.toggle('preview_open',on);
-  $('expandPreview').setAttribute('aria-label',on?'Vorschau verkleinern':'Vorschau vergrößern');
-  document.querySelectorAll('.work_controls,.site_header,.step_nav,.page_intro,.site_footer,.draftbar').forEach(e=>e.inert=on);
-  const preview=document.querySelector('.work_preview');
-  if(on){preview.setAttribute('role','dialog');preview.setAttribute('aria-modal','true');}
-  else{preview.removeAttribute('role');preview.removeAttribute('aria-modal');}
-  if(on){returnFocus=document.activeElement;$('expandPreview').focus();}else returnFocus?.focus();
-  requestAnimationFrame(()=>api.frame());
-}
-async function share(){
-  api.syncLink();
-  const url=location.href;
-  try{await navigator.clipboard.writeText(url);$('shareConfig').innerHTML=check+'Link kopiert';status('Link zur Konfiguration kopiert.');}
-  catch{showDialog('shareDialog',`<h2>Konfiguration teilen</h2><p>Kopiere diesen Link, um die Auswahl wieder zu öffnen.</p><label>Link<input readonly value="${esc(url)}"></label>`);}
-}
-function showDialog(id,html){
-  let d=$(id);if(!d){d=document.createElement('dialog');d.id=id;d.className='atelier_dialog';document.body.append(d);}
-  d.innerHTML=`<div class="dialog_header"><span></span><button class="icon_button" data-close aria-label="Dialog schließen">×</button></div>${html}`;d.querySelector('h2').id=id+'Title';d.setAttribute('aria-labelledby',id+'Title');uebersetzen(d);d.showModal();
-}
-function openEdgeDialog(){const s=snapshot;showDialog('edgeDialog',`<h2>${esc(s.material.name)} im Detail</h2><img class="large_edge" src="${esc(s.edgePhoto.src)}" alt="Kantenaufnahme ${esc(s.price.dekorName)}"><p>${esc(s.price.dekorName)} · ${esc(s.edgeNames.join(', '))}</p><p class="muted">${s.edgePhoto.ref?`Referenzaufnahme in ${s.edgePhoto.mm||25} mm. Deine gewählte Stärke: ${esc(s.price.thickName)}.`:'Originalaufnahme aus der Fertigung.'}</p>`);}
-function openSampleDialog(){
-  showDialog('sampleDialog',`<h2>Das Dekor in die Hand nehmen.</h2><p>Die Musterbox enthält vier Dekore und kostet 4,90 € — beim Plattenkauf rechnen wir sie voll an.</p><button class="primary_button" id="sampleMail" type="button">Musterbox anfragen</button>`);
-  /* Der Shop hat noch kein Musterbox-Produkt. Der Kern hat den Weg, der heute
-     funktioniert: eine vorbereitete E-Mail mit dem gewaehlten Dekor. */
-  const m=$('sampleMail'); if(m)m.addEventListener('click',()=>{const b=$('btnMuster'); if(b)b.click();});
-}
-function capturePreview(){
-  const clone=$('stage').cloneNode(true);clone.removeAttribute('id');clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
-  clone.querySelectorAll('[id]').forEach(e=>{const old=e.id,nu='cart-'+Date.now()+'-'+old;clone.querySelectorAll('*').forEach(n=>{for(const a of [...n.attributes])if(a.value.includes(`url(#${old})`))n.setAttribute(a.name,a.value.replaceAll(`url(#${old})`,`url(#${nu})`));});e.id=nu;});
-  clone.querySelectorAll('.kfg_dim,.kfg_cut-handle,.kfg_corner-hit').forEach(e=>e.remove());return clone.outerHTML;
-}
-function addToCart(){
-  if(!snapshot.valid||errors.length||snapshot.offer)return;
-  api.syncLink();
-  const existing=cart.find(item=>item.id===editingId);
-  const item={id:existing?.id||Date.now(),quantity:existing?.quantity||1,config:structuredClone(snapshot.config),name:snapshot.material.name+' · '+snapshot.price.dekorName,dims:dimsText(snapshot),thick:snapshot.price.thickName,price:snapshot.price.total,shipping:snapshot.standard?0:versand().betrag,hash:location.hash,preview:capturePreview(),cuts:structuredClone(snapshot.cuts),workerBody:api.workerBody(),order:api.orderIntent?api.orderIntent():null};
-  if(existing)cart=cart.map(row=>row.id===existing.id?item:row);else cart.push(item);
-  editingId=null;persistCart();renderCart();$('cartDialog').showModal();
-  $('cartDialogTitle').textContent=existing?'Deine Platte wurde aktualisiert.':'Deine Platte ist gespeichert.';
-  status('Deine Platte liegt bei deinen Platten. Du kannst die Stückzahl ändern oder eine weitere konfigurieren.');
-}
-function anotherPlate(){
-  editingId=null;window.KFG.setConfig(api.defaultConfig());
-  $('customText').value='';$('machineInput').value='';$('uploadInput').value='';
-  $('uploadZone').querySelector('b').textContent='Skizze oder Zeichnung hochladen';
-  document.querySelectorAll('.option_group').forEach(d=>d.open=d.id==='edgeGroup');
-  $('cartDialog').close();goStep(0);status('Neue Platte gestartet. Deine gespeicherten Platten bleiben im Warenkorb.');
-}
-function quotePreview(){
-  api.syncLink();
-  if(api.inquiry){api.inquiry();status('Deine Anfrage wird als E-Mail vorbereitet.');return;}
-  showDialog('quoteDialog',`<h2>Dein eigenes Bohrbild anfragen</h2><p>${esc(snapshot.material.name)} · ${esc(snapshot.price.dekorName)} · ${esc(dimsText(snapshot))}</p><p>${esc($('customText').value||'Ergänze deine Beschreibung und eine Skizze für das individuelle Bohrbild.')}</p><p>In dieser Vorschau wird keine Anfrage gesendet. Öffne die Auswahl im Live-Shop und ergänze dort Beschreibung und Skizze erneut.</p><a class="primary_button" href="https://www.kessler-pro.com/tischplatte-nach-mass${esc(location.hash)}" target="_blank" rel="noopener">Zum Live-Konfigurator</a>`);
-}
-/* ── Uebergabe an den bestehenden Worker + Shopyflow ───────────────────────────
-   Je Konfiguration ein Aufruf: der Worker legt die Variante mit dem Stueckpreis an
-   und liefert die Attribute samt Token zurueck. Die Stueckzahl geht getrennt als
-   quantity an Shopyflow — der Versand wird danach von Shopify fuer den gesamten
-   Warenkorb berechnet. Lagerplatten gehen ohne Worker direkt auf ihre Variante. */
-let checkoutBusy=false;
-async function zurKasse(){
-  if(!cart.length||checkoutBusy)return;
-  if(!api.checkout){showDialog('checkoutPreviewDialog','<h2>Der Warenkorb ist bereit.</h2><p>Im fertigen Shop führt dieser Schritt direkt zum Shopify-Checkout – mit allen Platten und Stückzahlen.</p><p>Diese lokale Designvorschau löst keine Bestellung aus.</p>');return;}
-  checkoutBusy=true;
-  const button=document.querySelector('[data-preview-checkout]');
-  const label=button?button.innerHTML:'';
-  if(button){button.disabled=true;button.textContent='Platten gehen in den Warenkorb …';}
-  const gesamt=cart.length;let fertig=0,fehler=null;
-  for(const item of [...cart]){
-    try{
-      await api.checkout(item.order||{body:item.workerBody,lager:null},item.quantity);
-      cart=cart.filter(row=>row.id!==item.id);fertig++;persistCart();
-    }catch(e){fehler=e;break;}
-  }
-  renderCart();
-  if(button){button.disabled=false;button.innerHTML=label;}
-  checkoutBusy=false;
-  if(!fehler){
-    $('cartDialog').close();
-    if(api.openCart)api.openCart();
-    status('Alle Platten liegen im Warenkorb des Shops.');
-    return;
-  }
-  const rest=gesamt-fertig;
-  showDialog('checkoutErrorDialog','<h2>Der Warenkorb ist noch nicht vollständig.</h2>'
-    +(fertig?`<p>${fertig} von ${gesamt} Platten liegen bereits im Warenkorb des Shops.</p>`:'')
-    +`<p>Bei ${rest===1?'der letzten Platte':'den restlichen '+rest+' Platten'} hat der Shop nicht geantwortet: ${esc(String(fehler&&fehler.message||fehler))}</p>`
-    +'<p>Deine noch offenen Platten sind gespeichert. Versuche es gleich noch einmal – es entsteht keine doppelte Position.</p>');
-  status('Der Warenkorb konnte nicht vollständig übergeben werden.');
-}
-function persistCart(){try{sessionStorage.setItem('kessler-atelier-cart',JSON.stringify(cart));}catch{status('Der Entwurf bleibt nur bis zum Neuladen verfügbar.');}}
-function renderCart(){
-  setText('cartCount',String(cart.reduce((sum,item)=>sum+item.quantity,0)));
-  setTimeout(()=>uebersetzen($('cartDialog')),0);
-  if(!cart.length){$('cartBody').innerHTML='<div class="empty_cart">'+svg('<path d="M4 7h16v14H4zM8 7V5a4 4 0 0 1 8 0v2"/>')+'<h3>Platz für deine erste Platte.</h3><p>Konfiguriere deine Platte und prüfe sie im letzten Schritt.</p><button class="primary_button" data-close>Weiter konfigurieren</button></div>';return;}
-  $('cartBody').innerHTML=cart.map(item=>`<article class="cart_item"><div class="cart_preview">${item.preview}</div><div><h3>${esc(item.name)}</h3><p>${esc(item.dims)} · ${esc(item.thick)}</p>${item.cuts.length?`<p>${item.cuts.length} Bearbeitung${item.cuts.length>1?'en':''}</p>`:''}<div class="cart_quantity"><span>Stückzahl</span><div><button data-quantity-step="-1" data-item="${item.id}" aria-label="Eine Platte weniger"${item.quantity===1?' disabled':''}>−</button><input type="number" inputmode="numeric" min="1" step="1" data-quantity="${item.id}" value="${item.quantity}" aria-label="Stückzahl ${esc(item.name)}"><button data-quantity-step="1" data-item="${item.id}" aria-label="Eine Platte mehr">+</button></div></div><strong>${money(lineTotal(item.price,item.quantity))}</strong><small>${money(item.price)} je Platte · inkl. MwSt.</small><div class="cart_item_actions"><button data-cart-edit="${item.id}">Bearbeiten</button><button data-cart-copy="${item.id}">Kopie anpassen</button><button data-cart-remove="${item.id}">Entfernen</button></div></div></article>`).join('')+`<div class="cart_totals"><span>Platten gesamt <small>${cart.reduce((sum,item)=>sum+item.quantity,0)} Stück · ${cart.length} Konfiguration${cart.length===1?'':'en'}</small></span><strong>${money(cart.reduce((sum,item)=>sum+Math.round(item.price*100)*item.quantity,0)/100)}</strong></div><p class="cart_shipping">Inkl. MwSt. Der Versand wird im Shopify-Checkout für den gesamten Warenkorb berechnet.</p><div class="cart_next"><h3>Möchtest du eine weitere Platte?</h3><button class="secondary_button" data-another-plate>Weitere Platte konfigurieren</button><button class="primary_button" data-preview-checkout>In den Warenkorb des Shops ${chevron}</button></div><p class="demo_explanation">${api.checkout?'Der Versand wird nach der Übergabe an den Shop für den gesamten Warenkorb berechnet.':'Designvorschau: Der Warenkorb bleibt auf diesem Rechner.'}</p>`;
-}
-document.addEventListener('click',e=>{
-  /* Die Wortliste kommt erst nach dem Start an - die festen Dialoge laufen
-     deshalb beim Oeffnen noch einmal durch die Uebersetzung. */
-  const open=e.target.closest('[data-dialog]');if(open){const d=$(open.dataset.dialog);if(d){uebersetzen(d);d.showModal();}return;}
-  if(e.target.closest('[data-close]'))e.target.closest('dialog')?.close();
-  const mc=e.target.closest('[data-material-choice]');if(mc&&api){api.material(mc.dataset.materialChoice);mc.closest('dialog').close();goStep(0);}
-  const remove=e.target.closest('[data-cart-remove]');if(remove){cart=cart.filter(x=>x.id!==+remove.dataset.cartRemove);persistCart();renderCart();}
-  const edit=e.target.closest('[data-cart-edit],[data-cart-copy]');if(edit){const item=cart.find(x=>x.id===+(edit.dataset.cartEdit||edit.dataset.cartCopy));if(item){editingId=edit.hasAttribute('data-cart-edit')?item.id:null;window.KFG.setConfig(structuredClone(item.config));$('cartDialog').close();goStep(0);status(editingId?'Du bearbeitest diese Warenkorbposition.':'Kopie geladen. Das Original bleibt im Warenkorb.');}}
-  const qty=e.target.closest('[data-quantity-step]');if(qty){const item=cart.find(x=>x.id===+qty.dataset.item);if(item){item.quantity=Math.max(1,item.quantity+(+qty.dataset.quantityStep));persistCart();renderCart();document.querySelector(`[data-item="${item.id}"][data-quantity-step="${qty.dataset.quantityStep}"]`)?.focus();}}
-  if(e.target.closest('[data-another-plate]'))anotherPlate();
-  if(e.target.closest('[data-preview-checkout]'))zurKasse();
-  if(e.target.closest('[data-start]')){e.preventDefault();if(api)goStep(0);}
-});
-document.addEventListener('change',e=>{if(!e.target.matches('[data-quantity]'))return;const item=cart.find(x=>x.id===+e.target.dataset.quantity);if(!item)return;const quantity=Number(e.target.value);if(!Number.isSafeInteger(quantity)||quantity<1){e.target.value=item.quantity;status('Bitte eine ganze Stückzahl ab 1 eingeben.');return;}item.quantity=quantity;persistCart();renderCart();document.querySelector(`[data-quantity="${item.id}"]`)?.focus();});
-document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close();}));
-let attempts=0;const startTimer=setInterval(()=>{boot();if(started||++attempts>200){clearInterval(startTimer);if(!started)$('atelier').innerHTML='<p class="loading">Der Konfigurator konnte nicht geladen werden. Bitte lade diese Seite erneut.</p>';}},50);
-
-
-
 })();

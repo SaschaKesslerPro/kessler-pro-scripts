@@ -34,6 +34,35 @@ function dialogeNachziehen(){
 function sectionTitle(title,body=''){return `<div class="panel_heading"><h2 tabindex="-1">${title}</h2>${body?`<p>${body}</p>`:''}</div>`;}
 function group(title,desc,id,open=false){return `<details class="option_group" id="${id}"${open?' open':''}><summary><span><b>${title}</b><small>${desc}</small></span>${chevron}</summary><div class="group_body"></div></details>`;}
 
+/* ── Wie viel steht offen? ──────────────────────────────────────────────────
+   Gemessen am 11.09.: Schritt 3 trägt mit 42 die meisten Bedienelemente und
+   wirkt trotzdem am leichtesten, weil sie in fünf geschlossenen Gruppen
+   liegen. Schritt 1 (21) und Schritt 2 (26) legten alles flach aus. Beide
+   bekommen deshalb dasselbe Muster: eine Reihe offen, der Rest auf Knopfdruck. */
+const DEKOR_REIHE=5;
+function dekorVorschau(){
+  const mount=$('dekorMount'),knopf=$('dekorMore');
+  if(!mount||!knopf)return;
+  const alle=[...mount.querySelectorAll('.kfg_dekor')];
+  const offen=mount.classList.contains('dekor_open');
+  const gewaehlt=alle.findIndex(b=>b.classList.contains('is-active'));
+  alle.forEach((b,i)=>{b.style.order='';b.style.display=(offen||i<DEKOR_REIHE||i===gewaehlt)?'':'none';});
+  /* Liegt das gewählte Dekor hinter der Reihe — aus einem geteilten Link oder
+     weil es die Voreinstellung ist —, rückt es nach vorn und das letzte der
+     Reihe rückt dafür heraus. Geschlossen stehen so immer genau fünf. */
+  if(!offen&&gewaehlt>=DEKOR_REIHE){alle[gewaehlt].style.order='-1';alle[DEKOR_REIHE-1].style.display='none';}
+  knopf.hidden=alle.length<=DEKOR_REIHE;
+  knopf.querySelector('span').textContent=offen?'Weniger Dekore zeigen':'Alle Dekore zeigen';
+  knopf.querySelector('i').textContent=offen?'':String(alle.length);
+}
+function standardVorschau(){
+  const zaehler=document.querySelector('.standard_sizes summary i');
+  if(!zaehler)return;
+  const n=document.querySelectorAll('#quickChips .kfg_quick-chip').length;
+  const text=n?String(n):'';
+  if(zaehler.textContent!==text)zaehler.textContent=text;
+}
+
 function boot(){
   if(started||!window.KFG?.atelier)return;started=true;api=window.KFG.atelier;
   const root=$('atelier');
@@ -100,6 +129,11 @@ function boot(){
   move('btn3d','viewSwitch').textContent='Produktansicht';move('btn2d','viewSwitch').textContent='Maßzeichnung';
   move('stage','canvasMount');move('stage3d','canvasMount');
   move('dekorGrid','dekorMount');move('thickChips','thicknessMount');
+  const dekorKnopf=document.createElement('button');
+  dekorKnopf.type='button';dekorKnopf.id='dekorMore';dekorKnopf.className='reveal_button';
+  dekorKnopf.innerHTML='<span>Alle Dekore zeigen</span><i></i>';
+  $('dekorMount').append(dekorKnopf);
+  dekorKnopf.addEventListener('click',()=>{$('dekorMount').classList.toggle('dekor_open');dekorVorschau();});
   // Preserve the original linked controls and calculations; only arrange their DOM.
   const surface=$('mpxSurfaceBlock')||$('surfaceBlock');if(surface)$('surfaceMount').append(surface);
   move('kfgStep3','dimensionsMount');
@@ -112,7 +146,7 @@ function boot(){
   move('cutList','cutEditorMount');
   // Always show mounted bodies; the four new steps own disclosure and focus.
   for(const id of ['kfgStep3','kfgStep4'])$(id).classList.add('is-open');
-  const quick=$('quickBlock');if(quick){const d=document.createElement('details');d.className='standard_sizes';d.open=true;d.innerHTML='<summary>Standardmaße ab Lager — sofort lieferbar</summary>';quick.before(d);d.append(quick);}
+  const quick=$('quickBlock');if(quick){const d=document.createElement('details');d.className='standard_sizes';d.innerHTML='<summary><span>Standardmaße ab Lager — sofort lieferbar</span><i></i></summary>';quick.before(d);d.append(quick);}
   const individual=$('cornerSelBlock');if(individual){const d=document.createElement('details');d.className='individual_corners';d.innerHTML='<summary>Ecken einzeln einstellen</summary>';individual.before(d);d.append(individual);}
   // Remove native Unicode placeholders; form illustrations and icons are authored SVGs.
   const drawNames={drawRect:'Rechteck zeichnen',drawCircle:'Rund zeichnen',drawPoly:'Freie Kontur zeichnen',addKanal:'Kabelkanal hinzufügen'};
@@ -217,6 +251,7 @@ function sync(){
   document.querySelectorAll('.kfg_field input').forEach(input=>{const field=input.closest('.kfg_field'),error=field.querySelector('.err'),range=field.querySelector('.range');input.setAttribute('aria-invalid',String(field.classList.contains('is-error')));const ids=[range?.id,error?.id].filter(Boolean);if(ids.length)input.setAttribute('aria-describedby',ids.join(' '));});
   // Shared core native choices are kept accessible after every rebuild.
   document.querySelectorAll('#thickChips button,#dekorGrid button,#edgeChips button,#absChips button').forEach(b=>{b.type='button';});
+  dekorVorschau();standardVorschau();
   const key=JSON.stringify({c,p,errors,customText:$('customText').value});if(key!==previousKey){renderReview();previousKey=key;}
   /* renderReview baut den Knopf neu — die Beschriftung kommt danach. */
   const ri=$('reviewAdd');

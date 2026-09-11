@@ -258,6 +258,51 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     await ctx.close();
   }
 
+  /* ══ ⑥ Weniger auf einmal (11.09.) ═══════════════════════════════════════
+     Schritt 1 und 2 legten alles flach aus (gemessen 21 und 26 Bedienelemente);
+     Schritt 3 trug mit 42 die meisten und wirkte trotzdem ruhig, weil sie in
+     geschlossenen Gruppen lagen. Beide bekommen dasselbe Muster. Geprueft wird,
+     dass geschlossen genau eine Dekorreihe steht, das gewaehlte Dekor immer
+     dabei ist, der Knopf aufklappt und die Standardmasse zu starten. */
+  for(const [name,vp,mobil] of [['Desktop',{width:1440,height:1000},false],['Mobil',{width:390,height:844},true]]){
+    const {ctx,p}=await seite(vp,'de',mobil);
+    const zu=await p.evaluate(()=>({
+      sichtbar:[...document.querySelectorAll('.kfg_dekor')].filter(b=>b.getClientRects().length).length,
+      gesamt:document.querySelectorAll('.kfg_dekor').length,
+      aktivSichtbar:!!document.querySelector('.kfg_dekor.is-active')?.getClientRects().length,
+      knopf:document.getElementById('dekorMore').textContent.trim(),
+      standardZu:!document.querySelector('.standard_sizes').open,
+      standardAnzahl:(document.querySelector('.standard_sizes summary i')||{}).textContent||''}));
+    pruef(`⑥ ${name} geschlossen steht genau eine Dekorreihe`, zu.sichtbar===5&&zu.gesamt===11, JSON.stringify(zu));
+    pruef(`⑥ ${name} gewaehltes Dekor bleibt sichtbar`, zu.aktivSichtbar, JSON.stringify(zu));
+    pruef(`⑥ ${name} Knopf nennt die Gesamtzahl`, /Alle Dekore zeigen/.test(zu.knopf)&&/11/.test(zu.knopf), zu.knopf);
+    pruef(`⑥ ${name} Standardmasse starten zugeklappt mit Anzahl`, zu.standardZu&&zu.standardAnzahl==='18', JSON.stringify(zu));
+    await p.klick('#dekorMore');
+    const auf=await p.evaluate(()=>({
+      sichtbar:[...document.querySelectorAll('.kfg_dekor')].filter(b=>b.getClientRects().length).length,
+      knopf:document.getElementById('dekorMore').textContent.trim()}));
+    pruef(`⑥ ${name} Knopf zeigt alle Dekore`, auf.sichtbar===11&&/Weniger/.test(auf.knopf), JSON.stringify(auf));
+    /* Ein Dekor aus dem hinteren Teil waehlen, wieder zuklappen — es muss stehen bleiben. */
+    await p.klick('.kfg_dekor:last-of-type');
+    await p.klick('#dekorMore');
+    const danach=await p.evaluate(()=>({
+      sichtbar:[...document.querySelectorAll('.kfg_dekor')].filter(b=>b.getClientRects().length).length,
+      aktiv:document.querySelector('.kfg_dekor.is-active')?.textContent.trim(),
+      aktivSichtbar:!!document.querySelector('.kfg_dekor.is-active')?.getClientRects().length}));
+    pruef(`⑥ ${name} hinteres Dekor bleibt nach dem Zuklappen stehen`,
+      danach.sichtbar===5&&danach.aktivSichtbar&&/Hickory/.test(danach.aktiv||''), JSON.stringify(danach));
+    await ctx.close();
+  }
+  {
+    const {ctx,p}=await seite({width:1440,height:1000},'pl',false);
+    const pl=await p.evaluate(()=>({knopf:document.getElementById('dekorMore').textContent.trim(),
+      standard:document.querySelector('.standard_sizes summary').textContent.trim()}));
+    pruef('⑥ PL Dekorknopf uebersetzt', /Pokaż wszystkie dekory/.test(pl.knopf)&&!/Alle Dekore/.test(pl.knopf), pl.knopf);
+    pruef('⑥ PL Standardmasse uebersetzt', !/Standardma/.test(pl.standard), pl.standard);
+    await ctx.close();
+  }
+  console.log('⑥ Dichte geprueft');
+
   await b.close();
   console.log(`\n${gruen} Zusicherungen gruen, ${rot.length} rot`);
   if(rot.length){ rot.forEach(r=>console.log('  ✗ '+r)); process.exit(1); }
