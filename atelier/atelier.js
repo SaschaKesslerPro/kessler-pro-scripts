@@ -49,16 +49,16 @@ function boot(){
           <div class="preview_toolbar"><div class="view_switch" id="viewSwitch"></div><button type="button" class="icon_button" id="expandPreview" aria-label="Vorschau vergrößern">${expand}</button></div>
           <div class="preview_canvas" id="canvasMount"></div>
           <section class="corner_legend" id="cornerLegend" aria-label="Eckenradien" hidden></section>
-          <div class="preview_caption"><div><strong id="previewName">Buche</strong><span id="previewDescription">Möbelplatte, 25 mm</span></div><span id="viewHint">Ziehen zum Drehen</span></div>
+          <div class="preview_caption"><div><strong id="previewName">Buche</strong><span id="previewDescription">Möbelplatte, 25 mm</span></div><span class="view_hint">${svg('<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 3v5h-5"/>')}<span id="viewHint">Ziehen zum Drehen</span></span></div>
         </div>
         <p class="texture_test_note" id="textureTestNote" hidden>Texturtest: KI-erweiterte Materialvorschau. Das Originaldekor siehst du in der Farbauswahl und im Kantenfoto.</p>
         <div class="preview_facts"><div><span>Dein Maß</span><strong id="factDimensions"></strong></div><div><span>Stärke</span><strong id="factThickness"></strong></div><div><span>Bearbeitungen</span><strong id="factExtras"></strong></div></div>
         <button class="edge_preview" id="edgePreview"><img id="edgeImage" width="160" height="110" alt="Kantenaufnahme des gewählten Materials"><span><b>Die Kante macht den Unterschied.</b><span id="edgeDescription"></span><small>Originalaufnahme ansehen</small></span>${chevron}</button>
-        <p class="preview_note">Die Darstellung hilft dir bei der Auswahl. Farbe und Maserung können je nach Bildschirm abweichen.</p>
+        
       </aside>
       <div class="work_controls">
         <section class="flow_panel" id="panel0" aria-label="Material und Oberfläche">
-          ${sectionTitle('Was passt zu deiner Platte?','Wähle zuerst den Aufbau, dann die Oberfläche.')}
+          ${sectionTitle('Was passt zu deiner Platte?')}
           <div class="material_choices" id="materialChoices">${Object.entries(materials).map(([k,m])=>`<button class="material_choice" type="button" data-material="${k}" aria-pressed="false"><img src="${assetUrl('kante/'+m.image+'.webp')}" width="104" height="76" alt=""><span><b>${m.name}</b><small>${m.desc}</small></span><span class="selection_check">${check}</span></button>`).join('')}</div>
           <div class="material_help"><button class="text_button" data-dialog="materialDialog">Materialien vergleichen</button><button class="text_button" id="sewingTemplate">Vorlage für Nähtische</button></div>
           <div id="sewingNotice" class="info_note" hidden>Nähtischplatte gewählt. Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras. <button type="button" id="leaveSewing">Zur Möbelplatte</button></div>
@@ -67,12 +67,12 @@ function boot(){
           <button class="sample_help" id="sampleHelp">${svg('<path d="m4 9 8-5 8 5-8 5-8-5Zm0 5 8 5 8-5"/>')}<span>Du möchtest die Oberfläche erst fühlen?<small>Musterbox mit vier Dekoren im Shop ansehen</small></span>${chevron}</button>
         </section>
         <section class="flow_panel" id="panel1" aria-label="Form und Maße" hidden>
-          ${sectionTitle('Welche Form brauchst du?','Die Zeichnung zeigt dir, wie Form und Maße zusammenpassen.')}
+          ${sectionTitle('Welche Form brauchst du?')}
           <div class="shape_choices">${Object.entries(shapes).map(([k,[n,p]])=>`<button type="button" class="shape_choice" data-shape="${k}" aria-pressed="false">${svg(p)}<span>${n}</span></button>`).join('')}</div>
           <div class="field_heading"><h3>Deine Maße</h3><span>Alle Plattenmaße in cm</span></div><div id="dimensionsMount"></div>
         </section>
         <section class="flow_panel" id="panel2" aria-label="Kanten und Extras" hidden>
-          ${sectionTitle('Der letzte Schliff.','Deine Grundausführung steht. Ergänze nur, was du brauchst.')}
+          ${sectionTitle('Der letzte Schliff.')}
           ${group('Kantenprofil & Farbe','Passend zur Oberfläche oder bewusst anders','edgeGroup',true)}
           ${group('Ecken abrunden','Alle Ecken gemeinsam oder einzeln einstellen','cornerGroup')}
           ${group('Bohrungen & Kabeldurchlässe','Kabel führen und das Gestell befestigen','holesGroup')}
@@ -83,7 +83,7 @@ function boot(){
           <div class="info_note" id="roundInfo" hidden>Bei runden Platten stehen Ausschnitte in diesem Konfigurator nicht zur Verfügung.</div>
         </section>
         <section class="flow_panel" id="panel3" aria-label="Konfiguration prüfen" hidden>
-          ${sectionTitle('Deine Platte auf einen Blick.','Lege deine Konfiguration direkt in den Warenkorb. Die Stückzahl kannst du dort ändern.')}
+          ${sectionTitle('Deine Platte auf einen Blick.')}
           <div id="reviewContent"></div>
           <div class="order_process" id="orderProcess"></div>
           <p class="demo_explanation" id="draftNote"></p>
@@ -112,7 +112,7 @@ function boot(){
   move('cutList','cutEditorMount');
   // Always show mounted bodies; the four new steps own disclosure and focus.
   for(const id of ['kfgStep3','kfgStep4'])$(id).classList.add('is-open');
-  const quick=$('quickBlock');if(quick){const d=document.createElement('details');d.className='standard_sizes';d.innerHTML='<summary>Oder ein vorhandenes Standardmaß wählen</summary>';quick.before(d);d.append(quick);}
+  const quick=$('quickBlock');if(quick){const d=document.createElement('details');d.className='standard_sizes';d.open=true;d.innerHTML='<summary>Standardmaße ab Lager — sofort lieferbar</summary>';quick.before(d);d.append(quick);}
   const individual=$('cornerSelBlock');if(individual){const d=document.createElement('details');d.className='individual_corners';d.innerHTML='<summary>Ecken einzeln einstellen</summary>';individual.before(d);d.append(individual);}
   // Remove native Unicode placeholders; form illustrations and icons are authored SVGs.
   const drawNames={drawRect:'Rechteck zeichnen',drawCircle:'Rund zeichnen',drawPoly:'Freie Kontur zeichnen',addKanal:'Kabelkanal hinzufügen'};
@@ -189,7 +189,9 @@ function sync(){
   setText('atelierTax',s.standard?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+versand().text+' Versand');
   $('continueStep').disabled=(!s.valid||errors.length>0)&&step===3;
   if(step===3)$('continueStep').innerHTML=(s.offer?'Anfrage vorbereiten':editingId?'Änderungen speichern':'Platte hinzufügen')+chevron;
-  setText('priceStatus',!s.valid?'Bitte korrigiere die markierten Maße.':errors.length?'Bitte prüfe die Position deiner Bearbeitungen.':s.offer?'Für diese Ausführung ist ein individuelles Angebot nötig.':s.standard?'Lagerausführung laut Produktdaten.':step===3?'Versand und Fertigungsablauf findest du oben in der Übersicht.':'Nach Maß gefertigt. Versand und Ablauf im Prüfschritt.');
+  /* Die Zeile meldet sich nur noch, wenn etwas zu tun ist — Fliesstext ohne
+   Handlungsbedarf stand sonst unter jedem Schritt (Sascha, 11.09.). */
+  setText('priceStatus',!s.valid?'Bitte korrigiere die markierten Maße.':errors.length?'Bitte prüfe die Position deiner Bearbeitungen.':s.offer?'Für diese Ausführung ist ein individuelles Angebot nötig.':'');
   $('cutErrors').hidden=!errors.length;
   const errorHTML=errors.map(e=>`<p><b>Bearbeitung ${e.index+1}:</b> ${esc(e.message)}</p>`).join('');
   if($('cutErrors').innerHTML!==errorHTML)$('cutErrors').innerHTML=errorHTML;
@@ -229,7 +231,7 @@ function renderReview(){
   const costs=[['Platte',p.basis],['Kantenbearbeitung',p.kante],['Eckenrundung',p.ecken],['Formzuschnitt',p.lschnitt],['Weitere Bearbeitungen',p.extras]].filter((r,i)=>i===0||r[1]>0);
   const shipping=s.standard?0:versand().betrag;
   $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div><span>Versand</span><b>${shipping?money(shipping):'Kostenfrei'}</b></div><div class="review_total"><span>Gesamt inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total+shipping)}</strong></div></details>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}`;
-  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Die Platte kommt zuerst zu deinen Platten. Dort stellst du die Stückzahl ein und kannst weitere Konfigurationen ergänzen. Der letzte Schritt legt dann alle zusammen in den Warenkorb des Shops.</p><p>Falls bei der technischen Umsetzung eine Rückfrage entsteht, melden wir uns bei dir.</p>';
+  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
   if(s.offer){api.syncLink();$('orderProcess').innerHTML=api.inquiry
     ?'<h3>Deine individuelle Anfrage</h3><p>Für ein eigenes Bohrbild rechnen wir von Hand. Wir bereiten eine E-Mail mit deiner Konfiguration vor — beschreibe darin, was du brauchst, und hänge deine Skizze an.</p>'
     :'<h3>Deine individuelle Anfrage</h3><p>Öffne diese Auswahl im Live-Konfigurator, um ein Angebot anzufragen.</p><a class="secondary_button" target="_blank" rel="noopener" href="https://www.kessler-pro.com/tischplatte-nach-mass'+esc(location.hash)+'">Auswahl im Live-Konfigurator öffnen</a>';}
@@ -255,7 +257,12 @@ function showDialog(id,html){
   d.innerHTML=`<div class="dialog_header"><span></span><button class="icon_button" data-close aria-label="Dialog schließen">×</button></div>${html}`;d.querySelector('h2').id=id+'Title';d.setAttribute('aria-labelledby',id+'Title');uebersetzen(d);d.showModal();
 }
 function openEdgeDialog(){const s=snapshot;showDialog('edgeDialog',`<h2>${esc(s.material.name)} im Detail</h2><img class="large_edge" src="${esc(s.edgePhoto.src)}" alt="Kantenaufnahme ${esc(s.price.dekorName)}"><p>${esc(s.price.dekorName)} · ${esc(s.edgeNames.join(', '))}</p><p class="muted">${s.edgePhoto.ref?`Referenzaufnahme in ${s.edgePhoto.mm||25} mm. Deine gewählte Stärke: ${esc(s.price.thickName)}.`:'Originalaufnahme aus der Fertigung.'}</p>`);}
-function openSampleDialog(){showDialog('sampleDialog',`<h2>Das Dekor in die Hand nehmen.</h2><p>Die Musterbox enthält vier Dekore und kostet 4,90 € — beim Plattenkauf rechnen wir sie voll an.</p><a class="primary_button" href="https://www.kessler-pro.com/tischplatte-nach-mass" target="_blank" rel="noopener">Muster im Shop ansehen</a>`);}
+function openSampleDialog(){
+  showDialog('sampleDialog',`<h2>Das Dekor in die Hand nehmen.</h2><p>Die Musterbox enthält vier Dekore und kostet 4,90 € — beim Plattenkauf rechnen wir sie voll an.</p><button class="primary_button" id="sampleMail" type="button">Musterbox anfragen</button>`);
+  /* Der Shop hat noch kein Musterbox-Produkt. Der Kern hat den Weg, der heute
+     funktioniert: eine vorbereitete E-Mail mit dem gewaehlten Dekor. */
+  const m=$('sampleMail'); if(m)m.addEventListener('click',()=>{const b=$('btnMuster'); if(b)b.click();});
+}
 function capturePreview(){
   const clone=$('stage').cloneNode(true);clone.removeAttribute('id');clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
   clone.querySelectorAll('[id]').forEach(e=>{const old=e.id,nu='cart-'+Date.now()+'-'+old;clone.querySelectorAll('*').forEach(n=>{for(const a of [...n.attributes])if(a.value.includes(`url(#${old})`))n.setAttribute(a.name,a.value.replaceAll(`url(#${old})`,`url(#${nu})`));});e.id=nu;});
