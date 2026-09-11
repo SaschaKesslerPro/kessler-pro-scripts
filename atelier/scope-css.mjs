@@ -31,15 +31,19 @@ function selektor(one){
 function block(text){
   return regeln(text).map(r=>{
     if(r.sel===null)return '';                                   /* Kommentare zwischen Regeln */
-    if(r.sel.startsWith('@media')||r.sel.startsWith('@supports'))return r.sel+'{'+block(r.body)+'}';
-    if(/^@(font-face|keyframes|-webkit-keyframes|page|property)/.test(r.sel))return r.sel+'{'+r.body+'}';
-    if(r.sel.replace(/\/\*[\s\S]*?\*\//g,'').trim()===':root'){
+    /* Ein Kommentar direkt vor einer At-Regel gehoert beim Zerlegen zum
+       Selektortext. Ohne ihn herauszurechnen begann der Text nicht mit '@media',
+       die Regel galt als Selektor und bekam den Scope davorgesetzt — der Browser
+       warf den ganzen Block weg (gefunden 11.09., Spaltenmasse wirkten nicht). */
+    const kommentar=(r.sel.match(/\/\*[\s\S]*?\*\//g)||[]).join('');
+    const rein=r.sel.replace(/\/\*[\s\S]*?\*\//g,'').trim();
+    if(rein.startsWith('@media')||rein.startsWith('@supports'))return kommentar+rein+'{'+block(r.body)+'}';
+    if(/^@(font-face|keyframes|-webkit-keyframes|page|property)/.test(rein))return kommentar+rein+'{'+r.body+'}';
+    if(rein===':root'){
       /* Nur die Farbtokens bleiben global; Schrift und Hintergrund gehoeren der Seite. */
       const vars=r.body.split(';').filter(d=>d.trim().startsWith('--')).join(';');
       return vars?':root{'+vars+'}':'';
     }
-    const kommentar=(r.sel.match(/\/\*[\s\S]*?\*\//g)||[]).join('');
-    const rein=r.sel.replace(/\/\*[\s\S]*?\*\//g,'');
     const sel=rein.split(',').map(selektor).filter(Boolean).join(',');
     return sel?kommentar+sel+'{'+r.body+'}':'';
   }).join('');

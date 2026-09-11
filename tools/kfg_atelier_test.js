@@ -65,6 +65,20 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     return {ctx,p};
   };
 
+  /* ⓪ Das gescopte Stylesheet muss gueltig sein --------------------------------
+     Ein Kommentar direkt vor einer At-Regel liess scope-css den @media-Block als
+     Selektor behandeln — der Browser warf ihn weg, die Spaltenmasse wirkten nicht
+     (11.09.). Hier gegen die gebaute Datei geprueft, nicht gegen die Quelle. */
+  {
+    const bundle=fs.readFileSync(path.join(__dirname,'..','dist','konfigurator-atelier.js'),'utf8');
+    const css=JSON.parse(bundle.match(/var css=("(?:[^"\\]|\\.)*")/)[1]);
+    const kaputt=css.match(/:is\([^)]*\)\s*@[a-z-]+/g)||[];
+    pruef('⓪ keine At-Regel bekam den Scope vorangestellt', kaputt.length===0, kaputt.join(' | '));
+    let tiefe=0; for(const c of css){ if(c==='{')tiefe++; else if(c==='}')tiefe--; }
+    pruef('⓪ Klammern im Stylesheet ausgeglichen', tiefe===0, String(tiefe));
+    pruef('⓪ alle Haltepunkte erhalten', (css.match(/@media/g)||[]).length>=16, String((css.match(/@media/g)||[]).length));
+  }
+
   /* ① Abschottung gegen die Seite ------------------------------------------------ */
   {
     const {ctx,p}=await seite({width:1440,height:1000},'de');
