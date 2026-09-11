@@ -93,8 +93,7 @@ function boot(){
     <div class="workbench">
       <aside class="work_preview" aria-label="Deine Platte">
         <div class="preview_surface">
-          <div class="preview_toolbar"><div class="view_switch" id="viewSwitch"></div><button type="button" class="icon_button" id="expandPreview" aria-label="Vorschau vergrößern">${expand}</button></div>
-          <button type="button" class="close_preview" id="closePreview">${kreuz}<span>Vollbild schließen</span></button>
+          <div class="preview_toolbar"><div class="view_switch" id="viewSwitch"></div><button type="button" class="icon_button" id="expandPreview" aria-label="Vorschau vergrößern">${expand}${kreuz}</button></div>
           <div class="preview_canvas" id="canvasMount"></div>
           <section class="corner_legend" id="cornerLegend" aria-label="Eckenradien" hidden></section>
           <div class="preview_caption"><div><strong id="previewName">Buche</strong><span id="previewDescription">Möbelplatte, 25 mm</span></div><span class="view_hint">${svg('<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 3v5h-5"/>')}<span id="viewHint">Ziehen zum Drehen</span></span></div>
@@ -192,7 +191,6 @@ function boot(){
      erreichbar — der Kunde kam aus der Ansicht nicht mehr heraus (Sascha,
      11.09.). Jetzt gibt es einen eigenen Knopf ueber allem, und ein Klick
      neben die Vorschau schliesst ebenfalls. */
-  $('closePreview').addEventListener('click',()=>setPreviewExpanded(false));
   document.querySelector('.work_preview').addEventListener('click',e=>{
     if(root.classList.contains('preview_expanded')&&e.target===e.currentTarget)setPreviewExpanded(false);
   });
@@ -331,7 +329,7 @@ function renderReview(){
 }
 function setPreviewExpanded(on){
   const root=$('atelier');root.classList.toggle('preview_expanded',on);document.body.classList.toggle('preview_open',on);
-  $('expandPreview').setAttribute('aria-label',on?'Vorschau verkleinern':'Vorschau vergrößern');
+  $('expandPreview').setAttribute('aria-label',on?'Vollbild schließen':'Vorschau vergrößern');
   document.querySelectorAll('.work_controls,.site_header,.step_nav,.page_intro,.site_footer,.draftbar').forEach(e=>e.inert=on);
   const preview=document.querySelector('.work_preview');
   if(on){preview.setAttribute('role','dialog');preview.setAttribute('aria-modal','true');}

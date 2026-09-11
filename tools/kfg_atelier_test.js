@@ -409,14 +409,17 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     const {ctx,p}=await seite(vp,'de',mobil);
     await p.klick('#expandPreview');
     await p.waitForTimeout(500);
-    const voll=await p.evaluate(()=>{const b=document.getElementById('closePreview'),r=b.getBoundingClientRect();
+    const voll=await p.evaluate(()=>{const b=document.getElementById('expandPreview'),r=b.getBoundingClientRect();
+      const sicht=[...b.querySelectorAll('svg')].map(s=>getComputedStyle(s).display);
       return {offen:document.getElementById('atelier').classList.contains('preview_expanded'),
         sichtbar:r.width>2&&r.height>2, imBild:r.top>=0&&r.left>=0&&r.right<=innerWidth,
-        obenDrauf:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.closest('#closePreview')!==null,
+        obenDrauf:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.closest('#expandPreview')!==null,
+        marke:b.getAttribute('aria-label'), symbole:sicht,
         z:+getComputedStyle(document.querySelector('.work_preview')).zIndex};});
-    pruef(`⑧ ${name} Vollbild: Schliessknopf sichtbar und anklickbar`,
-      voll.offen&&voll.sichtbar&&voll.imBild&&voll.obenDrauf&&voll.z>=9999, JSON.stringify(voll));
-    await p.klick('#closePreview');
+    pruef(`⑧ ${name} Vollbild: Knopf wird zum Kreuz und ist anklickbar`,
+      voll.offen&&voll.sichtbar&&voll.imBild&&voll.obenDrauf&&voll.z>=9999
+      &&voll.symbole[0]==='none'&&voll.symbole[1]!=='none'&&/Vollbild/.test(voll.marke||''), JSON.stringify(voll));
+    await p.klick('#expandPreview');
     await p.waitForTimeout(400);
     pruef(`⑧ ${name} Vollbild: Knopf schliesst`,
       await p.evaluate(()=>!document.getElementById('atelier').classList.contains('preview_expanded')));
