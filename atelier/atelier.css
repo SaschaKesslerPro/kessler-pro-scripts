@@ -90,3 +90,13 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
 /* Ohne Fliesstext unter jedem Schritt braucht die Statuszeile keinen festen Platz. */
 #atelier .price_status:empty{display:none}
 #atelier .step_actions{margin-top:24px}
+
+/* ── Kaufabschluss in der Seite (Sascha, 11.09.) ──────────────────────────── */
+#atelier .review_shipping{font-size:12px;line-height:1.6;color:var(--body);margin-top:10px}
+#atelier .review_cta{margin-top:22px}
+#atelier .review_cta .primary_button{width:100%;min-height:58px;font-size:15px;justify-content:center}
+/* Die feste Leiste tritt zurueck, solange der Knopf in der Uebersicht zu sehen ist. */
+#atelier .purchase_bar{transition:opacity .18s ease,transform .18s ease}
+#atelier.cta_inline .purchase_bar{opacity:0;transform:translateY(10px);pointer-events:none}
+@media(prefers-reduced-motion:reduce){#atelier .purchase_bar{transition:none}}
+#atelier .demo_explanation:empty{display:none}

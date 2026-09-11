@@ -516,7 +516,8 @@
   "Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.": "Sprawdzasz wymiary i potwierdzasz je linkiem. Bez odpowiedzi rysunek uznajemy po 72 godzinach za zatwierdzony — wtedy ruszamy z produkcją.",
   "Musterbox anfragen": "Zapytaj o zestaw próbek",
   "Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.": "Twoja płyta trafia najpierw do Twoich płyt. Tam ustawisz ilość.",
-  "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "Przenosisz wszystkie płyty do koszyka sklepu i płacisz."
+  "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "Przenosisz wszystkie płyty do koszyka sklepu i płacisz.",
+  "Deine Platte inkl. MwSt.": "Twoja płyta z VAT"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -1024,7 +1025,8 @@
   "Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.": "You check the dimensions and confirm them via the link. Without a reply the drawing is deemed released after 72 hours — then we start production.",
   "Musterbox anfragen": "Request the sample box",
   "Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.": "Your panel first collects with your panels. You set the quantity there.",
-  "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "You move all panels into the shop basket and pay."
+  "Du legst alle Platten in den Warenkorb des Shops und bezahlst.": "You move all panels into the shop basket and pay.",
+  "Deine Platte inkl. MwSt.": "Your panel incl. VAT"
  },
  "muster": {
   "pl": [
@@ -1375,6 +1377,10 @@
    [
     "^A und B lassen weniger als (\\d+) cm Mulde übrig$",
     "A i B pozostawiają mniej niż $1 cm wgłębienia"
+   ],
+   [
+    "^zzgl\\. (.+) Versand — einmalig je Bestellung, unabhängig von der Stückzahl$",
+    "plus $1 wysyłki — jednorazowo na zamówienie, niezależnie od liczby sztuk"
    ]
   ],
   "en": [
@@ -1725,6 +1731,10 @@
    [
     "^A und B lassen weniger als (\\d+) cm Mulde übrig$",
     "A and B leave less than $1 cm of scoop"
+   ],
+   [
+    "^zzgl\\. (.+) Versand — einmalig je Bestellung, unabhängig von der Stückzahl$",
+    "plus $1 shipping — once per order, regardless of quantity"
    ]
   ]
  }

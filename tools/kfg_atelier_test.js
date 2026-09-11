@@ -216,6 +216,22 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     pruef(`⑤ ${name} getipptes Mass kommt an`, String(k.L)==='163', `Feld ${lFeld}, Korb ${k.L}`);
     pruef(`⑤ ${name} Worker-Rumpf gleich dem Korb`, String(k.wL)===String(k.L)&&JSON.stringify(k.wr)===JSON.stringify(k.r), JSON.stringify(k));
     pruef(`⑤ ${name} Preis im Korb gleich dem angezeigten`, angezeigt.includes(String(k.preis).replace('.',',')), `${angezeigt} / ${k.preis}`);
+    /* Kaufabschluss in der Seite: eine Zahl, Knopf darunter, feste Leiste tritt
+       zurueck, solange er zu sehen ist (Sascha, 11.09.). */
+    await p.evaluate(()=>document.getElementById('reviewCta').scrollIntoView({block:'center'}));
+    await p.waitForTimeout(800);
+    const kauf=await p.evaluate(()=>({
+      knopf:(document.getElementById('reviewAdd')||{}).textContent||'',
+      gesamt:(document.querySelector('.review_total strong')||{}).textContent||'',
+      leiste:(document.getElementById('atelierPrice')||{}).textContent||'',
+      versandZeile:!!document.querySelector('.review_shipping'),
+      versandReihe:[...document.querySelectorAll('.review_costs>div')].some(d=>/^Versand/.test(d.textContent)),
+      deckung:getComputedStyle(document.querySelector('.purchase_bar')).opacity}));
+    pruef(`⑤ ${name} Kaufknopf steht in der Uebersicht`, /hinzufügen|speichern|Anfrage/.test(kauf.knopf), kauf.knopf);
+    pruef(`⑤ ${name} nur eine Summe — Uebersicht gleich Leiste`, kauf.gesamt.trim()===kauf.leiste.trim(), `${kauf.gesamt} / ${kauf.leiste}`);
+    pruef(`⑤ ${name} Versand als Hinweis, nicht als Preiszeile`, kauf.versandZeile&&!kauf.versandReihe, JSON.stringify(kauf));
+    pruef(`⑤ ${name} feste Leiste tritt zurueck`, kauf.deckung==='0', kauf.deckung);
+
     /* Die beiden Warenkorbzustaende muessen unterscheidbar bleiben (Codex, 11.09.) */
     if(!mobil){
       const w=await p.evaluate(()=>({titel:document.getElementById('cartDialogTitle').textContent,

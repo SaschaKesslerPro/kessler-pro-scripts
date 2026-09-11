@@ -121,6 +121,7 @@ function boot(){
   // Precision labels should say what the coordinates refer to.
   $('cutEditorMount').addEventListener('focusin',()=>{if(step!==2)goStep(2);});
   root.addEventListener('click',e=>{
+    if(e.target.closest('#reviewAdd')){$('continueStep').click();return;}
     const st=e.target.closest('[data-step]');if(st){goStep(+st.dataset.step);return;}
     const m=e.target.closest('[data-material]');if(m){api.material(m.dataset.material);status(materials[m.dataset.material].name+' gewählt.');return;}
     const sh=e.target.closest('[data-shape]');if(sh){api.shape(sh.dataset.shape);api.setView('2d');schedule();return;}
@@ -152,6 +153,18 @@ function boot(){
   root.dataset.ready='true';
 }
 function schedule(){clearTimeout(timer);timer=setTimeout(sync,50);}
+/* Solange der Knopf in der Uebersicht zu sehen ist, verdeckt die Kaufleiste nur
+   das Ergebnis. Sie kommt zurueck, sobald er aus dem Bild scrollt. */
+let ctaBeobachter=null;
+function beobachteCta(){
+  const ziel=$('reviewCta'); if(!ziel)return;
+  if(!ctaBeobachter&&'IntersectionObserver' in window){
+    ctaBeobachter=new IntersectionObserver(e=>{
+      $('atelier').classList.toggle('cta_inline', e.some(x=>x.isIntersecting));
+    },{rootMargin:'-12px 0px -12px 0px'});
+  }
+  if(ctaBeobachter){ctaBeobachter.disconnect();ctaBeobachter.observe(ziel);}
+}
 function contour(s){
   if(s.config.form==='round')return Array.from({length:240},(_,i)=>[s.dims.w/2+Math.cos(i*Math.PI/120)*s.dims.w/2,s.dims.h/2+Math.sin(i*Math.PI/120)*s.dims.h/2]);
   const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',api.outline());
@@ -164,7 +177,8 @@ function sync(){
   if(!api)return;
   snapshot=api.snapshot();const s=snapshot,c=s.config,p=s.price;
   $('atelier').dataset.view=c.view;
-  setText('draftNote',api.checkout?'Deine Platten sammeln sich hier. Erst der letzte Schritt legt sie in den Warenkorb des Shops.':'Designvorschau: Der Warenkorb speichert deinen Entwurf nur in dieser Browsersitzung.');
+  /* Der Ablaufkasten sagt das inzwischen selbst — die Zeile war doppelt. */
+  setText('draftNote',api.checkout?'':'Designvorschau: Der Warenkorb speichert deinen Entwurf nur in dieser Browsersitzung.');
   $('textureTestNote').hidden=!api.textureInfo()?.generated;
   const corners=api.cornerDetails();
   $('cornerLegend').hidden=c.view!=='2d'||!corners.length;
@@ -204,6 +218,9 @@ function sync(){
   // Shared core native choices are kept accessible after every rebuild.
   document.querySelectorAll('#thickChips button,#dekorGrid button,#edgeChips button,#absChips button').forEach(b=>{b.type='button';});
   const key=JSON.stringify({c,p,errors,customText:$('customText').value});if(key!==previousKey){renderReview();previousKey=key;}
+  /* renderReview baut den Knopf neu — die Beschriftung kommt danach. */
+  const ri=$('reviewAdd');
+  if(ri&&step===3){ri.innerHTML=$('continueStep').innerHTML;ri.disabled=$('continueStep').disabled;}
   uebersetzen();dialogeNachziehen();
 }
 function goStep(next){
@@ -213,6 +230,7 @@ function goStep(next){
   $('continueStep').innerHTML=[`Weiter zu Form & Maße ${chevron}`,`Weiter zu Kanten & Extras ${chevron}`,`Zur Übersicht ${chevron}`,`${editingId?'Änderungen speichern':'Platte hinzufügen'} ${chevron}`][step];
   api.setView(step===0?'3d':'2d');sync();
   const heading=$('panel'+step).querySelector('h2');heading.focus({preventScroll:true});
+  if(step!==3)$('atelier').classList.remove('cta_inline');
   const target=matchMedia('(max-width:767px)').matches?$('panel'+step):document.querySelector('.step_nav');target.scrollIntoView({behavior:'instant',block:'start'});
   uebersetzen();
 }
@@ -229,8 +247,13 @@ function renderReview(){
   if(c.machine)rows.push(['Nähmaschine',c.machine,2]);
   if(c.extras.custom){rows.push(['Individuelle Anfrage',$('customText').value.trim()||'Eigenes Bohrbild · Details noch ergänzen',2]);if($('uploadInput').files.length)rows.push(['Skizze',$('uploadInput').files[0].name,2]);}
   const costs=[['Platte',p.basis],['Kantenbearbeitung',p.kante],['Eckenrundung',p.ecken],['Formzuschnitt',p.lschnitt],['Weitere Bearbeitungen',p.extras]].filter((r,i)=>i===0||r[1]>0);
-  const shipping=s.standard?0:versand().betrag;
-  $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div><span>Versand</span><b>${shipping?money(shipping):'Kostenfrei'}</b></div><div class="review_total"><span>Gesamt inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total+shipping)}</strong></div></details>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}`;
+  /* Der Versand faellt einmal je Bestellung an, nicht je Platte. Als eigene Zeile
+     in dieser Aufstellung ergab er eine zweite, hoehere Gesamtsumme — und die stand
+     neben der Summe in der Kaufleiste (Sascha, 11.09.). Jetzt steht hier der Preis
+     der Platte, der Versand als Hinweis darunter. */
+  const versandHinweis=s.standard?'Versand kostenfrei':'zzgl. '+versand().text+' Versand — einmalig je Bestellung, unabhängig von der Stückzahl';
+  $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div class="review_total"><span>Deine Platte inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total)}</strong></div></details><p class="review_shipping">${versandHinweis}</p>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}<div class="review_cta" id="reviewCta"><button type="button" class="primary_button" id="reviewAdd"></button></div>`;
+  beobachteCta();
   $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
   if(s.offer){api.syncLink();$('orderProcess').innerHTML=api.inquiry
     ?'<h3>Deine individuelle Anfrage</h3><p>Für ein eigenes Bohrbild rechnen wir von Hand. Wir bereiten eine E-Mail mit deiner Konfiguration vor — beschreibe darin, was du brauchst, und hänge deine Skizze an.</p>'
