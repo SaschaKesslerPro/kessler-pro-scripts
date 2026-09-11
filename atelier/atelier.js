@@ -14,6 +14,7 @@ const svg=(content,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none"
 const chevron=svg('<path d="m9 5 7 7-7 7"/>');
 const check=svg('<path d="m5 12 4 4L19 6"/>');
 const expand=svg('<path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/>');
+const kreuz=svg('<path d="m6 6 12 12M18 6 6 18"/>');
 const frage=svg('<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.3 2.7v1.6"/><path d="M12.7 16.8h.01"/>');
 const shapes={rect:['Rechteck','<rect x="3" y="6" width="18" height="12" rx="1"/>'],round:['Rund','<circle cx="12" cy="12" r="9"/>'],lform:['L-Form','<path d="M3 4h18v7H11v9H3Z"/>'],bauch:['Bauchausschnitt','<path d="M3 5h18v14h-4l-2-5H9l-2 5H3Z"/>']};
 /* Die Naehtischplatte stand bis 11.09. nur hinter einem Textlink "Vorlage fuer
@@ -65,7 +66,14 @@ function standardVorschau(){
   /* Viele Dekore und Staerken haben gar keinen Lagerartikel — der Kern blendet
      dann #quickBlock aus. Die Schublade blieb stehen und war leer (Sascha,
      11.09.: "die Standardmasse sind wieder weg"). Sie verschwindet jetzt mit. */
-  const n=document.querySelectorAll('#quickChips .kfg_quick-chip').length;
+  /* Zaehlen allein reicht nicht: bei L-Form und Bauchausschnitt blendet der Kern
+     #quickBlock per Inline-Stil aus, die Knoepfe der vorigen Form bleiben aber im
+     DOM stehen. Dann zeigte die Schublade 10 Groessen, die es nicht gibt
+     (Sascha, 11.09.: "wenn der Bauchausschnitt keine Standardmasse hat, muss das
+     raus — genau so wie bei Rund"). */
+  const block=$('quickBlock');
+  const aus=!block||block.style.display==='none';
+  const n=aus?0:document.querySelectorAll('#quickChips .kfg_quick-chip').length;
   schublade.hidden=!n;
   const zaehler=schublade.querySelector('summary i');
   const text=n?String(n):'';
@@ -86,6 +94,7 @@ function boot(){
       <aside class="work_preview" aria-label="Deine Platte">
         <div class="preview_surface">
           <div class="preview_toolbar"><div class="view_switch" id="viewSwitch"></div><button type="button" class="icon_button" id="expandPreview" aria-label="Vorschau vergrößern">${expand}</button></div>
+          <button type="button" class="close_preview" id="closePreview">${kreuz}<span>Vollbild schließen</span></button>
           <div class="preview_canvas" id="canvasMount"></div>
           <section class="corner_legend" id="cornerLegend" aria-label="Eckenradien" hidden></section>
           <div class="preview_caption"><div><strong id="previewName">Buche</strong><span id="previewDescription">Möbelplatte, 25 mm</span></div><span class="view_hint">${svg('<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 3v5h-5"/>')}<span id="viewHint">Ziehen zum Drehen</span></span></div>
@@ -119,7 +128,7 @@ function boot(){
           ${group('Individuell bearbeiten','Kabelkanal, Ausschnitte oder eigenes Bohrbild','customGroup')}
           ${group('Nähmaschine & Maßband','Ausschnitt, Maschinenmodell und Maßband','sewingGroup')}
           <div id="cutEditorMount"></div><div id="cutErrors" class="validation_errors" role="alert" hidden></div>
-          <div class="info_note" id="roundInfo" hidden>Bei runden Platten stehen Ausschnitte in diesem Konfigurator nicht zur Verfügung.</div>
+          <div class="info_note" id="roundInfo" hidden>Bei runden Platten gibt es keine Küchen-Ausschnitte und keinen Kabelkanal. Bohrungen, Durchlässe und eigene Ausschnitte setzt du wie gewohnt.</div>
         </section>
         <section class="flow_panel" id="panel3" aria-label="Konfiguration prüfen" hidden>
           ${sectionTitle('Deine Platte auf einen Blick.')}
@@ -179,6 +188,14 @@ function boot(){
   $('sampleHelp').addEventListener('click',()=>openSampleDialog());
   $('edgePreview').addEventListener('click',()=>openEdgeDialog());
   $('expandPreview').addEventListener('click',()=>setPreviewExpanded(!root.classList.contains('preview_expanded')));
+  /* Im Vollbild lag der Verkleinern-Knopf hinter dem Webflow-Kopf und war nicht
+     erreichbar — der Kunde kam aus der Ansicht nicht mehr heraus (Sascha,
+     11.09.). Jetzt gibt es einen eigenen Knopf ueber allem, und ein Klick
+     neben die Vorschau schliesst ebenfalls. */
+  $('closePreview').addEventListener('click',()=>setPreviewExpanded(false));
+  document.querySelector('.work_preview').addEventListener('click',e=>{
+    if(root.classList.contains('preview_expanded')&&e.target===e.currentTarget)setPreviewExpanded(false);
+  });
   $('viewSwitch').addEventListener('click',()=>schedule());
   document.addEventListener('keydown',e=>{
     if(!root.classList.contains('preview_expanded'))return;
@@ -232,7 +249,12 @@ function sync(){
   document.querySelectorAll('[data-material]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.material===c.mat)));
   document.querySelectorAll('[data-shape]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.shape===c.form));b.disabled=sewing&&b.dataset.shape==='round';});
   $('sewingNotice').hidden=!sewing;
-  $('sewingGroup').hidden=!sewing;$('holesGroup').hidden=c.form==='round';$('kitchenGroup').hidden=sewing||c.form==='round';$('customGroup').hidden=sewing||c.form==='round';$('cornerGroup').hidden=c.form==='round';$('roundInfo').hidden=c.form!=='round';
+  /* Runde Platten durften bis 11.09. gar nichts bekommen. Jetzt fehlen ihnen
+     nur die Kuechen-Ausschnitte und der Kabelkanal — Ecken hat eine runde
+     Platte ohnehin keine. */
+  const rund=c.form==='round';
+  $('sewingGroup').hidden=!sewing;$('holesGroup').hidden=false;$('kitchenGroup').hidden=sewing||rund;$('customGroup').hidden=sewing;$('cornerGroup').hidden=rund;$('roundInfo').hidden=!rund;
+  if($('addKanal')){$('addKanal').disabled=rund;$('addKanal').hidden=rund;}
   setText('previewName',p.dekorName);setText('previewDescription',`${s.material.name}, ${p.thickName}`);
   /* Drehen geht nur in der Produktansicht — in der Masszeichnung stand der
      Hinweis samt Drehsymbol trotzdem da (Sascha, 11.09.). Massgeblich ist der

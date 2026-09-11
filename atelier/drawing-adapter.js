@@ -20,7 +20,7 @@ function atelierCornerMarkers(x,y,sc,pw,ph){
     // Keep the two recess markers above the existing angle annotations.
     if(S.form==='bauch'&&(c.id===3||c.id===4))ty=Math.min(ty,y+(g.BR-g.t)*sc-69);
     tx=Math.max(x+16,Math.min(x+pw-16,tx));ty=Math.max(y+17,Math.min(y+ph-17,ty));
-    return `<g><title>Ecke ${c.number}: ${c.name}, ${c.radius?'Radius '+c.radius+' mm':'eckig'}</title><path d="M${mx} ${my}L${tx} ${ty}" fill="none" stroke="#4e4e4e" stroke-width="1.1" stroke-opacity=".6"/><circle cx="${tx}" cy="${ty}" r="12" fill="#fff" stroke="#666" stroke-width="1"/><text x="${tx}" y="${ty+5.5}" text-anchor="middle" font-family="Onest,sans-serif" font-size="17" font-weight="600" fill="#242424">${c.number}</text></g>`;
+    return `<g><title>Ecke ${c.number}: ${c.name}, ${c.radius?'Radius '+c.radius+' mm':'eckig'}</title><path d="M${mx} ${my}L${tx} ${ty}" fill="none" stroke="#0a0a0a" stroke-width="1.2" stroke-opacity=".75"/><circle cx="${tx}" cy="${ty}" r="12" fill="#0a0a0a" stroke="#0a0a0a" stroke-width="1"/><text x="${tx}" y="${ty+5.5}" text-anchor="middle" font-family="Onest,sans-serif" font-size="17" font-weight="600" fill="#fff">${c.number}</text></g>`;
   }).join('')+'</g>';
 }
 function atelierLabel(cx,cy,text,kind=''){

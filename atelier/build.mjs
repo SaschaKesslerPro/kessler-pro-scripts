@@ -44,6 +44,95 @@ const drawing=fs.readFileSync(path.join(dir,'drawing-adapter.js'),'utf8');
 replaceOnce("const PADL=S.form==='lform'?rand:16, PADR=rand, PADB=rand;", "const PADL=S.form==='lform'?rand:16, PADR=rand, PADB=rand+(S.form==='bauch'?42:0);");
 replaceOnce("inner+=dimH(x,x+pw,y+ph+30,bg.L+' cm')+dimV(x+pw+30,y,y+ph,bg.BR+' cm');", "inner+=`<path d=\"${pd}\" fill=\"none\" stroke=\"#343434\" stroke-width=\"1.8\" stroke-linejoin=\"round\" pointer-events=\"none\"/>`;\n    inner+=dimH(x,x+pw,y+ph+72,bg.L+' cm')+dimV(x+pw+30,y,y+ph,bg.BR+' cm');");
 replaceOnce('function drawStage(){',drawing+'\nfunction drawStage(){');
+
+/* ── Ausschnitte auf runden Platten (Sascha, 11.09.) ─────────────────────────
+   Der Kern liess Bohrungen und Ausschnitte nur auf eckigen Platten zu. Der
+   Worker kann es dagegen schon: dxf.js zeichnet bei form==='rund' einen CIRCLE
+   als Aussenkontur und die Ausschnitte formunabhaengig, und contour() im
+   Atelier liefert fuer rund ein 240-Punkt-Polygon, mit dem validateCuts()
+   laeuft. Gesperrt war also nur die Oberflaeche. Vier Stellen:
+
+   1. Der Zeichen- und Ausschnitt-Renderblock der Draufsicht lief nur bei
+      eckigen Formen. Bei rund sitzt der Kreis auf W/2, nicht auf x+pw/2 —
+      der Zeichenkontext G bekommt deshalb seine eigene Huelle.
+   2. plateShape() kehrte bei rund vor addCutHoles um: in 3D fehlten die Loecher.
+   3. addPreset() sperrte rund pauschal. Kuechen-Ausschnitte bleiben draussen
+      (Sascha: "die Sachen fuer die Kueche eher nicht"), der Rest wird in den
+      Kreis gezogen statt in die umschliessende Box.
+   4. setDraw() sperrte das Aufziehen eigener Ausschnitte.
+
+   Der Kabelkanal bleibt gesperrt: kanalPunkte() laeuft entlang der Kanten der
+   Rechteckplatte, das ist eine eigene Aufgabe. */
+replaceOnce(`  /* Zeichnen-Kontext + eingezeichnete Ausschnitte */
+  if(S.form!=='round'){
+    G={x,y,sc,pw,ph,w:d.w,h:d.h};`,
+`  /* Zeichnen-Kontext + eingezeichnete Ausschnitte */
+  if(true){
+    G=S.form==='round'?{x:W/2-pw/2,y,sc,pw,ph,w:d.w,h:d.h}:{x,y,sc,pw,ph,w:d.w,h:d.h};`);
+replaceOnce("  if(S.form==='round'){ sh.absarc(0,0,w/2,0,Math.PI*2,false); return sh; }",
+            "  if(S.form==='round'){ sh.absarc(0,0,w/2,0,Math.PI*2,false); addCutHoles(sh); return sh; }");
+replaceOnce(`function addPreset(k){
+  if(S.form==='round'){toast('Ausschnitte aktuell nur bei eckigen Formen');return;}
+  const p=PRESETS[k], d=dims(), n=presetCount(k);
+  let [cx,cy]=k==='maschine'?maschineStart():p.pos(d.w,d.h,n);
+  const w=p.t==='c'?p.d:(k==='maschine'?maschineMass()[0]:p.w), hh=p.t==='c'?p.d:(k==='maschine'?maschineMass()[1]:p.h);
+  if(w>d.w-2||hh>d.h-2){toast(p.label+' passt nicht auf diese Plattengröße');return;}
+  cx=Math.max(w/2,Math.min(d.w-w/2,cx)); cy=Math.max(hh/2,Math.min(d.h-hh/2,cy));`,
+`const KUECHE_NUR_ECKIG=['usb','spuele','induktion'];
+function addPreset(k){
+  const rund=S.form==='round';
+  if(rund&&KUECHE_NUR_ECKIG.indexOf(k)>=0){toast('Küchen-Ausschnitte gibt es nur bei eckigen Platten');return;}
+  const p=PRESETS[k], d=dims(), n=presetCount(k);
+  let [cx,cy]=k==='maschine'?maschineStart():p.pos(d.w,d.h,n);
+  const w=p.t==='c'?p.d:(k==='maschine'?maschineMass()[0]:p.w), hh=p.t==='c'?p.d:(k==='maschine'?maschineMass()[1]:p.h);
+  if(w>d.w-2||hh>d.h-2){toast(p.label+' passt nicht auf diese Plattengröße');return;}
+  /* Bei rund misst die Grenze radial: die halbe Diagonale des Ausschnitts muss
+     mit Rest in den Kreis passen, sonst laege er halb in der Luft. */
+  const R=d.w/2, halb=Math.hypot(w/2,hh/2);
+  if(rund&&halb>R-1){toast(p.label+' passt nicht auf diese Plattengröße');return;}
+  const inKontur=(px,py)=>rund
+    ? Math.hypot(px-R,py-R)+halb<=R-0.5
+    : px-w/2>=0.5&&px+w/2<=d.w-0.5&&py-hh/2>=0.5&&py+hh/2<=d.h-0.5;
+  /* Zwei Rechtecke stehen frei, wenn sie sich auf einer Achse nicht ueberlappen. */
+  const frei=(px,py)=>S.cuts.every(c2=>{
+    if(c2.t==='k'||c2.t==='p')return true;
+    const bw=(c2.t==='c'?c2.d:c2.w), bh=(c2.t==='c'?c2.d:c2.h);
+    return Math.abs(px-c2.cx)>=(w+bw)/2+1 || Math.abs(py-c2.cy)>=(hh+bh)/2+1;
+  });
+  if(rund){
+    let vx=cx-R, vy=cy-R, ab=Math.hypot(vx,vy), max=R-halb-0.5;
+    if(ab>max){ if(ab<1e-6){vx=0;vy=-1;ab=1;} cx=R+vx/ab*max; cy=R+vy/ab*max; }
+  } else { cx=Math.max(w/2+0.5,Math.min(d.w-w/2-0.5,cx)); cy=Math.max(hh/2+0.5,Math.min(d.h-hh/2-0.5,cy)); }
+  /* Jedes Preset zaehlt in p.pos() nur seine EIGENEN Vorkommen. Kabeldurchlass
+     und Armaturenbohrung landeten deshalb uebereinander und die Pruefung meldete
+     sofort eine Ueberschneidung (11.09.). Der neue Ausschnitt weicht jetzt auf
+     den naechsten freien Platz aus, ringweise um die Startposition. */
+  if(!frei(cx,cy)){
+    const schritt=Math.max(3,Math.max(w,hh)/2+1.5); let treffer=null;
+    for(let ring=1;ring<=30&&!treffer;ring++)
+      for(const [dx,dy] of [[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]]){
+        const px=Math.round((cx+dx*ring*schritt)*2)/2, py=Math.round((cy+dy*ring*schritt)*2)/2;
+        if(inKontur(px,py)&&frei(px,py)){treffer=[px,py];break;}
+      }
+    if(!treffer){toast('Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen');return;}
+    [cx,cy]=treffer;
+  }
+  cx=Math.round(cx*2)/2; cy=Math.round(cy*2)/2;`);
+replaceOnce("  if(v&&S.form==='round'){toast('Zeichnen aktuell nur bei eckigen Formen');return;}",
+            "  if(v==='p'&&S.form==='round'){toast('Freie Kontur gibt es nur bei eckigen Platten');return;}");
+
+/* Die Montagebohrungen lagen im Rechteck-Zweig — bei rund wurden sie berechnet
+   und bezahlt, aber nicht gezeichnet. Der Worker setzt sie bei rund auf ein
+   Quadrat im Kreis (adapter.js: r = (D/2 - Abstand) / SQRT2); die Vorschau
+   rechnet jetzt genauso, damit Bild und Fertigung dasselbe zeigen. */
+replaceOnce("    inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');",
+`    inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');
+    if(S.extras.bohr){
+      const off=Math.max(6*sc,10), rb=(r-off)/Math.SQRT2;
+      if(rb>0) [[cx-rb,cy-rb],[cx+rb,cy-rb],[cx-rb,cy+rb],[cx+rb,cy+rb]]
+        .forEach(([bx,by])=>inner+=\`<circle cx="\${bx}" cy="\${by}" r="4.5" fill="#F2F0EB" stroke="#00000060"/>\`);
+    }`);
+
 const notchStart=core.indexOf('    /* in der aeusseren Ecke der Ausklinkung');
 const notchEnd=core.indexOf('    if(cornerCount()>0)',notchStart);
 if(notchStart<0||notchEnd<0)throw new Error('Missing notch annotation anchors');

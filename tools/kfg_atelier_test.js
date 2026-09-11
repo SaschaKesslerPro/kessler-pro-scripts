@@ -332,6 +332,127 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
   }
   console.log('⑥ Dichte geprueft');
 
+  /* ══ ⑦ Ausschnitte auf runden Platten (11.09.) ════════════════════════════
+     Runde Platten bekamen gar nichts: der Kern schloss den Ausschnitt-Render
+     aus, addPreset() und setDraw() sperrten rund, und plateShape() kehrte vor
+     addCutHoles um. Der Worker konnte es schon. Geprueft wird die Oberflaeche,
+     die Geometrie und dass die Kueche weiter draussen bleibt. */
+  for(const [name,vp,mobil] of [['Desktop',{width:1440,height:1000},false],['Mobil',{width:390,height:844},true]]){
+    const {ctx,p}=await seite(vp,'de',mobil);
+    await p.klick('.step_nav [data-step="1"]');
+    await p.klick('[data-shape="round"]');
+    await p.waitForTimeout(400);
+    const g=await p.evaluate(()=>({bohrungen:!document.getElementById('holesGroup').hidden,
+      kueche:!document.getElementById('kitchenGroup').hidden,
+      individuell:!document.getElementById('customGroup').hidden,
+      ecken:!document.getElementById('cornerGroup').hidden,
+      notiz:!document.getElementById('roundInfo').hidden,
+      kanalWeg:document.getElementById('addKanal')?document.getElementById('addKanal').hidden:true}));
+    pruef(`⑦ ${name} rund: Bohrungen und Individuell offen, Kueche und Ecken zu`,
+      g.bohrungen&&g.individuell&&!g.kueche&&!g.ecken&&g.notiz&&g.kanalWeg, JSON.stringify(g));
+
+    await p.klick('.step_nav [data-step="2"]');
+    await p.evaluate(()=>{document.getElementById('holesGroup').open=true;});
+    await p.waitForTimeout(300);
+    await p.klick('.kfg_preset[data-preset="kabel"] [data-inc]');
+    await p.klick('.kfg_preset[data-preset="armatur"] [data-inc]');
+    await p.klick('[data-x="bohr"]');
+    await p.waitForTimeout(600);
+    const r=await p.evaluate(()=>{
+      const s=window.KFG.atelier.snapshot(), R=+s.config.D/2;
+      const imKreis=s.config.cuts.every(c=>{const halb=c.t==='c'?c.d/2:Math.hypot(c.w/2,c.h/2);
+        return Math.hypot(c.cx-R,c.cy-R)+halb<=R;});
+      return {anzahl:s.config.cuts.length, imKreis, gueltig:s.valid,
+        fehler:!document.getElementById('cutErrors').hidden,
+        preis:s.price.total, bohr:s.config.extras.bohr,
+        gezeichnet:document.querySelectorAll('#stage .kfg_cutshape').length,
+        bohrkreise:[...document.querySelectorAll('#stage circle')].filter(c=>+c.getAttribute('r')===4.5).length};
+    });
+    pruef(`⑦ ${name} rund: zwei Ausschnitte liegen im Kreis und sind gezeichnet`,
+      r.anzahl===2&&r.imKreis&&r.gezeichnet===2, JSON.stringify(r));
+    pruef(`⑦ ${name} rund: keine Ueberschneidung trotz gleicher Startposition`,
+      r.gueltig&&!r.fehler, JSON.stringify(r));
+    pruef(`⑦ ${name} rund: Montagebohrungen im Bild wie in der Fertigung`,
+      r.bohr&&r.bohrkreise===4, JSON.stringify(r));
+    /* Kuechen-Ausschnitte bleiben auch ueber die API gesperrt. */
+    const kueche=await p.evaluate(()=>{const vor=window.KFG.atelier.snapshot().config.cuts.length;
+      const el=document.querySelector('.kfg_preset[data-preset="spuele"] [data-inc]'); if(el)el.click();
+      return {vor, nach:window.KFG.atelier.snapshot().config.cuts.length};});
+    pruef(`⑦ ${name} rund: Kuechen-Ausschnitt wird abgewiesen`, kueche.vor===kueche.nach, JSON.stringify(kueche));
+    /* Aus dem Kreis heraus geschoben muss die Pruefung anschlagen. */
+    const felder=await p.$$('#cutList .kfg_cutrow-fields input');
+    if(felder[1]){
+      await felder[1].click({clickCount:3});
+      await p.keyboard.type('30',{delay:40});
+      await p.keyboard.press('Tab');
+      await p.waitForTimeout(700);
+      const raus=await p.evaluate(()=>({fehler:!document.getElementById('cutErrors').hidden,
+        text:document.getElementById('cutErrors').textContent.trim().slice(0,80)}));
+      pruef(`⑦ ${name} rund: Ausschnitt ausserhalb des Kreises wird gemeldet`,
+        raus.fehler&&/außerhalb/.test(raus.text), JSON.stringify(raus));
+    }
+    /* Der Worker-Rumpf muss Form, Durchmesser und die Ausschnitte tragen. */
+    const body=await p.evaluate(()=>{const b=window.KFG.atelier.workerBody();
+      return {form:b.konfig.form, D:b.konfig.D, cuts:(b.konfig.cuts||[]).length, bohr:b.konfig.extras.bohr};});
+    pruef(`⑦ ${name} rund: Worker-Rumpf traegt Kreis und Ausschnitte`,
+      body.form==='round'&&+body.D>0&&body.cuts===2&&body.bohr===true, JSON.stringify(body));
+    await ctx.close();
+  }
+  console.log('⑦ Runde Platten geprueft');
+
+  /* ══ ⑧ Vollbild, Masszahlen, leere Schubladen (11.09.) ════════════════════
+     Drei Meldungen von Sascha: aus dem Vollbild kam man nicht mehr heraus (der
+     Verkleinern-Knopf lag hinter dem Webflow-Kopf), die Masszahlen waren auf
+     hellen Dekoren kaum zu lesen, und bei L-Form und Bauchausschnitt zeigte die
+     Standardmass-Schublade Groessen der vorigen Form. */
+  for(const [name,vp,mobil] of [['Desktop',{width:1440,height:1000},false],['Mobil',{width:390,height:844},true]]){
+    const {ctx,p}=await seite(vp,'de',mobil);
+    await p.klick('#expandPreview');
+    await p.waitForTimeout(500);
+    const voll=await p.evaluate(()=>{const b=document.getElementById('closePreview'),r=b.getBoundingClientRect();
+      return {offen:document.getElementById('atelier').classList.contains('preview_expanded'),
+        sichtbar:r.width>2&&r.height>2, imBild:r.top>=0&&r.left>=0&&r.right<=innerWidth,
+        obenDrauf:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.closest('#closePreview')!==null,
+        z:+getComputedStyle(document.querySelector('.work_preview')).zIndex};});
+    pruef(`⑧ ${name} Vollbild: Schliessknopf sichtbar und anklickbar`,
+      voll.offen&&voll.sichtbar&&voll.imBild&&voll.obenDrauf&&voll.z>=9999, JSON.stringify(voll));
+    await p.klick('#closePreview');
+    await p.waitForTimeout(400);
+    pruef(`⑧ ${name} Vollbild: Knopf schliesst`,
+      await p.evaluate(()=>!document.getElementById('atelier').classList.contains('preview_expanded')));
+    await p.klick('#expandPreview');
+    await p.waitForTimeout(300);
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(300);
+    pruef(`⑧ ${name} Vollbild: Escape schliesst`,
+      await p.evaluate(()=>!document.getElementById('atelier').classList.contains('preview_expanded')));
+
+    /* Masszahlen: weisse Schrift in schwarzer Kapsel, auf jedem Dekor gleich. */
+    const zahl=await p.evaluate(()=>{const t=document.querySelector('#stage text.dim-text');
+      if(!t)return null;const c=getComputedStyle(t);
+      return {fill:c.fill,stroke:c.stroke,breite:parseFloat(c.strokeWidth),reihenfolge:c.paintOrder};});
+    pruef(`⑧ ${name} Masszahlen weiss auf schwarzer Kapsel`,
+      zahl&&/255, 255, 255/.test(zahl.fill)&&/10, 10, 10/.test(zahl.stroke)&&zahl.breite>=6&&/stroke/.test(zahl.reihenfolge),
+      JSON.stringify(zahl));
+
+    /* Standardmasse: nur wenn der Kern wirklich Groessen zeigt. */
+    await p.klick('.step_nav [data-step="1"]');
+    const je={};
+    for(const form of ['rect','round','lform','bauch']){
+      await p.klick(`[data-shape="${form}"]`);
+      await p.waitForTimeout(500);
+      je[form]=await p.evaluate(()=>({versteckt:document.querySelector('.standard_sizes').hidden,
+        hoehe:Math.round(document.querySelector('.standard_sizes').getBoundingClientRect().height),
+        anzahl:(document.querySelector('.standard_sizes summary i')||{}).textContent}));
+    }
+    pruef(`⑧ ${name} Standardmasse: Rechteck und Rund zeigen, L-Form und Bauch nicht`,
+      !je.rect.versteckt&&!je.round.versteckt&&je.lform.versteckt&&je.bauch.versteckt
+      &&je.lform.hoehe===0&&je.bauch.hoehe===0&&je.lform.anzahl===''&&je.bauch.anzahl==='',
+      JSON.stringify(je));
+    await ctx.close();
+  }
+  console.log('⑧ Vollbild und Masszahlen geprueft');
+
   await b.close();
   console.log(`\n${gruen} Zusicherungen gruen, ${rot.length} rot`);
   if(rot.length){ rot.forEach(r=>console.log('  ✗ '+r)); process.exit(1); }

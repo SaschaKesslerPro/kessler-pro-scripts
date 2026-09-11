@@ -143,3 +143,29 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
 #atelier .standard_sizes>summary{gap:8px}
 /* Zweispaltig probiert und verworfen: bei 282 px je Karte bricht schon
    „Compact / HPL" um. Die vier Karten stehen untereinander in voller Breite. */
+
+/* ── Masszahlen auf jedem Dekor lesbar (Sascha, 11.09.) ────────────────────
+   Vorher: dunkle Schrift mit hellem Rand. Auf Weiss, Alaska Weiss und Kiefer
+   Weiss verschwand der Rand im Dekor und die Zahlen standen kontrastarm auf
+   der Platte. Jetzt weisse Schrift in einer schwarzen Kapsel — dasselbe Bild
+   auf jedem Dekor. Die Kapsel entsteht aus dem Rand, der unter der Fuellung
+   liegt (paint-order), mit runden Ecken statt Spitzen. */
+#atelier .dim-line{stroke:#0a0a0a}
+#atelier .dim-text{fill:#fff;font-family:Onest,sans-serif;font-size:15px;font-weight:500;stroke:#0a0a0a;stroke-width:7px;paint-order:stroke;stroke-linejoin:round;stroke-linecap:round}
+#atelier .corner_number{border-color:#0a0a0a;background:#0a0a0a;color:#fff}
+
+/* ── Vollbild: heraus muss man auch wieder (Sascha, 11.09.) ────────────────
+   Die Vorschau lag auf z-index 30 — der Webflow-Kopf liegt darüber und deckte
+   die Werkzeugleiste samt Verkleinern-Knopf ab. Sie steigt jetzt über alles,
+   und ein eigener Knopf sitzt fest oben rechts, unabhängig von der Leiste. */
+#atelier.preview_expanded .work_preview{z-index:9999}
+#atelier.preview_expanded:before{z-index:9998}
+#atelier .close_preview{display:none}
+#atelier.preview_expanded .close_preview{position:fixed;top:20px;right:20px;z-index:10001;display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:12px 18px;border:1px solid var(--ink);border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.28)}
+#atelier.preview_expanded .close_preview:hover{background:#333}
+#atelier.preview_expanded .close_preview svg{width:18px;height:18px}
+#atelier.preview_expanded .preview_toolbar{padding-top:4px}
+@media(max-width:767px){
+  #atelier.preview_expanded .close_preview{top:12px;right:12px;padding:10px 14px;font-size:12px;min-height:44px}
+  #atelier.preview_expanded .close_preview span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+}

@@ -1044,7 +1044,7 @@ function atelierCornerMarkers(x,y,sc,pw,ph){
     // Keep the two recess markers above the existing angle annotations.
     if(S.form==='bauch'&&(c.id===3||c.id===4))ty=Math.min(ty,y+(g.BR-g.t)*sc-69);
     tx=Math.max(x+16,Math.min(x+pw-16,tx));ty=Math.max(y+17,Math.min(y+ph-17,ty));
-    return `<g><title>Ecke ${c.number}: ${c.name}, ${c.radius?'Radius '+c.radius+' mm':'eckig'}</title><path d="M${mx} ${my}L${tx} ${ty}" fill="none" stroke="#4e4e4e" stroke-width="1.1" stroke-opacity=".6"/><circle cx="${tx}" cy="${ty}" r="12" fill="#fff" stroke="#666" stroke-width="1"/><text x="${tx}" y="${ty+5.5}" text-anchor="middle" font-family="Onest,sans-serif" font-size="17" font-weight="600" fill="#242424">${c.number}</text></g>`;
+    return `<g><title>Ecke ${c.number}: ${c.name}, ${c.radius?'Radius '+c.radius+' mm':'eckig'}</title><path d="M${mx} ${my}L${tx} ${ty}" fill="none" stroke="#0a0a0a" stroke-width="1.2" stroke-opacity=".75"/><circle cx="${tx}" cy="${ty}" r="12" fill="#0a0a0a" stroke="#0a0a0a" stroke-width="1"/><text x="${tx}" y="${ty+5.5}" text-anchor="middle" font-family="Onest,sans-serif" font-size="17" font-weight="600" fill="#fff">${c.number}</text></g>`;
   }).join('')+'</g>';
 }
 function atelierLabel(cx,cy,text,kind=''){
@@ -1128,6 +1128,11 @@ function drawStage(){
     inner+=`<circle class="kfg_edge" data-i="0" cx="${cx}" cy="${cy}" r="${r}" fill="none"
       stroke="${edgeCol(S.edges[0])}" stroke-width="5"><title>Kante: ${edgeLabel(S.edges[0])}</title></circle>`;
     inner+=dimH(cx-r,cx+r,cy+r+30,'Ø '+S.D+' cm');
+    if(S.extras.bohr){
+      const off=Math.max(6*sc,10), rb=(r-off)/Math.SQRT2;
+      if(rb>0) [[cx-rb,cy-rb],[cx+rb,cy-rb],[cx-rb,cy+rb],[cx+rb,cy+rb]]
+        .forEach(([bx,by])=>inner+=`<circle cx="${bx}" cy="${by}" r="4.5" fill="#F2F0EB" stroke="#00000060"/>`);
+    }
   } else if(S.form==='lform'){
     const lg=lfPts();
     /* Kontur aus Lage und Schnitt; Radien je Punkt aus lfPts (Kundenradius der
@@ -1223,8 +1228,8 @@ function drawStage(){
     }
   }
   /* Zeichnen-Kontext + eingezeichnete Ausschnitte */
-  if(S.form!=='round'){
-    G={x,y,sc,pw,ph,w:d.w,h:d.h};
+  if(true){
+    G=S.form==='round'?{x:W/2-pw/2,y,sc,pw,ph,w:d.w,h:d.h}:{x,y,sc,pw,ph,w:d.w,h:d.h};
     const all=tmpCut&&tmpCut.x1!==null?[...S.cuts,normCut(tmpCut)]:S.cuts;
     all.forEach((c2,i)=>{
       const committed=i<S.cuts.length;
@@ -1401,7 +1406,7 @@ function cutShort(c){
 }
 function setDraw(v){
   if(v!=='p') polyTmp=null;
-  if(v&&S.form==='round'){toast('Zeichnen aktuell nur bei eckigen Formen');return;}
+  if(v==='p'&&S.form==='round'){toast('Freie Kontur gibt es nur bei eckigen Platten');return;}
   if(v&&S.view==='3d'){setView('2d');}
   S.draw=v;
   document.querySelectorAll('[data-draw]').forEach(b=>b.classList.toggle('is-active',b.dataset.draw===v));
@@ -1647,7 +1652,7 @@ function polyToShape(sh, pts, rad){
 }
 function plateShape(){
   const d=dims(), w=d.w/10, h=d.h/10, sh=new THREE.Shape();
-  if(S.form==='round'){ sh.absarc(0,0,w/2,0,Math.PI*2,false); return sh; }
+  if(S.form==='round'){ sh.absarc(0,0,w/2,0,Math.PI*2,false); addCutHoles(sh); return sh; }
   /* Radius je Ecke — gleiche Reihenfolge wie in der 2D-Draufsicht */
   const cap=Math.min(w/2,h/2);
   /* Die 3D-Geometrie wird beim Kippen um X gespiegelt: die Shape-Ecke oben links
@@ -3334,13 +3339,46 @@ function cutTypName(c){
 /* Mindestabstand einer geschlossenen Aussparung zur Plattenkante (cm) */
 function cutMinEdge(){ return S.mat==='compact' ? 3 : 5; }
 function presetCount(k){ return S.cuts.filter(c=>c.preset===k).length; }
+const KUECHE_NUR_ECKIG=['usb','spuele','induktion'];
 function addPreset(k){
-  if(S.form==='round'){toast('Ausschnitte aktuell nur bei eckigen Formen');return;}
+  const rund=S.form==='round';
+  if(rund&&KUECHE_NUR_ECKIG.indexOf(k)>=0){toast('Küchen-Ausschnitte gibt es nur bei eckigen Platten');return;}
   const p=PRESETS[k], d=dims(), n=presetCount(k);
   let [cx,cy]=k==='maschine'?maschineStart():p.pos(d.w,d.h,n);
   const w=p.t==='c'?p.d:(k==='maschine'?maschineMass()[0]:p.w), hh=p.t==='c'?p.d:(k==='maschine'?maschineMass()[1]:p.h);
   if(w>d.w-2||hh>d.h-2){toast(p.label+' passt nicht auf diese Plattengröße');return;}
-  cx=Math.max(w/2,Math.min(d.w-w/2,cx)); cy=Math.max(hh/2,Math.min(d.h-hh/2,cy));
+  /* Bei rund misst die Grenze radial: die halbe Diagonale des Ausschnitts muss
+     mit Rest in den Kreis passen, sonst laege er halb in der Luft. */
+  const R=d.w/2, halb=Math.hypot(w/2,hh/2);
+  if(rund&&halb>R-1){toast(p.label+' passt nicht auf diese Plattengröße');return;}
+  const inKontur=(px,py)=>rund
+    ? Math.hypot(px-R,py-R)+halb<=R-0.5
+    : px-w/2>=0.5&&px+w/2<=d.w-0.5&&py-hh/2>=0.5&&py+hh/2<=d.h-0.5;
+  /* Zwei Rechtecke stehen frei, wenn sie sich auf einer Achse nicht ueberlappen. */
+  const frei=(px,py)=>S.cuts.every(c2=>{
+    if(c2.t==='k'||c2.t==='p')return true;
+    const bw=(c2.t==='c'?c2.d:c2.w), bh=(c2.t==='c'?c2.d:c2.h);
+    return Math.abs(px-c2.cx)>=(w+bw)/2+1 || Math.abs(py-c2.cy)>=(hh+bh)/2+1;
+  });
+  if(rund){
+    let vx=cx-R, vy=cy-R, ab=Math.hypot(vx,vy), max=R-halb-0.5;
+    if(ab>max){ if(ab<1e-6){vx=0;vy=-1;ab=1;} cx=R+vx/ab*max; cy=R+vy/ab*max; }
+  } else { cx=Math.max(w/2+0.5,Math.min(d.w-w/2-0.5,cx)); cy=Math.max(hh/2+0.5,Math.min(d.h-hh/2-0.5,cy)); }
+  /* Jedes Preset zaehlt in p.pos() nur seine EIGENEN Vorkommen. Kabeldurchlass
+     und Armaturenbohrung landeten deshalb uebereinander und die Pruefung meldete
+     sofort eine Ueberschneidung (11.09.). Der neue Ausschnitt weicht jetzt auf
+     den naechsten freien Platz aus, ringweise um die Startposition. */
+  if(!frei(cx,cy)){
+    const schritt=Math.max(3,Math.max(w,hh)/2+1.5); let treffer=null;
+    for(let ring=1;ring<=30&&!treffer;ring++)
+      for(const [dx,dy] of [[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]]){
+        const px=Math.round((cx+dx*ring*schritt)*2)/2, py=Math.round((cy+dy*ring*schritt)*2)/2;
+        if(inKontur(px,py)&&frei(px,py)){treffer=[px,py];break;}
+      }
+    if(!treffer){toast('Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen');return;}
+    [cx,cy]=treffer;
+  }
+  cx=Math.round(cx*2)/2; cy=Math.round(cy*2)/2;
   S.cuts.push(p.t==='c'?{t:'c',preset:k,cx,cy,d:p.d,w:p.d,h:p.d}:{t:'r',preset:k,cx,cy,w,h:hh});
   toast(p.label+' hinzugefügt, auf der Platte verschiebbar'); render();
 }

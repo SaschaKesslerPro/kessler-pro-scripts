@@ -364,7 +364,6 @@
   "Auswahl im Live-Konfigurator öffnen": "Otwórz wybór w konfiguratorze",
   "Bearbeiten": "Edytuj",
   "Bearbeitungen": "Obróbki",
-  "Bei runden Platten stehen Ausschnitte in diesem Konfigurator nicht zur Verfügung.": "Przy płytach okrągłych wycięcia nie są dostępne w tym konfiguratorze.",
   "Beschichtet, mit passender ABS-Kante": "Laminowana, z dopasowanym obrzeżem ABS",
   "Bohrungen & Kabeldurchlässe": "Otwory i przepusty kablowe",
   "Compact wählen": "Wybierz Compact",
@@ -521,7 +520,12 @@
   "Alle Dekore zeigen": "Pokaż wszystkie dekory",
   "Weniger Dekore zeigen": "Pokaż mniej dekorów",
   "Mit Ausschnitt für die Maschine und Maßband": "Z wycięciem pod maszynę i taśmą mierniczą",
-  "Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.": "Wycięcie pod maszynę i taśmę mierniczą znajdziesz w Krawędziach i dodatkach."
+  "Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.": "Wycięcie pod maszynę i taśmę mierniczą znajdziesz w Krawędziach i dodatkach.",
+  "Bei runden Platten gibt es keine Küchen-Ausschnitte und keinen Kabelkanal. Bohrungen, Durchlässe und eigene Ausschnitte setzt du wie gewohnt.": "W blatach okrągłych nie ma wycięć kuchennych ani kanału kablowego. Otwory, przepusty i własne wycięcia ustawiasz jak zwykle.",
+  "Küchen-Ausschnitte gibt es nur bei eckigen Platten": "Wycięcia kuchenne są tylko w blatach prostokątnych",
+  "Freie Kontur gibt es nur bei eckigen Platten": "Dowolny kontur jest tylko w blatach prostokątnych",
+  "Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen": "Brak wolnego miejsca — przesuń najpierw istniejące obróbki",
+  "Vollbild schließen": "Zamknij pełny ekran"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -877,7 +881,6 @@
   "Auswahl im Live-Konfigurator öffnen": "Open this selection in the live configurator",
   "Bearbeiten": "Edit",
   "Bearbeitungen": "Machining",
-  "Bei runden Platten stehen Ausschnitte in diesem Konfigurator nicht zur Verfügung.": "Cut-outs are not available for round panels in this configurator.",
   "Beschichtet, mit passender ABS-Kante": "Laminated, with a matching ABS edge",
   "Bohrungen & Kabeldurchlässe": "Holes & cable outlets",
   "Compact wählen": "Choose Compact",
@@ -1034,7 +1037,12 @@
   "Alle Dekore zeigen": "Show all decors",
   "Weniger Dekore zeigen": "Show fewer decors",
   "Mit Ausschnitt für die Maschine und Maßband": "With a cut-out for the machine and a measuring tape",
-  "Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.": "You find the machine cut-out and the measuring tape under Edges & extras."
+  "Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.": "You find the machine cut-out and the measuring tape under Edges & extras.",
+  "Bei runden Platten gibt es keine Küchen-Ausschnitte und keinen Kabelkanal. Bohrungen, Durchlässe und eigene Ausschnitte setzt du wie gewohnt.": "Round panels take no kitchen cut-outs and no cable channel. Holes, pass-throughs and your own cut-outs work as usual.",
+  "Küchen-Ausschnitte gibt es nur bei eckigen Platten": "Kitchen cut-outs are only available on straight-edged panels",
+  "Freie Kontur gibt es nur bei eckigen Platten": "A free contour is only available on straight-edged panels",
+  "Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen": "No free space left — move the existing work first",
+  "Vollbild schließen": "Close full screen"
  },
  "muster": {
   "pl": [
