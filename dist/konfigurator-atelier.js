@@ -197,7 +197,7 @@ function stageTex(k){ return ATELIER_ATLASES[k]?.src || (_texOk[k] ? TEX[k] : (T
    Kaleidoskop — dort bleibt das Foto wie bisher ueber die ganze Platte gelegt. */
 const TEX_CM = { 'marmor-weiss': null, 'marmor-schwarz': null, 'sperrholz-natur': 50 };
 const TEX_RAND = 0.08;
-function texCm(){ return null; } // Continuous source photograph: no mirrored tiles.
+function texCm(){ if(ATELIER_ATLASES[texKey()]) return null; const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }
 /* SVG-Muster: 2x2 Kacheln, jede zweite horizontal bzw. vertikal gespiegelt, damit an
    den Stoessen keine harten Kanten entstehen. Ursprung = Plattenecke (x,y), T = Kachel in px. */
 function texPattern(x,y,T,href,pw,ph){
@@ -381,7 +381,7 @@ const MATERIALS = {
   szwal:   { name:'Nähtischplatte', sub:'ab 89 € · 21 mm · 4 Farben',
              thick:[['21','21 mm']], def:'21', dekore:DEKOR_SZWAL, hasABS:true }
 };
-const FLAT = {'weiss':'#f0eee9','schwarz':'#232120','szary':'#b7b6b2','kaszmir':'#d9d2c4','sosna-bielona':'#ece5d6',
+const FLAT = {'weiss':'#f0eee9','alaska-weiss':'#efefef','schwarz':'#232120','szary':'#b7b6b2','kaszmir':'#d9d2c4','sosna-bielona':'#ece5d6',
   'ahorn':'#e9d1a8','buk':'#d9af7e','sonoma-eiche':'#c2a172','eiche-artison':'#a8815a','hikora':'#8f704a',
   'sperrholz-natur':'#e7d9ba','marmor-weiss':'#ebe9e4','marmor-schwarz':'#2b2926','czarny':'#232120',
   'sz-weiss':'#f0eee9','sz-gewebe':'#eae7e0','sz-grau':'#b7b6b2','sz-schwarz':'#232120'};

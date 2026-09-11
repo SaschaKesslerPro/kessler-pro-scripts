@@ -374,7 +374,7 @@ const MATERIALS = {
   szwal:   { name:'Nähtischplatte', sub:'ab 89 € · 21 mm · 4 Farben',
              thick:[['21','21 mm']], def:'21', dekore:DEKOR_SZWAL, hasABS:true }
 };
-const FLAT = {'weiss':'#f0eee9','schwarz':'#232120','szary':'#b7b6b2','kaszmir':'#d9d2c4','sosna-bielona':'#ece5d6',
+const FLAT = {'weiss':'#f0eee9','alaska-weiss':'#efefef','schwarz':'#232120','szary':'#b7b6b2','kaszmir':'#d9d2c4','sosna-bielona':'#ece5d6',
   'ahorn':'#e9d1a8','buk':'#d9af7e','sonoma-eiche':'#c2a172','eiche-artison':'#a8815a','hikora':'#8f704a',
   'sperrholz-natur':'#e7d9ba','marmor-weiss':'#ebe9e4','marmor-schwarz':'#2b2926','czarny':'#232120',
   'sz-weiss':'#f0eee9','sz-gewebe':'#eae7e0','sz-grau':'#b7b6b2','sz-schwarz':'#232120'};

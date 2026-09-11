@@ -16,7 +16,13 @@ const source=fs.readFileSync(QUELLE,'utf8');
 let core=LIVE?source:source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '.';");
 const replaceOnce=(before,after)=>{if(!core.includes(before))throw new Error('Missing original adapter anchor: '+before.slice(0,70));core=core.replace(before,after);};
 replaceOnce('const $=id=>document.getElementById(id);','const ATELIER_DEFAULT=JSON.parse(JSON.stringify(S));\nconst $=id=>document.getElementById(id);');
-replaceOnce("function texCm(){ const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }","function texCm(){ return null; } // Continuous source photograph: no mirrored tiles.");
+/* Der Codex-Entwurf setzte texCm() hart auf null. Fuer die KI-Atlanten ist das
+   richtig - sie zeigen 300 x 200 cm und laufen ueber die ganze Platte. Fuer alle
+   anderen Dekore ist es falsch: deren Foto zeigt 40 cm Oberflaeche und wird
+   gekachelt. Ueber die ganze Platte gezogen wurde aus der feinen Struktur von
+   Weiss ein grobes, glaenzendes Muster (Sascha, 11.09.). */
+replaceOnce("function texCm(){ const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }",
+  "function texCm(){ if(ATELIER_ATLASES[texKey()]) return null; const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }");
 const atlases=JSON.parse(fs.readFileSync(path.join(dir,'texture-atlases.json'),'utf8'));
 /* Live kommen die Atlanten aus demselben Commit wie das Skript, nicht vom Webflow-Host. */
 const atlasJs=LIVE
