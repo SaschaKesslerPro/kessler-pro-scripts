@@ -454,6 +454,38 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
       JSON.stringify(je));
     await ctx.close();
   }
+  /* ⑧b Jede Zahl in der Buehne, auch die mit Inline-Stil (Ausschnitt-Abstaende
+     und Massband), muss die schwarze Kapsel tragen — sie waren auf hellen
+     Dekoren unsichtbar (Sascha, 14.09.). */
+  {
+    const {ctx,p}=await seite({width:1440,height:1000},'de',false);
+    await p.klick('[data-material="szwal"]');
+    await p.waitForTimeout(600);
+    await p.evaluate(()=>{const b=[...document.querySelectorAll('.kfg_dekor')].find(x=>x.dataset.d==='sz-weiss');if(b){b.style.display='';b.click();}});
+    await p.waitForTimeout(400);
+    await p.klick('.step_nav [data-step="2"]');
+    await p.evaluate(()=>{document.getElementById('sewingGroup').open=true;});
+    await p.waitForTimeout(300);
+    await p.evaluate(()=>{const b=[...document.querySelectorAll('#massbandChips button')];if(b[1])b[1].click();});
+    await p.waitForTimeout(600);
+    await p.evaluate(()=>document.getElementById('btn2d').click());
+    await p.waitForTimeout(700);
+    const texte=await p.evaluate(()=>[...document.querySelectorAll('#stage text')].map(el=>{
+      const c=getComputedStyle(el);
+      return {t:el.textContent.slice(0,12),fill:c.fill,stroke:c.stroke,sw:parseFloat(c.strokeWidth)};}));
+    const blass=texte.filter(t=>!/255, 255, 255/.test(t.fill)||!/10, 10, 10/.test(t.stroke)||!(t.sw>=4));
+    pruef('⑧b jede Zahl in der Buehne traegt die schwarze Kapsel',
+      texte.length>=8&&blass.length===0, JSON.stringify({gesamt:texte.length,blass:blass.slice(0,4)}));
+    await ctx.close();
+  }
+  /* ⑧c frame3D dreht nur das Mesh — Band und Kanal muessen daran haengen,
+     sonst bleiben sie beim Drehen stehen (Sascha: "schwebt in der Luft"). */
+  {
+    const quelle=fs.readFileSync(path.join(__dirname,'../dist/konfigurator-atelier.js'),'utf8');
+    pruef('⑧c Massband und Kabelkanal haengen am Mesh, nicht an der Szene',
+      quelle.includes('three.mesh.add(three.band)')&&quelle.includes('three.mesh.add(three.kanal)')
+      &&!quelle.includes('three.scene.add(three.band)')&&!quelle.includes('three.scene.add(three.kanal)'));
+  }
   console.log('⑧ Vollbild und Masszahlen geprueft');
 
   await b.close();

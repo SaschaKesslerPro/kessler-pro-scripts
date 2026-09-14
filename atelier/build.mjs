@@ -45,6 +45,72 @@ replaceOnce("const PADL=S.form==='lform'?rand:16, PADR=rand, PADB=rand;", "const
 replaceOnce("inner+=dimH(x,x+pw,y+ph+30,bg.L+' cm')+dimV(x+pw+30,y,y+ph,bg.BR+' cm');", "inner+=`<path d=\"${pd}\" fill=\"none\" stroke=\"#343434\" stroke-width=\"1.8\" stroke-linejoin=\"round\" pointer-events=\"none\"/>`;\n    inner+=dimH(x,x+pw,y+ph+72,bg.L+' cm')+dimV(x+pw+30,y,y+ph,bg.BR+' cm');");
 replaceOnce('function drawStage(){',drawing+'\nfunction drawStage(){');
 
+/* ── Massband und Kabelkanal drehen mit (Sascha, 14.09.) ────────────────────
+   frame3D dreht NUR die Platte um Y (three.mesh.rotation.y=rotY); Band und
+   Kanal hingen als Geschwister in der Szene und blieben stehen. Schon in der
+   Startansicht (rotY = -0,5) lag das Band deshalb neben der Platte in der
+   Luft. Beide haengen jetzt am Mesh und machen jede Drehung mit. Das Aufraeumen
+   laeuft ueber das Mesh — entsorge3D traversiert die Kinder ohnehin. */
+replaceOnce(`    if(three.mesh){three.scene.remove(three.mesh);entsorge3D(three.mesh);three.mesh=null;}
+    if(three.kanal){three.scene.remove(three.kanal);entsorge3D(three.kanal);three.kanal=null;}
+    if(three.band){three.scene.remove(three.band);entsorge3D(three.band);three.band=null;}`,
+`    if(three.mesh){three.scene.remove(three.mesh);entsorge3D(three.mesh);}
+    three.mesh=null;three.kanal=null;three.band=null;`);
+replaceOnce(`    three.kanal=kanal3D(depth);
+    if(three.kanal) three.scene.add(three.kanal);
+    three.band=massband3D(depth);
+    if(three.band) three.scene.add(three.band);`,
+`    three.kanal=kanal3D(depth);
+    if(three.kanal) three.mesh.add(three.kanal);
+    three.band=massband3D(depth);
+    if(three.band) three.mesh.add(three.band);`);
+
+/* Das gelaserte Band lag mit 1,6 cm Breite und haarfeinen Strichen auf der
+   Platte — auf hellen Dekoren kaum zu erkennen. Breiter, kraeftiger, mit
+   groesseren Zahlen und feinerer Textur. */
+replaceOnce("  const cv=document.createElement('canvas'), pxCm=24; cv.width=Math.max(48,Math.round(len*pxCm)); cv.height=96;",
+            "  const cv=document.createElement('canvas'), pxCm=32; cv.width=Math.max(64,Math.round(len*pxCm)); cv.height=128;");
+/* Die Strichfarbe richtet sich nach dem Dekor: auf Schwarz waren schwarze
+   Striche unsichtbar. Dazu eine schwach getoente Bahn, damit das gelaserte
+   Band auch aus der Entfernung als Band zu erkennen ist. */
+replaceOnce(`  g.strokeStyle='#1E1E1E'; g.fillStyle='#1E1E1E'; g.textAlign='center'; g.textBaseline='middle';
+  g.font='600 26px system-ui, Arial, sans-serif';`,
+`  const tint=(FLAT[(typeof SZWAL_TEX!=='undefined'&&SZWAL_TEX[S.dekor])||S.dekor]||'#d8d4cc');
+  const hell=(parseInt(tint.slice(1,3),16)*0.299+parseInt(tint.slice(3,5),16)*0.587+parseInt(tint.slice(5,7),16)*0.114)>120;
+  const strich=hell?'#0A0A0A':'#FFFFFF';
+  if(!aufkleber){ g.fillStyle=hell?'rgba(0,0,0,.10)':'rgba(255,255,255,.16)'; g.fillRect(0,0,cv.width,cv.height); }
+  g.strokeStyle=strich; g.fillStyle=strich; g.textAlign='center'; g.textBaseline='middle';
+  g.font='700 34px system-ui, Arial, sans-serif';`);
+replaceOnce("    const xx=(rechts?len-cm:cm)*pxCm, gross=cm%10===0, mittel=cm%5===0, h=gross?50:(mittel?34:20);\n    g.lineWidth=gross?3:1.5; g.beginPath();",
+            "    const xx=(rechts?len-cm:cm)*pxCm, gross=cm%10===0, mittel=cm%5===0, h=gross?78:(mittel?52:32);\n    g.lineWidth=gross?5:3; g.beginPath();");
+replaceOnce("      g.fillText(String(cm), tx, aufkleber?cv.height-24:24); }",
+            "      g.fillText(String(cm), tx, aufkleber?cv.height-30:30); }");
+replaceOnce("  const bw=0.16;                                                       /* 1,6 cm breit */",
+            "  const bw=0.30;                                                       /* 3 cm breit — vorher 1,6 und aus der Entfernung nicht zu sehen */");
+/* Auch die Draufsicht: die Striche standen auf 85 bzw. 45 Prozent Deckung. */
+replaceOnce(`        stroke="#1E1E1E" stroke-width="\${gross?1:0.6}" opacity="\${gross?'.85':'.45'}"/>\`;`,
+            `        stroke="#0a0a0a" stroke-width="\${gross?1.3:0.8}" opacity="\${gross?'1':'.7'}"/>\`;`);
+/* Die Beschriftung des Bandes trug nur 2 px Kapsel — zu duenn fuer 9 px Schrift. */
+core=core.split("style=\"font-size:9px;font-weight:500;stroke-width:2px\"").join("style=\"font-size:9.5px;font-weight:600;stroke-width:4px\"");
+
+/* ── Abstandsmasse auf hellen Dekoren (Sascha, 14.09.) ──────────────────────
+   Die Zahlen der Ausschnitt-Abstaende trugen einen Inline-Stil mit hellem Rand
+   (#F2F0EB). Inline schlaegt das Stylesheet, deshalb blieb dort die weisse
+   Schrift des Ateliers in einem hellen Rand stehen — auf Weiss, Alaska Weiss
+   und Kiefer Weiss praktisch unsichtbar. Sie bekommen jetzt dieselbe schwarze
+   Kapsel wie alle uebrigen Masszahlen. Die Hilfslinien behalten die helle
+   Unterlegung (sonst verschwinden sie auf Schwarz), bekommen aber schwarze
+   Striche darueber — so tragen sie auf jedem Dekor. */
+replaceOnce("        const halo='paint-order:stroke;stroke:#F2F0EB;stroke-width:3px;font-size:10.5px';",
+            "        const halo='paint-order:stroke;stroke:#0a0a0a;stroke-width:5px;stroke-linejoin:round;stroke-linecap:round;fill:#fff;font-size:10.5px;font-weight:500';");
+replaceOnce(`        const dline=(x1,y1,x2,y2)=>\`<line x1="\${x1}" y1="\${y1}" x2="\${x2}" y2="\${y2}" stroke="#F2F0EB" stroke-width="3"/>
+          <line x1="\${x1}" y1="\${y1}" x2="\${x2}" y2="\${y2}" stroke="#55524d" stroke-width="1" stroke-dasharray="2 2"/>\`;`,
+`        const dline=(x1,y1,x2,y2)=>\`<line x1="\${x1}" y1="\${y1}" x2="\${x2}" y2="\${y2}" stroke="#fff" stroke-width="3.5" stroke-opacity=".9"/>
+          <line x1="\${x1}" y1="\${y1}" x2="\${x2}" y2="\${y2}" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/>\`;`);
+/* Der Umriss der Ausschnitte lag bei 38 % Schwarz — auf hellen Dekoren
+   verschwand er zusammen mit der hellen Fuellung. */
+core=core.split('stroke="#00000060" stroke-dasharray="5 3"').join('stroke="#0a0a0a" stroke-opacity=".72" stroke-dasharray="5 3"');
+
 /* ── Ausschnitte auf runden Platten (Sascha, 11.09.) ─────────────────────────
    Der Kern liess Bohrungen und Ausschnitte nur auf eckigen Platten zu. Der
    Worker kann es dagegen schon: dxf.js zeichnet bei form==='rund' einen CIRCLE

@@ -1261,17 +1261,17 @@ function drawStage(){
         const pa=polyAbs(c2).map(p=>[x+p[0]*sc, y+p[1]*sc]);
         const rr=pa.map(()=>Math.max(0,(c2.r||0))/10*sc);
         inner+=`<path class="kfg_cutshape" data-idx="${i}" d="${roundPoly(pa,rr)}"
-          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>Freie Kontur, ziehen zum Verschieben</title></path>`;
+          fill="#F2F0EB" fill-opacity=".92" stroke="#0a0a0a" stroke-opacity=".72" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>Freie Kontur, ziehen zum Verschieben</title></path>`;
         inner+=`<text class="dim-text" x="${x+c2.cx*sc}" y="${y+c2.cy*sc+4}" text-anchor="middle" style="font-size:11px;pointer-events:none">${(c2.pts||[]).length} Punkte</text>`;
         return;
       }
       if(c2.t==='c'){
         inner+=`<circle class="kfg_cutshape" data-idx="${i}" cx="${x+c2.cx*sc}" cy="${y+c2.cy*sc}" r="${c2.d/2*sc}"
-          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>Ø ${c2.d} cm, ziehen zum Verschieben</title></circle>`;
+          fill="#F2F0EB" fill-opacity=".92" stroke="#0a0a0a" stroke-opacity=".72" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>Ø ${c2.d} cm, ziehen zum Verschieben</title></circle>`;
         inner+=`<text class="dim-text" x="${x+c2.cx*sc}" y="${y+c2.cy*sc+4}" text-anchor="middle" style="font-size:11px;pointer-events:none">${cutShort(c2)}</text>`;
       } else {
         inner+=`<rect class="kfg_cutshape" data-idx="${i}" x="${x+(c2.cx-c2.w/2)*sc}" y="${y+(c2.cy-c2.h/2)*sc}" width="${c2.w*sc}" height="${c2.h*sc}" rx="3"
-          fill="#F2F0EB" fill-opacity=".92" stroke="#00000060" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>${c2.w} × ${c2.h} cm, ziehen zum Verschieben</title></rect>`;
+          fill="#F2F0EB" fill-opacity=".92" stroke="#0a0a0a" stroke-opacity=".72" stroke-dasharray="5 3"${committed?' style="cursor:move"':''}><title>${c2.w} × ${c2.h} cm, ziehen zum Verschieben</title></rect>`;
         inner+=`<text class="dim-text" x="${x+c2.cx*sc}" y="${y+c2.cy*sc+4}" text-anchor="middle" style="font-size:11px;pointer-events:none">${cutShort(c2)}</text>`;
       }
       /* Abstandsmaße zur Kante: beim Ziehen dieses Ausschnitts oder in der Auftragszeichnung */
@@ -1279,9 +1279,9 @@ function drawStage(){
         const f=v=>(''+(Math.round(v*10)/10)).replace('.',',');
         const ab=cutAbstaende(c2), cl=ab.l, cr=ab.r, ct=ab.t, cb=ab.b;
         const cyp=y+c2.cy*sc, cxp=x+c2.cx*sc;
-        const halo='paint-order:stroke;stroke:#F2F0EB;stroke-width:3px;font-size:10.5px';
-        const dline=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#F2F0EB" stroke-width="3"/>
-          <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#55524d" stroke-width="1" stroke-dasharray="2 2"/>`;
+        const halo='paint-order:stroke;stroke:#0a0a0a;stroke-width:5px;stroke-linejoin:round;stroke-linecap:round;fill:#fff;font-size:10.5px;font-weight:500';
+        const dline=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="3.5" stroke-opacity=".9"/>
+          <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/>`;
         inner+=`<g style="pointer-events:none">
           ${dline(x+(c2.cx-c2.w/2-cl)*sc,cyp,x+(c2.cx-c2.w/2)*sc,cyp)}<text class="dim-text" x="${x+(c2.cx-c2.w/2-cl/2)*sc}" y="${cyp-6}" text-anchor="middle" style="${halo}">${f(cl)}</text>
           ${dline(x+(c2.cx+c2.w/2)*sc,cyp,x+(c2.cx+c2.w/2+cr)*sc,cyp)}<text class="dim-text" x="${x+(c2.cx+c2.w/2+cr/2)*sc}" y="${cyp-6}" text-anchor="middle" style="${halo}">${f(cr)}</text>
@@ -1749,18 +1749,22 @@ function kanal3D(depth){
    die Striche von der Oberkante des Bandes, beim gelaserten stehen sie auf der
    Vorderkante der Platte. */
 function massbandTextur(len, rechts, aufkleber){
-  const cv=document.createElement('canvas'), pxCm=24; cv.width=Math.max(48,Math.round(len*pxCm)); cv.height=96;
+  const cv=document.createElement('canvas'), pxCm=32; cv.width=Math.max(64,Math.round(len*pxCm)); cv.height=128;
   const g=cv.getContext('2d');
   if(aufkleber){ g.fillStyle='#f4f0e6'; g.fillRect(0,0,cv.width,cv.height); }
-  g.strokeStyle='#1E1E1E'; g.fillStyle='#1E1E1E'; g.textAlign='center'; g.textBaseline='middle';
-  g.font='600 26px system-ui, Arial, sans-serif';
+  const tint=(FLAT[(typeof SZWAL_TEX!=='undefined'&&SZWAL_TEX[S.dekor])||S.dekor]||'#d8d4cc');
+  const hell=(parseInt(tint.slice(1,3),16)*0.299+parseInt(tint.slice(3,5),16)*0.587+parseInt(tint.slice(5,7),16)*0.114)>120;
+  const strich=hell?'#0A0A0A':'#FFFFFF';
+  if(!aufkleber){ g.fillStyle=hell?'rgba(0,0,0,.10)':'rgba(255,255,255,.16)'; g.fillRect(0,0,cv.width,cv.height); }
+  g.strokeStyle=strich; g.fillStyle=strich; g.textAlign='center'; g.textBaseline='middle';
+  g.font='700 34px system-ui, Arial, sans-serif';
   for(let cm=0; cm<=len; cm++){
-    const xx=(rechts?len-cm:cm)*pxCm, gross=cm%10===0, mittel=cm%5===0, h=gross?50:(mittel?34:20);
-    g.lineWidth=gross?3:1.5; g.beginPath();
+    const xx=(rechts?len-cm:cm)*pxCm, gross=cm%10===0, mittel=cm%5===0, h=gross?78:(mittel?52:32);
+    g.lineWidth=gross?5:3; g.beginPath();
     if(aufkleber){ g.moveTo(xx,0); g.lineTo(xx,h); } else { g.moveTo(xx,cv.height); g.lineTo(xx,cv.height-h); }
     g.stroke();
     if(gross){ let tx=xx; if(cm===0) tx+=rechts?-14:14; else if(cm===len) tx+=rechts?14:-14;
-      g.fillText(String(cm), tx, aufkleber?cv.height-24:24); }
+      g.fillText(String(cm), tx, aufkleber?cv.height-30:30); }
   }
   const t=new THREE.CanvasTexture(cv); t.encoding=THREE.sRGBEncoding; t.anisotropy=8;
   t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; return t;
@@ -1777,16 +1781,15 @@ function massband3D(depth){
     m.position.set(cx, 1.5*depth, H/2+0.003);                            /* Stirnseite, vorn */
     return m;
   }
-  const bw=0.16;                                                       /* 1,6 cm breit */
+  const bw=0.30;                                                       /* 3 cm breit — vorher 1,6 und aus der Entfernung nicht zu sehen */
   const m=new THREE.Mesh(new THREE.PlaneGeometry(len,bw), new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false}));
   m.rotateX(-Math.PI/2); m.position.set(cx, 2*depth+0.003, H/2-bw/2-0.01);  /* Oberseite, an der Vorderkante */
   return m;
 }
 function draw3D(){
   ensure3D(()=>{
-    if(three.mesh){three.scene.remove(three.mesh);entsorge3D(three.mesh);three.mesh=null;}
-    if(three.kanal){three.scene.remove(three.kanal);entsorge3D(three.kanal);three.kanal=null;}
-    if(three.band){three.scene.remove(three.band);entsorge3D(three.band);three.band=null;}
+    if(three.mesh){three.scene.remove(three.mesh);entsorge3D(three.mesh);}
+    three.mesh=null;three.kanal=null;three.band=null;
     const depth=(+S.thick)/100;
     const geo=new THREE.ExtrudeGeometry(plateShape(),{depth,bevelEnabled:false,curveSegments:48});
     /* UV-Fix: Deckflächen sauber [0..1] gemappt, Proportionen über max(B,T) — kein Kacheln, kein Zerren */
@@ -1817,9 +1820,9 @@ function draw3D(){
     three.mesh=new THREE.Mesh(geo,[topMat,sideMat]);
     three.scene.add(three.mesh);
     three.kanal=kanal3D(depth);
-    if(three.kanal) three.scene.add(three.kanal);
+    if(three.kanal) three.mesh.add(three.kanal);
     three.band=massband3D(depth);
-    if(three.band) three.scene.add(three.band);
+    if(three.band) three.mesh.add(three.band);
     const d=dims(), maxd=Math.max(d.w,d.h)/10;
     three.cam.position.set(0, maxd*0.9, maxd*1.55); three.cam.lookAt(0,0,0);
     frame3D();
@@ -2008,7 +2011,7 @@ function massbandSVG(x,y,sc,pw,ph){
     for(let cm=0; cm<=st.len+0.001; cm+=schritt){
       const gross=Math.round(cm)%10===0;
       out+=`<line x1="${xs(cm)}" y1="${yB}" x2="${xs(cm)}" y2="${yB-(gross?lang:kurz)}"
-        stroke="#1E1E1E" stroke-width="${gross?1:0.6}" opacity="${gross?'.85':'.45'}"/>`;
+        stroke="#0a0a0a" stroke-width="${gross?1.3:0.8}" opacity="${gross?'1':'.7'}"/>`;
     }
     const beschr=Math.max(10, Math.ceil(26/Math.max(1,10*sc))*10);
     for(let cm=0; cm<=st.len+0.001; cm+=beschr){
@@ -2018,12 +2021,12 @@ function massbandSVG(x,y,sc,pw,ph){
       const anker = cm===0||letzte ? (innen?'start':'end') : 'middle';
       const dx = cm===0||letzte ? (innen?2:-2) : 0;
       out+=`<text class="dim-text" x="${xs(cm)+dx}" y="${yB-lang-2}" text-anchor="${anker}"
-        style="font-size:9px;font-weight:500;stroke-width:2px">${cm}</text>`;
+        style="font-size:9.5px;font-weight:600;stroke-width:4px">${cm}</text>`;
     }
   } else {
     const x1=x+st.x0*sc, x2=x+(st.x0+st.len)*sc, yB=y+ph;
     out+=`<line x1="${x1}" y1="${yB-1.5}" x2="${x2}" y2="${yB-1.5}" stroke="#1E1E1E" stroke-width="1.2" stroke-dasharray="3 2" opacity=".8"/>`;
-    out+=`<text class="dim-text" x="${(x1+x2)/2}" y="${yB-6}" text-anchor="middle" style="font-size:9px;font-weight:500;stroke-width:2px">Maßband auf der Kante · ${st.len} cm</text>`;
+    out+=`<text class="dim-text" x="${(x1+x2)/2}" y="${yB-6}" text-anchor="middle" style="font-size:9.5px;font-weight:600;stroke-width:4px">Maßband auf der Kante · ${st.len} cm</text>`;
   }
   return `<g style="pointer-events:none">${out}</g>`;
 }
