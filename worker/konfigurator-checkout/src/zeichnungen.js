@@ -34,6 +34,18 @@ async function schriften(){
 
 const nummerAus = (best) => String(best.nummer || String(best.id).split('/').pop());
 export const auftragKey = (nummer) => `auftrag:${nummer}`;
+
+/* Interne Empfaenger. SHOP_MAIL bleibt die eine Adresse fuer Reply-To und
+   Fallback; MAIL_INTERN darf eine Liste sein (Komma oder Semikolon getrennt) —
+   Sascha am 14.09.: die Zeichnungen sollen ausser an shop@ auch an den Senior
+   und an drawings@ gehen. Doppelte Adressen fallen raus. */
+export function internAn(env){
+  const roh = String(env.MAIL_INTERN || env.SHOP_MAIL || 'shop@kessler-pro.com');
+  const gesehen = new Map();
+  for(const a of roh.split(/[,;]/).map(s => s.trim()).filter(Boolean))
+    if(!gesehen.has(a.toLowerCase())) gesehen.set(a.toLowerCase(), a);
+  return gesehen.size ? [...gesehen.values()] : ['shop@kessler-pro.com'];
+}
 const dateiKey = (nummer, name) => `datei:${nummer}:${name}`;
 
 const TOKEN_RE = /^[A-Za-z0-9_-]{16,64}$/;
@@ -213,7 +225,7 @@ export async function bestellungVerarbeiten(best, env, opt = {}){
   // Mails
   const anhaenge = erzeugt.flatMap(e => Object.entries(e.inhalte).filter(([n]) => !n.endsWith('.svg')).map(([name, daten]) => ({ name, daten })));
   const intern = internMail(auftrag, urls, 'neu');
-  const ri = await sendeMail(env, { an: env.SHOP_MAIL || 'shop@kessler-pro.com', betreff: intern.betreff, html: intern.html, anhaenge, antwortAn: auftrag.email || undefined });
+  const ri = await sendeMail(env, { an: internAn(env), betreff: intern.betreff, html: intern.html, anhaenge, antwortAn: auftrag.email || undefined });
   auftrag.protokoll.push(`Mail intern: ${JSON.stringify(ri)}`);
   if(auftrag.email){
     const km = kundenMail(auftrag, spr, urls);
@@ -318,7 +330,7 @@ export async function freigabeSetzen(env, auftrag, aktion, daten = {}){
 
   const anhaenge = erzeugt.flatMap(e => Object.entries(e.inhalte).filter(([n]) => !n.endsWith('.svg')).map(([name, d]) => ({ name, daten: d })));
   const im = internMail(auftrag, urls, aktion === 'ok' ? 'freigegeben' : aktion);
-  auftrag.protokoll.push(`Mail intern (${aktion}): ${JSON.stringify(await sendeMail(env, { an: env.SHOP_MAIL || 'shop@kessler-pro.com', betreff: im.betreff, html: im.html, anhaenge, antwortAn: auftrag.email || undefined }))}`);
+  auftrag.protokoll.push(`Mail intern (${aktion}): ${JSON.stringify(await sendeMail(env, { an: internAn(env), betreff: im.betreff, html: im.html, anhaenge, antwortAn: auftrag.email || undefined }))}`);
   if(auftrag.email && aktion !== 'auto'){
     const km = aktion === 'aenderung' ? aenderungMail(auftrag, spr) : freigabeMail(auftrag, spr, urls);
     const kundenAnh = aktion === 'aenderung' ? [] : erzeugt.map(e => ({ name: e.dateien.kunde_pdf, daten: e.inhalte[e.dateien.kunde_pdf] }));

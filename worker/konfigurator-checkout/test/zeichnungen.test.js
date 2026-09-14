@@ -52,7 +52,10 @@ globalThis.fetch = async (u, opt) => {
   throw new Error('unerwarteter fetch ' + u);
 };
 const env = { SHOPIFY_SHOP:'hyf2zr-7x.myshopify.com', SHOPIFY_CLIENT_ID:'cid', SHOPIFY_CLIENT_SECRET:'geheim', ALLOWED_ORIGINS:'https://www.kessler-pro.com', PUBLIC_URL:'https://kfg.example.workers.dev',
-  SHOP_MAIL:'shop@kessler-pro.com', MAIL_VON:'Kessler PRO <zeichnung@kessler-pro.com>', RESEND_API_KEY:'re_test', SETUP_KEY:'s3tup', FREIGABE_STUNDEN:'72', ZEICHNUNGEN: kvMock() };
+  SHOP_MAIL:'shop@kessler-pro.com',
+  /* Sascha 14.09.: die Zeichnungen sollen ausser an shop@ auch an den Senior und an drawings@ gehen. */
+  MAIL_INTERN:'shop@kessler-pro.com, zbigniew.sobkow@kessler-pro.com ;drawings@kessler-pro.com,SHOP@kessler-pro.com',
+  MAIL_VON:'Kessler PRO <zeichnung@kessler-pro.com>', RESEND_API_KEY:'re_test', SETUP_KEY:'s3tup', FREIGABE_STUNDEN:'72', ZEICHNUNGEN: kvMock() };
 
 /* ① Webhook-Payload (REST) wie von Shopify */
 const restOrder = { id: 8372871594330, admin_graphql_api_id:'gid://shopify/Order/8372871594330', name:'KP-2026-1034', email:'sobkow.alexander@gmail.com', created_at:'2026-09-02T12:41:00+02:00', customer_locale:'de-DE', tags:'konfigurator, kfg-1.17.1', note: orderNote, test:true,
@@ -81,7 +84,8 @@ const dxfTxt = new TextDecoder().decode(await env.ZEICHNUNGEN.get(`datei:8372871
 check('DXF mit Aussenkontur, Bohrungen, Innenkreis', /AUSSEN/.test(dxfTxt) && (dxfTxt.match(/BOHRUNG/g) || []).length >= 4 && /INNEN/.test(dxfTxt), dxfTxt.length);
 check('Frist ≈ 72 h', Math.abs(new Date(a.frist) - new Date(a.angelegt) - 72 * 3600e3) < 5000, [a.angelegt, a.frist]);
 check('Shopify: Tag zeichnung-offen + Notiz mit Link', gql.some(g => /tagsAdd/.test(g.query) && g.variables.tags.includes(TAG.offen)) && /Freigabe des Kunden offen bis .* Dateien intern: https:\/\/kfg\.example\.workers\.dev\/i\/[A-Za-z0-9_-]{20,}/.test(orderNote), orderNote);
-check('Mail intern an shop@ mit 3 Anhaengen + Testhinweis', mails[0] && mails[0].to[0] === 'shop@kessler-pro.com' && mails[0].attachments.length === 3 && /TESTBESTELLUNG/.test(mails[0].html) && /werkstatt\.pdf/.test(mails[0].attachments[1].filename), mails[0] && { to: mails[0].to, n: mails[0].attachments.length });
+check('Mail intern an alle drei Adressen, ohne Dublette', mails[0] && mails[0].to.join(',') === 'shop@kessler-pro.com,zbigniew.sobkow@kessler-pro.com,drawings@kessler-pro.com', mails[0] && mails[0].to);
+check('Mail intern mit 3 Anhaengen + Testhinweis', mails[0] && mails[0].to[0] === 'shop@kessler-pro.com' && mails[0].attachments.length === 3 && /TESTBESTELLUNG/.test(mails[0].html) && /werkstatt\.pdf/.test(mails[0].attachments[1].filename), mails[0] && { to: mails[0].to, n: mails[0].attachments.length });
 check('Mail Kunde mit Zeichnung, Bestaetigen-Link, 72-h-Hinweis', mails[1] && mails[1].to[0] === 'sobkow.alexander@gmail.com' && mails[1].attachments.length === 1 && /\/freigabe\/[A-Za-z0-9_-]+"/.test(mails[1].html) && /72-Stunden/.test(mails[1].html) && /Hallo Alexander/.test(mails[1].html), mails[1] && mails[1].subject);
 
 /* ②b Positionstitel: Variantenposition des Basisprodukts → voller Titel aus _kfg_titel */
@@ -152,6 +156,7 @@ check('Notiz ergaenzt', /vom Kunden bestätigt/.test(orderNote), orderNote);
 const svgNeu = new TextDecoder().decode(await env.ZEICHNUNGEN.get(`datei:8372871594330:${d.svg}`, 'arrayBuffer'));
 check('Zeichnung neu mit Freigabestand', /Alexander Sobkow · /.test(svgNeu) && /Fertigungsgrundlage/.test(svgNeu));
 check('Mails: intern + Kunde (Bestaetigung mit PDF)', mails.length === nMails + 2 && /BESTÄTIGT/.test(mails[nMails].html) && mails[nMails + 1].attachments.length === 1, mails.slice(nMails).map(m => m.subject));
+check('Freigabemail geht ebenfalls an alle drei', mails[nMails].to.join(',') === 'shop@kessler-pro.com,zbigniew.sobkow@kessler-pro.com,drawings@kessler-pro.com', mails[nMails].to);
 r = await worker.fetch(new Request(`https://x/freigabe/${a.token}`, { method:'POST', body: fd }), env, ctx);
 check('Zweite Bestaetigung aendert nichts', (await auftragLaden(env, a.token)).freigabe.iso === a3.freigabe.iso);
 
