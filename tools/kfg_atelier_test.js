@@ -517,27 +517,38 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     pruef(`⑨ ${name} Zurueck erst ab Schritt 2`,
       !je[0].zurueck&&je[1].zurueck&&je[2].zurueck&&je[3].zurueck, JSON.stringify(je.map(x=>x.zurueck)));
     pruef(`⑨ ${name} Knopf bleibt im Bild`, je.slice(0,3).every(x=>x.imBild), JSON.stringify(je.map(x=>x.imBild)));
-    /* Die schwebende Leiste tritt zurueck, solange die Zeile zu sehen ist.
-       Geprueft wird auf Schritt 1: nur dessen Tafel ist hoch genug, dass die
-       Zeile beim Blick von oben wirklich unter dem Bildrand liegt. */
+    /* Die Leiste erscheint erst, wenn die Zeile nach OBEN aus dem Bild ist.
+       Nur unter dem Bildrand zu liegen genuegt nicht — sonst klebt sie schon
+       beim Aufschlagen unten und nimmt Sicht weg (Sascha, 17.09.). Unter dem
+       Konfigurator liegt auf der echten Seite noch viel Inhalt; der Spiegel
+       bekommt dafuer einen Platzhalter. */
     await p.evaluate(()=>document.querySelector('.step_nav [data-step="0"]').click());
     await p.waitForTimeout(600);
+    await p.evaluate(()=>{
+      if(!document.getElementById('testLuft'))
+        document.body.insertAdjacentHTML('beforeend','<div id="testLuft" style="height:2400px"></div>');
+      window.scrollTo(0,0);
+    });
+    await p.waitForTimeout(700);
+    const zustand=async()=>p.evaluate(()=>({
+      opazitaet:getComputedStyle(document.querySelector('.purchase_bar')).opacity,
+      unten:document.getElementById('flowBar').getBoundingClientRect().bottom}));
+    const oben=await zustand();
     await p.evaluate(()=>document.getElementById('flowBar').scrollIntoView({block:'center'}));
     await p.waitForTimeout(700);
-    const beiZeile=await p.evaluate(()=>({
-      opazitaet:getComputedStyle(document.querySelector('.purchase_bar')).opacity,
-      zeileImBild:(()=>{const r=document.getElementById('flowBar').getBoundingClientRect();
-        return r.top<innerHeight&&r.bottom>0;})()}));
-    await p.evaluate(()=>window.scrollTo(0,0));
+    const mittig=await zustand();
+    await p.evaluate(()=>{const r=document.getElementById('flowBar').getBoundingClientRect();
+      window.scrollBy(0,r.bottom+200);});
     await p.waitForTimeout(700);
-    const oben=await p.evaluate(()=>({
-      opazitaet:getComputedStyle(document.querySelector('.purchase_bar')).opacity,
-      zeileImBild:(()=>{const r=document.getElementById('flowBar').getBoundingClientRect();
-        return r.top<innerHeight&&r.bottom>0;})()}));
-    pruef(`⑨ ${name} Zeile im Bild blendet die schwebende Leiste aus`,
-      beiZeile.zeileImBild&&beiZeile.opazitaet==='0', JSON.stringify(beiZeile));
-    pruef(`⑨ ${name} Zeile ausserhalb des Bildes holt die Leiste zurueck`,
-      !oben.zeileImBild&&oben.opazitaet==='1', JSON.stringify(oben));
+    const vorbei=await zustand();
+    pruef(`⑨ ${name} oben auf der Seite bleibt die Leiste weg`,
+      oben.unten>0&&oben.opazitaet==='0', JSON.stringify(oben));
+    pruef(`⑨ ${name} Zeile im Bild blendet die Leiste aus`,
+      mittig.unten>0&&mittig.opazitaet==='0', JSON.stringify(mittig));
+    pruef(`⑨ ${name} erst nach dem Vorbeiscrollen kommt die Leiste`,
+      vorbei.unten<=0&&vorbei.opazitaet==='1', JSON.stringify(vorbei));
+    await p.evaluate(()=>{document.getElementById('testLuft')?.remove();window.scrollTo(0,0);});
+    await p.waitForTimeout(400);
     /* Der Knopf im Fluss loest denselben Schrittwechsel aus. */
     await p.evaluate(()=>document.querySelector('.step_nav [data-step="0"]').click());
     await p.waitForTimeout(500);
@@ -548,6 +559,77 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     await ctx.close();
   }
   console.log('⑨ Weiter-Knopf im Fluss geprueft');
+
+  /* ══ ⑩ Blaue Platte und flackernde Dekore (17.09.) ════════════════════════
+     2.6.2 ging mit einem falschen FALLBACK_BASE live: die Atlas-Bilder fehlten,
+     und ein kaputtes <image> im SVG-Muster malt Chromium als blaue Flaeche —
+     „die Platte ist blau“ (Sascha). Gleichzeitig baute jeder Dekorklick das
+     Gitter per innerHTML neu: alle Swatch-Bilder luden erneut und die
+     Reihen-Begrenzung des Ateliers war weg, die Dekore klappten kurz auf. */
+  {
+    const quelle=fs.readFileSync(path.join(__dirname,'..','dist','konfigurator-atelier.js'),'utf8');
+    pruef('⑩ FALLBACK_BASE zeigt auf einen Commit mit Atlas-Bildern',
+      /var FALLBACK_BASE = 'https:\/\/cdn\.jsdelivr\.net\/gh\/SaschaKesslerPro\/kessler-pro-scripts@[0-9a-f]{7}'/.test(quelle)
+      &&!quelle.includes('@2ee8195'),
+      (quelle.match(/var FALLBACK_BASE = '[^']*'/)||[])[0]);
+    pruef('⑩ Atlas-Zugriffe laufen ueber atlasVon mit Ausfallschutz',
+      quelle.includes('function atlasVon(k)')&&quelle.includes('ATLAS_FEHLT[k]=1')
+      &&!/ATELIER_ATLASES\[texKey\(\)\]/.test(quelle));
+    pruef('⑩ Dekorklick baut das Gitter nicht neu',
+      !quelle.includes("S.dekor=b.dataset.d; buildDekore(); render();"));
+
+    const ctx=await b.newContext({viewport:{width:1440,height:1000}});
+    const p=await ctx.newPage();
+    p.on('pageerror',e=>rot.push('JS-Fehler: '+e.message));
+    await p.goto(`${HOST}/_spiegel/atelier.html`,{waitUntil:'load'});
+    await p.waitForFunction(()=>document.querySelector('[data-kfg-root]')?.dataset.ready==='true',{timeout:40000});
+    await p.waitForTimeout(2200);
+    const bilder=async()=>p.evaluate(()=>({
+      hrefs:[...document.querySelectorAll('#stage image')].map(i=>i.getAttribute('href')),
+      notiz:!document.getElementById('textureTestNote').hidden}));
+    const mitAtlas=await bilder();
+    pruef('⑩ mit Atlas: ein Bild ueber die ganze Platte',
+      mitAtlas.hrefs.length===1&&/\/atlas\//.test(mitAtlas.hrefs[0])&&mitAtlas.notiz,
+      JSON.stringify(mitAtlas));
+
+    /* Ein Dekorklick darf die Reihe nicht sprengen und die Knoepfe nicht
+       neu bauen — sonst laden alle Bilder erneut. */
+    await p.evaluate(()=>{document.querySelector('#dekorGrid .kfg_dekor').dataset.marke='1';});
+    const anders=await p.evaluate(()=>{
+      const alle=[...document.querySelectorAll('#dekorGrid .kfg_dekor')];
+      const z=alle.find(b=>!b.classList.contains('is-active')&&b.style.display!=='none');
+      z.click(); return z.dataset.d;});
+    await p.waitForTimeout(600);
+    const nachKlick=await p.evaluate(()=>({
+      marke:!!document.querySelector('#dekorGrid .kfg_dekor')?.dataset.marke,
+      sichtbar:[...document.querySelectorAll('#dekorGrid .kfg_dekor')].filter(b=>b.style.display!=='none').length,
+      aktiv:document.querySelector('#dekorGrid .kfg_dekor.is-active')?.dataset.d}));
+    pruef('⑩ Dekorklick laesst die Knoepfe stehen',nachKlick.marke,JSON.stringify(nachKlick));
+    pruef('⑩ geschlossene Reihe bleibt bei fuenf',nachKlick.sichtbar===5,JSON.stringify(nachKlick));
+    pruef('⑩ Markierung sitzt auf dem geklickten Dekor',nachKlick.aktiv===anders,
+      JSON.stringify({anders,...nachKlick}));
+    await ctx.close();
+
+    /* Jetzt dasselbe mit verweigerten Atlas-Bildern: die Platte muss auf das
+       gekachelte Dekorfoto zurueckfallen, nicht leer (blau) bleiben. */
+    const ctx2=await b.newContext({viewport:{width:1440,height:1000}});
+    await ctx2.route('**/assets/kfg/atlas/**',r=>r.abort());
+    const p2=await ctx2.newPage();
+    p2.on('pageerror',e=>rot.push('JS-Fehler: '+e.message));
+    await p2.goto(`${HOST}/_spiegel/atelier.html`,{waitUntil:'load'});
+    await p2.waitForFunction(()=>document.querySelector('[data-kfg-root]')?.dataset.ready==='true',{timeout:40000});
+    await p2.waitForTimeout(3000);
+    const ohneAtlas=await p2.evaluate(()=>({
+      hrefs:[...document.querySelectorAll('#stage image')].map(i=>i.getAttribute('href')),
+      notiz:!document.getElementById('textureTestNote').hidden}));
+    pruef('⑩ ohne Atlas: gekacheltes Dekorfoto statt leerer Flaeche',
+      ohneAtlas.hrefs.length===4&&ohneAtlas.hrefs.every(h=>/\/top\/|\/thumb\//.test(h))
+      &&!ohneAtlas.hrefs.some(h=>/\/atlas\//.test(h)),
+      JSON.stringify(ohneAtlas));
+    pruef('⑩ ohne Atlas verschwindet der Texturtest-Hinweis',!ohneAtlas.notiz);
+    await ctx2.close();
+  }
+  console.log('⑩ Atlas-Ausfall und Dekorwechsel geprueft');
 
   console.log('⑧ Vollbild und Masszahlen geprueft');
 

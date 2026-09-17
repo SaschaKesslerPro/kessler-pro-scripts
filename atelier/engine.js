@@ -169,6 +169,21 @@ const TEX = Object.fromEntries(["weiss", "schwarz", "kaszmir", "sosna-bielona", 
    60-px-Kacheln (Audit 29.07., Fix 3). */
 const TEX_THUMB = Object.fromEntries(Object.entries(TEX).map(([k,u])=>[k,u.replace('/top/','/thumb/')]));
 const ATELIER_ATLASES={"hikora":{"src":"./assets/kfg/atlas/hikora.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/hikora.webp"},"ahorn":{"src":"./assets/kfg/atlas/ahorn.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/ahorn.webp"},"buk":{"src":"./assets/kfg/atlas/buk.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/buk.webp"},"sonoma-eiche":{"src":"./assets/kfg/atlas/sonoma-eiche.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sonoma-eiche.webp"},"eiche-artison":{"src":"./assets/kfg/atlas/eiche-artison.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/eiche-artison.webp"},"sosna-bielona":{"src":"./assets/kfg/atlas/sosna-bielona.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sosna-bielona.webp"},"sperrholz-natur":{"src":"./assets/kfg/atlas/sperrholz-natur.webp","widthCm":300,"heightCm":200,"generated":true,"status":"prototype-ki-erweiterung-kein-herstellerscan","reference":"assets/kfg/top/sperrholz-natur.webp"}};
+const ATLAS_FEHLT=Object.create(null), _atlasGeprueft=Object.create(null);
+function atlasVon(k){
+  const a=ATELIER_ATLASES[k]; if(!a||ATLAS_FEHLT[k]) return null;
+  if(!_atlasGeprueft[k]){ _atlasGeprueft[k]=1;
+    /* Dieselbe URL wie im Muster — der Browser holt sie nur einmal. */
+    const im=new Image();
+    im.onerror=function(){ ATLAS_FEHLT[k]=1;
+      try{ drawStage(); }catch(_){}
+      /* Das Atelier haengt Hinweise am Atlas (Texturtest) — es muss mitziehen. */
+      try{ document.dispatchEvent(new CustomEvent('kfg:atlasfehlt',{detail:k})); }catch(_){}
+    };
+    im.src=a.src;
+  }
+  return a;
+}
 
 /* Vollbild-Cache: Die Buehne zeigt beim Dekorwechsel SOFORT das (gecachte)
    128-px-Thumb und tauscht auf das Vollbild, sobald es dekodiert ist. Vorher
@@ -188,7 +203,7 @@ function ensureTex(k, cb){
   };
   im.onload = fertig; im.onerror = fertig; im.src = TEX[k];
 }
-function stageTex(k){ return ATELIER_ATLASES[k]?.src || (_texOk[k] ? TEX[k] : (TEX_THUMB[k] || TEX[k])); }
+function stageTex(k){ return atlasVon(k)?.src || (_texOk[k] ? TEX[k] : (TEX_THUMB[k] || TEX[k])); }
 /* Reale Kantenlaenge eines Dekorfotos in cm. Die Archivaufnahmen zeigen einen
    Ausschnitt von rund 40 cm (Dielenbreiten, Astgroessen) — bis v1.17.9 wurde EIN Foto
    ueber die ganze Platte gezogen, die Maserung war auf 120 cm dreimal zu gross
@@ -198,11 +213,11 @@ function stageTex(k){ return ATELIER_ATLASES[k]?.src || (_texOk[k] ? TEX[k] : (T
    Kaleidoskop — dort bleibt das Foto wie bisher ueber die ganze Platte gelegt. */
 const TEX_CM = { 'marmor-weiss': null, 'marmor-schwarz': null, 'sperrholz-natur': 50 };
 const TEX_RAND = 0.08;
-function texCm(){ if(ATELIER_ATLASES[texKey()]) return null; const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }
+function texCm(){ if(atlasVon(texKey())) return null; const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }
 /* SVG-Muster: 2x2 Kacheln, jede zweite horizontal bzw. vertikal gespiegelt, damit an
    den Stoessen keine harten Kanten entstehen. Ursprung = Plattenecke (x,y), T = Kachel in px. */
 function texPattern(x,y,T,href,pw,ph){
-  const atlas=ATELIER_ATLASES[texKey()];
+  const atlas=atlasVon(texKey());
   if(atlas){
     const d=dims(), sc=pw/d.w, tw=atlas.widthCm*sc, th=atlas.heightCm*sc;
     const ox=x-(tw-pw)/2, oy=y-(th-ph)/2;
@@ -1706,14 +1721,15 @@ function textur3D(key){
   t.encoding=THREE.sRGBEncoding; t.wrapS=t.wrapT=THREE.MirroredRepeatWrapping; t.anisotropy=8; t.kfgCache=true;   /* r128 kennt kein userData an Texturen */
   const im=new Image(); im.crossOrigin='anonymous';
   im.onload=()=>{
-    try{ const w=im.naturalWidth, h=im.naturalHeight, border=ATELIER_ATLASES[key]?0:TEX_RAND, ix=Math.round(w*border), iy=Math.round(h*border);
+    try{ const w=im.naturalWidth, h=im.naturalHeight, border=atlasVon(key)?0:TEX_RAND, ix=Math.round(w*border), iy=Math.round(h*border);
       const c=document.createElement('canvas'); c.width=w-2*ix; c.height=h-2*iy;
       c.getContext('2d').drawImage(im, ix, iy, c.width, c.height, 0, 0, c.width, c.height);
       t.image=c; }
     catch(_){ t.image=im; }
     t.needsUpdate=true; frame3D();
   };
-  im.src=ATELIER_ATLASES[key]?.src||TEX[key];
+  im.onerror=function(){ if(atlasVon(key)){ ATLAS_FEHLT[key]=1; im.src=TEX[key]; } };
+  im.src=atlasVon(key)?.src||TEX[key];
   return t;
 }
 function plyTexture(){
@@ -1807,7 +1823,7 @@ function draw3D(){
     /* UV-Fix: Deckflächen sauber [0..1] gemappt, Proportionen über max(B,T) — kein Kacheln, kein Zerren */
     { const d2=dims(), M=Math.max(d2.w,d2.h)/10;
       const pos=geo.attributes.position, uv=geo.attributes.uv;
-      const atlas=ATELIER_ATLASES[texKey()], uw=atlas?atlas.widthCm/10:M, uh=atlas?atlas.heightCm/10:M;
+      const atlas=atlasVon(texKey()), uw=atlas?atlas.widthCm/10:M, uh=atlas?atlas.heightCm/10:M;
       for(let i=0;i<uv.count;i++) uv.setXY(i, pos.getX(i)/uw+0.5, pos.getY(i)/uh+0.5);
       uv.needsUpdate=true; }
     geo.rotateX(-Math.PI/2); geo.translate(0,depth,0);
@@ -1908,7 +1924,12 @@ function buildDekore(){
   $('dekorGrid').innerHTML=list.map(([k,n])=>
     `<button class="kfg_dekor${k===S.dekor?' is-active':''}" aria-pressed="${k===S.dekor}" data-d="${k}" title="${n}"><span class="sw" style="background-image:url(${TEX_THUMB[k]})"></span><span>${n}</span></button>`).join('');
   $('dekorGrid').querySelectorAll('.kfg_dekor').forEach(b=>b.addEventListener('click',()=>{
-    S.dekor=b.dataset.d; buildDekore(); render();
+    S.dekor=b.dataset.d;
+    $('dekorGrid').querySelectorAll('.kfg_dekor').forEach(x=>{
+      const an=x.dataset.d===S.dekor;
+      x.classList.toggle('is-active',an); x.setAttribute('aria-pressed',an);
+    });
+    render();
   }));
   $('mpxSurfaceBlock').style.display=S.mat==='mpx'?'block':'none';
   const dn=$('dekorNote'); if(dn) dn.textContent = (S.mat==='mpx'&&S.mpxSurface==='hpl')
@@ -3937,7 +3958,7 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
       setView:setView, frame:frame3D, render:render, syncLink:_syncURLnow,
       workerBody:bodyFuerWorker,
       defaultConfig:function(){return JSON.parse(JSON.stringify(ATELIER_DEFAULT));},
-      textureInfo:function(){return ATELIER_ATLASES[texKey()]||null;},
+      textureInfo:function(){return atlasVon(texKey())||null;},
       cornerDetails:atelierCornerDetails,
       outline:function(){ if(S.form==='round')return null; const g=S.form==='lform'?lfPts():S.form==='bauch'?bsPts():null; return g?roundPoly(g.pts,g.rad):roundPath(0,0,+S.L,+S.B,S.cornerR.map(r=>r/10)); },
       material:function(k){ const b=document.querySelector('#matGrid [data-m="'+k+'"]'); if(b)b.click(); },

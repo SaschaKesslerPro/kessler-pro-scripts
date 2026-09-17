@@ -189,6 +189,9 @@ function boot(){
   $('continueStep').addEventListener('click',()=>{sync();if(!snapshot.valid||errors.length){goStep(errors.length?2:1);return;}if(step<3)goStep(step+1);else if(snapshot.offer)quotePreview();else addToCart();});
   $('backStep').addEventListener('click',()=>goStep(step-1));
   $('shareConfig').addEventListener('click',share);
+  /* Faellt ein Atlas-Bild aus, zeichnet der Kern neu — die Hinweise hier
+     (Texturtest) muessen dann ebenfalls nachziehen. */
+  document.addEventListener('kfg:atlasfehlt',schedule);
   $('edgePreview').addEventListener('click',()=>openEdgeDialog());
   $('expandPreview').addEventListener('click',()=>setPreviewExpanded(!root.classList.contains('preview_expanded')));
   /* Im Vollbild lag der Verkleinern-Knopf hinter dem Webflow-Kopf und war nicht
@@ -214,20 +217,28 @@ function boot(){
   root.dataset.ready='true';
 }
 function schedule(){clearTimeout(timer);timer=setTimeout(sync,50);}
-/* Solange der Knopf in der Uebersicht zu sehen ist, verdeckt die Kaufleiste nur
-   das Ergebnis. Sie kommt zurueck, sobald er aus dem Bild scrollt. */
 let ctaBeobachter=null;
-/* Der Kaufknopf steht im Fluss, die schwebende Leiste taucht erst auf, wenn er
-   aus dem Bild ist (Sascha, 17.09.: sie nahm nur Sicht weg). In Schritt 4
+/* Der Kaufknopf steht im Fluss. Die schwebende Leiste erscheint erst, wenn die
+   Zeile nach OBEN aus dem Bild gescrollt ist — nicht schon, wenn sie bloss noch
+   unter dem Bildrand liegt. Sonst klebt sie gleich beim Aufschlagen der Seite
+   unten und nimmt nur Sicht weg, ohne weiterzuhelfen (Sascha, 17.09.: „wenn der
+   Knopf oben verschwindet, dann soll er halt weiter auftauchen“). In Schritt 4
    uebernimmt der Knopf unter der Preisaufschluesselung diese Rolle. */
+function vorbeiGescrollt(ziel){const r=ziel.getBoundingClientRect();return r.bottom<=0;}
+function leisteNachziehen(){
+  const ziel=step===3?$('reviewCta'):$('flowBar');
+  $('atelier').classList.toggle('cta_inline', !(ziel&&vorbeiGescrollt(ziel)));
+}
 function beobachteCta(){
   const ziel=step===3?$('reviewCta'):$('flowBar'); if(!ziel)return;
   if(!ctaBeobachter&&'IntersectionObserver' in window){
-    ctaBeobachter=new IntersectionObserver(e=>{
-      $('atelier').classList.toggle('cta_inline', e.some(x=>x.isIntersecting));
-    },{rootMargin:'-12px 0px -12px 0px'});
+    /* Der Beobachter meldet nur die Uebergaenge; die Richtung steht im
+       gemeldeten Rechteck. Beide Schwellen, damit auch eine Zeile, die hoeher
+       als das Bild ist, sauber schaltet. */
+    ctaBeobachter=new IntersectionObserver(leisteNachziehen,{threshold:[0,1]});
   }
   if(ctaBeobachter){ctaBeobachter.disconnect();ctaBeobachter.observe(ziel);}
+  leisteNachziehen();
 }
 function contour(s){
   if(s.config.form==='round')return Array.from({length:240},(_,i)=>[s.dims.w/2+Math.cos(i*Math.PI/120)*s.dims.w/2,s.dims.h/2+Math.sin(i*Math.PI/120)*s.dims.h/2]);
@@ -313,7 +324,7 @@ function goStep(next){
   $('continueStep').innerHTML=[`Weiter zu Form & Maße ${chevron}`,`Weiter zu Kanten & Extras ${chevron}`,`Zur Übersicht ${chevron}`,`${editingId?'Änderungen speichern':'Platte hinzufügen'} ${chevron}`][step];
   api.setView(step===0?'3d':'2d');sync();
   const heading=$('panel'+step).querySelector('h2');heading.focus({preventScroll:true});
-  $('atelier').classList.remove('cta_inline');
+  $('atelier').classList.add('cta_inline');
   beobachteCta();
   const target=matchMedia('(max-width:767px)').matches?$('panel'+step):document.querySelector('.step_nav');target.scrollIntoView({behavior:'instant',block:'start'});
   uebersetzen();

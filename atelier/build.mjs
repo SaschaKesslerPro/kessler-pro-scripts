@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {execSync} from 'node:child_process';
 import {scopeCss} from './scope-css.mjs';
 const dir=path.dirname(fileURLToPath(import.meta.url));
 const LIVE=process.argv.includes('--live');
@@ -14,14 +15,31 @@ const LIVE=process.argv.includes('--live');
 const QUELLE=path.join(dir,'..','dist','konfigurator.js');
 const source=fs.readFileSync(QUELLE,'utf8');
 /* Liegt das Skript als Webflow-Asset statt auf jsDelivr, findet es seine eigene
-   Basis nicht und faellt auf FALLBACK_BASE zurueck. Der zeigt auf einen alten
-   Commit ohne die Atlas-Texturen — die KI-Holzbilder fielen dann alle aus.
-   KFG_FALLBACK_BASE aus der Umgebung zieht ihn auf den passenden Commit;
-   ohne die Variable bleibt der Build unveraendert (17.09.). */
-const FALLBACK=process.env.KFG_FALLBACK_BASE||'';
+   Basis nicht und faellt auf FALLBACK_BASE zurueck — von dort kommen Bilder,
+   Preiskurven und Sprachdatei. Der Wert im Kern zeigt auf einen alten Commit
+   ohne assets/kfg/atlas/. Frueher zog KFG_FALLBACK_BASE ihn zurecht, und genau
+   das ging am 17.09. schief: 2.6.2 wurde ohne die Variable gebaut, die sieben
+   KI-Dekore fielen aus, und Chromium malt an die Stelle eines kaputten <image>
+   im SVG-Muster eine blaue Flaeche (Sascha: „die Platte ist blau“). Der Zeiger
+   kommt deshalb jetzt aus dem Git-Stand selbst: HEAD ist beim Bauen der
+   Elternteil des Commits, der das Buendel traegt — dort liegen die Bilder
+   schon. Die Variable bleibt als Notausgang. */
+function fallbackBasis(){
+  if(process.env.KFG_FALLBACK_BASE) return process.env.KFG_FALLBACK_BASE;
+  try{
+    const sha=execSync('git rev-parse HEAD',{cwd:dir,encoding:'utf8'}).trim().slice(0,7);
+    if(!/^[0-9a-f]{7}$/.test(sha)) throw new Error('kein Commit');
+    return 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@'+sha;
+  }catch(e){
+    throw new Error('FALLBACK_BASE laesst sich nicht bestimmen ('+e.message+'). '
+      +'Setze KFG_FALLBACK_BASE auf einen gepushten Commit mit assets/kfg/atlas/.');
+  }
+}
+const FALLBACK=LIVE?fallbackBasis():'';
 let core=LIVE
-  ? (FALLBACK?source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '"+FALLBACK+"';"):source)
+  ? source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '"+FALLBACK+"';")
   : source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '.';");
+if(LIVE) console.log('FALLBACK_BASE: '+FALLBACK+'\n  -> dieser Commit muss gepusht sein, bevor das Skript registriert wird.');
 const replaceOnce=(before,after)=>{if(!core.includes(before))throw new Error('Missing original adapter anchor: '+before.slice(0,70));core=core.replace(before,after);};
 replaceOnce('const $=id=>document.getElementById(id);','const ATELIER_DEFAULT=JSON.parse(JSON.stringify(S));\nconst $=id=>document.getElementById(id);');
 /* Der Codex-Entwurf setzte texCm() hart auf null. Fuer die KI-Atlanten ist das
@@ -30,24 +48,57 @@ replaceOnce('const $=id=>document.getElementById(id);','const ATELIER_DEFAULT=JS
    gekachelt. Ueber die ganze Platte gezogen wurde aus der feinen Struktur von
    Weiss ein grobes, glaenzendes Muster (Sascha, 11.09.). */
 replaceOnce("function texCm(){ const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }",
-  "function texCm(){ if(ATELIER_ATLASES[texKey()]) return null; const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }");
+  "function texCm(){ if(atlasVon(texKey())) return null; const v=TEX_CM[texKey()]; return v===undefined ? 40 : v; }");
 const atlases=JSON.parse(fs.readFileSync(path.join(dir,'texture-atlases.json'),'utf8'));
 /* Live kommen die Atlanten aus demselben Commit wie das Skript, nicht vom Webflow-Host. */
 const atlasJs=LIVE
   ? 'Object.fromEntries(Object.entries('+JSON.stringify(atlases)+').map(([k,v])=>[k,Object.assign({},v,{src:ASSET+v.src.replace(/^\\.\\/assets\\/kfg\\//,\'\')})]))'
   : JSON.stringify(atlases);
-replaceOnce("const TEX_THUMB = Object.fromEntries(Object.entries(TEX).map(([k,u])=>[k,u.replace('/top/','/thumb/')]));", "const TEX_THUMB = Object.fromEntries(Object.entries(TEX).map(([k,u])=>[k,u.replace('/top/','/thumb/')]));\nconst ATELIER_ATLASES="+atlasJs+';');
-replaceOnce("function stageTex(k){ return _texOk[k] ? TEX[k] : (TEX_THUMB[k] || TEX[k]); }", "function stageTex(k){ return ATELIER_ATLASES[k]?.src || (_texOk[k] ? TEX[k] : (TEX_THUMB[k] || TEX[k])); }");
+/* Ein fehlendes Atlas-Bild darf die Platte nicht leer lassen: ein kaputtes
+   <image> im SVG-Muster malt Chromium als blaue Platzhalterflaeche. atlasVon()
+   prueft jedes Atlas-Bild einmal und faellt beim Ausfall auf das gekachelte
+   Dekorfoto zurueck (Sascha, 17.09.). */
+replaceOnce("const TEX_THUMB = Object.fromEntries(Object.entries(TEX).map(([k,u])=>[k,u.replace('/top/','/thumb/')]));", "const TEX_THUMB = Object.fromEntries(Object.entries(TEX).map(([k,u])=>[k,u.replace('/top/','/thumb/')]));\nconst ATELIER_ATLASES="+atlasJs+`;
+const ATLAS_FEHLT=Object.create(null), _atlasGeprueft=Object.create(null);
+function atlasVon(k){
+  const a=ATELIER_ATLASES[k]; if(!a||ATLAS_FEHLT[k]) return null;
+  if(!_atlasGeprueft[k]){ _atlasGeprueft[k]=1;
+    /* Dieselbe URL wie im Muster — der Browser holt sie nur einmal. */
+    const im=new Image();
+    im.onerror=function(){ ATLAS_FEHLT[k]=1;
+      try{ drawStage(); }catch(_){}
+      /* Das Atelier haengt Hinweise am Atlas (Texturtest) — es muss mitziehen. */
+      try{ document.dispatchEvent(new CustomEvent('kfg:atlasfehlt',{detail:k})); }catch(_){}
+    };
+    im.src=a.src;
+  }
+  return a;
+}`);
+replaceOnce("function stageTex(k){ return _texOk[k] ? TEX[k] : (TEX_THUMB[k] || TEX[k]); }", "function stageTex(k){ return atlasVon(k)?.src || (_texOk[k] ? TEX[k] : (TEX_THUMB[k] || TEX[k])); }");
 replaceOnce('function texPattern(x,y,T,href,pw,ph){',`function texPattern(x,y,T,href,pw,ph){
-  const atlas=ATELIER_ATLASES[texKey()];
+  const atlas=atlasVon(texKey());
   if(atlas){
     const d=dims(), sc=pw/d.w, tw=atlas.widthCm*sc, th=atlas.heightCm*sc;
     const ox=x-(tw-pw)/2, oy=y-(th-ph)/2;
     return '<pattern id="texPat" patternUnits="userSpaceOnUse" x="'+ox+'" y="'+oy+'" width="'+tw+'" height="'+th+'"><image href="'+atlas.src+'" width="'+tw+'" height="'+th+'" preserveAspectRatio="xMidYMid slice"/></pattern>';
   }`);
-replaceOnce('const w=im.naturalWidth, h=im.naturalHeight, ix=Math.round(w*TEX_RAND), iy=Math.round(h*TEX_RAND);','const w=im.naturalWidth, h=im.naturalHeight, border=ATELIER_ATLASES[key]?0:TEX_RAND, ix=Math.round(w*border), iy=Math.round(h*border);');
-replaceOnce('  im.src=TEX[key];','  im.src=ATELIER_ATLASES[key]?.src||TEX[key];');
-replaceOnce('for(let i=0;i<uv.count;i++) uv.setXY(i, pos.getX(i)/M+0.5, pos.getY(i)/M+0.5);','const atlas=ATELIER_ATLASES[texKey()], uw=atlas?atlas.widthCm/10:M, uh=atlas?atlas.heightCm/10:M;\n      for(let i=0;i<uv.count;i++) uv.setXY(i, pos.getX(i)/uw+0.5, pos.getY(i)/uh+0.5);');
+replaceOnce('const w=im.naturalWidth, h=im.naturalHeight, ix=Math.round(w*TEX_RAND), iy=Math.round(h*TEX_RAND);','const w=im.naturalWidth, h=im.naturalHeight, border=atlasVon(key)?0:TEX_RAND, ix=Math.round(w*border), iy=Math.round(h*border);');
+replaceOnce('  im.src=TEX[key];','  im.onerror=function(){ if(atlasVon(key)){ ATLAS_FEHLT[key]=1; im.src=TEX[key]; } };\n  im.src=atlasVon(key)?.src||TEX[key];');
+replaceOnce('for(let i=0;i<uv.count;i++) uv.setXY(i, pos.getX(i)/M+0.5, pos.getY(i)/M+0.5);','const atlas=atlasVon(texKey()), uw=atlas?atlas.widthCm/10:M, uh=atlas?atlas.heightCm/10:M;\n      for(let i=0;i<uv.count;i++) uv.setXY(i, pos.getX(i)/uw+0.5, pos.getY(i)/uh+0.5);');
+/* ── Dekorwechsel baut das Gitter nicht neu (Sascha, 17.09.) ────────────────
+   buildDekore() setzte bei jedem Klick das innerHTML von #dekorGrid neu. Damit
+   verlor jeder der 21 Swatches sein Hintergrundbild und holte es erneut — die
+   Farben flackerten, als wuerden sie nicht laden. Schlimmer: die Inline-Stile,
+   mit denen das Atelier die Liste auf eine Reihe begrenzt, waren weg. Alle
+   Dekore klappten kurz auf und beim naechsten sync() wieder zu. Ein Klick
+   verschiebt jetzt nur die Markierung. */
+replaceOnce(`    S.dekor=b.dataset.d; buildDekore(); render();`,
+`    S.dekor=b.dataset.d;
+    $('dekorGrid').querySelectorAll('.kfg_dekor').forEach(x=>{
+      const an=x.dataset.d===S.dekor;
+      x.classList.toggle('is-active',an); x.setAttribute('aria-pressed',an);
+    });
+    render();`);
 const drawing=fs.readFileSync(path.join(dir,'drawing-adapter.js'),'utf8');
 replaceOnce("const PADL=S.form==='lform'?rand:16, PADR=rand, PADB=rand;", "const PADL=S.form==='lform'?rand:16, PADR=rand, PADB=rand+(S.form==='bauch'?42:0);");
 replaceOnce("inner+=dimH(x,x+pw,y+ph+30,bg.L+' cm')+dimV(x+pw+30,y,y+ph,bg.BR+' cm');", "inner+=`<path d=\"${pd}\" fill=\"none\" stroke=\"#343434\" stroke-width=\"1.8\" stroke-linejoin=\"round\" pointer-events=\"none\"/>`;\n    inner+=dimH(x,x+pw,y+ph+72,bg.L+' cm')+dimV(x+pw+30,y,y+ph,bg.BR+' cm');");
@@ -272,7 +323,7 @@ core=core.replace('version: VERSION,',`version: VERSION,
       setView:setView, frame:frame3D, render:render, syncLink:_syncURLnow,
       workerBody:bodyFuerWorker,
       defaultConfig:function(){return JSON.parse(JSON.stringify(ATELIER_DEFAULT));},
-      textureInfo:function(){return ATELIER_ATLASES[texKey()]||null;},
+      textureInfo:function(){return atlasVon(texKey())||null;},
       cornerDetails:atelierCornerDetails,
       outline:function(){ if(S.form==='round')return null; const g=S.form==='lform'?lfPts():S.form==='bauch'?bsPts():null; return g?roundPoly(g.pts,g.rad):roundPath(0,0,+S.L,+S.B,S.cornerR.map(r=>r/10)); },
       material:function(k){ const b=document.querySelector('#matGrid [data-m="'+k+'"]'); if(b)b.click(); },
