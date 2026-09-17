@@ -431,12 +431,23 @@ function massbandName(){ return massbandEintrag()[1]; }
 const CORNER_NAMES = ['hinten links','hinten rechts','vorne rechts','vorne links'];
 /* Radius JE ECKE in mm (0 = eckig). Preisstufen wie in der Preisliste:
    bis R50 = 4,90 € je Ecke, darueber = 7,90 € je Ecke. */
+/* Die Ecken an einer Schraege traegt die Fertigungsregel automatisch, und sie
+   kosten ueber die Radienstaffel mit. Sie standen bisher in keinem Etikett: ein
+   Bauchausschnitt ohne eigene Rundung las sich als "eckig", waehrend in der
+   Aufschluesselung 39,90 Euro Eckenrundung standen (Befund Sascha, 14.09.).
+   Der Text ist bewusst wortgleich mit der Zeile in der Aufschluesselung. */
+function cornerAuto(){ return lfAutoEcken()+bsAutoEcken(); }
+function cornerAutoLabel(){ return cornerAuto()>0 ? `Schräge R${lfMinR()*10} (Fertigungsregel)` : ''; }
+/* Wird ueberhaupt eine Rundung gezeigt? Auch die automatischen zaehlen. */
+function cornerSichtbar(){ return cornerCount()>0 || cornerAuto()>0; }
 function cornerLabel(){
-  const idx=cornerIdx(), on=idx.filter(i=>cornerR(i)>0);
-  if(!on.length) return 'eckig';
+  const idx=cornerIdx(), on=idx.filter(i=>cornerR(i)>0), auto=cornerAutoLabel();
+  if(!on.length) return auto || 'eckig';
   const uniq=[...new Set(on.map(cornerR))];
-  if(uniq.length===1) return `R${uniq[0]} · ${on.length===idx.length?(idx.length===6?'alle sechs':idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`;
-  return on.map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ');
+  const eigen = uniq.length===1
+    ? `R${uniq[0]} · ${on.length===idx.length?(idx.length===6?'alle sechs':idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`
+    : on.map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ');
+  return auto ? `${eigen} + ${auto}` : eigen;
 }
 /* Indizes der Aussenecken: vier beim Rechteck, fuenf bei der L-Form */
 function cornerIdx(){ return S.form==='lform' ? [0,1,2,3,4] : S.form==='bauch' ? bsOrd() : [0,1,2,3]; }
@@ -1481,7 +1492,7 @@ function drawDetail(){
   $('detailLabel').innerHTML=`<b>${c.dekorName}</b>
     <span>${m.name}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.thickName}</span>
     <span>Kante: ${uniq.join(' · ')}${absTxt}</span>
-    ${cornerCount()>0?`<span>Ecken: ${cornerLabel()}</span>`:''}
+    ${cornerSichtbar()?`<span>Ecken: ${cornerLabel()}</span>`:''}
     <em>${ph.ref?(ph.mm===25||!ph.mm?`Abbildung zeigt die Kante in 25 mm, unabhängig von der gewählten Stärke. Gefertigt wird in ${c.thickName}.`:`Abbildung zeigt eine ${ph.mm}-mm-Aufnahme dieses Dekors. Für dieses Dekor liegt noch keine 25-mm-Kantenaufnahme vor. Gefertigt wird in ${c.thickName}.`)
       :`Kantenfoto ${c.thickName}, Originalaufnahme aus der Fertigung.`}</em>`;
 }
@@ -2423,10 +2434,8 @@ function renderAtelierCore(){
     :lfGeo().schraeg?`Ausklinkung schräg (${lfSchnittCm()} cm Schnitt)`:`Ausklinkung (${lfSchnittCm()} cm Schnitt)`,c.lschnitt]);
   if(massbandPreis()>0)rows.push([massbandName(),massbandPreis()]);
   if(c.ecken>0){
-    const n=cornerCount(), na=lfAutoEcken()+bsAutoEcken();
-    const auto=na>0?`Schräge R${lfMinR()*10} (Fertigungsregel)`:'';
-    const lbl=n>0?`${cornerLabel()}${auto?' + '+auto:''}`:auto;
-    rows.push([`Eckenrundung ${lbl} (${n+na} ${n+na===1?'Ecke':'Ecken'})`, c.ecken]);
+    const n=cornerCount()+cornerAuto();
+    rows.push([`Eckenrundung ${cornerLabel()} (${n} ${n===1?'Ecke':'Ecken'})`, c.ecken]);
   }
   /* Presets in einer Zeile, jede freie Bearbeitung mit eigenem Preis darunter */
   const summePreset=(S.extras.bohr?zl(X_PRICE.bohr):0)
@@ -2574,7 +2583,7 @@ function buildConf(){
   if(isLack()) items.push({t:'Kante lackiert', s:4});
   if(S.mat==='szwal'&&S.massband!=='none') items.push({t:massbandName(), s:4});
   if(S.mat==='szwal'&&S.machine) items.push({t:`Maschine: ${esc(S.machine)}`, s:5});
-  if(cornerCount()>0) items.push({t:`Ecken ${cornerLabel()}`, s:2});
+  if(cornerSichtbar()) items.push({t:`Ecken ${cornerLabel()}`, s:2});
   extrasList().forEach(e=>items.push(e));
   box.innerHTML=items.map(i=>
     `<button class="kfg_conf-chip${i.warn?' is-warn':''}" data-step="${i.s}">${i.t}</button>`).join('');

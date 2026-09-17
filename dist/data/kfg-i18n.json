@@ -525,7 +525,8 @@
   "Küchen-Ausschnitte gibt es nur bei eckigen Platten": "Wycięcia kuchenne są tylko w blatach prostokątnych",
   "Freie Kontur gibt es nur bei eckigen Platten": "Dowolny kontur jest tylko w blatach prostokątnych",
   "Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen": "Brak wolnego miejsca — przesuń najpierw istniejące obróbki",
-  "Vollbild schließen": "Zamknij pełny ekran"
+  "Vollbild schließen": "Zamknij pełny ekran",
+  "eckig": "ostre"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -1042,7 +1043,8 @@
   "Küchen-Ausschnitte gibt es nur bei eckigen Platten": "Kitchen cut-outs are only available on straight-edged panels",
   "Freie Kontur gibt es nur bei eckigen Platten": "A free contour is only available on straight-edged panels",
   "Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen": "No free space left — move the existing work first",
-  "Vollbild schließen": "Close full screen"
+  "Vollbild schließen": "Close full screen",
+  "eckig": "square"
  },
  "muster": {
   "pl": [

@@ -13,7 +13,15 @@ const LIVE=process.argv.includes('--live');
    nur mit lokalen Pfaden - so koennen die beiden Fassungen nie auseinanderlaufen. */
 const QUELLE=path.join(dir,'..','dist','konfigurator.js');
 const source=fs.readFileSync(QUELLE,'utf8');
-let core=LIVE?source:source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '.';");
+/* Liegt das Skript als Webflow-Asset statt auf jsDelivr, findet es seine eigene
+   Basis nicht und faellt auf FALLBACK_BASE zurueck. Der zeigt auf einen alten
+   Commit ohne die Atlas-Texturen — die KI-Holzbilder fielen dann alle aus.
+   KFG_FALLBACK_BASE aus der Umgebung zieht ihn auf den passenden Commit;
+   ohne die Variable bleibt der Build unveraendert (17.09.). */
+const FALLBACK=process.env.KFG_FALLBACK_BASE||'';
+let core=LIVE
+  ? (FALLBACK?source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '"+FALLBACK+"';"):source)
+  : source.replace(/var FALLBACK_BASE = '[^']+';/,"var FALLBACK_BASE = '.';");
 const replaceOnce=(before,after)=>{if(!core.includes(before))throw new Error('Missing original adapter anchor: '+before.slice(0,70));core=core.replace(before,after);};
 replaceOnce('const $=id=>document.getElementById(id);','const ATELIER_DEFAULT=JSON.parse(JSON.stringify(S));\nconst $=id=>document.getElementById(id);');
 /* Der Codex-Entwurf setzte texCm() hart auf null. Fuer die KI-Atlanten ist das
