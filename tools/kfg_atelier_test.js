@@ -486,6 +486,69 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
       quelle.includes('three.mesh.add(three.band)')&&quelle.includes('three.mesh.add(three.kanal)')
       &&!quelle.includes('three.scene.add(three.band)')&&!quelle.includes('three.scene.add(three.kanal)'));
   }
+  /* ══ ⑨ Weiter-Knopf im Fluss (17.09.) ════════════════════════════════════
+     Der Knopf lag nur in der schwebenden Leiste; die nahm Sicht weg und stand
+     nicht dort, wo der Schritt endet (Sascha). Jeder Schritt schliesst jetzt mit
+     einer Zeile ab: links zurueck, rechts Preis und weiter. Die schwebende
+     Leiste erscheint erst, wenn diese Zeile aus dem Bild ist; in Schritt 4
+     uebernimmt der Kaufknopf unter der Preisaufschluesselung diese Rolle. */
+  for(const [name,vp,mobil] of [['Desktop',{width:1440,height:1000},false],['Mobil',{width:390,height:844},true]]){
+    const {ctx,p}=await seite(vp,'de',mobil);
+    pruef(`⑨ ${name} Fortschrittstext und Musterbox sind weg`,
+      await p.evaluate(()=>!document.getElementById('stepProgress')&&!document.getElementById('sampleHelp')));
+    const je=[];
+    for(let i=0;i<4;i++){
+      if(i) await p.evaluate(i=>document.querySelector(`.step_nav [data-step="${i}"]`).click(),i);
+      await p.waitForTimeout(700);
+      je.push(await p.evaluate(()=>{
+        const fn=document.getElementById('flowNext'), wrap=document.getElementById('flowNextWrap');
+        const r=fn.getBoundingClientRect();
+        return {weiterDa:!wrap.hidden, gleich:fn.innerHTML===document.getElementById('continueStep').innerHTML,
+          preis:(document.getElementById('flowPrice').textContent||'').trim(),
+          zurueck:!document.getElementById('backStep').hidden,
+          imBild:r.right<=innerWidth&&r.left>=0};}));
+    }
+    pruef(`⑨ ${name} Schritt 1 bis 3 tragen den Weiter-Knopf, Schritt 4 nicht`,
+      je[0].weiterDa&&je[1].weiterDa&&je[2].weiterDa&&!je[3].weiterDa, JSON.stringify(je.map(x=>x.weiterDa)));
+    pruef(`⑨ ${name} Beschriftung spiegelt den echten Knopf`,
+      je.slice(0,3).every(x=>x.gleich), JSON.stringify(je.map(x=>x.gleich)));
+    pruef(`⑨ ${name} Preis steht in der Zeile`,
+      je.slice(0,3).every(x=>/\d/.test(x.preis)), JSON.stringify(je.map(x=>x.preis)));
+    pruef(`⑨ ${name} Zurueck erst ab Schritt 2`,
+      !je[0].zurueck&&je[1].zurueck&&je[2].zurueck&&je[3].zurueck, JSON.stringify(je.map(x=>x.zurueck)));
+    pruef(`⑨ ${name} Knopf bleibt im Bild`, je.slice(0,3).every(x=>x.imBild), JSON.stringify(je.map(x=>x.imBild)));
+    /* Die schwebende Leiste tritt zurueck, solange die Zeile zu sehen ist.
+       Geprueft wird auf Schritt 1: nur dessen Tafel ist hoch genug, dass die
+       Zeile beim Blick von oben wirklich unter dem Bildrand liegt. */
+    await p.evaluate(()=>document.querySelector('.step_nav [data-step="0"]').click());
+    await p.waitForTimeout(600);
+    await p.evaluate(()=>document.getElementById('flowBar').scrollIntoView({block:'center'}));
+    await p.waitForTimeout(700);
+    const beiZeile=await p.evaluate(()=>({
+      opazitaet:getComputedStyle(document.querySelector('.purchase_bar')).opacity,
+      zeileImBild:(()=>{const r=document.getElementById('flowBar').getBoundingClientRect();
+        return r.top<innerHeight&&r.bottom>0;})()}));
+    await p.evaluate(()=>window.scrollTo(0,0));
+    await p.waitForTimeout(700);
+    const oben=await p.evaluate(()=>({
+      opazitaet:getComputedStyle(document.querySelector('.purchase_bar')).opacity,
+      zeileImBild:(()=>{const r=document.getElementById('flowBar').getBoundingClientRect();
+        return r.top<innerHeight&&r.bottom>0;})()}));
+    pruef(`⑨ ${name} Zeile im Bild blendet die schwebende Leiste aus`,
+      beiZeile.zeileImBild&&beiZeile.opazitaet==='0', JSON.stringify(beiZeile));
+    pruef(`⑨ ${name} Zeile ausserhalb des Bildes holt die Leiste zurueck`,
+      !oben.zeileImBild&&oben.opazitaet==='1', JSON.stringify(oben));
+    /* Der Knopf im Fluss loest denselben Schrittwechsel aus. */
+    await p.evaluate(()=>document.querySelector('.step_nav [data-step="0"]').click());
+    await p.waitForTimeout(500);
+    await p.evaluate(()=>document.getElementById('flowNext').click());
+    await p.waitForTimeout(800);
+    pruef(`⑨ ${name} Knopf im Fluss schaltet weiter`,
+      await p.evaluate(()=>!document.getElementById('panel1').hidden));
+    await ctx.close();
+  }
+  console.log('⑨ Weiter-Knopf im Fluss geprueft');
+
   console.log('⑧ Vollbild und Masszahlen geprueft');
 
   await b.close();

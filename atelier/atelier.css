@@ -167,3 +167,31 @@ body.preview_open{overflow:hidden}#atelier.preview_expanded .work_preview{positi
 #atelier.preview_expanded #expandPreview>svg:last-child{display:block}
 #atelier.preview_expanded #expandPreview{border:1px solid #d1d1d3;border-radius:8px;background:#fff}
 #atelier.preview_expanded #expandPreview:hover{background:#f0f0f1}
+
+/* ── Weiter-Knopf im Fluss (Sascha, 17.09.) ────────────────────────────────
+   Der Knopf lag nur in der schwebenden Leiste. Die nahm Sicht weg und stand
+   nicht dort, wo der Schritt endet. Jetzt schliesst jeder Schritt mit einer
+   Zeile ab: links zurück, rechts Preis und weiter — die schwebende Leiste
+   erscheint erst, wenn diese Zeile aus dem Bild gescrollt ist. */
+#atelier .flow_bar{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:20px;margin-top:28px;min-height:52px}
+#atelier .flow_bar #backStep{gap:6px;white-space:nowrap}
+#atelier .flow_bar #backStep>svg{width:15px;height:15px;transform:rotate(180deg)}
+#atelier .flow_next{display:flex;align-items:center;gap:20px;margin-left:auto;min-width:0}
+#atelier .flow_price{text-align:right;font-variant-numeric:tabular-nums;min-width:0}
+#atelier .flow_price strong{display:block;font-size:22px;font-weight:600;letter-spacing:-.5px;line-height:1.3}
+#atelier .flow_price small{display:block;font-size:11px;line-height:1.5;color:var(--body)}
+#atelier .flow_next .primary_button{flex:0 0 auto;min-width:230px}
+#atelier .flow_next[hidden]{display:none}
+@media(max-width:767px){
+  /* Bei 358 px Breite passen Preis und Knopf nicht nebeneinander — der Knopf
+     lief aus dem Bild. Die Zeile bricht deshalb um: zurück oben, darunter
+     Preis und Knopf, der Knopf nimmt den Rest und darf umbrechen. */
+  #atelier .flow_bar{gap:10px 12px;margin-top:22px;padding-top:16px;flex-wrap:wrap}
+  #atelier .flow_bar #backStep{flex:0 0 100%;min-height:40px}
+  #atelier .flow_next{gap:12px;width:100%;margin-left:0}
+  #atelier .flow_price{flex:0 0 auto;text-align:left}
+  #atelier .flow_price strong{font-size:20px}
+  #atelier .flow_price small{font-size:10px;max-width:16ch}
+  #atelier .flow_next .primary_button{flex:1 1 auto;min-width:0;font-size:12px;padding:11px 12px;white-space:normal;text-align:left;line-height:1.35;gap:8px}
+  #atelier .flow_next .primary_button>svg{width:14px;min-width:14px}
+}

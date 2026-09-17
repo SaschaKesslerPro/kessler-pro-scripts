@@ -111,7 +111,6 @@ function boot(){
           <div id="sewingNotice" class="info_note" hidden>Maschinen-Ausschnitt und Maßband findest du bei Kanten & Extras.</div>
           <div id="surfaceMount"></div><div class="field_heading"><h3>Oberfläche</h3></div><div id="dekorMount"></div>
           <div class="field_heading"><h3>Plattenstärke</h3></div><div id="thicknessMount"></div>
-          <button class="sample_help" id="sampleHelp">${svg('<path d="m4 9 8-5 8 5-8 5-8-5Zm0 5 8 5 8-5"/>')}<span>Du möchtest die Oberfläche erst fühlen?<small>Musterbox mit vier Dekoren im Shop ansehen</small></span>${chevron}</button>
         </section>
         <section class="flow_panel" id="panel1" aria-label="Form und Maße" hidden>
           ${sectionTitle('Welche Form brauchst du?')}
@@ -135,7 +134,13 @@ function boot(){
           <div class="order_process" id="orderProcess"></div>
           <p class="demo_explanation" id="draftNote"></p>
         </section>
-        <div class="step_actions"><button id="backStep" class="text_button" type="button" hidden>Zurück</button><span id="stepProgress">Schritt 1 von 4</span></div>
+        <div class="flow_bar" id="flowBar">
+          <button id="backStep" class="text_button" type="button" hidden>${chevron}Zurück</button>
+          <div class="flow_next" id="flowNextWrap">
+            <div class="flow_price"><strong id="flowPrice">–</strong><small id="flowTax"></small></div>
+            <button type="button" class="primary_button" id="flowNext"></button>
+          </div>
+        </div>
         <div class="purchase_bar"><div class="price_block"><span id="priceContext">Deine Platte</span><strong id="atelierPrice">–</strong><small id="atelierTax">inkl. MwSt., zzgl. Versand</small></div><button type="button" class="primary_button" id="continueStep">Weiter zu Form & Maße ${chevron}</button></div>
         <p id="priceStatus" class="price_status" role="status"></p>
       </div>
@@ -173,7 +178,7 @@ function boot(){
   // Precision labels should say what the coordinates refer to.
   $('cutEditorMount').addEventListener('focusin',()=>{if(step!==2)goStep(2);});
   root.addEventListener('click',e=>{
-    if(e.target.closest('#reviewAdd')){$('continueStep').click();return;}
+    if(e.target.closest('#reviewAdd,#flowNext')){$('continueStep').click();return;}
     const st=e.target.closest('[data-step]');if(st){goStep(+st.dataset.step);return;}
     const m=e.target.closest('[data-material]');if(m){api.material(m.dataset.material);status(materials[m.dataset.material].name+' gewählt.');return;}
     const sh=e.target.closest('[data-shape]');if(sh){api.shape(sh.dataset.shape);api.setView('2d');schedule();return;}
@@ -184,7 +189,6 @@ function boot(){
   $('continueStep').addEventListener('click',()=>{sync();if(!snapshot.valid||errors.length){goStep(errors.length?2:1);return;}if(step<3)goStep(step+1);else if(snapshot.offer)quotePreview();else addToCart();});
   $('backStep').addEventListener('click',()=>goStep(step-1));
   $('shareConfig').addEventListener('click',share);
-  $('sampleHelp').addEventListener('click',()=>openSampleDialog());
   $('edgePreview').addEventListener('click',()=>openEdgeDialog());
   $('expandPreview').addEventListener('click',()=>setPreviewExpanded(!root.classList.contains('preview_expanded')));
   /* Im Vollbild lag der Verkleinern-Knopf hinter dem Webflow-Kopf und war nicht
@@ -213,8 +217,11 @@ function schedule(){clearTimeout(timer);timer=setTimeout(sync,50);}
 /* Solange der Knopf in der Uebersicht zu sehen ist, verdeckt die Kaufleiste nur
    das Ergebnis. Sie kommt zurueck, sobald er aus dem Bild scrollt. */
 let ctaBeobachter=null;
+/* Der Kaufknopf steht im Fluss, die schwebende Leiste taucht erst auf, wenn er
+   aus dem Bild ist (Sascha, 17.09.: sie nahm nur Sicht weg). In Schritt 4
+   uebernimmt der Knopf unter der Preisaufschluesselung diese Rolle. */
 function beobachteCta(){
-  const ziel=$('reviewCta'); if(!ziel)return;
+  const ziel=step===3?$('reviewCta'):$('flowBar'); if(!ziel)return;
   if(!ctaBeobachter&&'IntersectionObserver' in window){
     ctaBeobachter=new IntersectionObserver(e=>{
       $('atelier').classList.toggle('cta_inline', e.some(x=>x.isIntersecting));
@@ -289,16 +296,25 @@ function sync(){
   /* renderReview baut den Knopf neu — die Beschriftung kommt danach. */
   const ri=$('reviewAdd');
   if(ri&&step===3){ri.innerHTML=$('continueStep').innerHTML;ri.disabled=$('continueStep').disabled;}
+  /* Die Flusszeile spiegelt den echten Knopf und den Preis. */
+  const fn=$('flowNext');
+  if(fn){fn.innerHTML=$('continueStep').innerHTML;fn.disabled=$('continueStep').disabled;}
+  setText('flowPrice',$('atelierPrice').textContent);
+  setText('flowTax',$('atelierTax').textContent);
   uebersetzen();dialogeNachziehen();
 }
 function goStep(next){
   step=Math.max(0,Math.min(3,next));
   for(let i=0;i<4;i++){ $('panel'+i).hidden=i!==step;const b=document.querySelector(`.step_nav [data-step="${i}"]`);b.toggleAttribute('data-complete',i<step);if(i===step)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current'); }
-  $('backStep').hidden=step===0;setText('stepProgress',`Schritt ${step+1} von 4`);
+  $('backStep').hidden=step===0;
+  /* In der Uebersicht sitzt der Kaufknopf unter der Preisaufschluesselung — dort
+     braucht die Flusszeile keinen zweiten. */
+  $('flowNextWrap').hidden=step===3;
   $('continueStep').innerHTML=[`Weiter zu Form & Maße ${chevron}`,`Weiter zu Kanten & Extras ${chevron}`,`Zur Übersicht ${chevron}`,`${editingId?'Änderungen speichern':'Platte hinzufügen'} ${chevron}`][step];
   api.setView(step===0?'3d':'2d');sync();
   const heading=$('panel'+step).querySelector('h2');heading.focus({preventScroll:true});
-  if(step!==3)$('atelier').classList.remove('cta_inline');
+  $('atelier').classList.remove('cta_inline');
+  beobachteCta();
   const target=matchMedia('(max-width:767px)').matches?$('panel'+step):document.querySelector('.step_nav');target.scrollIntoView({behavior:'instant',block:'start'});
   uebersetzen();
 }
