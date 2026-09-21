@@ -8,7 +8,7 @@ const matrix = fs.readFileSync(path.join(root,'dist/data/kfg-produktmatrix.json'
 const kurven = fs.readFileSync(path.join(root,'dist/data/kfg-preiskurven.json'));
 let letzterAufruf = null, tokenAufrufe = 0, varianteAblehnen = false, profilAblehnen = false, aufrufe = [], storefront = [];
 /* Vorrat-Attrappe: Reserven im Basisprodukt; leer → der Worker legt frisch an. skuNachher: was die Nachkontrolle liest (null = wie umgeschrieben) */
-let reserven = [], skuNachher = null, warenkorbLeerBis = 0;
+let reserven = [], nameNachher = null, warenkorbLeerBis = 0;
 globalThis.fetch = async (u, opt) => {
   u = String(u);
   if(u.endsWith('kfg-produktmatrix.json')) return new Response(matrix, { status:200 });
@@ -24,7 +24,7 @@ globalThis.fetch = async (u, opt) => {
     if(/productVariants\(first/.test(q) && /KFG-RESERVE-/.test(letzterAufruf.variables.q)) return new Response(JSON.stringify({ data:{ productVariants:{ nodes: reserven.map(id => ({ id, sku:'KFG-RESERVE-'+id.split('/').pop(), createdAt:'2026-09-08T06:00:00Z' })) } } }), { status:200 });
     if(/productVariants\(first/.test(q)) return new Response(JSON.stringify({ data:{ productVariants:{ nodes:[] } } }), { status:200 });
     if(/productVariantsBulkUpdate/.test(q)){ const v = letzterAufruf.variables.v[0]; return new Response(JSON.stringify({ data:{ productVariantsBulkUpdate:{ productVariants:[{ id:v.id, title:v.optionValues[0].name, sku:v.inventoryItem.sku }], userErrors:[] } } }), { status:200 }); }
-    if(/productVariant\(id/.test(q)){ const um = aufrufe.filter(a=>/productVariantsBulkUpdate/.test(a.query)).pop(); return new Response(JSON.stringify({ data:{ productVariant:{ sku: skuNachher || (um && um.variables.v[0].inventoryItem.sku) } } }), { status:200 }); }
+    if(/productVariant\(id/.test(q)){ const um = aufrufe.filter(a=>/productVariantsBulkUpdate/.test(a.query)).pop(); return new Response(JSON.stringify({ data:{ productVariant:{ sku: um && um.variables.v[0].inventoryItem.sku, title: nameNachher || (um && um.variables.v[0].optionValues[0].name) } } }), { status:200 }); }
     if(/productVariantsBulkCreate/.test(q)){ const vs = letzterAufruf.variables.v; return new Response(JSON.stringify({ data:{ productVariantsBulkCreate:{ productVariants: vs.map((v,i) => ({ id: vs.length>1 ? 'gid://shopify/ProductVariant/7770000'+i : 'gid://shopify/ProductVariant/999000111', title: v.optionValues[0].name, sku: v.inventoryItem.sku })), userErrors:[] } } }), { status:200 }); }
     if(/priceListFixedPricesAdd/.test(q)) return new Response(JSON.stringify({ data:{ priceListFixedPricesAdd:{ prices:[{ variant:{ id:'gid://shopify/ProductVariant/999000111' }, price: letzterAufruf.variables.p[0].price }], userErrors:[] } } }), { status:200 });
     if(/deliveryProfileUpdate/.test(q)) return new Response(JSON.stringify(profilAblehnen ? { data:{ deliveryProfileUpdate:{ profile:null, userErrors:[{ field:['profile'], message:'Access denied for deliveryProfileUpdate' }] } } } : { data:{ deliveryProfileUpdate:{ profile:{ id:'gid://shopify/DeliveryProfile/1' }, userErrors:[] } } }), { status:200 });
@@ -115,7 +115,7 @@ const varCall = aufrufe.find(a=>/productVariantsBulkCreate/.test(a.query)), prei
 check('Warenkorb: Variante angelegt, Festpreis EUR, Versandprofil zugeordnet', varCall && preisCall && profilCall, qs.map(q=>q.slice(0,40)));
 check('Warenkorb: Antwort mit variantId, Token, Titel, Preis EUR', r.variantId==='gid://shopify/ProductVariant/999000111' && /^[A-Za-z0-9_-]{16,}$/.test(r.token) && /Tischplatte nach Maß · Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm/.test(r.titel) && r.preis===199.8 && r.waehrung==='EUR', r);
 const v0 = varCall.variables.v[0];
-check('Variante: Option Ausführung mit Kurztitel + #Token, SKU KFG-, PLN-Preis, Gewicht, Dekorbild Buche', v0.optionValues[0].optionName==='Ausführung' && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(v0.optionValues[0].name) && v0.inventoryItem.sku==='KFG-'+r.token && +v0.price>500 && v0.inventoryItem.measurement.weight.value>25 && v0.mediaId==='gid://shopify/MediaImage/62075442561370', v0);
+check('Variante: Option Ausführung mit Kurztitel + #Token, feste ERP-SKU NM-MP-BUK-25, PLN-Preis, Gewicht, Dekorbild Buche', v0.optionValues[0].optionName==='Ausführung' && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(v0.optionValues[0].name) && v0.inventoryItem.sku==='NM-MP-BUK-25' && +v0.price>500 && v0.inventoryItem.measurement.weight.value>25 && v0.mediaId==='gid://shopify/MediaImage/62075442561370', v0);
 check('Festpreis 199,80 EUR in der EU-Preisliste', preisCall.variables.p[0].price.amount==='199.80' && preisCall.variables.p[0].price.currencyCode==='EUR' && preisCall.variables.l==='gid://shopify/PriceList/31843025242', preisCall.variables);
 check('Versandprofil Massanfertigung', profilCall.variables.id==='gid://shopify/DeliveryProfile/138342564186' && profilCall.variables.p.variantsToAssociate[0]===r.variantId, profilCall.variables);
 check('Attribute: sichtbare Zeilen + Zeichnung-pruefen-Link + versteckte _kfg_token/_kfg_titel/_kfg_konfig', r.attribute.some(a=>a.key==='Form & Maß') && r.attribute.some(a=>a.key==='Zeichnung prüfen'&&a.value.endsWith('/freigabe/'+r.token)) && r.attribute.some(a=>a.key==='_kfg_token'&&a.value===r.token) && r.attribute.some(a=>a.key==='_kfg_titel') && r.attribute.some(a=>a.key==='_kfg_konfig_1'), r.attribute.map(a=>a.key));
@@ -183,17 +183,17 @@ r = await warenkorb({ version:'1.17.8', kanal:'eur', sprache:'de', preis:199.8, 
 const umCall = aufrufe.find(a=>/productVariantsBulkUpdate/.test(a.query)), anlegeCalls = aufrufe.filter(a=>/productVariantsBulkCreate/.test(a.query)), profilCalls = aufrufe.filter(a=>/deliveryProfileUpdate/.test(a.query));
 check('Vorrat: Reserve umgeschrieben, keine Konfig-Variante frisch angelegt', umCall && reserven.includes(umCall.variables.v[0].id) && r.variantId===umCall.variables.v[0].id && r.vorrat===true, { r: r.variantId, um: umCall && umCall.variables.v[0].id });
 const u0 = umCall && umCall.variables.v[0];
-check('Vorrat: Umschreiben setzt Name, PLN-Preis, SKU KFG-Token, kaufbar (tracked false, CONTINUE), Gewicht, Dekorbild', u0 && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(u0.optionValues[0].name) && +u0.price>500 && u0.inventoryItem.sku==='KFG-'+r.token && u0.inventoryItem.tracked===false && u0.inventoryPolicy==='CONTINUE' && u0.inventoryItem.measurement.weight.value>25 && u0.mediaId==='gid://shopify/MediaImage/62075442561370', u0);
+check('Vorrat: Umschreiben setzt Name, PLN-Preis, feste ERP-SKU, kaufbar (tracked false, CONTINUE), Gewicht, Dekorbild', u0 && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(u0.optionValues[0].name) && +u0.price>500 && u0.inventoryItem.sku==='NM-MP-BUK-25' && u0.inventoryItem.tracked===false && u0.inventoryPolicy==='CONTINUE' && u0.inventoryItem.measurement.weight.value>25 && u0.mediaId==='gid://shopify/MediaImage/62075442561370', u0);
 check('Vorrat: EUR-Festpreis gesetzt, Versandprofil nicht erneut (Reserve hat es schon)', aufrufe.some(a=>/priceListFixedPricesAdd/.test(a.query)) && !profilCalls.some(p=>p.variables.p.variantsToAssociate.includes(r.variantId)), profilCalls.map(p=>p.variables.p));
-check('Vorrat: Kaufbarkeits-Probe per cartCreate auch ohne sofort, Nachkontrolle der SKU', storefront.length===1 && storefront[0].b.variables.in.lines[0].merchandiseId===r.variantId && aufrufe.some(a=>/productVariant\(id/.test(a.query)), storefront.length);
+check('Vorrat: Kaufbarkeits-Probe per cartCreate auch ohne sofort, Nachkontrolle des Namens', storefront.length===1 && storefront[0].b.variables.in.lines[0].merchandiseId===r.variantId && aufrufe.some(a=>/productVariant\(id/.test(a.query)), storefront.length);
 const nach = anlegeCalls.find(a=>a.variables.v.length>1);
 check('Vorrat: 10 Reserven nachgelegt (Ziel 12, 2 vorhanden) — SKU KFG-RESERVE-, nicht kaufbar (tracked, DENY, 0,00), Versandprofil zugeordnet', nach && nach.variables.v.length===10 && nach.variables.v.every(v=>/^KFG-RESERVE-[A-Za-z0-9]{8}$/.test(v.inventoryItem.sku) && v.inventoryItem.tracked===true && v.inventoryPolicy==='DENY' && v.price==='0.00' && /^Reserviert · /.test(v.optionValues[0].name)) && profilCalls.some(p=>p.variables.p.variantsToAssociate.length===10), nach && nach.variables.v.length);
 
-/* ⑧g Zwei Klicks auf dieselbe Reserve: Nachkontrolle sieht fremde SKU → 409, Variante bleibt (gehoert dem anderen) */
-skuNachher = 'KFG-anderer-Klick'; aufrufe = [];
+/* ⑧g Zwei Klicks auf dieselbe Reserve: Nachkontrolle sieht fremden Namen → 409, Variante bleibt (gehoert dem anderen) */
+nameNachher = 'Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #zzzz'; aufrufe = [];
 try{ await warenkorb({ kanal:'eur', konfig:S }, env, null); check('Reserve doppelt → Fehler', false); }
 catch(e){ check('Reserve doppelt vergeben → 409, nicht geloescht', e.status===409 && !aufrufe.some(a=>/productVariantsBulkDelete/.test(a.query)), e.message); }
-skuNachher = null;
+nameNachher = null;
 
 /* ⑧h Vorrat leer, frische Variante: Warenkorb-Backend meldet 2× "ausverkauft", dann kaufbar → trotzdem Erfolg */
 reserven = []; storefront = []; warenkorbLeerBis = 2; aufrufe = [];
@@ -234,6 +234,57 @@ warenkorbLeerBis = 0;
   let f4 = null;
   try { await warenkorb({ kanal:'eur', konfig:B0({L:130,a:60,b:60,art:'welle'}), preis:100 }, env, null); } catch(e){ f4 = e; }
   check('Bauchausschnitt Welle: zu schmale Mulde wird abgewiesen', !!f4, f4 && f4.message);
+}
+
+/* ⑫ Fester ERP-Schluessel (Maks, 21.09.): Subiekt erkennt Artikel nur an EAN oder
+   Symbol (max. 20 Zeichen). Jede Konfiguration haengt jetzt an einem festen Schluessel
+   je Material/Dekor/Staerke; das Individuelle steht in den Eigenschaften. */
+{
+  const kat = JSON.parse(fs.readFileSync(path.join(hier, '../src/sku-katalog.json'), 'utf8'));
+  const varianten = JSON.parse(fs.readFileSync(path.join(hier, '../src/varianten.json'), 'utf8'));
+  const eintraege = Object.entries(kat).filter(([k]) => k.includes('|'));
+  const skus = eintraege.map(([, e]) => e.sku);
+  check('ERP: 66 Schluessel, alle SKUs eindeutig und hoechstens 20 Zeichen (Subiekt-Symbol)',
+    eintraege.length===66 && new Set(skus).size===66 && skus.every(x=>/^NM-[A-Z]{2,3}-[A-Z]{3}-\d{2}$/.test(x) && x.length<=20), skus.filter(x=>x.length>20));
+  const dicken = { dekor:['18','25','36'], mpx:['21','40'], mpx_hpl:['21','40'], compact:['12'], szwal:['21'] };
+  const fehlend = Object.keys(varianten).filter(k=>k.includes('|')).flatMap(k => dicken[k.split('|')[0]].map(st => `${k}|${st}`)).filter(k => !kat[k] || !kat[k].sku);
+  check('ERP: jede Basisvariante x Staerke hat einen Schluessel', fehlend.length===0, fehlend);
+  check('ERP: EAN-Felder leer oder 8–14 Ziffern', eintraege.every(([, e]) => e.ean==='' || /^\d{8,14}$/.test(e.ean)));
+
+  /* Warenkorb-Weg: feste SKU statt KFG-<token>, Schluessel auch als Eigenschaft */
+  reserven = []; aufrufe = []; storefront = [];
+  const r1 = await warenkorb({ kanal:'eur', sprache:'de', konfig:S }, env, null);
+  const anl = aufrufe.find(a=>/productVariantsBulkCreate/.test(a.query) && a.variables.v.length===1);
+  check('ERP: Möbelplatte Buche 25 → SKU NM-MP-BUK-25, ohne EAN kein Barcode', anl && anl.variables.v[0].inventoryItem.sku==='NM-MP-BUK-25' && !('barcode' in anl.variables.v[0]), anl && anl.variables.v[0].inventoryItem);
+  check('ERP: _kfg_sku als Eigenschaft, kein _kfg_ean solange leer', r1.attribute.some(a=>a.key==='_kfg_sku' && a.value==='NM-MP-BUK-25') && !r1.attribute.some(a=>a.key==='_kfg_ean'));
+  check('ERP: Name traegt weiter das #Token-Kuerzel (Kennung des Klicks)', /#[A-Za-z0-9]{4}$/.test(anl.variables.v[0].optionValues[0].name), anl.variables.v[0].optionValues[0].name);
+
+  /* Mit eingetragenem EAN wandert er als Barcode auf die Variante und als Eigenschaft mit */
+  const SKU_KATALOG = (await import('../src/sku-katalog.json', { with: { type: 'json' } })).default;
+  const alt = SKU_KATALOG['dekor|buk|25'].ean; SKU_KATALOG['dekor|buk|25'].ean = '5908453799991';
+  reserven = ['gid://shopify/ProductVariant/5009']; aufrufe = []; storefront = [];
+  const r2 = await warenkorb({ kanal:'pln', sprache:'pl', konfig:S }, env, null);
+  const um2 = aufrufe.find(a=>/productVariantsBulkUpdate/.test(a.query));
+  check('ERP: EAN aus dem Katalog wird Barcode der Variante (auch beim Umschreiben einer Reserve)', um2 && um2.variables.v[0].barcode==='5908453799991' && um2.variables.v[0].inventoryItem.sku==='NM-MP-BUK-25', um2 && um2.variables.v[0]);
+  check('ERP: _kfg_ean als Eigenschaft', r2.attribute.some(a=>a.key==='_kfg_ean' && a.value==='5908453799991'));
+  SKU_KATALOG['dekor|buk|25'].ean = alt;
+
+  /* Andere Kombinationen treffen ihren eigenen Schluessel */
+  reserven = []; aufrufe = [];
+  await warenkorb({ kanal:'eur', konfig:Object.assign({}, S, { mat:'compact', dekor:'czarny', thick:'12', form:'rect', L:123, B:61 }) }, env, null);
+  const anlC = aufrufe.find(a=>/productVariantsBulkCreate/.test(a.query) && a.variables.v.length===1);
+  check('ERP: Compact Schwarz 12 → NM-CP-CZA-12', anlC && anlC.variables.v[0].inventoryItem.sku==='NM-CP-CZA-12', anlC && anlC.variables.v[0].inventoryItem.sku);
+  reserven = []; aufrufe = [];
+  await warenkorb({ kanal:'eur', konfig:Object.assign({}, S, { mat:'mpx', mpxSurface:'natur', thick:'40', form:'rect', L:123, B:61 }) }, env, null);   /* kein Lagermass */
+  const anlM = aufrufe.find(a=>/productVariantsBulkCreate/.test(a.query) && a.variables.v.length===1);
+  check('ERP: Multiplex natur 40 → NM-MPX-NAT-40', anlM && anlM.variables.v[0].inventoryItem.sku==='NM-MPX-NAT-40', anlM ? anlM.variables.v[0] : aufrufe.map(a=>a.query.slice(0,40)));
+
+  /* Rueckfall (Draft Order): eigene Position bekommt die SKU */
+  aufrufe = [];
+  await checkout({ kanal:'eur', sprache:'de', konfig:S }, env, null);
+  const dr = aufrufe.find(a=>/draftOrderCreate/.test(a.query));
+  const li = dr && dr.variables.input.lineItems[0];
+  check('ERP: Rueckfall-Position traegt sku NM-MP-BUK-25 und _kfg_sku', li && li.sku==='NM-MP-BUK-25' && li.customAttributes.some(a=>a.key==='_kfg_sku' && a.value==='NM-MP-BUK-25'), li && { sku: li.sku });
 }
 
 console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b=>console.log('  ✗', b));

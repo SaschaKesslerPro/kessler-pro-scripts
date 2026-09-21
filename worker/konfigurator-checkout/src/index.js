@@ -69,6 +69,7 @@ import { preisKern } from './preis-kern.js';
    waehlen koennen (Sicherheitscheck 03.09.). */
 import PRODUKTMATRIX from '../../../dist/data/kfg-produktmatrix.json' with { type: 'json' };
 import PREISKURVEN from '../../../dist/data/kfg-preiskurven.json' with { type: 'json' };
+import SKU_KATALOG from './sku-katalog.json' with { type: 'json' };
 /* Verstecktes Basisprodukt "Tischplatte nach Maß" mit einer Variante je Dekor: die
    Position zeigt so im Warenkorb, Checkout und in der Bestellbestaetigung das
    Produktfoto des gewaehlten Dekors (Sascha 03.09.). Preis kommt per priceOverride
@@ -414,6 +415,11 @@ export async function checkout(body, env, ctx){
     priceOverride: { amount: c.total.toFixed(2), currencyCode: waehrung },
     customAttributes: [...attribute, { key:'_kfg_titel', value: titel }],
   } : null;
+  /* Auch die Rueckfall-Position bekommt den festen ERP-Schluessel, damit BaseLinker
+     sie ueber die SKU zuordnen kann (ein EAN laesst sich an einer eigenen Position
+     nicht setzen — er steht als Eigenschaft _kfg_ean dabei). */
+  const erpEigen = erpSchluessel(S, variantenSchluessel(S));
+  if(erpEigen){ attribute.push({ key:'_kfg_sku', value: erpEigen.sku }); if(erpEigen.ean) attribute.push({ key:'_kfg_ean', value: erpEigen.ean }); }
   const positionEigen = {
     title: titel,
     quantity: 1,
@@ -421,6 +427,7 @@ export async function checkout(body, env, ctx){
     requiresShipping: true,
     taxable: true,
     weight: { unit: 'KILOGRAMS', value: gewicht },
+    ...(erpEigen ? { sku: erpEigen.sku } : {}),
     customAttributes: attribute,
   };
   const input = {
@@ -494,8 +501,14 @@ export async function warenkorb(body, env, ctx){
   const mass = S.form==='round' ? `Ø ${S.D} cm` : S.form==='lform' ? `L-Form ${S.lf.L} × ${S.lf.B} cm`
     : S.form==='bauch' ? `Bauchausschnitt ${S.bs.L} × ${S.bs.BR} cm` : `${d.w} × ${d.h} cm`;
   const optionWert = `${MATERIAL[S.mat]}${S.mat==='mpx'&&S.mpxSurface==='hpl'?' + HPL':''} · ${c.dekorName} · ${c.thickName} · ${mass} · #${token.replace(/[^A-Za-z0-9]/g,'').slice(0,4)}`.slice(0, 250);
-  const sku = `KFG-${token}`;
-  const daten = { produktId: meta.produkt, optionName: meta.option || 'Ausführung', optionWert, preisPln: cpl.total, sku, gewichtKg: gewicht, mediaId: (VARIANTEN.medien||{})[schluessel] || null };
+  /* Fester ERP-Schluessel (Maks, 21.09.): Subiekt erkennt Artikel nur an EAN oder
+     Symbol (max. 20 Zeichen). KFG-<token> war je Klick anders — kein Mapping, kein
+     Import. Jetzt tragen alle Platten eines Materials/Dekors/einer Staerke dieselbe
+     SKU und denselben EAN; was daran individuell ist, steht in den Eigenschaften. */
+  const erp = erpSchluessel(S, schluessel);
+  const sku = erp ? erp.sku : `KFG-${token}`;
+  if(erp){ attribute.push({ key:'_kfg_sku', value: erp.sku }); if(erp.ean) attribute.push({ key:'_kfg_ean', value: erp.ean }); }
+  const daten = { produktId: meta.produkt, optionName: meta.option || 'Ausführung', optionWert, preisPln: cpl.total, sku, barcode: erp && erp.ean || null, gewichtKg: gewicht, mediaId: (VARIANTEN.medien||{})[schluessel] || null };
   /* Zuerst eine vorgewaermte Reserve umschreiben (sofort kaufbar, ~1 s). Erst wenn der
      Vorrat leer ist, eine Variante frisch anlegen — die braucht dann 8–14 s, bis der
      Warenkorb sie annimmt (Details bei RESERVE_SKU in shopify.js). */
@@ -518,7 +531,7 @@ export async function warenkorb(body, env, ctx){
        Warenkorb-Backend die Variante mit Menge 1 annimmt — sonst legt Shopyflow sie im Browser mit Menge 0 ab */
     cart = await SH.storefrontWarenkorb(env, { variantId: variante.id, attribute, land, sprache, maxMs: ausVorrat ? 6000 : 15000 });
     /* Nachkontrolle: hat ein gleichzeitiger Klick dieselbe Reserve erwischt, traegt sie jetzt eine andere SKU */
-    if(ausVorrat && !(await SH.varianteSkuStimmt(env, variante.id, sku))) throw Object.assign(fehler('Reserve gleichzeitig vergeben', 409), { fremd: true });
+    if(ausVorrat && !(await SH.varianteNameStimmt(env, variante.id, optionWert))) throw Object.assign(fehler('Reserve gleichzeitig vergeben', 409), { fremd: true });
   }catch(e){
     /* Aufraeumen — ausser die Variante gehoert inzwischen dem anderen Klick */
     if(!e.fremd){ try{ await SH.variantenLoeschen(env, meta.produkt, [variante.id]); }catch(_){} }
@@ -550,6 +563,12 @@ export async function vorratAuffuellen(env){
   const ids = await SH.reservenAnlegen(env, { produktId: meta.produkt, optionName: meta.option || 'Ausführung', anzahl: fehlt, versandprofil: meta.versandprofil });
   return { vorrat: vorhanden.length + ids.length, ziel, angelegt: ids.length };
 }
+/** Fester Schluessel aus sku-katalog.json — null, wenn die Kombination dort fehlt (dann KFG-<token>). */
+function erpSchluessel(S, schluessel){
+  const e = SKU_KATALOG[`${schluessel}|${S.thick}`];
+  if(!e || !e.sku) return null;
+  return { sku: String(e.sku).slice(0, 20), ean: /^\d{8,14}$/.test(String(e.ean||'')) ? String(e.ean) : '' };
+}
 function variantenSchluessel(S){
   const mat = S.mat === 'mpx' ? (S.mpxSurface === 'hpl' ? 'mpx_hpl' : 'mpx') : S.mat;
   const dekor = S.mat === 'mpx' && S.mpxSurface !== 'hpl' ? 'sperrholz-natur' : S.dekor;
@@ -561,7 +580,7 @@ function variantenSchluessel(S){
 export async function variantenAufraeumen(env){
   const meta = VARIANTEN._meta || {};
   const tage = +(env.VARIANTEN_TAGE || 45);
-  const alle = await SH.konfigVariantenAuflisten(env, meta.produkt);
+  const alle = await SH.konfigVariantenAuflisten(env, meta.produkt, 250, Object.entries(VARIANTEN).filter(([k]) => k.includes('|')).map(([, id]) => id));
   const grenze = Date.now() - tage*86400e3;
   const alt = alle.filter(v => new Date(v.updatedAt || v.createdAt).getTime() < grenze).map(v => v.id);
   const n = await SH.variantenLoeschen(env, meta.produkt, alt);

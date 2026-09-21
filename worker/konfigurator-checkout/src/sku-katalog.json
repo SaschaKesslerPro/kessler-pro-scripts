@@ -1,0 +1,405 @@
+{
+ "_meta": {
+  "zweck": "Fester ERP-Schluessel je Material, Dekor und Staerke. Der Worker setzt beim Anlegen der Konfigurations-Variante diese SKU (Symbol in Subiekt, max. 20 Zeichen) und den EAN als Barcode statt der wechselnden KFG-<token>-SKU. Die Konfiguration selbst (Mass, Form, Kanten, Ausschnitte) laeuft weiter als Positions-Eigenschaften mit. Fehlt ein Schluessel, faellt der Worker auf KFG-<token> zurueck.",
+  "schluessel": "<mat|mpx_hpl>|<dekor>|<staerke>  (wie varianten.json plus Staerke)",
+  "sku_muster": "NM-<MAT>-<DEKOR>-<ST>  (NM = na wymiar)",
+  "ean": "leer, bis Kessler die Nummern aus dem eigenen GS1-Bereich vergibt (5908453…)",
+  "stand": "21.09.2026"
+ },
+ "dekor|buk|18": {
+  "sku": "NM-MP-BUK-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa buk 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Buche 18 mm"
+ },
+ "dekor|buk|25": {
+  "sku": "NM-MP-BUK-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa buk 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Buche 25 mm"
+ },
+ "dekor|buk|36": {
+  "sku": "NM-MP-BUK-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa buk 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Buche 36 mm"
+ },
+ "dekor|ahorn|18": {
+  "sku": "NM-MP-AHO-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa klon 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Ahorn 18 mm"
+ },
+ "dekor|ahorn|25": {
+  "sku": "NM-MP-AHO-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa klon 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Ahorn 25 mm"
+ },
+ "dekor|ahorn|36": {
+  "sku": "NM-MP-AHO-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa klon 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Ahorn 36 mm"
+ },
+ "dekor|sosna-bielona|18": {
+  "sku": "NM-MP-SOB-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa sosna bielona 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Kiefer Weiß 18 mm"
+ },
+ "dekor|sosna-bielona|25": {
+  "sku": "NM-MP-SOB-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa sosna bielona 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Kiefer Weiß 25 mm"
+ },
+ "dekor|sosna-bielona|36": {
+  "sku": "NM-MP-SOB-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa sosna bielona 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Kiefer Weiß 36 mm"
+ },
+ "dekor|szary|18": {
+  "sku": "NM-MP-SZA-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa szary 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Grau 18 mm"
+ },
+ "dekor|szary|25": {
+  "sku": "NM-MP-SZA-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa szary 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Grau 25 mm"
+ },
+ "dekor|szary|36": {
+  "sku": "NM-MP-SZA-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa szary 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Grau 36 mm"
+ },
+ "dekor|schwarz|18": {
+  "sku": "NM-MP-CZA-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa czarny 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Schwarz 18 mm"
+ },
+ "dekor|schwarz|25": {
+  "sku": "NM-MP-CZA-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa czarny 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Schwarz 25 mm"
+ },
+ "dekor|schwarz|36": {
+  "sku": "NM-MP-CZA-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa czarny 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Schwarz 36 mm"
+ },
+ "dekor|sonoma-eiche|18": {
+  "sku": "NM-MP-SON-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb sonoma 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Sonoma-Eiche 18 mm"
+ },
+ "dekor|sonoma-eiche|25": {
+  "sku": "NM-MP-SON-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb sonoma 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Sonoma-Eiche 25 mm"
+ },
+ "dekor|sonoma-eiche|36": {
+  "sku": "NM-MP-SON-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb sonoma 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Sonoma-Eiche 36 mm"
+ },
+ "dekor|hikora|18": {
+  "sku": "NM-MP-HIK-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb hikora 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Eiche Hickory 18 mm"
+ },
+ "dekor|hikora|25": {
+  "sku": "NM-MP-HIK-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb hikora 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Eiche Hickory 25 mm"
+ },
+ "dekor|hikora|36": {
+  "sku": "NM-MP-HIK-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb hikora 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Eiche Hickory 36 mm"
+ },
+ "dekor|weiss|18": {
+  "sku": "NM-MP-BIA-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa biały 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Weiß 18 mm"
+ },
+ "dekor|weiss|25": {
+  "sku": "NM-MP-BIA-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa biały 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Weiß 25 mm"
+ },
+ "dekor|weiss|36": {
+  "sku": "NM-MP-BIA-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa biały 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Weiß 36 mm"
+ },
+ "dekor|alaska-weiss|18": {
+  "sku": "NM-MP-ALA-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa biały alaska 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Alaska Weiß 18 mm"
+ },
+ "dekor|alaska-weiss|25": {
+  "sku": "NM-MP-ALA-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa biały alaska 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Alaska Weiß 25 mm"
+ },
+ "dekor|alaska-weiss|36": {
+  "sku": "NM-MP-ALA-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa biały alaska 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Alaska Weiß 36 mm"
+ },
+ "dekor|kaszmir|18": {
+  "sku": "NM-MP-KAS-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa kaszmir 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Kaschmir 18 mm"
+ },
+ "dekor|kaszmir|25": {
+  "sku": "NM-MP-KAS-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa kaszmir 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Kaschmir 25 mm"
+ },
+ "dekor|kaszmir|36": {
+  "sku": "NM-MP-KAS-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa kaszmir 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Kaschmir 36 mm"
+ },
+ "dekor|eiche-artison|18": {
+  "sku": "NM-MP-ART-18",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb artisan 18 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Eiche Artisan 18 mm"
+ },
+ "dekor|eiche-artison|25": {
+  "sku": "NM-MP-ART-25",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb artisan 25 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Eiche Artisan 25 mm"
+ },
+ "dekor|eiche-artison|36": {
+  "sku": "NM-MP-ART-36",
+  "ean": "",
+  "name_pl": "Blat na wymiar Płyta meblowa dąb artisan 36 mm",
+  "name_de": "Tischplatte nach Maß Möbelplatte Eiche Artisan 36 mm"
+ },
+ "mpx|sperrholz-natur|21": {
+  "sku": "NM-MPX-NAT-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa natur 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke natur 21 mm"
+ },
+ "mpx|sperrholz-natur|40": {
+  "sku": "NM-MPX-NAT-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa natur 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke natur 40 mm"
+ },
+ "mpx_hpl|ahorn|21": {
+  "sku": "NM-MPH-AHO-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL klon 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Ahorn 21 mm"
+ },
+ "mpx_hpl|ahorn|40": {
+  "sku": "NM-MPH-AHO-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL klon 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Ahorn 40 mm"
+ },
+ "mpx_hpl|buk|21": {
+  "sku": "NM-MPH-BUK-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL buk 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Buche 21 mm"
+ },
+ "mpx_hpl|buk|40": {
+  "sku": "NM-MPH-BUK-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL buk 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Buche 40 mm"
+ },
+ "mpx_hpl|hikora|21": {
+  "sku": "NM-MPH-HIK-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL dąb hikora 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Eiche Hickory 21 mm"
+ },
+ "mpx_hpl|hikora|40": {
+  "sku": "NM-MPH-HIK-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL dąb hikora 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Eiche Hickory 40 mm"
+ },
+ "mpx_hpl|weiss|21": {
+  "sku": "NM-MPH-BIA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL biały 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Weiß 21 mm"
+ },
+ "mpx_hpl|weiss|40": {
+  "sku": "NM-MPH-BIA-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL biały 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Weiß 40 mm"
+ },
+ "mpx_hpl|sosna-bielona|21": {
+  "sku": "NM-MPH-SOB-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL sosna bielona 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Kiefer Weiß 21 mm"
+ },
+ "mpx_hpl|sosna-bielona|40": {
+  "sku": "NM-MPH-SOB-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL sosna bielona 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Kiefer Weiß 40 mm"
+ },
+ "mpx_hpl|szary|21": {
+  "sku": "NM-MPH-SZA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL szary 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Grau 21 mm"
+ },
+ "mpx_hpl|szary|40": {
+  "sku": "NM-MPH-SZA-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL szary 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Grau 40 mm"
+ },
+ "mpx_hpl|schwarz|21": {
+  "sku": "NM-MPH-CZA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL czarny 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Schwarz 21 mm"
+ },
+ "mpx_hpl|schwarz|40": {
+  "sku": "NM-MPH-CZA-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL czarny 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Schwarz 40 mm"
+ },
+ "mpx_hpl|sonoma-eiche|21": {
+  "sku": "NM-MPH-SON-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL dąb sonoma 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Sonoma-Eiche 21 mm"
+ },
+ "mpx_hpl|sonoma-eiche|40": {
+  "sku": "NM-MPH-SON-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL dąb sonoma 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Sonoma-Eiche 40 mm"
+ },
+ "mpx_hpl|alaska-weiss|21": {
+  "sku": "NM-MPH-ALA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL biały alaska 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Alaska Weiß 21 mm"
+ },
+ "mpx_hpl|alaska-weiss|40": {
+  "sku": "NM-MPH-ALA-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL biały alaska 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Alaska Weiß 40 mm"
+ },
+ "mpx_hpl|kaszmir|21": {
+  "sku": "NM-MPH-KAS-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL kaszmir 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Kaschmir 21 mm"
+ },
+ "mpx_hpl|kaszmir|40": {
+  "sku": "NM-MPH-KAS-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL kaszmir 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Kaschmir 40 mm"
+ },
+ "mpx_hpl|eiche-artison|21": {
+  "sku": "NM-MPH-ART-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL dąb artisan 21 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Eiche Artisan 21 mm"
+ },
+ "mpx_hpl|eiche-artison|40": {
+  "sku": "NM-MPH-ART-40",
+  "ean": "",
+  "name_pl": "Blat na wymiar Sklejka brzozowa + HPL dąb artisan 40 mm",
+  "name_de": "Tischplatte nach Maß Multiplex Birke + HPL Eiche Artisan 40 mm"
+ },
+ "compact|weiss|12": {
+  "sku": "NM-CP-BIA-12",
+  "ean": "",
+  "name_pl": "Blat na wymiar Compact / HPL biały 12 mm",
+  "name_de": "Tischplatte nach Maß Compact / HPL Weiß 12 mm"
+ },
+ "compact|szary|12": {
+  "sku": "NM-CP-SZA-12",
+  "ean": "",
+  "name_pl": "Blat na wymiar Compact / HPL szary 12 mm",
+  "name_de": "Tischplatte nach Maß Compact / HPL Grau 12 mm"
+ },
+ "compact|czarny|12": {
+  "sku": "NM-CP-CZA-12",
+  "ean": "",
+  "name_pl": "Blat na wymiar Compact / HPL czarny 12 mm",
+  "name_de": "Tischplatte nach Maß Compact / HPL Schwarz 12 mm"
+ },
+ "compact|marmor-weiss|12": {
+  "sku": "NM-CP-MBI-12",
+  "ean": "",
+  "name_pl": "Blat na wymiar Compact / HPL marmur biały 12 mm",
+  "name_de": "Tischplatte nach Maß Compact / HPL Marmor Weiß 12 mm"
+ },
+ "compact|marmor-schwarz|12": {
+  "sku": "NM-CP-MCZ-12",
+  "ean": "",
+  "name_pl": "Blat na wymiar Compact / HPL marmur czarny 12 mm",
+  "name_de": "Tischplatte nach Maß Compact / HPL Marmor Schwarz 12 mm"
+ },
+ "szwal|sz-weiss|21": {
+  "sku": "NM-SZ-BIA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Blat szwalniczy biały 21 mm",
+  "name_de": "Tischplatte nach Maß Nähtischplatte Weiß 21 mm"
+ },
+ "szwal|sz-gewebe|21": {
+  "sku": "NM-SZ-TKA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Blat szwalniczy tkanina 21 mm",
+  "name_de": "Tischplatte nach Maß Nähtischplatte Gewebe 21 mm"
+ },
+ "szwal|sz-grau|21": {
+  "sku": "NM-SZ-SZA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Blat szwalniczy szary 21 mm",
+  "name_de": "Tischplatte nach Maß Nähtischplatte Grau 21 mm"
+ },
+ "szwal|sz-schwarz|21": {
+  "sku": "NM-SZ-CZA-21",
+  "ean": "",
+  "name_pl": "Blat na wymiar Blat szwalniczy czarny 21 mm",
+  "name_de": "Tischplatte nach Maß Nähtischplatte Schwarz 21 mm"
+ }
+}

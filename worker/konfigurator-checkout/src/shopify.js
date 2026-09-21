@@ -155,12 +155,13 @@ export async function webhookHmacOk(env, rohkoerper, hmacHeader){
    Preis: PLN als Variantenpreis (Shopwaehrung), EUR als Festpreis in der Preisliste
    des EU-Markts. So laeuft die Platte durch Shopyflow-Warenkorb und Checkout wie
    jeder andere Artikel; der Preis kommt nie aus dem Browser. */
-export async function varianteAnlegen(env, { produktId, optionName, optionWert, preisPln, sku, gewichtKg, mediaId }){
+export async function varianteAnlegen(env, { produktId, optionName, optionWert, preisPln, sku, barcode, gewichtKg, mediaId }){
   const q = `mutation kfgVar($p:ID!,$v:[ProductVariantsBulkInput!]!){ productVariantsBulkCreate(productId:$p, variants:$v, strategy:DEFAULT){ productVariants{ id title } userErrors{ field message code } } }`;
   const v = [{
     optionValues: [{ optionName, name: optionWert }],
     price: (+preisPln).toFixed(2), taxable: true, inventoryPolicy: 'CONTINUE',
     inventoryItem: { sku, tracked: false, requiresShipping: true, measurement: { weight: { unit: 'KILOGRAMS', value: +gewichtKg || 1 } } },
+    ...(barcode ? { barcode } : {}),
     ...(mediaId ? { mediaId } : {}),
   }];
   const d = await graphql(env, q, { p: produktId, v });
@@ -182,11 +183,15 @@ export async function versandprofilZuordnen(env, profilId, variantIds){
   if(!res || (res.userErrors && res.userErrors.length)) throw fehler('Versandprofil abgelehnt', 502, res && res.userErrors);
   return true;
 }
-/** Konfigurator-Varianten (SKU KFG-…) des Basisprodukts, aelteste zuerst — ohne die Reserven. */
-export async function konfigVariantenAuflisten(env, produktId, max = 250){
+/** Konfigurator-Varianten des Basisprodukts, aelteste zuerst — ohne Reserven und
+    ohne die Basisvarianten (Bildtraeger). Seit 21.09. tragen Konfigurationen die feste
+    ERP-SKU NM-… (siehe sku-katalog.json), aeltere noch KFG-<token>; beide zaehlen. */
+export async function konfigVariantenAuflisten(env, produktId, max = 250, basisIds = []){
   const q = `query($q:String!,$n:Int!){ productVariants(first:$n, query:$q, sortKey:ID){ nodes{ id sku createdAt updatedAt } } }`;
-  const d = await graphql(env, q, { q: `product_id:${String(produktId).split('/').pop()} AND sku:KFG-*`, n: Math.min(250, max) });
-  return ((d.productVariants && d.productVariants.nodes) || []).filter(v => /^KFG-/.test(v.sku || '') && !istReserve(v.sku));
+  const d = await graphql(env, q, { q: `product_id:${String(produktId).split('/').pop()}`, n: Math.min(250, max) });
+  const basis = new Set(basisIds);
+  return ((d.productVariants && d.productVariants.nodes) || [])
+    .filter(v => !basis.has(v.id) && !istReserve(v.sku) && /^(KFG|NM)-/.test(v.sku || ''));
 }
 
 /* ── Vorrat: vorgewaermte Reservevarianten ──────────────────────────────────
@@ -224,26 +229,29 @@ export async function reservenAnlegen(env, { produktId, optionName, anzahl, vers
   if(versandprofil && ids.length) await versandprofilZuordnen(env, versandprofil, ids);
   return ids;
 }
-/** Eine Reserve in die Konfigurations-Variante umschreiben (ein Aufruf: Preis, Name, SKU, Gewicht, Bild, kaufbar). */
-export async function reserveUmschreiben(env, { produktId, variantId, optionName, optionWert, preisPln, sku, gewichtKg, mediaId }){
+/** Eine Reserve in die Konfigurations-Variante umschreiben (ein Aufruf: Preis, Name, SKU, EAN, Gewicht, Bild, kaufbar). */
+export async function reserveUmschreiben(env, { produktId, variantId, optionName, optionWert, preisPln, sku, barcode, gewichtKg, mediaId }){
   const q = `mutation kfgUm($p:ID!,$v:[ProductVariantsBulkInput!]!){ productVariantsBulkUpdate(productId:$p, variants:$v){ productVariants{ id title sku } userErrors{ field message code } } }`;
   const v = [{ id: variantId,
     optionValues: [{ optionName, name: optionWert }],
     price: (+preisPln).toFixed(2), taxable: true, inventoryPolicy: 'CONTINUE',
     inventoryItem: { sku, tracked: false, requiresShipping: true, measurement: { weight: { unit: 'KILOGRAMS', value: +gewichtKg || 1 } } },
+    ...(barcode ? { barcode } : {}),
     ...(mediaId ? { mediaId } : {}),
   }];
   const d = await graphql(env, q, { p: produktId, v });
   const res = d && d.productVariantsBulkUpdate;
   const out = res && res.productVariants && res.productVariants[0];
   if(!res || (res.userErrors && res.userErrors.length) || !out) throw fehler('Reserve abgelehnt', 502, res && res.userErrors);
-  if(out.sku !== sku) throw fehler('Reserve gleichzeitig vergeben', 409, out);
+  /* Die SKU ist seit 21.09. je Material/Dekor/Staerke fest und taugt nicht mehr als
+     Kennung des Klicks — der Name traegt das #Token-Kuerzel und ist je Klick eigen. */
+  if(out.title !== optionWert) throw fehler('Reserve gleichzeitig vergeben', 409, out);
   return out;
 }
-/** Nachkontrolle gegen den seltenen Fall, dass zwei Klicks dieselbe Reserve erwischt haben: traegt die Variante noch unsere SKU? */
-export async function varianteSkuStimmt(env, variantId, sku){
-  const d = await graphql(env, `query($id:ID!){ productVariant(id:$id){ sku } }`, { id: variantId });
-  return !!(d && d.productVariant && d.productVariant.sku === sku);
+/** Nachkontrolle gegen den seltenen Fall, dass zwei Klicks dieselbe Reserve erwischt haben: traegt die Variante noch unseren Namen? */
+export async function varianteNameStimmt(env, variantId, optionWert){
+  const d = await graphql(env, `query($id:ID!){ productVariant(id:$id){ title } }`, { id: variantId });
+  return !!(d && d.productVariant && d.productVariant.title === optionWert);
 }
 export async function variantenLoeschen(env, produktId, variantIds){
   if(!variantIds.length) return 0;
