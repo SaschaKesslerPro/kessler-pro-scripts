@@ -29,6 +29,11 @@ function fallbackBasis(){
   try{
     const sha=execSync('git rev-parse HEAD',{cwd:dir,encoding:'utf8'}).trim().slice(0,7);
     if(!/^[0-9a-f]{7}$/.test(sha)) throw new Error('kein Commit');
+    /* Matrix, Kurven und Sprachdatei kommen live von diesem Commit. Sind sie noch
+       nicht committet, wuerde das Buendel auf einen Stand OHNE die Aenderung
+       zeigen (24.09.: Versandprofile fehlten). Daten zuerst committen, dann bauen. */
+    const offen=execSync('git status --porcelain -- ../dist/data',{cwd:dir,encoding:'utf8'}).trim();
+    if(offen) throw new Error('dist/data hat uncommittete Aenderungen:\n'+offen);
     return 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@'+sha;
   }catch(e){
     throw new Error('FALLBACK_BASE laesst sich nicht bestimmen ('+e.message+'). '
@@ -316,7 +321,7 @@ const LIVE_API=`,
       /* Erst wenn die Wortliste da ist, lohnt ein zweiter Lauf ueber die Dialoge. */
       wortlisteDa:function(){ return !!_kfgWB; },
       money:fmt,
-      shipping:function(){ return { betrag: kanal()==='pln' ? 84.90 : 19.99, text: VERSAND_MASS[kanal()] }; }`;
+      shipping:function(){ return versandInfo(); }`;
 core=core.replace('version: VERSION,',`version: VERSION,
     atelier: {
       snapshot: function(){ return { config:JSON.parse(JSON.stringify(S)), price:calc(), standard:isStandard(), offer:needsOffer(), valid:validate(), dims:dims(), material:MATERIALS[S.mat], dekore:dekorList(), texture:TEX[texKey()], edgePhoto:edgePhoto(), edgeNames:[...new Set(S.edges.map(edgeLabel))], cornerLabel:cornerLabel(), rules:rules(), cuts:S.cuts.map(c=>({label:cutTypName(c),mass:cutMass(c),price:cutPrice(c),warning:cutWarn(c)})), minEdge:cutMinEdge(), shape:S.form==='lform'?lfPts():S.form==='bauch'?bsPts():null }; },

@@ -100,12 +100,26 @@ const DICHTE = { dekor:0.00070, mpx:0.00068, compact:0.00140, szwal:0.00072 };
 const VERSAND_STANDARD = {
   pauschal: { eur: 19.99, pln: 84.90 },
   titel: { eur: 'Versand Maßanfertigung (pauschal)', pln: 'Dostawa produktu na wymiar (ryczałt)' },
+  /* Ab 150 cm laengster Seite (Sascha 24.09.): eine 200er Platte hat im Versand knapp
+     100 EUR gekostet. Gleicher Betrag wie im Shopify-Profil "Massanfertigung gross". */
+  gross: { eur: 49.99, pln: 199.90 },
+  grossTitel: { eur: 'Versand Maßanfertigung ab 150 cm (pauschal)', pln: 'Dostawa produktu na wymiar od 150 cm (ryczałt)' },
+  grossAbCm: 150,
 };
+/** Laengste Seite der Platte in cm — Rechteck L/B, L-Form Gesamtmass, Bauch L/BR, rund Ø. */
+export function laengsteSeite(S, K){ const d = K.dims(); return Math.max(+d.w || 0, +d.h || 0); }
+export function istGross(S, K, env){
+  let ab = VERSAND_STANDARD.grossAbCm;
+  if(env && env.VERSAND){ try{ const o = JSON.parse(env.VERSAND); if(o.grossAbCm) ab = +o.grossAbCm; }catch(e){} }
+  return laengsteSeite(S, K) >= ab;
+}
 function versandZeile(S, K, gewichtKg, kanal, env){
   let V = VERSAND_STANDARD;
-  if(env && env.VERSAND){ try{ const o = JSON.parse(env.VERSAND); V = { pauschal: Object.assign({}, VERSAND_STANDARD.pauschal, o.pauschal||{}), titel: Object.assign({}, VERSAND_STANDARD.titel, o.titel||{}) }; }catch(e){} }
-  const betrag = V.pauschal[kanal] ?? V.pauschal.eur;
-  return { title: V.titel[kanal] || V.titel.eur, price: (+betrag).toFixed(2) };
+  if(env && env.VERSAND){ try{ const o = JSON.parse(env.VERSAND); V = Object.assign({}, VERSAND_STANDARD, { pauschal: Object.assign({}, VERSAND_STANDARD.pauschal, o.pauschal||{}), titel: Object.assign({}, VERSAND_STANDARD.titel, o.titel||{}), gross: Object.assign({}, VERSAND_STANDARD.gross, o.gross||{}), grossTitel: Object.assign({}, VERSAND_STANDARD.grossTitel, o.grossTitel||{}) }); }catch(e){} }
+  const gross = istGross(S, K, env);
+  const tab = gross ? V.gross : V.pauschal, tit = gross ? V.grossTitel : V.titel;
+  const betrag = tab[kanal] ?? tab.eur;
+  return { title: tit[kanal] || tit.eur, price: (+betrag).toFixed(2) };
 }
 
 export default {
@@ -526,7 +540,11 @@ export async function warenkorb(body, env, ctx){
     await SH.festpreisSetzen(env, meta.preisliste_eur, variante.id, cde.total, 'EUR');
     /* Ohne das Versandprofil ginge die Massplatte versandkostenfrei raus — dann lieber kein Warenkorb (Rueckfall: Sofortkauf per Draft Order).
        Reserven haben das Profil schon seit dem Anlegen. */
-    if(!ausVorrat) await SH.versandprofilZuordnen(env, meta.versandprofil, [variante.id]);
+    /* Ab 150 cm laengster Seite ins Profil "Massanfertigung gross" (49,99) — auch eine
+       Reserve, die noch im 19,99-Profil steckt; Shopify haengt die Variante um. */
+    const gross = istGross(S, K, env) && meta.versandprofil_gross;
+    if(gross) await SH.versandprofilZuordnen(env, meta.versandprofil_gross, [variante.id]);
+    else if(!ausVorrat) await SH.versandprofilZuordnen(env, meta.versandprofil, [variante.id]);
     /* Probe (und beim Sofortkauf gleich der echte Warenkorb): erst zurueckmelden, wenn das
        Warenkorb-Backend die Variante mit Menge 1 annimmt — sonst legt Shopyflow sie im Browser mit Menge 0 ab */
     cart = await SH.storefrontWarenkorb(env, { variantId: variante.id, attribute, land, sprache, maxMs: ausVorrat ? 6000 : 15000 });

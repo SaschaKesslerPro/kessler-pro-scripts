@@ -145,7 +145,7 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
   }
 
   /* ③ Sprachen: Preis, Waehrung, keine deutschen Reste --------------------------- */
-  for(const [lang,waehrung,versand] of [['de','€','19,99'],['pl','zł','84,90'],['en','€','19.99']]){
+  for(const [lang,waehrung,versand] of [['de','€','49,99'],['pl','zł','199,90'],['en','€','49.99']]){   /* 163 cm → ab 150 cm 49,99 (24.09.) */
     const {ctx,p}=await seite({width:1440,height:1000},lang);
     await p.klick('[data-step="1"]'); await p.feld('#inL','163');
     await p.klick('[data-step="3"]');
@@ -630,6 +630,59 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
     await ctx2.close();
   }
   console.log('⑩ Atlas-Ausfall und Dekorwechsel geprueft');
+
+  /* ══ ⑪ Versand wie an der Kasse (Sascha 24.09.) ══════════════════════════════
+     Bis 1.20.x hiess jede Lagergroesse "kostenfrei" — 201 von 321 Lagerplatten
+     kosten an der Shopify-Kasse aber Versand (Sperrgut nach Gewicht, Rundplatten
+     pauschal). Massplatten: 19,99, ab 150 cm laengster Seite 49,99. */
+  {
+    const {ctx,p}=await seite({width:1440,height:1000},'de');
+    const lies=async()=>p.evaluate(()=>({
+      steuer:document.getElementById('atelierTax').textContent.trim(),
+      versand:window.KFG.atelier.shipping(),
+      standard:window.KFG.atelier.snapshot().standard}));
+    /* Lagerartikel im freien Profil: 80x40 Buche 25 */
+    await p.klick('[data-step="1"]'); await p.feld('#inL','80'); await p.feld('#inB','40');
+    let r=await lies();
+    pruef('⑪ Lager 80x40 (Profil frei): kostenfrei', r.standard&&r.versand.frei&&r.versand.betrag===0&&/kostenfrei/.test(r.steuer), JSON.stringify(r));
+    /* Lagerartikel im Sperrgut-Profil: 120x60 Buche 25 = 13 kg → 6,90 */
+    await p.feld('#inL','120'); await p.feld('#inB','60');
+    r=await lies();
+    pruef('⑪ Lager 120x60 (Sperrgut 13 kg): zzgl. 6,90 €', r.standard&&!r.versand.frei&&r.versand.art==='sperrgut'&&r.versand.betrag===6.9&&/zzgl\. 6,90 € Versand/.test(r.steuer), JSON.stringify(r));
+    /* Mass unter 150: 163x60 → 19,99 */
+    await p.feld('#inL','163');
+    r=await lies();
+    pruef('⑪ Mass 163x60: 49,99 (laengste Seite 163 ≥ 150)', !r.standard&&r.versand.art==='gross'&&r.versand.betrag===49.99&&/49,99/.test(r.steuer), JSON.stringify(r));
+    await p.feld('#inL','140');
+    r=await lies();
+    pruef('⑪ Mass 140x60: 19,99', !r.standard&&r.versand.art==='mass'&&r.versand.betrag===19.99&&/19,99/.test(r.steuer), JSON.stringify(r));
+    /* Breite zaehlt auch */
+    await p.feld('#inL','100'); await p.feld('#inB','110');
+    r=await lies();
+    pruef('⑪ Mass 100x110 unter 150: 19,99', !r.standard&&r.versand.betrag===19.99, JSON.stringify(r));
+    /* Rundplatte ab Lager: eigenes Profil 19,90 */
+    await p.klick('[data-shape="round"]'); await p.feld('#inD','80');
+    r=await lies();
+    pruef('⑪ Lager rund Ø 80: Rundplatten-Profil 19,90', r.standard&&r.versand.art==='rund'&&r.versand.betrag===19.9, JSON.stringify(r));
+    /* Uebersicht: der Hinweis nennt den Betrag des Lagerartikels */
+    await p.klick('[data-step="3"]'); await p.waitForTimeout(600);
+    const hinweis=await p.evaluate(()=>(document.querySelector('.review_shipping')||{}).textContent||'');
+    pruef('⑪ Uebersicht nennt 19,90 € fuer die Lager-Rundplatte', /19,90 €/.test(hinweis)&&/Lagerartikel/.test(hinweis), hinweis);
+    /* Vertrauenszeile im Kern (versteckt, aber gesetzt) */
+    const trust=await p.evaluate(()=>[...document.querySelectorAll('.kfg_trust span')].map(x=>x.textContent).join(' | '));
+    pruef('⑪ Trust-Zeile: 19,99 · ab 150 cm 49,99, kein "versandkostenfrei" mehr', /19,99 €/.test(trust)&&/ab 150 cm 49,99 €/.test(trust)&&!/versandkostenfrei/.test(trust), trust);
+    await ctx.close();
+    /* Polnisch: Betraege in zl, Muster uebersetzt */
+    const pl=await seite({width:1440,height:1000},'pl');
+    await pl.p.klick('[data-step="1"]'); await pl.p.feld('#inL','200'); await pl.p.feld('#inB','90');
+    const rp=await pl.p.evaluate(()=>({steuer:document.getElementById('atelierTax').textContent.trim(), v:window.KFG.atelier.shipping()}));
+    pruef('⑪ PL 200x90: 199,90 zł', rp.v.betrag===199.9&&/199,90 zł/.test(rp.steuer)&&!/zzgl/.test(rp.steuer), JSON.stringify(rp));
+    await pl.p.feld('#inL','120'); await pl.p.feld('#inB','60');
+    const rp2=await pl.p.evaluate(()=>({steuer:document.getElementById('atelierTax').textContent.trim(), v:window.KFG.atelier.shipping()}));
+    pruef('⑪ PL Lager 120x60 Sperrgut: 39,90 zł, uebersetzt', rp2.v.betrag===39.9&&/39,90 zł/.test(rp2.steuer)&&!/zzgl/.test(rp2.steuer), JSON.stringify(rp2));
+    await pl.ctx.close();
+  }
+  console.log('⑪ Versand geprueft');
 
   console.log('⑧ Vollbild und Masszahlen geprueft');
 

@@ -5,7 +5,9 @@
     "warnung": "Nie veröffentlichen — die Varianten kosten 0,00 und bekommen ihren Preis nur über den Worker.",
     "option": "Ausführung",
     "preisliste_eur": "gid://shopify/PriceList/31843025242",
-    "versandprofil": "gid://shopify/DeliveryProfile/138342564186"
+    "versandprofil": "gid://shopify/DeliveryProfile/138342564186",
+    "versandprofil_gross": "gid://shopify/DeliveryProfile/138357965146",
+    "versand_gross_ab_cm": 150
   },
   "dekor|buk": "gid://shopify/ProductVariant/54697596420442",
   "dekor|ahorn": "gid://shopify/ProductVariant/54697616703834",

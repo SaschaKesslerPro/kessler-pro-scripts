@@ -19,13 +19,13 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.20.1';
+  var VERSION = '1.21.0';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   /* Auf den Commit gezogen, der am 10.09.2026 live lief — dort liegen Preiskurven,
    Sprachdatei und Bilder, die es unter dem alten Commit noch nicht gab. Greift,
    wenn das Skript NICHT ueber jsDelivr geladen wird (z. B. als Webflow-Asset). */
-var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@858fb6d';
+var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@5163be9';
   var BASE = (function(){
     try{
       var me = document.currentScript && document.currentScript.src;
@@ -123,9 +123,12 @@ var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-sc
         if (d && d.produkte) {
           for (var k in d.produkte) {
             var v = d.produkte[k];
-            /* [EUR, VariantId, SKU, PLN] — PLN seit v1.17.0 fuer die polnische Seite */
+            /* [EUR, VariantId, SKU, PLN, Versand] — PLN seit v1.17.0 fuer die polnische
+               Seite; Versand seit 1.21.0: Shopify-Profil und Gewicht des Lagerartikels
+               ({p:'frei'|'sperrgut'|'rund', kg}), damit der Konfigurator dasselbe sagt
+               wie die Kasse (vorher hiess jede Lagergroesse "kostenfrei"). */
             if (v.eur) out[k] = [Math.round(v.eur*100)/100, String(v.variantId||'').split('/').pop(), v.sku,
-                                 v.pln ? Math.round(v.pln*100)/100 : null];
+                                 v.pln ? Math.round(v.pln*100)/100 : null, v.versand || null];
           }
         }
         return { shop: out, kurven: kv && kv.kurven ? kv.kurven : null };
@@ -912,6 +915,30 @@ const CHECKOUT_URL=(function(){
    setzt denselben Betrag als Versandzeile in die Bestellung (VERSAND_STANDARD).
    PLN-Wert vorlaeufig, von Sascha zu bestaetigen. */
 const VERSAND_MASS={eur:'19,99 €', pln:'84,90 zł'};
+/* ── Versand, wie Shopify ihn wirklich berechnet (Sascha 24.09.) ──────────────
+   Lagerartikel: das Profil des Artikels in Shopify — "frei" (DHL kostenlos),
+   "sperrgut" (Staffel nach Gewicht) oder "rund" (Rundplatten-Pauschale). Bis
+   1.20.x hiess jede Lagergroesse "kostenfrei", obwohl 201 von 321 Lagerplatten
+   an der Kasse Versand kosten (130 x 80 Compact: 12,90 EUR). Massanfertigung:
+   19,99 EUR pauschal; ab 150 cm laengster Seite 49,99 EUR — eine 200er Platte
+   hat im Versand knapp 100 EUR gekostet. Der Worker rechnet dieselbe Staffel. */
+const VERSAND_GROSS={eur:'49,99 €', pln:'199,90 zł'}, VERSAND_GROSS_AB_CM=150;
+const VERSAND_RUND={eur:19.90, pln:90.00};
+const VERSAND_SPERRGUT={eur:[[14,6.90],[28,12.90],[42,24.90],[Infinity,59.90]], pln:[[14,39.90],[28,69.90],[Infinity,119.90]]};
+function laengsteSeite(){ const d=dims(); return Math.max(+d.w||0,+d.h||0); }
+function versandBetrag(txt){ return +String(txt).replace(/[^\d,]/g,'').replace(',','.'); }
+/* {betrag, text, frei, art:'frei'|'sperrgut'|'rund'|'mass'|'gross'} fuer die aktuelle Konfiguration */
+function versandInfo(){
+  const k=kanal();
+  if(isStandard()){
+    const hit=shopHit(), v=hit&&hit[4];
+    if(!v||v.p==='frei') return {betrag:0, text:fmt(0), frei:true, art:'frei'};
+    if(v.p==='rund') return {betrag:VERSAND_RUND[k], text:fmt(VERSAND_RUND[k]), frei:false, art:'rund'};
+    if(v.p==='sperrgut'){ const st=VERSAND_SPERRGUT[k], kg=+v.kg||0; const b=(st.find(x=>kg<=x[0])||st[st.length-1])[1]; return {betrag:b, text:fmt(b), frei:false, art:'sperrgut'}; }
+  }
+  const gross=laengsteSeite()>=VERSAND_GROSS_AB_CM, t=gross?VERSAND_GROSS[k]:VERSAND_MASS[k];
+  return {betrag:versandBetrag(t), text:t, frei:false, art:gross?'gross':'mass'};
+}
 /* Der Checkout-Worker traegt eine SERVERSEITIGE Kopie der Preisrechnung. Sie kennt
    den Bauchausschnitt noch nicht und wuerde einen anderen Betrag errechnen — der
    Abgleich im Worker haette die Bestellung mit "Preis weicht ab" abgewiesen, nachdem
@@ -2334,7 +2361,7 @@ function preisTexte(){
   document.querySelectorAll('.kfg_preset').forEach(el=>{ const p=PRESETS[el.dataset.preset], pr=el.querySelector('.pr'); if(p&&pr) pr.textContent=`+ ${fmt(zl(p.price))} / Stück`; });
   { const b=document.querySelector('.kfg_check input[data-x="bohr"]'); const pr=b&&b.closest('.kfg_check').querySelector('.pr'); if(pr) pr.textContent=`+ ${fmt(zl(X_PRICE.bohr))}`; }
   { const bm=$('btnMaschine'); const pr=bm&&bm.parentElement.querySelector('.pr'); if(pr) pr.textContent=`+ ${fmt(zl(PRESETS.maschine.price))} pauschal`; }
-  { const t=document.querySelector('.kfg_trust'); if(t){ const sp=[...t.querySelectorAll('span')].find(x=>/nach Maß|na wymiar|made to measure/.test(x.textContent)); if(sp){ const ic=sp.querySelector('svg'); sp.textContent=` Lagergröße versandkostenfrei · nach Maß ${VERSAND_MASS[kanal()]}`; if(ic) sp.prepend(ic); } } }
+  { const t=document.querySelector('.kfg_trust'); if(t){ const sp=[...t.querySelectorAll('span')].find(x=>/nach Maß|na wymiar|made to measure/.test(x.textContent)); if(sp){ const ic=sp.querySelector('svg'); sp.textContent=` Nach Maß ${VERSAND_MASS[kanal()]} · ab ${VERSAND_GROSS_AB_CM} cm ${VERSAND_GROSS[kanal()]}`; if(ic) sp.prepend(ic); } } }
   { const n=$('mpxNote'); if(n) n.textContent=`Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet ${fmt(zl(5))}/lfm, halbrund ${fmt(zl(8))}/lfm. Lackiert sind es ${fmt(zl(5))}, ${fmt(zl(10))} und ${fmt(zl(16))}/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.`; }
   { const b=$('btnMuster'); const sm=b&&b.parentElement.querySelector('small'); if(sm) sm.textContent=`Musterbox mit 4 Dekoren — ${fmt(zl(4.9))}, voll angerechnet beim Kauf`; }
 }
@@ -2426,10 +2453,11 @@ function renderAtelierCore(){
   { const dh=$('datenHinweis'); if(dh) dh.hidden=!keineDaten; }
   if(keineDaten) $('badgeText').textContent='Preise gerade nicht verfügbar';
   const zahlbar=!std && kannBezahlen();
-  if(std){$('delivDate').textContent='Versand bis '+delivDate();$('delivSub').textContent='DHL, ab Lager';$('delivBar').textContent='Versand bis '+delivDate();}
-  else if(zahlbar){$('delivDate').textContent='Fertigung nach Maß';$('delivSub').textContent=`Versand ${VERSAND_MASS[kanal()]} pauschal`;$('delivBar').textContent='Nach Maß gefertigt';}
+  const vs=versandInfo();
+  if(std){$('delivDate').textContent='Versand bis '+delivDate();$('delivSub').textContent=vs.frei?'DHL, ab Lager':`Ab Lager · zzgl. ${vs.text} Versand`;$('delivBar').textContent='Versand bis '+delivDate();}
+  else if(zahlbar){$('delivDate').textContent='Fertigung nach Maß';$('delivSub').textContent=`Versand ${vs.text} pauschal`;$('delivBar').textContent='Nach Maß gefertigt';}
   else {$('delivDate').textContent='Angebot in 24 h';$('delivSub').textContent='Versandkosten im Angebot';$('delivBar').textContent='Fertigung · Angebot in 24 h';}
-  { const vl=$('vatLine'); if(vl) vl.textContent=std?'inkl. MwSt., kostenloser Versand':`inkl. MwSt., zzgl. ${VERSAND_MASS[kanal()]} Versand`; }
+  { const vl=$('vatLine'); if(vl) vl.textContent=vs.frei?'inkl. MwSt., kostenloser Versand':`inkl. MwSt., zzgl. ${vs.text} Versand`; }
   /* Senior 07.09.: wie auf der Produktseite — "In den Warenkorb" als Hauptknopf, darunter
      "Sofortkauf". Lagerartikel und Massplatten mit festem Preis koennen beides; ohne
      festen Preis bleibt nur die Anfrage. */
@@ -2441,7 +2469,7 @@ function renderAtelierCore(){
      kein Preis im Bild, die Preiskarte sitzt am Ende des Panels (Review 08.09., C1) */
   { const pm=$('priceMini'), dm=$('delivMini'), cm=$('ctaMini');
     if(pm) pm.textContent=pv;
-    if(dm) dm.textContent=keineDaten?'Preis folgt':std?'Ab Lager · 3 bis 5 Tage':zahlbar?`Nach Maß · zzgl. ${VERSAND_MASS[kanal()]} Versand`:'Angebot in 24 h';
+    if(dm) dm.textContent=keineDaten?'Preis folgt':std?(vs.frei?'Ab Lager · 3 bis 5 Tage':`Ab Lager · zzgl. ${vs.text} Versand`):zahlbar?`Nach Maß · zzgl. ${vs.text} Versand`:'Angebot in 24 h';
     if(cm) cm.classList.toggle('is-sonder',!kaufbar); }
   const sur=S.mat==='mpx'?{natur:' · natur',hpl:' + HPL'}[S.mpxSurface]:'';
   const hit=shopHit();
@@ -3992,7 +4020,7 @@ window.addEventListener('resize',()=>{clearTimeout(window.__stT);window.__stT=se
       /* Erst wenn die Wortliste da ist, lohnt ein zweiter Lauf ueber die Dialoge. */
       wortlisteDa:function(){ return !!_kfgWB; },
       money:fmt,
-      shipping:function(){ return { betrag: kanal()==='pln' ? 84.90 : 19.99, text: VERSAND_MASS[kanal()] }; }
+      shipping:function(){ return versandInfo(); }
     },
     getConfig: function(){ return JSON.parse(JSON.stringify(S)); },
     setConfig: function(patch){ Object.assign(S, patch||{}); [["inL",S.L],["inB",S.B],["inD",S.D]].forEach(([id,v])=>{if($(id))$(id).value=v;}); buildAll(); render(); },
@@ -4116,7 +4144,9 @@ const assetUrl=p=>((api&&api.assetBase&&api.assetBase())||'assets/kfg/')+p;
 const moneyDe=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n);
 /* Waehrung und Versandpauschale gehoeren dem Kern: auf /pl-pl/ sind es Zloty. */
 const money=n=>(api&&api.money?api.money(n):moneyDe(n));
-const versand=()=>(api&&api.shipping?api.shipping():{betrag:19.99,text:'19,99 \u20ac'});
+/* {betrag,text,frei,art} — der Kern kennt das Shopify-Profil des Lagerartikels und die
+   Staffel fuer Massplatten (ab 150 cm 49,99). Nicht mehr "Lager = kostenfrei" raten. */
+const versand=()=>(api&&api.shipping?api.shipping():{betrag:19.99,text:'19,99 \u20ac',frei:false,art:'mass'});
 const number=n=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(n);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const svg=(content,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${content}</svg>`;
@@ -4394,7 +4424,7 @@ function sync(){
   const closedPrice=!s.valid||errors.length>0||s.offer;
   setText('atelierPrice',!s.valid||errors.length?'–':s.offer?'Preis auf Anfrage':money(p.total));
   setText('priceContext',s.standard?'Deine Platte ab Lager':'Deine Maßanfertigung');
-  setText('atelierTax',s.standard?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+versand().text+' Versand');
+  { const v=versand(); setText('atelierTax',v.frei?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+v.text+' Versand'); }
   $('continueStep').disabled=(!s.valid||errors.length>0)&&step===3;
   if(step===3)$('continueStep').innerHTML=(s.offer?'Anfrage vorbereiten':editingId?'Änderungen speichern':'Platte hinzufügen')+chevron;
   /* Die Zeile meldet sich nur noch, wenn etwas zu tun ist — Fliesstext ohne
@@ -4455,10 +4485,11 @@ function renderReview(){
      in dieser Aufstellung ergab er eine zweite, hoehere Gesamtsumme — und die stand
      neben der Summe in der Kaufleiste (Sascha, 11.09.). Jetzt steht hier der Preis
      der Platte, der Versand als Hinweis darunter. */
-  const versandHinweis=s.standard?'Versand kostenfrei':'zzgl. '+versand().text+' Versand — einmalig je Bestellung, unabhängig von der Stückzahl';
+  const vsd=versand();
+  const versandHinweis=vsd.frei?'Versand kostenfrei':s.standard?'zzgl. '+vsd.text+' Versand — Lagerartikel, Betrag wie im Shop':'zzgl. '+vsd.text+' Versand — einmalig je Bestellung, unabhängig von der Stückzahl';
   $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div class="review_total"><span>Deine Platte inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total)}</strong></div></details><p class="review_shipping">${versandHinweis}</p>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}<div class="review_cta" id="reviewCta"><button type="button" class="primary_button" id="reviewAdd"></button></div>`;
   beobachteCta();
-  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
+  $('orderProcess').innerHTML=s.standard?(vsd.frei?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops; der Versand wird an der Kasse berechnet.</p>'):'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
   if(s.offer){api.syncLink();$('orderProcess').innerHTML=api.inquiry
     ?'<h3>Deine individuelle Anfrage</h3><p>Für ein eigenes Bohrbild rechnen wir von Hand. Wir bereiten eine E-Mail mit deiner Konfiguration vor — beschreibe darin, was du brauchst, und hänge deine Skizze an.</p>'
     :'<h3>Deine individuelle Anfrage</h3><p>Öffne diese Auswahl im Live-Konfigurator, um ein Angebot anzufragen.</p><a class="secondary_button" target="_blank" rel="noopener" href="https://www.kessler-pro.com/tischplatte-nach-mass'+esc(location.hash)+'">Auswahl im Live-Konfigurator öffnen</a>';}
@@ -4499,7 +4530,7 @@ function addToCart(){
   if(!snapshot.valid||errors.length||snapshot.offer)return;
   api.syncLink();
   const existing=cart.find(item=>item.id===editingId);
-  const item={id:existing?.id||Date.now(),quantity:existing?.quantity||1,config:structuredClone(snapshot.config),name:snapshot.material.name+' · '+snapshot.price.dekorName,dims:dimsText(snapshot),thick:snapshot.price.thickName,price:snapshot.price.total,shipping:snapshot.standard?0:versand().betrag,hash:location.hash,preview:capturePreview(),cuts:structuredClone(snapshot.cuts),workerBody:api.workerBody(),order:api.orderIntent?api.orderIntent():null};
+  const item={id:existing?.id||Date.now(),quantity:existing?.quantity||1,config:structuredClone(snapshot.config),name:snapshot.material.name+' · '+snapshot.price.dekorName,dims:dimsText(snapshot),thick:snapshot.price.thickName,price:snapshot.price.total,shipping:versand().betrag,hash:location.hash,preview:capturePreview(),cuts:structuredClone(snapshot.cuts),workerBody:api.workerBody(),order:api.orderIntent?api.orderIntent():null};
   if(existing)cart=cart.map(row=>row.id===existing.id?item:row);else cart.push(item);
   editingId=null;persistCart();renderCart();$('cartDialog').showModal();
   $('cartDialogTitle').textContent=existing?'Deine Platte wurde aktualisiert.':'Deine Platte ist gespeichert.';

@@ -48,7 +48,7 @@ check('Position (Rueckfall Draft Order): individuelle Position mit Titel, Preis,
 check('Attribute: Form & Maß mit Lage', li.customAttributes.some(a=>a.key==='Form & Maß' && /Ausklinkung 80 × 50 cm hinten rechts · gerade/.test(a.value)), li.customAttributes);
 check('Attribute: _kfg_preis-Aufteilung', li.customAttributes.some(a=>a.key==='_kfg_preis' && /Platte 170.90 .* Ausklinkung 28.90/.test(a.value)), li.customAttributes);
 check('Gewicht plausibel (1,8 m2 x 25 mm ≈ 31,5 kg)', li.weight.value>25 && li.weight.value<40, li.weight);
-check('Versand Massanfertigung pauschal 19,99 fuer 200x90', letzterAufruf.variables.input.shippingLine && letzterAufruf.variables.input.shippingLine.price==='19.99' && /pauschal/.test(letzterAufruf.variables.input.shippingLine.title), letzterAufruf.variables.input.shippingLine);
+check('Versand Massanfertigung 49,99 fuer L-Form 200x90 (ab 150 cm, Sascha 24.09.)', letzterAufruf.variables.input.shippingLine && letzterAufruf.variables.input.shippingLine.price==='49.99' && /ab 150 cm/.test(letzterAufruf.variables.input.shippingLine.title), letzterAufruf.variables.input.shippingLine);
 check('Rohdaten in Stuecken vollstaendig', (()=>{ const t=li.customAttributes.filter(a=>/^_kfg_konfig_\d$/.test(a.key)).sort((x,y)=>x.key.localeCompare(y.key)).map(a=>a.value).join(''); try{ const o=JSON.parse(t); return o.lf && o.lf.L===200; }catch(e){ return false; } })(), li.customAttributes.filter(a=>/_kfg_konfig/.test(a.key)).length);
 check('Widerruf + Lieferzeit als Attribut', li.customAttributes.some(a=>a.key==='Hinweis'&&/Widerruf/.test(a.value)) && li.customAttributes.some(a=>a.key==='Lieferzeit'), li.customAttributes.map(a=>a.key));
 check('Presentment EUR, Tags, Notiz', letzterAufruf.variables.input.presentmentCurrencyCode==='EUR' && letzterAufruf.variables.input.tags.includes('konfigurator') && /kfg-1\.17\.0/.test(letzterAufruf.variables.input.tags.join()), letzterAufruf.variables.input);
@@ -117,7 +117,7 @@ check('Warenkorb: Antwort mit variantId, Token, Titel, Preis EUR', r.variantId==
 const v0 = varCall.variables.v[0];
 check('Variante: Option Ausführung mit Kurztitel + #Token, feste ERP-SKU NM-MP-BUK-25, PLN-Preis, Gewicht, Dekorbild Buche', v0.optionValues[0].optionName==='Ausführung' && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(v0.optionValues[0].name) && v0.inventoryItem.sku==='NM-MP-BUK-25' && +v0.price>500 && v0.inventoryItem.measurement.weight.value>25 && v0.mediaId==='gid://shopify/MediaImage/62075442561370', v0);
 check('Festpreis 199,80 EUR in der EU-Preisliste', preisCall.variables.p[0].price.amount==='199.80' && preisCall.variables.p[0].price.currencyCode==='EUR' && preisCall.variables.l==='gid://shopify/PriceList/31843025242', preisCall.variables);
-check('Versandprofil Massanfertigung', profilCall.variables.id==='gid://shopify/DeliveryProfile/138342564186' && profilCall.variables.p.variantsToAssociate[0]===r.variantId, profilCall.variables);
+check('Versandprofil Massanfertigung gross (200x90 >= 150 cm)', profilCall.variables.id==='gid://shopify/DeliveryProfile/138357965146' && profilCall.variables.p.variantsToAssociate[0]===r.variantId, profilCall.variables);
 check('Attribute: sichtbare Zeilen + Zeichnung-pruefen-Link + versteckte _kfg_token/_kfg_titel/_kfg_konfig', r.attribute.some(a=>a.key==='Form & Maß') && r.attribute.some(a=>a.key==='Zeichnung prüfen'&&a.value.endsWith('/freigabe/'+r.token)) && r.attribute.some(a=>a.key==='_kfg_token'&&a.value===r.token) && r.attribute.some(a=>a.key==='_kfg_titel') && r.attribute.some(a=>a.key==='_kfg_konfig_1'), r.attribute.map(a=>a.key));
 check('Kein checkoutUrl ohne sofort', !r.checkoutUrl);
 /* Shopyflow-Notbehelf (10.09.2026): kein Attributwert darf Anfuehrungszeichen
@@ -184,7 +184,7 @@ const umCall = aufrufe.find(a=>/productVariantsBulkUpdate/.test(a.query)), anleg
 check('Vorrat: Reserve umgeschrieben, keine Konfig-Variante frisch angelegt', umCall && reserven.includes(umCall.variables.v[0].id) && r.variantId===umCall.variables.v[0].id && r.vorrat===true, { r: r.variantId, um: umCall && umCall.variables.v[0].id });
 const u0 = umCall && umCall.variables.v[0];
 check('Vorrat: Umschreiben setzt Name, PLN-Preis, feste ERP-SKU, kaufbar (tracked false, CONTINUE), Gewicht, Dekorbild', u0 && /^Möbelplatte · Buche · 25 mm · L-Form 200 × 90 cm · #/.test(u0.optionValues[0].name) && +u0.price>500 && u0.inventoryItem.sku==='NM-MP-BUK-25' && u0.inventoryItem.tracked===false && u0.inventoryPolicy==='CONTINUE' && u0.inventoryItem.measurement.weight.value>25 && u0.mediaId==='gid://shopify/MediaImage/62075442561370', u0);
-check('Vorrat: EUR-Festpreis gesetzt, Versandprofil nicht erneut (Reserve hat es schon)', aufrufe.some(a=>/priceListFixedPricesAdd/.test(a.query)) && !profilCalls.some(p=>p.variables.p.variantsToAssociate.includes(r.variantId)), profilCalls.map(p=>p.variables.p));
+check('Vorrat: EUR-Festpreis gesetzt; 200x90 haengt die Reserve ins grosse Profil um', aufrufe.some(a=>/priceListFixedPricesAdd/.test(a.query)) && profilCalls.some(p=>p.variables.id==='gid://shopify/DeliveryProfile/138357965146' && p.variables.p.variantsToAssociate.includes(r.variantId)), profilCalls.map(p=>p.variables));
 check('Vorrat: Kaufbarkeits-Probe per cartCreate auch ohne sofort, Nachkontrolle des Namens', storefront.length===1 && storefront[0].b.variables.in.lines[0].merchandiseId===r.variantId && aufrufe.some(a=>/productVariant\(id/.test(a.query)), storefront.length);
 const nach = anlegeCalls.find(a=>a.variables.v.length>1);
 check('Vorrat: 10 Reserven nachgelegt (Ziel 12, 2 vorhanden) — SKU KFG-RESERVE-, nicht kaufbar (tracked, DENY, 0,00), Versandprofil zugeordnet', nach && nach.variables.v.length===10 && nach.variables.v.every(v=>/^KFG-RESERVE-[A-Za-z0-9]{8}$/.test(v.inventoryItem.sku) && v.inventoryItem.tracked===true && v.inventoryPolicy==='DENY' && v.price==='0.00' && /^Reserviert · /.test(v.optionValues[0].name)) && profilCalls.some(p=>p.variables.p.variantsToAssociate.length===10), nach && nach.variables.v.length);
@@ -285,6 +285,31 @@ warenkorbLeerBis = 0;
   const dr = aufrufe.find(a=>/draftOrderCreate/.test(a.query));
   const li = dr && dr.variables.input.lineItems[0];
   check('ERP: Rueckfall-Position traegt sku NM-MP-BUK-25 und _kfg_sku', li && li.sku==='NM-MP-BUK-25' && li.customAttributes.some(a=>a.key==='_kfg_sku' && a.value==='NM-MP-BUK-25'), li && { sku: li.sku });
+}
+
+/* ⑬ Versandstaffel (Sascha 24.09.): unter 150 cm 19,99 / 84,90, ab 150 cm laengster
+   Seite 49,99 / 199,90 — Rechteck, L-Form, Bauch und rund gleich behandelt. */
+{
+  const klein = Object.assign({}, S, { form:'rect', L:120, B:60 }), breit = Object.assign({}, S, { form:'rect', L:100, B:150 }), rund = Object.assign({}, S, { form:'round', D:150 });
+  reserven = ['gid://shopify/ProductVariant/5011']; aufrufe = []; storefront = [];
+  const rk = await warenkorb({ kanal:'eur', konfig:klein }, env, null);
+  check('Versand: 120x60 bleibt bei 19,99 und im 19,99-Profil (Reserve wird nicht umgehaengt)', !aufrufe.some(a=>/deliveryProfileUpdate/.test(a.query) && a.variables.p.variantsToAssociate.includes(rk.variantId)), aufrufe.filter(a=>/deliveryProfileUpdate/.test(a.query)).map(a=>a.variables));
+  aufrufe = [];
+  await checkout({ kanal:'eur', konfig:klein }, env, null);
+  const dk = aufrufe.find(a=>/draftOrderCreate/.test(a.query));
+  check('Versand: Draft Order 120x60 → 19,99 pauschal', dk && dk.variables.input.shippingLine.price==='19.99' && /pauschal/.test(dk.variables.input.shippingLine.title) && !/150/.test(dk.variables.input.shippingLine.title), dk && dk.variables.input.shippingLine);
+  aufrufe = [];
+  await checkout({ kanal:'pln', sprache:'pl', konfig:breit }, env, null);
+  const db = aufrufe.find(a=>/draftOrderCreate/.test(a.query));
+  check('Versand: 100x150 (Breite zaehlt) PL → 199,90 zl', db && db.variables.input.shippingLine.price==='199.90' && /od 150 cm/.test(db.variables.input.shippingLine.title), db && db.variables.input.shippingLine);
+  reserven = []; aufrufe = []; storefront = [];
+  const rr = await warenkorb({ kanal:'eur', konfig:rund }, env, null);
+  const pr = aufrufe.filter(a=>/deliveryProfileUpdate/.test(a.query) && a.variables.p.variantsToAssociate.includes(rr.variantId));
+  check('Versand: rund Ø 150 frisch angelegt → nur ins grosse Profil', pr.length===1 && pr[0].variables.id==='gid://shopify/DeliveryProfile/138357965146', pr.map(p=>p.variables.id));
+  aufrufe = [];
+  await checkout({ kanal:'eur', konfig:Object.assign({}, S, { form:'rect', L:149, B:80 }) }, env, null);
+  const d149 = aufrufe.find(a=>/draftOrderCreate/.test(a.query));
+  check('Versand: 149x80 knapp darunter → 19,99', d149 && d149.variables.input.shippingLine.price==='19.99', d149 && d149.variables.input.shippingLine);
 }
 
 console.log(`${ok} gruen, ${bad.length} rot`); bad.forEach(b=>console.log('  ✗', b));

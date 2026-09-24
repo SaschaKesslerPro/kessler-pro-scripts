@@ -19,7 +19,7 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.20.1';
+  var VERSION = '1.21.0';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   /* Auf den Commit gezogen, der am 10.09.2026 live lief — dort liegen Preiskurven,
@@ -124,9 +124,12 @@ var FALLBACK_BASE = '.';
         if (d && d.produkte) {
           for (var k in d.produkte) {
             var v = d.produkte[k];
-            /* [EUR, VariantId, SKU, PLN] — PLN seit v1.17.0 fuer die polnische Seite */
+            /* [EUR, VariantId, SKU, PLN, Versand] — PLN seit v1.17.0 fuer die polnische
+               Seite; Versand seit 1.21.0: Shopify-Profil und Gewicht des Lagerartikels
+               ({p:'frei'|'sperrgut'|'rund', kg}), damit der Konfigurator dasselbe sagt
+               wie die Kasse (vorher hiess jede Lagergroesse "kostenfrei"). */
             if (v.eur) out[k] = [Math.round(v.eur*100)/100, String(v.variantId||'').split('/').pop(), v.sku,
-                                 v.pln ? Math.round(v.pln*100)/100 : null];
+                                 v.pln ? Math.round(v.pln*100)/100 : null, v.versand || null];
           }
         }
         return { shop: out, kurven: kv && kv.kurven ? kv.kurven : null };
@@ -913,6 +916,30 @@ const CHECKOUT_URL=(function(){
    setzt denselben Betrag als Versandzeile in die Bestellung (VERSAND_STANDARD).
    PLN-Wert vorlaeufig, von Sascha zu bestaetigen. */
 const VERSAND_MASS={eur:'19,99 €', pln:'84,90 zł'};
+/* ── Versand, wie Shopify ihn wirklich berechnet (Sascha 24.09.) ──────────────
+   Lagerartikel: das Profil des Artikels in Shopify — "frei" (DHL kostenlos),
+   "sperrgut" (Staffel nach Gewicht) oder "rund" (Rundplatten-Pauschale). Bis
+   1.20.x hiess jede Lagergroesse "kostenfrei", obwohl 201 von 321 Lagerplatten
+   an der Kasse Versand kosten (130 x 80 Compact: 12,90 EUR). Massanfertigung:
+   19,99 EUR pauschal; ab 150 cm laengster Seite 49,99 EUR — eine 200er Platte
+   hat im Versand knapp 100 EUR gekostet. Der Worker rechnet dieselbe Staffel. */
+const VERSAND_GROSS={eur:'49,99 €', pln:'199,90 zł'}, VERSAND_GROSS_AB_CM=150;
+const VERSAND_RUND={eur:19.90, pln:90.00};
+const VERSAND_SPERRGUT={eur:[[14,6.90],[28,12.90],[42,24.90],[Infinity,59.90]], pln:[[14,39.90],[28,69.90],[Infinity,119.90]]};
+function laengsteSeite(){ const d=dims(); return Math.max(+d.w||0,+d.h||0); }
+function versandBetrag(txt){ return +String(txt).replace(/[^\d,]/g,'').replace(',','.'); }
+/* {betrag, text, frei, art:'frei'|'sperrgut'|'rund'|'mass'|'gross'} fuer die aktuelle Konfiguration */
+function versandInfo(){
+  const k=kanal();
+  if(isStandard()){
+    const hit=shopHit(), v=hit&&hit[4];
+    if(!v||v.p==='frei') return {betrag:0, text:fmt(0), frei:true, art:'frei'};
+    if(v.p==='rund') return {betrag:VERSAND_RUND[k], text:fmt(VERSAND_RUND[k]), frei:false, art:'rund'};
+    if(v.p==='sperrgut'){ const st=VERSAND_SPERRGUT[k], kg=+v.kg||0; const b=(st.find(x=>kg<=x[0])||st[st.length-1])[1]; return {betrag:b, text:fmt(b), frei:false, art:'sperrgut'}; }
+  }
+  const gross=laengsteSeite()>=VERSAND_GROSS_AB_CM, t=gross?VERSAND_GROSS[k]:VERSAND_MASS[k];
+  return {betrag:versandBetrag(t), text:t, frei:false, art:gross?'gross':'mass'};
+}
 /* Der Checkout-Worker traegt eine SERVERSEITIGE Kopie der Preisrechnung. Sie kennt
    den Bauchausschnitt noch nicht und wuerde einen anderen Betrag errechnen — der
    Abgleich im Worker haette die Bestellung mit "Preis weicht ab" abgewiesen, nachdem
@@ -2335,7 +2362,7 @@ function preisTexte(){
   document.querySelectorAll('.kfg_preset').forEach(el=>{ const p=PRESETS[el.dataset.preset], pr=el.querySelector('.pr'); if(p&&pr) pr.textContent=`+ ${fmt(zl(p.price))} / Stück`; });
   { const b=document.querySelector('.kfg_check input[data-x="bohr"]'); const pr=b&&b.closest('.kfg_check').querySelector('.pr'); if(pr) pr.textContent=`+ ${fmt(zl(X_PRICE.bohr))}`; }
   { const bm=$('btnMaschine'); const pr=bm&&bm.parentElement.querySelector('.pr'); if(pr) pr.textContent=`+ ${fmt(zl(PRESETS.maschine.price))} pauschal`; }
-  { const t=document.querySelector('.kfg_trust'); if(t){ const sp=[...t.querySelectorAll('span')].find(x=>/nach Maß|na wymiar|made to measure/.test(x.textContent)); if(sp){ const ic=sp.querySelector('svg'); sp.textContent=` Lagergröße versandkostenfrei · nach Maß ${VERSAND_MASS[kanal()]}`; if(ic) sp.prepend(ic); } } }
+  { const t=document.querySelector('.kfg_trust'); if(t){ const sp=[...t.querySelectorAll('span')].find(x=>/nach Maß|na wymiar|made to measure/.test(x.textContent)); if(sp){ const ic=sp.querySelector('svg'); sp.textContent=` Nach Maß ${VERSAND_MASS[kanal()]} · ab ${VERSAND_GROSS_AB_CM} cm ${VERSAND_GROSS[kanal()]}`; if(ic) sp.prepend(ic); } } }
   { const n=$('mpxNote'); if(n) n.textContent=`Sichtbare Schichtkante: nicht gefräst ist serienmäßig, gefräst 45° kostet ${fmt(zl(5))}/lfm, halbrund ${fmt(zl(8))}/lfm. Lackiert sind es ${fmt(zl(5))}, ${fmt(zl(10))} und ${fmt(zl(16))}/lfm — wir haben genau eine Lackierung. Alternativ eine ABS-Kante in der gewünschten Farbe.`; }
   { const b=$('btnMuster'); const sm=b&&b.parentElement.querySelector('small'); if(sm) sm.textContent=`Musterbox mit 4 Dekoren — ${fmt(zl(4.9))}, voll angerechnet beim Kauf`; }
 }
@@ -2427,10 +2454,11 @@ function renderAtelierCore(){
   { const dh=$('datenHinweis'); if(dh) dh.hidden=!keineDaten; }
   if(keineDaten) $('badgeText').textContent='Preise gerade nicht verfügbar';
   const zahlbar=!std && kannBezahlen();
-  if(std){$('delivDate').textContent='Versand bis '+delivDate();$('delivSub').textContent='DHL, ab Lager';$('delivBar').textContent='Versand bis '+delivDate();}
-  else if(zahlbar){$('delivDate').textContent='Fertigung nach Maß';$('delivSub').textContent=`Versand ${VERSAND_MASS[kanal()]} pauschal`;$('delivBar').textContent='Nach Maß gefertigt';}
+  const vs=versandInfo();
+  if(std){$('delivDate').textContent='Versand bis '+delivDate();$('delivSub').textContent=vs.frei?'DHL, ab Lager':`Ab Lager · zzgl. ${vs.text} Versand`;$('delivBar').textContent='Versand bis '+delivDate();}
+  else if(zahlbar){$('delivDate').textContent='Fertigung nach Maß';$('delivSub').textContent=`Versand ${vs.text} pauschal`;$('delivBar').textContent='Nach Maß gefertigt';}
   else {$('delivDate').textContent='Angebot in 24 h';$('delivSub').textContent='Versandkosten im Angebot';$('delivBar').textContent='Fertigung · Angebot in 24 h';}
-  { const vl=$('vatLine'); if(vl) vl.textContent=std?'inkl. MwSt., kostenloser Versand':`inkl. MwSt., zzgl. ${VERSAND_MASS[kanal()]} Versand`; }
+  { const vl=$('vatLine'); if(vl) vl.textContent=vs.frei?'inkl. MwSt., kostenloser Versand':`inkl. MwSt., zzgl. ${vs.text} Versand`; }
   /* Senior 07.09.: wie auf der Produktseite — "In den Warenkorb" als Hauptknopf, darunter
      "Sofortkauf". Lagerartikel und Massplatten mit festem Preis koennen beides; ohne
      festen Preis bleibt nur die Anfrage. */
@@ -2442,7 +2470,7 @@ function renderAtelierCore(){
      kein Preis im Bild, die Preiskarte sitzt am Ende des Panels (Review 08.09., C1) */
   { const pm=$('priceMini'), dm=$('delivMini'), cm=$('ctaMini');
     if(pm) pm.textContent=pv;
-    if(dm) dm.textContent=keineDaten?'Preis folgt':std?'Ab Lager · 3 bis 5 Tage':zahlbar?`Nach Maß · zzgl. ${VERSAND_MASS[kanal()]} Versand`:'Angebot in 24 h';
+    if(dm) dm.textContent=keineDaten?'Preis folgt':std?(vs.frei?'Ab Lager · 3 bis 5 Tage':`Ab Lager · zzgl. ${vs.text} Versand`):zahlbar?`Nach Maß · zzgl. ${vs.text} Versand`:'Angebot in 24 h';
     if(cm) cm.classList.toggle('is-sonder',!kaufbar); }
   const sur=S.mat==='mpx'?{natur:' · natur',hpl:' + HPL'}[S.mpxSurface]:'';
   const hit=shopHit();

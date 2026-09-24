@@ -7,7 +7,9 @@ const assetUrl=p=>((api&&api.assetBase&&api.assetBase())||'assets/kfg/')+p;
 const moneyDe=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n);
 /* Waehrung und Versandpauschale gehoeren dem Kern: auf /pl-pl/ sind es Zloty. */
 const money=n=>(api&&api.money?api.money(n):moneyDe(n));
-const versand=()=>(api&&api.shipping?api.shipping():{betrag:19.99,text:'19,99 \u20ac'});
+/* {betrag,text,frei,art} — der Kern kennt das Shopify-Profil des Lagerartikels und die
+   Staffel fuer Massplatten (ab 150 cm 49,99). Nicht mehr "Lager = kostenfrei" raten. */
+const versand=()=>(api&&api.shipping?api.shipping():{betrag:19.99,text:'19,99 \u20ac',frei:false,art:'mass'});
 const number=n=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(n);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const svg=(content,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${content}</svg>`;
@@ -285,7 +287,7 @@ function sync(){
   const closedPrice=!s.valid||errors.length>0||s.offer;
   setText('atelierPrice',!s.valid||errors.length?'–':s.offer?'Preis auf Anfrage':money(p.total));
   setText('priceContext',s.standard?'Deine Platte ab Lager':'Deine Maßanfertigung');
-  setText('atelierTax',s.standard?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+versand().text+' Versand');
+  { const v=versand(); setText('atelierTax',v.frei?'inkl. MwSt., Versand kostenfrei':'inkl. MwSt., zzgl. '+v.text+' Versand'); }
   $('continueStep').disabled=(!s.valid||errors.length>0)&&step===3;
   if(step===3)$('continueStep').innerHTML=(s.offer?'Anfrage vorbereiten':editingId?'Änderungen speichern':'Platte hinzufügen')+chevron;
   /* Die Zeile meldet sich nur noch, wenn etwas zu tun ist — Fliesstext ohne
@@ -346,10 +348,11 @@ function renderReview(){
      in dieser Aufstellung ergab er eine zweite, hoehere Gesamtsumme — und die stand
      neben der Summe in der Kaufleiste (Sascha, 11.09.). Jetzt steht hier der Preis
      der Platte, der Versand als Hinweis darunter. */
-  const versandHinweis=s.standard?'Versand kostenfrei':'zzgl. '+versand().text+' Versand — einmalig je Bestellung, unabhängig von der Stückzahl';
+  const vsd=versand();
+  const versandHinweis=vsd.frei?'Versand kostenfrei':s.standard?'zzgl. '+vsd.text+' Versand — Lagerartikel, Betrag wie im Shop':'zzgl. '+vsd.text+' Versand — einmalig je Bestellung, unabhängig von der Stückzahl';
   $('reviewContent').innerHTML=`<div class="review_rows">${rows.map(([label,value,index])=>`<div><span>${esc(label)}</span><strong>${esc(value)}</strong><button type="button" data-edit-step="${index}" aria-label="Ändern \u00b7 ${esc(label)}">Ändern</button></div>`).join('')}</div><details class="review_costs" open><summary>Dein Preis im Detail</summary>${costs.map(([n,v])=>`<div><span>${n}</span><b>${s.offer?'Auf Anfrage':money(v)}</b></div>`).join('')}<div class="review_total"><span>Deine Platte inkl. MwSt.</span><strong>${!s.valid||errors.length?'Bitte Konfiguration prüfen':s.offer?'Angebot erforderlich':money(p.total)}</strong></div></details><p class="review_shipping">${versandHinweis}</p>${errors.length?'<p class="error_note">Bitte korrigiere die Bearbeitungen im vorherigen Schritt.</p>':''}<div class="review_cta" id="reviewCta"><button type="button" class="primary_button" id="reviewAdd"></button></div>`;
   beobachteCta();
-  $('orderProcess').innerHTML=s.standard?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
+  $('orderProcess').innerHTML=s.standard?(vsd.frei?'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops, der Versand ist kostenfrei.</p>':'<h3>Deine Platte ab Lager</h3><p>Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops; der Versand wird an der Kasse berechnet.</p>'):'<h3>Direkt bestellen und bezahlen</h3><p>Deine Platte sammelt sich zuerst bei deinen Platten. Dort stellst du die Stückzahl ein.</p><ol class="order_steps"><li>Du legst alle Platten in den Warenkorb des Shops und bezahlst.</li><li>Wir schicken dir die technische Zeichnung deiner Platte per E-Mail.</li><li>Du prüfst die Maße und bestätigst sie über den Link. Ohne Rückmeldung gilt die Zeichnung nach 72 Stunden als freigegeben — dann fertigen wir.</li></ol>';
   if(s.offer){api.syncLink();$('orderProcess').innerHTML=api.inquiry
     ?'<h3>Deine individuelle Anfrage</h3><p>Für ein eigenes Bohrbild rechnen wir von Hand. Wir bereiten eine E-Mail mit deiner Konfiguration vor — beschreibe darin, was du brauchst, und hänge deine Skizze an.</p>'
     :'<h3>Deine individuelle Anfrage</h3><p>Öffne diese Auswahl im Live-Konfigurator, um ein Angebot anzufragen.</p><a class="secondary_button" target="_blank" rel="noopener" href="https://www.kessler-pro.com/tischplatte-nach-mass'+esc(location.hash)+'">Auswahl im Live-Konfigurator öffnen</a>';}
@@ -390,7 +393,7 @@ function addToCart(){
   if(!snapshot.valid||errors.length||snapshot.offer)return;
   api.syncLink();
   const existing=cart.find(item=>item.id===editingId);
-  const item={id:existing?.id||Date.now(),quantity:existing?.quantity||1,config:structuredClone(snapshot.config),name:snapshot.material.name+' · '+snapshot.price.dekorName,dims:dimsText(snapshot),thick:snapshot.price.thickName,price:snapshot.price.total,shipping:snapshot.standard?0:versand().betrag,hash:location.hash,preview:capturePreview(),cuts:structuredClone(snapshot.cuts),workerBody:api.workerBody(),order:api.orderIntent?api.orderIntent():null};
+  const item={id:existing?.id||Date.now(),quantity:existing?.quantity||1,config:structuredClone(snapshot.config),name:snapshot.material.name+' · '+snapshot.price.dekorName,dims:dimsText(snapshot),thick:snapshot.price.thickName,price:snapshot.price.total,shipping:versand().betrag,hash:location.hash,preview:capturePreview(),cuts:structuredClone(snapshot.cuts),workerBody:api.workerBody(),order:api.orderIntent?api.orderIntent():null};
   if(existing)cart=cart.map(row=>row.id===existing.id?item:row);else cart.push(item);
   editingId=null;persistCart();renderCart();$('cartDialog').showModal();
   $('cartDialogTitle').textContent=existing?'Deine Platte wurde aktualisiert.':'Deine Platte ist gespeichert.';
