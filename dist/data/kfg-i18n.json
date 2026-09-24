@@ -6,8 +6,8 @@
    "pl",
    "en"
   ],
-  "anzahl": 341,
-  "muster": 87,
+  "anzahl": 523,
+  "muster": 91,
   "stand": "2026-09-10 Atelier-Oberflaeche"
  },
  "pl": {
@@ -526,7 +526,14 @@
   "Freie Kontur gibt es nur bei eckigen Platten": "Dowolny kontur jest tylko w blatach prostokątnych",
   "Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen": "Brak wolnego miejsca — przesuń najpierw istniejące obróbki",
   "Vollbild schließen": "Zamknij pełny ekran",
-  "eckig": "ostre"
+  "eckig": "ostre",
+  "Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops; der Versand wird an der Kasse berechnet.": "Ta wersja jest u nas artykułem magazynowym. Trafia do koszyka sklepu bez produkcji na wymiar; wysyłka jest naliczana przy kasie.",
+  "inkl. MwSt., zzgl. 49,99 € Versand": "z VAT, plus 49,99 € wysyłki",
+  "inkl. MwSt., zzgl. 6,90 € Versand": "z VAT, plus 6,90 € wysyłki",
+  "inkl. MwSt., zzgl. 12,90 € Versand": "z VAT, plus 12,90 € wysyłki",
+  "inkl. MwSt., zzgl. 24,90 € Versand": "z VAT, plus 24,90 € wysyłki",
+  "inkl. MwSt., zzgl. 59,90 € Versand": "z VAT, plus 59,90 € wysyłki",
+  "inkl. MwSt., zzgl. 19,90 € Versand": "z VAT, plus 19,90 € wysyłki"
  },
  "en": {
   "Ab Lager": "From stock",
@@ -1044,7 +1051,14 @@
   "Freie Kontur gibt es nur bei eckigen Platten": "A free contour is only available on straight-edged panels",
   "Kein freier Platz mehr — verschiebe zuerst die vorhandenen Bearbeitungen": "No free space left — move the existing work first",
   "Vollbild schließen": "Close full screen",
-  "eckig": "square"
+  "eckig": "square",
+  "Diese Ausführung liegt bei uns als Lagerartikel. Sie geht ohne Sonderfertigung in den Warenkorb des Shops; der Versand wird an der Kasse berechnet.": "This version is a stock item. It goes into the shop basket without custom production; shipping is calculated at checkout.",
+  "inkl. MwSt., zzgl. 49,99 € Versand": "incl. VAT, plus €49.99 shipping",
+  "inkl. MwSt., zzgl. 6,90 € Versand": "incl. VAT, plus €6.90 shipping",
+  "inkl. MwSt., zzgl. 12,90 € Versand": "incl. VAT, plus €12.90 shipping",
+  "inkl. MwSt., zzgl. 24,90 € Versand": "incl. VAT, plus €24.90 shipping",
+  "inkl. MwSt., zzgl. 59,90 € Versand": "incl. VAT, plus €59.90 shipping",
+  "inkl. MwSt., zzgl. 19,90 € Versand": "incl. VAT, plus €19.90 shipping"
  },
  "muster": {
   "pl": [
@@ -1399,6 +1413,18 @@
    [
     "^zzgl\\. (.+) Versand — einmalig je Bestellung, unabhängig von der Stückzahl$",
     "plus $1 wysyłki — jednorazowo na zamówienie, niezależnie od liczby sztuk"
+   ],
+   [
+    "^Ab Lager · zzgl\\. (.+) Versand$",
+    "Z magazynu · plus $1 dostawa"
+   ],
+   [
+    "^Nach Maß (.+) · ab (\\d+) cm (.+)$",
+    "Na wymiar $1 · od $2 cm $3"
+   ],
+   [
+    "^zzgl\\. (.+) Versand — Lagerartikel, Betrag wie im Shop$",
+    "plus $1 dostawa — artykuł magazynowy, kwota jak w sklepie"
    ]
   ],
   "en": [
@@ -1753,6 +1779,18 @@
    [
     "^zzgl\\. (.+) Versand — einmalig je Bestellung, unabhängig von der Stückzahl$",
     "plus $1 shipping — once per order, regardless of quantity"
+   ],
+   [
+    "^Ab Lager · zzgl\\. (.+) Versand$",
+    "From stock · plus $1 shipping"
+   ],
+   [
+    "^Nach Maß (.+) · ab (\\d+) cm (.+)$",
+    "Made to measure $1 · from $2 cm $3"
+   ],
+   [
+    "^zzgl\\. (.+) Versand — Lagerartikel, Betrag wie im Shop$",
+    "plus $1 shipping — stock item, same amount as in the shop"
    ]
   ]
  }

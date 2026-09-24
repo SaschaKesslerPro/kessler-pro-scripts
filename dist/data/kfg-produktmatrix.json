@@ -7,7 +7,8 @@
   "ohne_shopify_variante": [],
   "doppelte_ean": [
    "5908453742155 = 5908453742209 (Moebelplatte rund D100 Grau 25 mm)"
-  ]
+  ],
+  "versand": "je Lagerartikel: p = Shopify-Versandprofil (frei | sperrgut nach Gewicht | rund), kg = Gewicht laut Shopify. Stand 24.09.2026, tools/versand-shopify.json"
  },
  "produkte": {
   "compact|rect|szary|12|110x60": {
@@ -23,7 +24,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451238234",
    "productId": "gid://shopify/Product/10915007791450",
    "handle": "compact-tischplatte-110x60-cm-grau-12-mm",
-   "title": "Compact-Tischplatte | 110 x 60 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte | 110 x 60 cm | Grau | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|marmor-schwarz|12|110x60": {
    "sku": "5908453741011",
@@ -38,7 +43,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452745562",
    "productId": "gid://shopify/Product/10915008250202",
    "handle": "compact-tischplatte-110x60-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte | 110 x 60 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 110 x 60 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|weiss|12|110x60": {
    "sku": "5908453740861",
@@ -53,7 +62,11 @@
    "variantId": "gid://shopify/ProductVariant/54404450615642",
    "productId": "gid://shopify/Product/10915007529306",
    "handle": "compact-tischplatte-110x60-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte | 110 x 60 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte | 110 x 60 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|marmor-weiss|12|110x60": {
    "sku": "5908453740960",
@@ -68,7 +81,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451926362",
    "productId": "gid://shopify/Product/10915008020826",
    "handle": "compact-tischplatte-110x60-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte | 110 x 60 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 110 x 60 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|szary|12|120x80": {
    "sku": "5908453740922",
@@ -83,7 +100,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451271002",
    "productId": "gid://shopify/Product/10915007856986",
    "handle": "compact-tischplatte-120x80-cm-grau-12-mm",
-   "title": "Compact-Tischplatte | 120 x 80 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte | 120 x 80 cm | Grau | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 16
+   }
   },
   "compact|rect|marmor-schwarz|12|120x80": {
    "sku": "5908453741028",
@@ -98,7 +119,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452778330",
    "productId": "gid://shopify/Product/10915008282970",
    "handle": "compact-tischplatte-120x80-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte | 120 x 80 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 120 x 80 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 16
+   }
   },
   "compact|rect|weiss|12|120x80": {
    "sku": "5908453740878",
@@ -113,7 +138,11 @@
    "variantId": "gid://shopify/ProductVariant/54404450681178",
    "productId": "gid://shopify/Product/10915007594842",
    "handle": "compact-tischplatte-120x80-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte | 120 x 80 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte | 120 x 80 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 16
+   }
   },
   "compact|rect|marmor-weiss|12|120x80": {
    "sku": "5908453740977",
@@ -128,7 +157,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452057434",
    "productId": "gid://shopify/Product/10915008053594",
    "handle": "compact-tischplatte-120x80-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte | 120 x 80 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 120 x 80 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 16
+   }
   },
   "compact|rect|szary|12|130x80": {
    "sku": "5908453740939",
@@ -143,7 +176,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451565914",
    "productId": "gid://shopify/Product/10915007889754",
    "handle": "compact-tischplatte-130x80-cm-grau-12-mm",
-   "title": "Compact-Tischplatte | 130 x 80 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte | 130 x 80 cm | Grau | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 18
+   }
   },
   "compact|rect|marmor-schwarz|12|130x80": {
    "sku": "5908453741035",
@@ -158,7 +195,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452811098",
    "productId": "gid://shopify/Product/10915008315738",
    "handle": "compact-tischplatte-130x80-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte | 130 x 80 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 130 x 80 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 18
+   }
   },
   "compact|rect|weiss|12|130x80": {
    "sku": "5908453740885",
@@ -173,7 +214,11 @@
    "variantId": "gid://shopify/ProductVariant/54404450746714",
    "productId": "gid://shopify/Product/10915007627610",
    "handle": "compact-tischplatte-130x80-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte | 130 x 80 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte | 130 x 80 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 18
+   }
   },
   "compact|rect|marmor-weiss|12|130x80": {
    "sku": "5908453740984",
@@ -188,7 +233,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452286810",
    "productId": "gid://shopify/Product/10915008119130",
    "handle": "compact-tischplatte-130x80-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte | 130 x 80 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 130 x 80 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 18
+   }
   },
   "compact|rect|szary|12|60x60": {
    "sku": "5908453740892",
@@ -203,7 +252,11 @@
    "variantId": "gid://shopify/ProductVariant/54404450976090",
    "productId": "gid://shopify/Product/10915007693146",
    "handle": "compact-tischplatte-60x60-cm-grau-12-mm",
-   "title": "Compact-Tischplatte | 60 x 60 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte | 60 x 60 cm | Grau | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "compact|rect|marmor-schwarz|12|60x60": {
    "sku": "5908453740991",
@@ -218,7 +271,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452352346",
    "productId": "gid://shopify/Product/10915008184666",
    "handle": "compact-tischplatte-60x60-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte | 60 x 60 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 60 x 60 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "compact|rect|weiss|12|60x60": {
    "sku": "5908453740847",
@@ -233,7 +290,11 @@
    "variantId": "gid://shopify/ProductVariant/54404450517338",
    "productId": "gid://shopify/Product/10915007398234",
    "handle": "compact-tischplatte-60x60-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte | 60 x 60 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte | 60 x 60 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "compact|rect|marmor-weiss|12|60x60": {
    "sku": "5908453740946",
@@ -248,7 +309,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451598682",
    "productId": "gid://shopify/Product/10915007922522",
    "handle": "compact-tischplatte-60x60-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte | 60 x 60 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 60 x 60 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "compact|rect|szary|12|80x80": {
    "sku": "5908453740908",
@@ -263,7 +328,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451008858",
    "productId": "gid://shopify/Product/10915007758682",
    "handle": "compact-tischplatte-80x80-cm-grau-12-mm",
-   "title": "Compact-Tischplatte | 80 x 80 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte | 80 x 80 cm | Grau | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|marmor-schwarz|12|80x80": {
    "sku": "5908453741004",
@@ -278,7 +347,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452680026",
    "productId": "gid://shopify/Product/10915008217434",
    "handle": "compact-tischplatte-80x80-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte | 80 x 80 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 80 x 80 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|weiss|12|80x80": {
    "sku": "5908453740854",
@@ -293,7 +366,11 @@
    "variantId": "gid://shopify/ProductVariant/54404450582874",
    "productId": "gid://shopify/Product/10915007463770",
    "handle": "compact-tischplatte-80x80-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte | 80 x 80 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte | 80 x 80 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|rect|marmor-weiss|12|80x80": {
    "sku": "5908453740953",
@@ -308,7 +385,11 @@
    "variantId": "gid://shopify/ProductVariant/54404451860826",
    "productId": "gid://shopify/Product/10915007955290",
    "handle": "compact-tischplatte-80x80-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte | 80 x 80 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte | 80 x 80 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "compact|round|szary|12|D100": {
    "sku": "5908453741127",
@@ -323,7 +404,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453269850",
    "productId": "gid://shopify/Product/10915008676186",
    "handle": "compact-tischplatte-rund-100-cm-grau-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 100 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 100 cm | Grau | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 13
+   }
   },
   "compact|round|marmor-schwarz|12|D100": {
    "sku": "5908453741240",
@@ -338,7 +423,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453826906",
    "productId": "gid://shopify/Product/10915009134938",
    "handle": "compact-tischplatte-rund-100-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 100 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 100 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 13
+   }
   },
   "compact|round|weiss|12|D100": {
    "sku": "5908453741066",
@@ -353,7 +442,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452909402",
    "productId": "gid://shopify/Product/10915008446810",
    "handle": "compact-tischplatte-rund-100-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 100 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 100 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 13
+   }
   },
   "compact|round|marmor-weiss|12|D100": {
    "sku": "5908453741189",
@@ -368,7 +461,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453597530",
    "productId": "gid://shopify/Product/10915008938330",
    "handle": "compact-tischplatte-rund-100-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 100 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 100 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 13
+   }
   },
   "compact|round|szary|12|D110": {
    "sku": "5908453741134",
@@ -383,7 +480,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453335386",
    "productId": "gid://shopify/Product/10915008708954",
    "handle": "compact-tischplatte-rund-110-cm-grau-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 110 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 110 cm | Grau | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 16
+   }
   },
   "compact|round|marmor-schwarz|12|D110": {
    "sku": "5908453741257",
@@ -398,7 +499,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453859674",
    "productId": "gid://shopify/Product/10915009200474",
    "handle": "compact-tischplatte-rund-110-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 110 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 110 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 16
+   }
   },
   "compact|round|weiss|12|D110": {
    "sku": "5908453741073",
@@ -413,7 +518,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452974938",
    "productId": "gid://shopify/Product/10915008479578",
    "handle": "compact-tischplatte-rund-110-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 110 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 110 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 16
+   }
   },
   "compact|round|marmor-weiss|12|D110": {
    "sku": "5908453741196",
@@ -428,7 +537,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453663066",
    "productId": "gid://shopify/Product/10915009003866",
    "handle": "compact-tischplatte-rund-110-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 110 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 110 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 16
+   }
   },
   "compact|round|szary|12|D120": {
    "sku": "5908453741141",
@@ -443,7 +556,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453368154",
    "productId": "gid://shopify/Product/10915008741722",
    "handle": "compact-tischplatte-rund-120-cm-grau-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 120 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 120 cm | Grau | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 19
+   }
   },
   "compact|round|marmor-schwarz|12|D120": {
    "sku": "5908453741264",
@@ -458,7 +575,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453925210",
    "productId": "gid://shopify/Product/10915009233242",
    "handle": "compact-tischplatte-rund-120-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 120 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 120 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 19
+   }
   },
   "compact|round|weiss|12|D120": {
    "sku": "5908453741080",
@@ -473,7 +594,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453040474",
    "productId": "gid://shopify/Product/10915008512346",
    "handle": "compact-tischplatte-rund-120-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 120 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 120 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 19
+   }
   },
   "compact|round|marmor-weiss|12|D120": {
    "sku": "5908453741202",
@@ -488,7 +613,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453695834",
    "productId": "gid://shopify/Product/10915009036634",
    "handle": "compact-tischplatte-rund-120-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 120 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 120 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 19
+   }
   },
   "compact|round|szary|12|D130": {
    "sku": "5908453741158",
@@ -503,7 +632,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453400922",
    "productId": "gid://shopify/Product/10915008774490",
    "handle": "compact-tischplatte-rund-130-cm-grau-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 130 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 130 cm | Grau | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 22
+   }
   },
   "compact|round|marmor-schwarz|12|D130": {
    "sku": "5908453741271",
@@ -518,7 +651,11 @@
    "variantId": "gid://shopify/ProductVariant/54404454220122",
    "productId": "gid://shopify/Product/10915009331546",
    "handle": "compact-tischplatte-rund-130-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 130 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 130 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 22
+   }
   },
   "compact|round|weiss|12|D130": {
    "sku": "5908453741097",
@@ -533,7 +670,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453138778",
    "productId": "gid://shopify/Product/10915008545114",
    "handle": "compact-tischplatte-rund-130-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 130 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 130 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 22
+   }
   },
   "compact|round|marmor-weiss|12|D130": {
    "sku": "5908453741219",
@@ -548,7 +689,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453761370",
    "productId": "gid://shopify/Product/10915009069402",
    "handle": "compact-tischplatte-rund-130-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 130 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 130 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 22
+   }
   },
   "compact|round|szary|12|D60": {
    "sku": "5908453741103",
@@ -563,7 +708,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453171546",
    "productId": "gid://shopify/Product/10915008577882",
    "handle": "compact-tischplatte-rund-60-cm-grau-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 60 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 60 cm | Grau | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "compact|round|weiss|12|D60": {
    "sku": "5908453741042",
@@ -578,7 +727,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452843866",
    "productId": "gid://shopify/Product/10915008348506",
    "handle": "compact-tischplatte-rund-60-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 60 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 60 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "compact|round|marmor-weiss|12|D60": {
    "sku": "5908453741165",
@@ -593,7 +746,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453466458",
    "productId": "gid://shopify/Product/10915008872794",
    "handle": "compact-tischplatte-rund-60-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 60 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 60 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "compact|round|szary|12|D80": {
    "sku": "5908453741110",
@@ -608,7 +765,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453237082",
    "productId": "gid://shopify/Product/10915008643418",
    "handle": "compact-tischplatte-rund-80-cm-grau-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 80 cm | Grau | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 80 cm | Grau | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 8
+   }
   },
   "compact|round|marmor-schwarz|12|D80": {
    "sku": "5908453741233",
@@ -623,7 +784,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453794138",
    "productId": "gid://shopify/Product/10915009102170",
    "handle": "compact-tischplatte-rund-80-cm-schwarzer-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 80 cm | Schwarzer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 80 cm | Schwarzer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 8
+   }
   },
   "compact|round|weiss|12|D80": {
    "sku": "5908453741059",
@@ -638,7 +803,11 @@
    "variantId": "gid://shopify/ProductVariant/54404452876634",
    "productId": "gid://shopify/Product/10915008381274",
    "handle": "compact-tischplatte-rund-80-cm-weiss-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 80 cm | Weiß | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 80 cm | Weiß | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 8
+   }
   },
   "compact|round|marmor-weiss|12|D80": {
    "sku": "5908453741172",
@@ -653,7 +822,11 @@
    "variantId": "gid://shopify/ProductVariant/54404453564762",
    "productId": "gid://shopify/Product/10915008905562",
    "handle": "compact-tischplatte-rund-80-cm-weisser-marmor-12-mm",
-   "title": "Compact-Tischplatte rund | Ø 80 cm | Weißer Marmor | 12 mm"
+   "title": "Compact-Tischplatte rund | Ø 80 cm | Weißer Marmor | 12 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 8
+   }
   },
   "mpx|rect|sperrholz-natur|21|100x40": {
    "sku": "5908453742421",
@@ -668,7 +841,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786804058",
    "productId": "gid://shopify/Product/10894082539866",
    "handle": "multiplexplatte-100x40-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 100 x 40 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 100 x 40 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3.5
+   }
   },
   "mpx|rect|sperrholz-natur|21|100x50": {
    "sku": "5908453742438",
@@ -683,7 +860,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786869594",
    "productId": "gid://shopify/Product/10894082605402",
    "handle": "multiplexplatte-100x50-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 100 x 50 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 100 x 50 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "mpx|rect|sperrholz-natur|21|100x60": {
    "sku": "5908453742445",
@@ -698,7 +879,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786902362",
    "productId": "gid://shopify/Product/10894082638170",
    "handle": "multiplexplatte-100x60-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 100 x 60 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 100 x 60 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 4.5
+   }
   },
   "mpx|rect|sperrholz-natur|21|120x50": {
    "sku": "5908453742452",
@@ -713,7 +898,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786967898",
    "productId": "gid://shopify/Product/10894082703706",
    "handle": "multiplexplatte-120x50-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 120 x 50 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 120 x 50 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 3.7
+   }
   },
   "mpx|rect|sperrholz-natur|21|120x60": {
    "sku": "5908453742469",
@@ -728,7 +917,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787230042",
    "productId": "gid://shopify/Product/10894082802010",
    "handle": "multiplexplatte-120x60-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 120 x 60 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 120 x 60 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "mpx|rect|sperrholz-natur|21|50x50": {
    "sku": "5908453742476",
@@ -743,7 +936,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787328346",
    "productId": "gid://shopify/Product/10894082900314",
    "handle": "multiplexplatte-50x50-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 50 x 50 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 50 x 50 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "mpx|rect|sperrholz-natur|21|60x60": {
    "sku": "5908453742483",
@@ -758,7 +955,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787393882",
    "productId": "gid://shopify/Product/10894082965850",
    "handle": "multiplexplatte-60x60-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 60 x 60 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 60 x 60 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 3
+   }
   },
   "mpx|rect|sperrholz-natur|21|70x50": {
    "sku": "5908453742490",
@@ -773,7 +974,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787492186",
    "productId": "gid://shopify/Product/10894083064154",
    "handle": "multiplexplatte-70x50-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 70 x 50 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 70 x 50 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "mpx|rect|sperrholz-natur|21|70x60": {
    "sku": "5908453742506",
@@ -788,7 +993,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787656026",
    "productId": "gid://shopify/Product/10894083227994",
    "handle": "multiplexplatte-70x60-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 70 x 60 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 70 x 60 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 3.4
+   }
   },
   "mpx|rect|sperrholz-natur|21|80x40": {
    "sku": "5908453742513",
@@ -803,7 +1012,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787688794",
    "productId": "gid://shopify/Product/10894083260762",
    "handle": "multiplexplatte-80x40-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 80 x 40 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 80 x 40 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2.8
+   }
   },
   "mpx|rect|sperrholz-natur|21|80x50": {
    "sku": "5908453742520",
@@ -818,7 +1031,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787754330",
    "productId": "gid://shopify/Product/10894083326298",
    "handle": "multiplexplatte-80x50-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 80 x 50 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 80 x 50 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3.5
+   }
   },
   "mpx|rect|sperrholz-natur|21|80x60": {
    "sku": "5908453742537",
@@ -833,7 +1050,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787819866",
    "productId": "gid://shopify/Product/10894083391834",
    "handle": "multiplexplatte-80x60-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 80 x 60 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 80 x 60 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 3.8
+   }
   },
   "mpx|rect|sperrholz-natur|21|90x40": {
    "sku": "5908453742544",
@@ -848,7 +1069,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787852634",
    "productId": "gid://shopify/Product/10894083424602",
    "handle": "multiplexplatte-90x40-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 90 x 40 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 90 x 40 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "mpx|rect|sperrholz-natur|21|90x50": {
    "sku": "5908453742551",
@@ -863,7 +1088,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787918170",
    "productId": "gid://shopify/Product/10894083490138",
    "handle": "multiplexplatte-90x50-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 90 x 50 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 90 x 50 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "mpx|rect|sperrholz-natur|21|90x60": {
    "sku": "5908453742568",
@@ -878,7 +1107,11 @@
    "variantId": "gid://shopify/ProductVariant/54306788082010",
    "productId": "gid://shopify/Product/10894083621210",
    "handle": "multiplexplatte-90x60-cm-birke-roh-21-mm",
-   "title": "Multiplexplatte | 90 x 60 cm | Birke roh | 21 mm"
+   "title": "Multiplexplatte | 90 x 60 cm | Birke roh | 21 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 4.4
+   }
   },
   "mpx|rect|sperrholz-natur|40|100x40": {
    "sku": "5908453740151",
@@ -893,7 +1126,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776842586",
    "productId": "gid://shopify/Product/10894073561434",
    "handle": "multiplexplatte-100x40-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 100 x 40 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 100 x 40 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "mpx|rect|sperrholz-natur|40|100x50": {
    "sku": "5908453740007",
@@ -908,7 +1145,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776252762",
    "productId": "gid://shopify/Product/10894073069914",
    "handle": "multiplexplatte-100x50-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 100 x 50 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 100 x 50 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8
+   }
   },
   "mpx|rect|sperrholz-natur|40|100x60": {
    "sku": "5908453740564",
@@ -923,7 +1164,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778448218",
    "productId": "gid://shopify/Product/10894075003226",
    "handle": "multiplexplatte-100x60-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 100 x 60 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 100 x 60 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9.6
+   }
   },
   "mpx|rect|sperrholz-natur|40|120x50": {
    "sku": "5908453740168",
@@ -938,7 +1183,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776875354",
    "productId": "gid://shopify/Product/10894073594202",
    "handle": "multiplexplatte-120x50-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 120 x 50 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 120 x 50 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9.6
+   }
   },
   "mpx|rect|sperrholz-natur|40|120x60": {
    "sku": "5908453740014",
@@ -953,7 +1202,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776351066",
    "productId": "gid://shopify/Product/10894073135450",
    "handle": "multiplexplatte-120x60-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 120 x 60 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 120 x 60 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11.6
+   }
   },
   "mpx|rect|sperrholz-natur|40|50x50": {
    "sku": "5907255093670",
@@ -968,7 +1221,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775400794",
    "productId": "gid://shopify/Product/10894072217946",
    "handle": "multiplexplatte-50x50-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 50 x 50 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 50 x 50 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "mpx|rect|sperrholz-natur|40|60x60": {
    "sku": "5907255093687",
@@ -983,7 +1240,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775433562",
    "productId": "gid://shopify/Product/10894072250714",
    "handle": "multiplexplatte-60x60-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 60 x 60 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 60 x 60 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "mpx|rect|sperrholz-natur|40|70x50": {
    "sku": "5908453740298",
@@ -998,7 +1259,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777366874",
    "productId": "gid://shopify/Product/10894074052954",
    "handle": "multiplexplatte-70x50-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 70 x 50 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 70 x 50 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.6
+   }
   },
   "mpx|rect|sperrholz-natur|40|70x60": {
    "sku": "5908453740403",
@@ -1013,7 +1278,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777727322",
    "productId": "gid://shopify/Product/10894074413402",
    "handle": "multiplexplatte-70x60-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 70 x 60 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 70 x 60 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.8
+   }
   },
   "mpx|rect|sperrholz-natur|40|70x70": {
    "sku": "5907255093694",
@@ -1028,7 +1297,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775466330",
    "productId": "gid://shopify/Product/10894072283482",
    "handle": "multiplexplatte-70x70-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 70 x 70 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 70 x 70 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.9
+   }
   },
   "mpx|rect|sperrholz-natur|40|80x40": {
    "sku": "5907255093991",
@@ -1043,7 +1316,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776219994",
    "productId": "gid://shopify/Product/10894073037146",
    "handle": "multiplexplatte-80x40-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 80 x 40 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 80 x 40 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.2
+   }
   },
   "mpx|rect|sperrholz-natur|40|80x49": {
    "sku": "5908453740304",
@@ -1058,7 +1335,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777399642",
    "productId": "gid://shopify/Product/10894074085722",
    "handle": "multiplexplatte-80x49-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 80 x 49 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 80 x 49 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.4
+   }
   },
   "mpx|rect|sperrholz-natur|40|80x60": {
    "sku": "5908453740465",
@@ -1073,7 +1354,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778022234",
    "productId": "gid://shopify/Product/10894074642778",
    "handle": "multiplexplatte-80x60-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 80 x 60 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 80 x 60 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.8
+   }
   },
   "mpx|rect|sperrholz-natur|40|80x70": {
    "sku": "5908453740410",
@@ -1088,7 +1373,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777792858",
    "productId": "gid://shopify/Product/10894074446170",
    "handle": "multiplexplatte-80x70-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 80 x 70 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 80 x 70 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "mpx|rect|sperrholz-natur|40|80x80": {
    "sku": "5907255093700",
@@ -1103,7 +1392,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775499098",
    "productId": "gid://shopify/Product/10894072316250",
    "handle": "multiplexplatte-80x80-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 80 x 80 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 80 x 80 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10.5
+   }
   },
   "mpx|rect|sperrholz-natur|40|90x40": {
    "sku": "5908453740144",
@@ -1118,7 +1411,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776777050",
    "productId": "gid://shopify/Product/10894073528666",
    "handle": "multiplexplatte-90x40-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 90 x 40 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 90 x 40 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "mpx|rect|sperrholz-natur|40|90x50": {
    "sku": "5908453740557",
@@ -1133,7 +1430,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778415450",
    "productId": "gid://shopify/Product/10894074970458",
    "handle": "multiplexplatte-90x50-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 90 x 50 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 90 x 50 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8.7
+   }
   },
   "mpx|rect|sperrholz-natur|40|90x60": {
    "sku": "5908453740311",
@@ -1148,7 +1449,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777432410",
    "productId": "gid://shopify/Product/10894074118490",
    "handle": "multiplexplatte-90x60-cm-birke-roh-40-mm",
-   "title": "Multiplexplatte | 90 x 60 cm | Birke roh | 40 mm"
+   "title": "Multiplexplatte | 90 x 60 cm | Birke roh | 40 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8.8
+   }
   },
   "dekor|rect|ahorn|18|100x40": {
    "sku": "5908453744678",
@@ -1163,7 +1468,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781200730",
    "productId": "gid://shopify/Product/10894077591898",
    "handle": "arbeitsplatte-100x40-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|buk|18|100x40": {
    "sku": "5908453744975",
@@ -1178,7 +1487,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782413146",
    "productId": "gid://shopify/Product/10894078738778",
    "handle": "arbeitsplatte-100x40-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|hikora|18|100x40": {
    "sku": "5908453745576",
@@ -1193,7 +1506,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785329498",
    "productId": "gid://shopify/Product/10894081229146",
    "handle": "arbeitsplatte-100x40-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|sonoma-eiche|18|100x40": {
    "sku": "5908453745422",
@@ -1208,7 +1525,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784248154",
    "productId": "gid://shopify/Product/10894080573786",
    "handle": "arbeitsplatte-100x40-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|szary|18|100x40": {
    "sku": "5908453745125",
@@ -1223,7 +1544,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783166810",
    "productId": "gid://shopify/Product/10894079525210",
    "handle": "arbeitsplatte-100x40-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|sosna-bielona|18|100x40": {
    "sku": "5908453744821",
@@ -1238,7 +1563,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781692250",
    "productId": "gid://shopify/Product/10894078083418",
    "handle": "arbeitsplatte-100x40-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|schwarz|18|100x40": {
    "sku": "5908453745279",
@@ -1253,7 +1582,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783756634",
    "productId": "gid://shopify/Product/10894080082266",
    "handle": "arbeitsplatte-100x40-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|ahorn|18|100x50": {
    "sku": "5908453744685",
@@ -1268,7 +1601,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781233498",
    "productId": "gid://shopify/Product/10894077624666",
    "handle": "arbeitsplatte-100x50-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|buk|18|100x50": {
    "sku": "5908453744982",
@@ -1283,7 +1620,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782445914",
    "productId": "gid://shopify/Product/10894078804314",
    "handle": "arbeitsplatte-100x50-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|18|100x50": {
    "sku": "5908453745583",
@@ -1298,7 +1639,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785362266",
    "productId": "gid://shopify/Product/10894081261914",
    "handle": "arbeitsplatte-100x50-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|sonoma-eiche|18|100x50": {
    "sku": "5908453745439",
@@ -1313,7 +1658,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784280922",
    "productId": "gid://shopify/Product/10894080606554",
    "handle": "arbeitsplatte-100x50-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|szary|18|100x50": {
    "sku": "5908453745132",
@@ -1328,7 +1677,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784575834",
    "productId": "gid://shopify/Product/10894080901466",
    "handle": "arbeitsplatte-100x50-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|sosna-bielona|18|100x50": {
    "sku": "5908453744838",
@@ -1343,7 +1696,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781790554",
    "productId": "gid://shopify/Product/10894078148954",
    "handle": "arbeitsplatte-100x50-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|schwarz|18|100x50": {
    "sku": "5908453745286",
@@ -1358,7 +1715,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783789402",
    "productId": "gid://shopify/Product/10894080115034",
    "handle": "arbeitsplatte-100x50-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|ahorn|18|100x60": {
    "sku": "5908453744692",
@@ -1373,7 +1734,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781266266",
    "productId": "gid://shopify/Product/10894077657434",
    "handle": "arbeitsplatte-100x60-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|buk|18|100x60": {
    "sku": "5908453744999",
@@ -1388,7 +1753,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782511450",
    "productId": "gid://shopify/Product/10894078837082",
    "handle": "arbeitsplatte-100x60-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|18|100x60": {
    "sku": "5908453745590",
@@ -1403,7 +1772,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785395034",
    "productId": "gid://shopify/Product/10894081294682",
    "handle": "arbeitsplatte-100x60-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|sonoma-eiche|18|100x60": {
    "sku": "5908453745446",
@@ -1418,7 +1791,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784313690",
    "productId": "gid://shopify/Product/10894080639322",
    "handle": "arbeitsplatte-100x60-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|szary|18|100x60": {
    "sku": "5908453745149",
@@ -1433,7 +1810,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783265114",
    "productId": "gid://shopify/Product/10894079590746",
    "handle": "arbeitsplatte-100x60-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|sosna-bielona|18|100x60": {
    "sku": "5908453744845",
@@ -1448,7 +1829,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781856090",
    "productId": "gid://shopify/Product/10894078181722",
    "handle": "arbeitsplatte-100x60-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|schwarz|18|100x60": {
    "sku": "5908453745293",
@@ -1463,7 +1848,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783822170",
    "productId": "gid://shopify/Product/10894080147802",
    "handle": "arbeitsplatte-100x60-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|ahorn|18|120x50": {
    "sku": "5908453744708",
@@ -1478,7 +1867,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781299034",
    "productId": "gid://shopify/Product/10894077690202",
    "handle": "arbeitsplatte-120x50-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|buk|18|120x50": {
    "sku": "5908453745002",
@@ -1493,7 +1886,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782544218",
    "productId": "gid://shopify/Product/10894078902618",
    "handle": "arbeitsplatte-120x50-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|hikora|18|120x50": {
    "sku": "5908453745606",
@@ -1508,7 +1905,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785427802",
    "productId": "gid://shopify/Product/10894081327450",
    "handle": "arbeitsplatte-120x50-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|sonoma-eiche|18|120x50": {
    "sku": "5908453745453",
@@ -1523,7 +1924,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784346458",
    "productId": "gid://shopify/Product/10894080672090",
    "handle": "arbeitsplatte-120x50-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|szary|18|120x50": {
    "sku": "5908453745156",
@@ -1538,7 +1943,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783330650",
    "productId": "gid://shopify/Product/10894079656282",
    "handle": "arbeitsplatte-120x50-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|sosna-bielona|18|120x50": {
    "sku": "5908453744852",
@@ -1553,7 +1962,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781888858",
    "productId": "gid://shopify/Product/10894078214490",
    "handle": "arbeitsplatte-120x50-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|schwarz|18|120x50": {
    "sku": "5908453745309",
@@ -1568,7 +1981,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783854938",
    "productId": "gid://shopify/Product/10894080180570",
    "handle": "arbeitsplatte-120x50-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|ahorn|18|120x60": {
    "sku": "5908453744715",
@@ -1583,7 +2000,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781331802",
    "productId": "gid://shopify/Product/10894077722970",
    "handle": "arbeitsplatte-120x60-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8.5
+   }
   },
   "dekor|rect|buk|18|120x60": {
    "sku": "5908453745019",
@@ -1598,7 +2019,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782609754",
    "productId": "gid://shopify/Product/10894078935386",
    "handle": "arbeitsplatte-120x60-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8.5
+   }
   },
   "dekor|rect|hikora|18|120x60": {
    "sku": "5908453745613",
@@ -1613,7 +2038,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785460570",
    "productId": "gid://shopify/Product/10894081360218",
    "handle": "arbeitsplatte-120x60-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|sonoma-eiche|18|120x60": {
    "sku": "5908453745460",
@@ -1628,7 +2057,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784379226",
    "productId": "gid://shopify/Product/10894080704858",
    "handle": "arbeitsplatte-120x60-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|szary|18|120x60": {
    "sku": "5908453745163",
@@ -1643,7 +2076,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783363418",
    "productId": "gid://shopify/Product/10894079689050",
    "handle": "arbeitsplatte-120x60-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8.5
+   }
   },
   "dekor|rect|sosna-bielona|18|120x60": {
    "sku": "5908453744869",
@@ -1658,7 +2095,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781921626",
    "productId": "gid://shopify/Product/10894078247258",
    "handle": "arbeitsplatte-120x60-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8.5
+   }
   },
   "dekor|rect|schwarz|18|120x60": {
    "sku": "5908453745316",
@@ -1673,7 +2114,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783887706",
    "productId": "gid://shopify/Product/10894080213338",
    "handle": "arbeitsplatte-120x60-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|ahorn|18|50x50": {
    "sku": "5908453744722",
@@ -1688,7 +2133,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781364570",
    "productId": "gid://shopify/Product/10894077755738",
    "handle": "arbeitsplatte-50x50-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|buk|18|50x50": {
    "sku": "5908453745026",
@@ -1703,7 +2152,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782675290",
    "productId": "gid://shopify/Product/10894079000922",
    "handle": "arbeitsplatte-50x50-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|hikora|18|50x50": {
    "sku": "5908453745620",
@@ -1718,7 +2171,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785526106",
    "productId": "gid://shopify/Product/10894081425754",
    "handle": "arbeitsplatte-50x50-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|sonoma-eiche|18|50x50": {
    "sku": "5908453745477",
@@ -1733,7 +2190,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784444762",
    "productId": "gid://shopify/Product/10894080770394",
    "handle": "arbeitsplatte-50x50-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|szary|18|50x50": {
    "sku": "5908453745170",
@@ -1748,7 +2209,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783396186",
    "productId": "gid://shopify/Product/10894079721818",
    "handle": "arbeitsplatte-50x50-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|sosna-bielona|18|50x50": {
    "sku": "5908453744876",
@@ -1763,7 +2228,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781954394",
    "productId": "gid://shopify/Product/10894078280026",
    "handle": "arbeitsplatte-50x50-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|schwarz|18|50x50": {
    "sku": "5908453745323",
@@ -1778,7 +2247,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783920474",
    "productId": "gid://shopify/Product/10894080246106",
    "handle": "arbeitsplatte-50x50-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 3
+   }
   },
   "dekor|rect|ahorn|18|60x60": {
    "sku": "5908453744739",
@@ -1793,7 +2266,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781397338",
    "productId": "gid://shopify/Product/10894077788506",
    "handle": "arbeitsplatte-60x60-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 4.5
+   }
   },
   "dekor|rect|buk|18|60x60": {
    "sku": "5908453745033",
@@ -1808,7 +2285,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782708058",
    "productId": "gid://shopify/Product/10894079033690",
    "handle": "arbeitsplatte-60x60-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 4.5
+   }
   },
   "dekor|rect|hikora|18|60x60": {
    "sku": "5908453745637",
@@ -1823,7 +2304,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785558874",
    "productId": "gid://shopify/Product/10894081458522",
    "handle": "arbeitsplatte-60x60-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|sonoma-eiche|18|60x60": {
    "sku": "5908453745484",
@@ -1838,7 +2323,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784477530",
    "productId": "gid://shopify/Product/10894080803162",
    "handle": "arbeitsplatte-60x60-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|szary|18|60x60": {
    "sku": "5908453745187",
@@ -1853,7 +2342,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783428954",
    "productId": "gid://shopify/Product/10894079754586",
    "handle": "arbeitsplatte-60x60-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 4.5
+   }
   },
   "dekor|rect|sosna-bielona|18|60x60": {
    "sku": "5908453744883",
@@ -1868,7 +2361,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781987162",
    "productId": "gid://shopify/Product/10894078312794",
    "handle": "arbeitsplatte-60x60-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 4.5
+   }
   },
   "dekor|rect|schwarz|18|60x60": {
    "sku": "5908453745330",
@@ -1883,7 +2380,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783953242",
    "productId": "gid://shopify/Product/10894080278874",
    "handle": "arbeitsplatte-60x60-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|ahorn|18|70x50": {
    "sku": "5908453744746",
@@ -1898,7 +2399,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781430106",
    "productId": "gid://shopify/Product/10894077821274",
    "handle": "arbeitsplatte-70x50-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|buk|18|70x50": {
    "sku": "5908453745040",
@@ -1913,7 +2418,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782773594",
    "productId": "gid://shopify/Product/10894079099226",
    "handle": "arbeitsplatte-70x50-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|hikora|18|70x50": {
    "sku": "5908453745644",
@@ -1928,7 +2437,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785591642",
    "productId": "gid://shopify/Product/10894081491290",
    "handle": "arbeitsplatte-70x50-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|sonoma-eiche|18|70x50": {
    "sku": "5908453745491",
@@ -1943,7 +2456,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784510298",
    "productId": "gid://shopify/Product/10894080835930",
    "handle": "arbeitsplatte-70x50-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|szary|18|70x50": {
    "sku": "5908453745194",
@@ -1958,7 +2475,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783461722",
    "productId": "gid://shopify/Product/10894079787354",
    "handle": "arbeitsplatte-70x50-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|sosna-bielona|18|70x50": {
    "sku": "5908453744890",
@@ -1973,7 +2494,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782052698",
    "productId": "gid://shopify/Product/10894078378330",
    "handle": "arbeitsplatte-70x50-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|schwarz|18|70x50": {
    "sku": "5908453745347",
@@ -1988,7 +2513,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783986010",
    "productId": "gid://shopify/Product/10894080311642",
    "handle": "arbeitsplatte-70x50-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|ahorn|18|70x60": {
    "sku": "5908453744753",
@@ -2003,7 +2532,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781462874",
    "productId": "gid://shopify/Product/10894077854042",
    "handle": "arbeitsplatte-70x60-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|buk|18|70x60": {
    "sku": "5908453745057",
@@ -2018,7 +2551,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782806362",
    "productId": "gid://shopify/Product/10894079131994",
    "handle": "arbeitsplatte-70x60-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|hikora|18|70x60": {
    "sku": "5908453745651",
@@ -2033,7 +2570,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785657178",
    "productId": "gid://shopify/Product/10894081556826",
    "handle": "arbeitsplatte-70x60-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|sonoma-eiche|18|70x60": {
    "sku": "5908453745507",
@@ -2048,7 +2589,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784543066",
    "productId": "gid://shopify/Product/10894080868698",
    "handle": "arbeitsplatte-70x60-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|szary|18|70x60": {
    "sku": "5908453745200",
@@ -2063,7 +2608,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783494490",
    "productId": "gid://shopify/Product/10894079820122",
    "handle": "arbeitsplatte-70x60-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|sosna-bielona|18|70x60": {
    "sku": "5908453744906",
@@ -2078,7 +2627,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782151002",
    "productId": "gid://shopify/Product/10894078443866",
    "handle": "arbeitsplatte-70x60-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|schwarz|18|70x60": {
    "sku": "5908453745354",
@@ -2093,7 +2646,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784018778",
    "productId": "gid://shopify/Product/10894080344410",
    "handle": "arbeitsplatte-70x60-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|ahorn|18|80x40": {
    "sku": "5908453744760",
@@ -2108,7 +2665,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781495642",
    "productId": "gid://shopify/Product/10894077886810",
    "handle": "arbeitsplatte-80x40-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|buk|18|80x40": {
    "sku": "5908453745064",
@@ -2123,7 +2684,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782904666",
    "productId": "gid://shopify/Product/10894079230298",
    "handle": "arbeitsplatte-80x40-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|hikora|18|80x40": {
    "sku": "5908453745668",
@@ -2138,7 +2703,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785689946",
    "productId": "gid://shopify/Product/10894081589594",
    "handle": "arbeitsplatte-80x40-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|sonoma-eiche|18|80x40": {
    "sku": "5908453745514",
@@ -2153,7 +2722,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784608602",
    "productId": "gid://shopify/Product/10894080934234",
    "handle": "arbeitsplatte-80x40-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|szary|18|80x40": {
    "sku": "5908453745217",
@@ -2168,7 +2741,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783527258",
    "productId": "gid://shopify/Product/10894079852890",
    "handle": "arbeitsplatte-80x40-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|sosna-bielona|18|80x40": {
    "sku": "5908453744913",
@@ -2183,7 +2760,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782183770",
    "productId": "gid://shopify/Product/10894078476634",
    "handle": "arbeitsplatte-80x40-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|schwarz|18|80x40": {
    "sku": "5908453745361",
@@ -2198,7 +2779,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784051546",
    "productId": "gid://shopify/Product/10894080377178",
    "handle": "arbeitsplatte-80x40-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|ahorn|18|80x50": {
    "sku": "5908453744777",
@@ -2213,7 +2798,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781528410",
    "productId": "gid://shopify/Product/10894077919578",
    "handle": "arbeitsplatte-80x50-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|buk|18|80x50": {
    "sku": "5908453745071",
@@ -2228,7 +2817,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782937434",
    "productId": "gid://shopify/Product/10894079263066",
    "handle": "arbeitsplatte-80x50-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|hikora|18|80x50": {
    "sku": "5908453745675",
@@ -2243,7 +2836,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785722714",
    "productId": "gid://shopify/Product/10894081622362",
    "handle": "arbeitsplatte-80x50-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|sonoma-eiche|18|80x50": {
    "sku": "5908453745521",
@@ -2258,7 +2855,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784837978",
    "productId": "gid://shopify/Product/10894081098074",
    "handle": "arbeitsplatte-80x50-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|szary|18|80x50": {
    "sku": "5908453745224",
@@ -2273,7 +2874,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783560026",
    "productId": "gid://shopify/Product/10894079885658",
    "handle": "arbeitsplatte-80x50-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|sosna-bielona|18|80x50": {
    "sku": "5908453744920",
@@ -2288,7 +2893,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782216538",
    "productId": "gid://shopify/Product/10894078509402",
    "handle": "arbeitsplatte-80x50-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|schwarz|18|80x50": {
    "sku": "5908453745378",
@@ -2303,7 +2912,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784084314",
    "productId": "gid://shopify/Product/10894080409946",
    "handle": "arbeitsplatte-80x50-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|ahorn|18|80x60": {
    "sku": "5908453744784",
@@ -2318,7 +2931,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781561178",
    "productId": "gid://shopify/Product/10894077952346",
    "handle": "arbeitsplatte-80x60-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|buk|18|80x60": {
    "sku": "5908453745088",
@@ -2333,7 +2950,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782970202",
    "productId": "gid://shopify/Product/10894079295834",
    "handle": "arbeitsplatte-80x60-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 5
+   }
   },
   "dekor|rect|hikora|18|80x60": {
    "sku": "5908453745682",
@@ -2348,7 +2969,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785788250",
    "productId": "gid://shopify/Product/10894081687898",
    "handle": "arbeitsplatte-80x60-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|sonoma-eiche|18|80x60": {
    "sku": "5908453745538",
@@ -2363,7 +2988,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784870746",
    "productId": "gid://shopify/Product/10894081130842",
    "handle": "arbeitsplatte-80x60-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|szary|18|80x60": {
    "sku": "5908453745231",
@@ -2378,7 +3007,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783625562",
    "productId": "gid://shopify/Product/10894079951194",
    "handle": "arbeitsplatte-80x60-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|sosna-bielona|18|80x60": {
    "sku": "5908453744937",
@@ -2393,7 +3026,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782249306",
    "productId": "gid://shopify/Product/10894078542170",
    "handle": "arbeitsplatte-80x60-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|schwarz|18|80x60": {
    "sku": "5908453745385",
@@ -2408,7 +3045,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784117082",
    "productId": "gid://shopify/Product/10894080442714",
    "handle": "arbeitsplatte-80x60-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|ahorn|18|90x40": {
    "sku": "5908453744791",
@@ -2423,7 +3064,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781593946",
    "productId": "gid://shopify/Product/10894077985114",
    "handle": "arbeitsplatte-90x40-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|buk|18|90x40": {
    "sku": "5908453745095",
@@ -2438,7 +3083,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783035738",
    "productId": "gid://shopify/Product/10894079361370",
    "handle": "arbeitsplatte-90x40-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|hikora|18|90x40": {
    "sku": "5908453745699",
@@ -2453,7 +3102,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785821018",
    "productId": "gid://shopify/Product/10894081720666",
    "handle": "arbeitsplatte-90x40-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|sonoma-eiche|18|90x40": {
    "sku": "5908453745545",
@@ -2468,7 +3121,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784641370",
    "productId": "gid://shopify/Product/10894080967002",
    "handle": "arbeitsplatte-90x40-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|szary|18|90x40": {
    "sku": "5908453745248",
@@ -2483,7 +3140,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783658330",
    "productId": "gid://shopify/Product/10894079983962",
    "handle": "arbeitsplatte-90x40-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|sosna-bielona|18|90x40": {
    "sku": "5908453744944",
@@ -2498,7 +3159,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782282074",
    "productId": "gid://shopify/Product/10894078574938",
    "handle": "arbeitsplatte-90x40-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|schwarz|18|90x40": {
    "sku": "5908453745392",
@@ -2513,7 +3178,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784149850",
    "productId": "gid://shopify/Product/10894080475482",
    "handle": "arbeitsplatte-90x40-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5
+   }
   },
   "dekor|rect|ahorn|18|90x50": {
    "sku": "5908453744807",
@@ -2528,7 +3197,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781626714",
    "productId": "gid://shopify/Product/10894078017882",
    "handle": "arbeitsplatte-90x50-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|buk|18|90x50": {
    "sku": "5908453745101",
@@ -2543,7 +3216,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783068506",
    "productId": "gid://shopify/Product/10894079394138",
    "handle": "arbeitsplatte-90x50-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Buche | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|18|90x50": {
    "sku": "5908453745705",
@@ -2558,7 +3235,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785886554",
    "productId": "gid://shopify/Product/10894081786202",
    "handle": "arbeitsplatte-90x50-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|sonoma-eiche|18|90x50": {
    "sku": "5908453745552",
@@ -2573,7 +3254,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784805210",
    "productId": "gid://shopify/Product/10894081065306",
    "handle": "arbeitsplatte-90x50-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|szary|18|90x50": {
    "sku": "5908453745255",
@@ -2588,7 +3273,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783691098",
    "productId": "gid://shopify/Product/10894080016730",
    "handle": "arbeitsplatte-90x50-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Grau | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|sosna-bielona|18|90x50": {
    "sku": "5908453744951",
@@ -2603,7 +3292,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782314842",
    "productId": "gid://shopify/Product/10894078640474",
    "handle": "arbeitsplatte-90x50-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 5.5
+   }
   },
   "dekor|rect|schwarz|18|90x50": {
    "sku": "5908453745408",
@@ -2618,7 +3311,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784182618",
    "productId": "gid://shopify/Product/10894080508250",
    "handle": "arbeitsplatte-90x50-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|ahorn|18|90x60": {
    "sku": "5908453744814",
@@ -2633,7 +3330,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781659482",
    "productId": "gid://shopify/Product/10894078050650",
    "handle": "arbeitsplatte-90x60-cm-ahorn-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Ahorn | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Ahorn | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|buk|18|90x60": {
    "sku": "5908453745118",
@@ -2648,7 +3349,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783134042",
    "productId": "gid://shopify/Product/10894079459674",
    "handle": "arbeitsplatte-90x60-cm-buche-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Buche | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Buche | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|18|90x60": {
    "sku": "5908453745712",
@@ -2663,7 +3368,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785919322",
    "productId": "gid://shopify/Product/10894081818970",
    "handle": "arbeitsplatte-90x60-cm-eiche-hickory-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Eiche Hickory | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Eiche Hickory | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7
+   }
   },
   "dekor|rect|sonoma-eiche|18|90x60": {
    "sku": "5908453745569",
@@ -2678,7 +3387,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784903514",
    "productId": "gid://shopify/Product/10894081163610",
    "handle": "arbeitsplatte-90x60-cm-eiche-sonoma-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Eiche Sonoma | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Eiche Sonoma | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7
+   }
   },
   "dekor|rect|szary|18|90x60": {
    "sku": "5908453745262",
@@ -2693,7 +3406,11 @@
    "variantId": "gid://shopify/ProductVariant/54306783723866",
    "productId": "gid://shopify/Product/10894080049498",
    "handle": "arbeitsplatte-90x60-cm-grau-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Grau | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Grau | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|sosna-bielona|18|90x60": {
    "sku": "5908453744968",
@@ -2708,7 +3425,11 @@
    "variantId": "gid://shopify/ProductVariant/54306782380378",
    "productId": "gid://shopify/Product/10894078706010",
    "handle": "arbeitsplatte-90x60-cm-kiefer-gebleicht-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Kiefer Weiß | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Kiefer Weiß | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|schwarz|18|90x60": {
    "sku": "5908453745415",
@@ -2723,7 +3444,11 @@
    "variantId": "gid://shopify/ProductVariant/54306784215386",
    "productId": "gid://shopify/Product/10894080541018",
    "handle": "arbeitsplatte-90x60-cm-schwarz-18-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Schwarz | 18 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Schwarz | 18 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7
+   }
   },
   "dekor|rect|ahorn|25|100x40": {
    "sku": "5908453740069",
@@ -2738,7 +3463,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776514906",
    "productId": "gid://shopify/Product/10894073299290",
    "handle": "arbeitsplatte-100x40-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7.2
+   }
   },
   "dekor|rect|buk|25|100x40": {
    "sku": "5908453740038",
@@ -2753,7 +3482,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776416602",
    "productId": "gid://shopify/Product/10894073200986",
    "handle": "arbeitsplatte-100x40-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7.2
+   }
   },
   "dekor|rect|sosna-bielona|25|100x40": {
    "sku": "5908453740120",
@@ -2768,7 +3501,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776678746",
    "productId": "gid://shopify/Product/10894073430362",
    "handle": "arbeitsplatte-100x40-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 100 x 40 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 100 x 40 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7.2
+   }
   },
   "dekor|rect|ahorn|25|100x50": {
    "sku": "5907255093915",
@@ -2783,7 +3520,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776056154",
    "productId": "gid://shopify/Product/10894072873306",
    "handle": "arbeitsplatte-100x50-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 9
+   }
   },
   "dekor|rect|buk|25|100x50": {
    "sku": "5907255093885",
@@ -2798,7 +3539,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775957850",
    "productId": "gid://shopify/Product/10894072775002",
    "handle": "arbeitsplatte-100x50-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 9
+   }
   },
   "dekor|rect|sosna-bielona|25|100x50": {
    "sku": "5907255093977",
@@ -2813,7 +3558,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776154458",
    "productId": "gid://shopify/Product/10894072971610",
    "handle": "arbeitsplatte-100x50-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 100 x 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 100 x 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 9
+   }
   },
   "dekor|rect|ahorn|25|100x60": {
    "sku": "5908453740502",
@@ -2828,7 +3577,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778251610",
    "productId": "gid://shopify/Product/10894074839386",
    "handle": "arbeitsplatte-100x60-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|buk|25|100x60": {
    "sku": "5908453740489",
@@ -2843,7 +3596,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778120538",
    "productId": "gid://shopify/Product/10894074741082",
    "handle": "arbeitsplatte-100x60-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|sosna-bielona|25|100x60": {
    "sku": "5908453740540",
@@ -2858,7 +3615,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778382682",
    "productId": "gid://shopify/Product/10894074937690",
    "handle": "arbeitsplatte-100x60-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 100 x 60 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 100 x 60 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|ahorn|25|120x50": {
    "sku": "5908453740076",
@@ -2873,7 +3634,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776547674",
    "productId": "gid://shopify/Product/10894073332058",
    "handle": "arbeitsplatte-120x50-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|buk|25|120x50": {
    "sku": "5908453740045",
@@ -2888,7 +3653,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776449370",
    "productId": "gid://shopify/Product/10894073233754",
    "handle": "arbeitsplatte-120x50-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|sosna-bielona|25|120x50": {
    "sku": "5908453740137",
@@ -2903,7 +3672,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776711514",
    "productId": "gid://shopify/Product/10894073463130",
    "handle": "arbeitsplatte-120x50-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 120 x 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 120 x 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|ahorn|25|120x60": {
    "sku": "5907255093922",
@@ -2918,7 +3691,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776088922",
    "productId": "gid://shopify/Product/10894072906074",
    "handle": "arbeitsplatte-120x60-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 13
+   }
   },
   "dekor|rect|buk|25|120x60": {
    "sku": "5907255093892",
@@ -2933,7 +3710,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775990618",
    "productId": "gid://shopify/Product/10894072807770",
    "handle": "arbeitsplatte-120x60-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 13
+   }
   },
   "dekor|rect|sosna-bielona|25|120x60": {
    "sku": "5907255093984",
@@ -2948,7 +3729,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776187226",
    "productId": "gid://shopify/Product/10894073004378",
    "handle": "arbeitsplatte-120x60-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 120 x 60 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 120 x 60 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 13
+   }
   },
   "dekor|rect|ahorn|25|50x50": {
    "sku": "5907255093755",
@@ -2963,7 +3748,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775662938",
    "productId": "gid://shopify/Product/10894072480090",
    "handle": "arbeitsplatte-50x50-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|buk|25|50x50": {
    "sku": "5907255093717",
@@ -2978,7 +3767,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775531866",
    "productId": "gid://shopify/Product/10894072349018",
    "handle": "arbeitsplatte-50x50-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|sosna-bielona|25|50x50": {
    "sku": "5907255093830",
@@ -2993,7 +3786,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775794010",
    "productId": "gid://shopify/Product/10894072611162",
    "handle": "arbeitsplatte-50x50-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 50 x 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 50 x 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4.5
+   }
   },
   "dekor|rect|ahorn|25|60x60": {
    "sku": "5907255093809",
@@ -3008,7 +3805,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775761242",
    "productId": "gid://shopify/Product/10894072578394",
    "handle": "arbeitsplatte-60x60-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|buk|25|60x60": {
    "sku": "5907255093724",
@@ -3023,7 +3824,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775564634",
    "productId": "gid://shopify/Product/10894072381786",
    "handle": "arbeitsplatte-60x60-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|sosna-bielona|25|60x60": {
    "sku": "5907255093847",
@@ -3038,7 +3843,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775826778",
    "productId": "gid://shopify/Product/10894072643930",
    "handle": "arbeitsplatte-60x60-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 60 x 60 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 60 x 60 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6.5
+   }
   },
   "dekor|rect|ahorn|25|70x50": {
    "sku": "5908453740205",
@@ -3053,7 +3862,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777039194",
    "productId": "gid://shopify/Product/10894073758042",
    "handle": "arbeitsplatte-70x50-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|buk|25|70x50": {
    "sku": "5908453740175",
@@ -3068,7 +3881,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776908122",
    "productId": "gid://shopify/Product/10894073626970",
    "handle": "arbeitsplatte-70x50-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|sosna-bielona|25|70x50": {
    "sku": "5908453740267",
@@ -3083,7 +3900,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777235802",
    "productId": "gid://shopify/Product/10894073921882",
    "handle": "arbeitsplatte-70x50-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 70 x 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 70 x 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|ahorn|25|70x60": {
    "sku": "5908453740342",
@@ -3098,7 +3919,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777530714",
    "productId": "gid://shopify/Product/10894074216794",
    "handle": "arbeitsplatte-70x60-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|buk|25|70x60": {
    "sku": "5908453740328",
@@ -3113,7 +3938,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777465178",
    "productId": "gid://shopify/Product/10894074151258",
    "handle": "arbeitsplatte-70x60-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|sosna-bielona|25|70x60": {
    "sku": "5908453740380",
@@ -3128,7 +3957,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777629018",
    "productId": "gid://shopify/Product/10894074315098",
    "handle": "arbeitsplatte-70x60-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 70 x 60 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 70 x 60 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 7.5
+   }
   },
   "dekor|rect|ahorn|25|70x70": {
    "sku": "5907255093779",
@@ -3143,7 +3976,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775695706",
    "productId": "gid://shopify/Product/10894072512858",
    "handle": "arbeitsplatte-70x70-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 70 x 70 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 70 x 70 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9.5
+   }
   },
   "dekor|rect|buk|25|70x70": {
    "sku": "5907255093731",
@@ -3158,7 +3995,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775597402",
    "productId": "gid://shopify/Product/10894072414554",
    "handle": "arbeitsplatte-70x70-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 70 x 70 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 70 x 70 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|sosna-bielona|25|70x70": {
    "sku": "5907255093854",
@@ -3173,7 +4014,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775859546",
    "productId": "gid://shopify/Product/10894072676698",
    "handle": "arbeitsplatte-70x70-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 70 x 70 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 70 x 70 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9.5
+   }
   },
   "dekor|rect|ahorn|25|80x40": {
    "sku": "5907255093908",
@@ -3188,7 +4033,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776023386",
    "productId": "gid://shopify/Product/10894072840538",
    "handle": "arbeitsplatte-80x40-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|buk|25|80x40": {
    "sku": "5907255093878",
@@ -3203,7 +4052,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775925082",
    "productId": "gid://shopify/Product/10894072742234",
    "handle": "arbeitsplatte-80x40-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|sosna-bielona|25|80x40": {
    "sku": "5907255093960",
@@ -3218,7 +4071,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776121690",
    "productId": "gid://shopify/Product/10894072938842",
    "handle": "arbeitsplatte-80x40-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 80 x 40 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 80 x 40 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|ahorn|25|80x50": {
    "sku": "5908453740212",
@@ -3233,7 +4090,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777170266",
    "productId": "gid://shopify/Product/10894073856346",
    "handle": "arbeitsplatte-80x50-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7.5
+   }
   },
   "dekor|rect|buk|25|80x50": {
    "sku": "5908453740182",
@@ -3248,7 +4109,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776940890",
    "productId": "gid://shopify/Product/10894073659738",
    "handle": "arbeitsplatte-80x50-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7.5
+   }
   },
   "dekor|rect|sosna-bielona|25|80x50": {
    "sku": "5908453740274",
@@ -3263,7 +4128,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777268570",
    "productId": "gid://shopify/Product/10894073954650",
    "handle": "arbeitsplatte-80x50-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 80 x 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 80 x 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7.5
+   }
   },
   "dekor|rect|ahorn|25|80x60": {
    "sku": "5908453740434",
@@ -3278,7 +4147,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777858394",
    "productId": "gid://shopify/Product/10894074511706",
    "handle": "arbeitsplatte-80x60-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|buk|25|80x60": {
    "sku": "5908453740427",
@@ -3293,7 +4166,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777825626",
    "productId": "gid://shopify/Product/10894074478938",
    "handle": "arbeitsplatte-80x60-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|sosna-bielona|25|80x60": {
    "sku": "5908453740458",
@@ -3308,7 +4185,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777956698",
    "productId": "gid://shopify/Product/10894074610010",
    "handle": "arbeitsplatte-80x60-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 80 x 60 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 80 x 60 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|ahorn|25|80x70": {
    "sku": "5908453740359",
@@ -3323,7 +4204,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777596250",
    "productId": "gid://shopify/Product/10894074282330",
    "handle": "arbeitsplatte-80x70-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 80 x 70 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 80 x 70 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10.5
+   }
   },
   "dekor|rect|buk|25|80x70": {
    "sku": "5908453740335",
@@ -3338,7 +4223,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777497946",
    "productId": "gid://shopify/Product/10894074184026",
    "handle": "arbeitsplatte-80x70-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 80 x 70 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 80 x 70 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10
+   }
   },
   "dekor|rect|sosna-bielona|25|80x70": {
    "sku": "5908453740397",
@@ -3353,7 +4242,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777661786",
    "productId": "gid://shopify/Product/10894074347866",
    "handle": "arbeitsplatte-80x70-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 80 x 70 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 80 x 70 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10.5
+   }
   },
   "dekor|rect|ahorn|25|80x80": {
    "sku": "5907255093786",
@@ -3368,7 +4261,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775728474",
    "productId": "gid://shopify/Product/10894072545626",
    "handle": "arbeitsplatte-80x80-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 80 x 80 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 80 x 80 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 12.5
+   }
   },
   "dekor|rect|buk|25|80x80": {
    "sku": "5907255093748",
@@ -3383,7 +4280,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775630170",
    "productId": "gid://shopify/Product/10894072447322",
    "handle": "arbeitsplatte-80x80-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 80 x 80 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 80 x 80 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 12
+   }
   },
   "dekor|rect|sosna-bielona|25|80x80": {
    "sku": "5907255093861",
@@ -3398,7 +4299,11 @@
    "variantId": "gid://shopify/ProductVariant/54306775892314",
    "productId": "gid://shopify/Product/10894072709466",
    "handle": "arbeitsplatte-80x80-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 80 x 80 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 80 x 80 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 12.5
+   }
   },
   "dekor|rect|ahorn|25|90x40": {
    "sku": "5908453740052",
@@ -3413,7 +4318,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776482138",
    "productId": "gid://shopify/Product/10894073266522",
    "handle": "arbeitsplatte-90x40-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|buk|25|90x40": {
    "sku": "5908453740021",
@@ -3428,7 +4337,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776383834",
    "productId": "gid://shopify/Product/10894073168218",
    "handle": "arbeitsplatte-90x40-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|sosna-bielona|25|90x40": {
    "sku": "5908453740113",
@@ -3443,7 +4356,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776580442",
    "productId": "gid://shopify/Product/10894073364826",
    "handle": "arbeitsplatte-90x40-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 90 x 40 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 90 x 40 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6.5
+   }
   },
   "dekor|rect|ahorn|25|90x50": {
    "sku": "5908453740496",
@@ -3458,7 +4375,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778186074",
    "productId": "gid://shopify/Product/10894074773850",
    "handle": "arbeitsplatte-90x50-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8
+   }
   },
   "dekor|rect|buk|25|90x50": {
    "sku": "5908453740472",
@@ -3473,7 +4394,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778055002",
    "productId": "gid://shopify/Product/10894074675546",
    "handle": "arbeitsplatte-90x50-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8
+   }
   },
   "dekor|rect|sosna-bielona|25|90x50": {
    "sku": "5908453740533",
@@ -3488,7 +4413,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778284378",
    "productId": "gid://shopify/Product/10894074904922",
    "handle": "arbeitsplatte-90x50-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 90 x 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 90 x 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8
+   }
   },
   "dekor|rect|ahorn|25|90x60": {
    "sku": "5908453740229",
@@ -3503,7 +4432,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777203034",
    "productId": "gid://shopify/Product/10894073889114",
    "handle": "arbeitsplatte-90x60-cm-ahorn-25-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Ahorn | 25 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10
+   }
   },
   "dekor|rect|buk|25|90x60": {
    "sku": "5908453740199",
@@ -3518,7 +4451,11 @@
    "variantId": "gid://shopify/ProductVariant/54306776973658",
    "productId": "gid://shopify/Product/10894073692506",
    "handle": "arbeitsplatte-90x60-cm-buche-25-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Buche | 25 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Buche | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10
+   }
   },
   "dekor|rect|sosna-bielona|25|90x60": {
    "sku": "5908453740281",
@@ -3533,7 +4470,11 @@
    "variantId": "gid://shopify/ProductVariant/54306777334106",
    "productId": "gid://shopify/Product/10894074020186",
    "handle": "arbeitsplatte-90x60-cm-kiefer-gebleicht-25-mm",
-   "title": "Arbeitsplatte | 90 x 60 cm | Kiefer Weiß | 25 mm"
+   "title": "Arbeitsplatte | 90 x 60 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10
+   }
   },
   "dekor|rect|hikora|25|100x40": {
    "sku": "5908453744524",
@@ -3548,7 +4489,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785952090",
    "productId": "gid://shopify/Product/10894081851738",
    "handle": "tischplatte-100x40-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 100 x 40 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 100 x 40 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7
+   }
   },
   "dekor|rect|hikora|25|100x50": {
    "sku": "5908453744531",
@@ -3563,7 +4508,11 @@
    "variantId": "gid://shopify/ProductVariant/54306785984858",
    "productId": "gid://shopify/Product/10894081884506",
    "handle": "tischplatte-100x50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 100 x 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 100 x 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 9
+   }
   },
   "dekor|rect|hikora|25|100x60": {
    "sku": "5908453744548",
@@ -3578,7 +4527,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786017626",
    "productId": "gid://shopify/Product/10894081917274",
    "handle": "tischplatte-100x60-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 100 x 60 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 100 x 60 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|hikora|25|120x50": {
    "sku": "5908453744555",
@@ -3593,7 +4546,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786050394",
    "productId": "gid://shopify/Product/10894081950042",
    "handle": "tischplatte-120x50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 120 x 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 120 x 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 11
+   }
   },
   "dekor|rect|hikora|25|120x60": {
    "sku": "5908453744562",
@@ -3608,7 +4565,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786115930",
    "productId": "gid://shopify/Product/10894082015578",
    "handle": "tischplatte-120x60-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 120 x 60 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 120 x 60 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 13
+   }
   },
   "dekor|rect|hikora|25|50x50": {
    "sku": "5908453744579",
@@ -3623,7 +4584,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786148698",
    "productId": "gid://shopify/Product/10894082048346",
    "handle": "tischplatte-50x50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 50 x 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 50 x 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|rect|hikora|25|60x60": {
    "sku": "5908453744586",
@@ -3638,7 +4603,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786181466",
    "productId": "gid://shopify/Product/10894082081114",
    "handle": "tischplatte-60x60-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 60 x 60 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 60 x 60 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|25|70x50": {
    "sku": "5908453744593",
@@ -3653,7 +4622,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786247002",
    "productId": "gid://shopify/Product/10894082146650",
    "handle": "tischplatte-70x50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 70 x 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 70 x 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|25|70x60": {
    "sku": "5908453744609",
@@ -3668,7 +4641,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786378074",
    "productId": "gid://shopify/Product/10894082212186",
    "handle": "tischplatte-70x60-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 70 x 60 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 70 x 60 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 8
+   }
   },
   "dekor|rect|hikora|25|80x40": {
    "sku": "5908453744616",
@@ -3683,7 +4660,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786410842",
    "productId": "gid://shopify/Product/10894082244954",
    "handle": "tischplatte-80x40-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 80 x 40 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 80 x 40 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|25|80x50": {
    "sku": "5908453744623",
@@ -3698,7 +4679,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786509146",
    "productId": "gid://shopify/Product/10894082310490",
    "handle": "tischplatte-80x50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 80 x 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 80 x 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 7
+   }
   },
   "dekor|rect|hikora|25|80x60": {
    "sku": "5908453744630",
@@ -3713,7 +4698,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786541914",
    "productId": "gid://shopify/Product/10894082343258",
    "handle": "tischplatte-80x60-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 80 x 60 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 80 x 60 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 9
+   }
   },
   "dekor|rect|hikora|25|90x40": {
    "sku": "5908453744647",
@@ -3728,7 +4717,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786607450",
    "productId": "gid://shopify/Product/10894082376026",
    "handle": "tischplatte-90x40-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 90 x 40 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 90 x 40 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 6
+   }
   },
   "dekor|rect|hikora|25|90x50": {
    "sku": "5908453744654",
@@ -3743,7 +4736,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786705754",
    "productId": "gid://shopify/Product/10894082441562",
    "handle": "tischplatte-90x50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 90 x 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 90 x 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8
+   }
   },
   "dekor|rect|sonoma-eiche|25|90x50": {
    "sku": "5908453744500",
@@ -3758,7 +4755,11 @@
    "variantId": "gid://shopify/ProductVariant/54306787950938",
    "productId": "gid://shopify/Product/10894083522906",
    "handle": "tischplatte-90x50-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte | 90 x 50 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte | 90 x 50 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 8
+   }
   },
   "dekor|rect|hikora|25|90x60": {
    "sku": "5908453744661",
@@ -3773,7 +4774,11 @@
    "variantId": "gid://shopify/ProductVariant/54306786738522",
    "productId": "gid://shopify/Product/10894082474330",
    "handle": "tischplatte-90x60-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte | 90 x 60 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte | 90 x 60 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10
+   }
   },
   "dekor|rect|sonoma-eiche|25|90x60": {
    "sku": "5908453744517",
@@ -3788,7 +4793,11 @@
    "variantId": "gid://shopify/ProductVariant/54306788016474",
    "productId": "gid://shopify/Product/10894083588442",
    "handle": "tischplatte-90x60-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte | 90 x 60 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte | 90 x 60 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "sperrgut",
+    "kg": 10
+   }
   },
   "dekor|round|ahorn|25|D100": {
    "sku": "5908453742193",
@@ -3803,7 +4812,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780217690",
    "productId": "gid://shopify/Product/10894076641626",
    "handle": "tischplatte-rund-100-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 100 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 100 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 14
+   }
   },
   "dekor|round|buk|25|D100": {
    "sku": "5908453742179",
@@ -3818,7 +4831,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780152154",
    "productId": "gid://shopify/Product/10894076576090",
    "handle": "tischplatte-rund-100-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 100 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 100 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 14
+   }
   },
   "dekor|round|sonoma-eiche|25|D100": {
    "sku": "5908453742162",
@@ -3833,7 +4850,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780119386",
    "productId": "gid://shopify/Product/10894076543322",
    "handle": "tischplatte-rund-100-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 100 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 100 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 14
+   }
   },
   "dekor|round|szary|25|D100": {
    "sku": "5908453742209",
@@ -3848,7 +4869,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780250458",
    "productId": "gid://shopify/Product/10894076674394",
    "handle": "tischplatte-rund-100-cm-grau-25-mm-2209",
-   "title": "Tischplatte rund | Ø 100 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 100 cm | Grau | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 14
+   }
   },
   "dekor|round|sosna-bielona|25|D100": {
    "sku": "5908453742186",
@@ -3863,7 +4888,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780184922",
    "productId": "gid://shopify/Product/10894076608858",
    "handle": "tischplatte-rund-100-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 100 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 100 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 14
+   }
   },
   "dekor|round|schwarz|25|D100": {
    "sku": "5908453742148",
@@ -3878,7 +4907,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780053850",
    "productId": "gid://shopify/Product/10894076477786",
    "handle": "tischplatte-rund-100-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 100 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 100 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 14
+   }
   },
   "dekor|round|ahorn|25|D120": {
    "sku": "5908453742261",
@@ -3893,7 +4926,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780381530",
    "productId": "gid://shopify/Product/10894076805466",
    "handle": "tischplatte-rund-120-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|buk|25|D120": {
    "sku": "5908453742247",
@@ -3908,7 +4945,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780315994",
    "productId": "gid://shopify/Product/10894076739930",
    "handle": "tischplatte-rund-120-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|hikora|25|D120": {
    "sku": "5908453742278",
@@ -3923,7 +4964,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780414298",
    "productId": "gid://shopify/Product/10894076838234",
    "handle": "tischplatte-rund-120-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|sonoma-eiche|25|D120": {
    "sku": "5908453742230",
@@ -3938,7 +4983,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780283226",
    "productId": "gid://shopify/Product/10894076707162",
    "handle": "tischplatte-rund-120-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|szary|25|D120": {
    "sku": "5908453742223",
@@ -3953,7 +5002,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781102426",
    "productId": "gid://shopify/Product/10894077493594",
    "handle": "tischplatte-rund-120-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|sosna-bielona|25|D120": {
    "sku": "5908453742254",
@@ -3968,7 +5021,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780348762",
    "productId": "gid://shopify/Product/10894076772698",
    "handle": "tischplatte-rund-120-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|schwarz|25|D120": {
    "sku": "5908453742216",
@@ -3983,7 +5040,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779824474",
    "productId": "gid://shopify/Product/10894076248410",
    "handle": "tischplatte-rund-120-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 120 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 120 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 20
+   }
   },
   "dekor|round|ahorn|25|D139": {
    "sku": "5908453742339",
@@ -3998,7 +5059,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780610906",
    "productId": "gid://shopify/Product/10894077034842",
    "handle": "tischplatte-rund-139-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|buk|25|D139": {
    "sku": "5908453742315",
@@ -4013,7 +5078,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780545370",
    "productId": "gid://shopify/Product/10894076969306",
    "handle": "tischplatte-rund-139-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|hikora|25|D139": {
    "sku": "5908453742346",
@@ -4028,7 +5097,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781135194",
    "productId": "gid://shopify/Product/10894077526362",
    "handle": "tischplatte-rund-139-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|sonoma-eiche|25|D139": {
    "sku": "5908453742308",
@@ -4043,7 +5116,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780512602",
    "productId": "gid://shopify/Product/10894076936538",
    "handle": "tischplatte-rund-139-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|szary|25|D139": {
    "sku": "5908453742292",
@@ -4058,7 +5135,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780479834",
    "productId": "gid://shopify/Product/10894076903770",
    "handle": "tischplatte-rund-139-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|sosna-bielona|25|D139": {
    "sku": "5908453742322",
@@ -4073,7 +5154,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780578138",
    "productId": "gid://shopify/Product/10894077002074",
    "handle": "tischplatte-rund-139-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|schwarz|25|D139": {
    "sku": "5908453742285",
@@ -4088,7 +5173,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780447066",
    "productId": "gid://shopify/Product/10894076871002",
    "handle": "tischplatte-rund-139-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 139 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 139 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 27
+   }
   },
   "dekor|round|ahorn|25|D160": {
    "sku": "5908453742407",
@@ -4103,7 +5192,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780807514",
    "productId": "gid://shopify/Product/10894077231450",
    "handle": "tischplatte-rund-160-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|buk|25|D160": {
    "sku": "5908453742384",
@@ -4118,7 +5211,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780741978",
    "productId": "gid://shopify/Product/10894077165914",
    "handle": "tischplatte-rund-160-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|hikora|25|D160": {
    "sku": "5908453742414",
@@ -4133,7 +5230,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780840282",
    "productId": "gid://shopify/Product/10894077264218",
    "handle": "tischplatte-rund-160-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|sonoma-eiche|25|D160": {
    "sku": "5908453742377",
@@ -4148,7 +5249,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780709210",
    "productId": "gid://shopify/Product/10894077133146",
    "handle": "tischplatte-rund-160-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|szary|25|D160": {
    "sku": "5908453742360",
@@ -4163,7 +5268,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780676442",
    "productId": "gid://shopify/Product/10894077100378",
    "handle": "tischplatte-rund-160-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|sosna-bielona|25|D160": {
    "sku": "5908453742391",
@@ -4178,7 +5287,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780774746",
    "productId": "gid://shopify/Product/10894077198682",
    "handle": "tischplatte-rund-160-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|schwarz|25|D160": {
    "sku": "5908453742353",
@@ -4193,7 +5306,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780643674",
    "productId": "gid://shopify/Product/10894077067610",
    "handle": "tischplatte-rund-160-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 160 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 160 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 36
+   }
   },
   "dekor|round|ahorn|25|D40": {
    "sku": "5908453741776",
@@ -4208,7 +5325,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778612058",
    "productId": "gid://shopify/Product/10894075134298",
    "handle": "tischplatte-rund-40-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|buk|25|D40": {
    "sku": "5908453745897",
@@ -4223,7 +5344,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781004122",
    "productId": "gid://shopify/Product/10894077395290",
    "handle": "tischplatte-rund-40-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|hikora|25|D40": {
    "sku": "5908453741783",
@@ -4238,7 +5363,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778677594",
    "productId": "gid://shopify/Product/10894075167066",
    "handle": "tischplatte-rund-40-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|sonoma-eiche|25|D40": {
    "sku": "5908453745880",
@@ -4253,7 +5382,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780971354",
    "productId": "gid://shopify/Product/10894077362522",
    "handle": "tischplatte-rund-40-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|szary|25|D40": {
    "sku": "5908453745873",
@@ -4268,7 +5401,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780905818",
    "productId": "gid://shopify/Product/10894077329754",
    "handle": "tischplatte-rund-40-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Grau | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|sosna-bielona|25|D40": {
    "sku": "5908453741769",
@@ -4283,7 +5420,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778513754",
    "productId": "gid://shopify/Product/10894075068762",
    "handle": "tischplatte-rund-40-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|schwarz|25|D40": {
    "sku": "5908453745866",
@@ -4298,7 +5439,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780873050",
    "productId": "gid://shopify/Product/10894077296986",
    "handle": "tischplatte-rund-40-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 40 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 40 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 2
+   }
   },
   "dekor|round|ahorn|25|D50": {
    "sku": "5908453741844",
@@ -4313,7 +5458,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778939738",
    "productId": "gid://shopify/Product/10894075429210",
    "handle": "tischplatte-rund-50-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|buk|25|D50": {
    "sku": "5908453741820",
@@ -4328,7 +5477,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778841434",
    "productId": "gid://shopify/Product/10894075330906",
    "handle": "tischplatte-rund-50-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Buche | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|hikora|25|D50": {
    "sku": "5908453741851",
@@ -4343,7 +5496,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779005274",
    "productId": "gid://shopify/Product/10894075461978",
    "handle": "tischplatte-rund-50-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|sonoma-eiche|25|D50": {
    "sku": "5908453741813",
@@ -4358,7 +5515,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778808666",
    "productId": "gid://shopify/Product/10894075298138",
    "handle": "tischplatte-rund-50-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|szary|25|D50": {
    "sku": "5908453741806",
@@ -4373,7 +5534,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778775898",
    "productId": "gid://shopify/Product/10894075265370",
    "handle": "tischplatte-rund-50-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Grau | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|sosna-bielona|25|D50": {
    "sku": "5908453741837",
@@ -4388,7 +5553,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778874202",
    "productId": "gid://shopify/Product/10894075363674",
    "handle": "tischplatte-rund-50-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|schwarz|25|D50": {
    "sku": "5908453741790",
@@ -4403,7 +5572,11 @@
    "variantId": "gid://shopify/ProductVariant/54306778710362",
    "productId": "gid://shopify/Product/10894075199834",
    "handle": "tischplatte-rund-50-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 50 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 50 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "frei",
+    "kg": 4
+   }
   },
   "dekor|round|ahorn|25|D59": {
    "sku": "5908453741912",
@@ -4418,7 +5591,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779201882",
    "productId": "gid://shopify/Product/10894075658586",
    "handle": "tischplatte-rund-59-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|buk|25|D59": {
    "sku": "5908453741899",
@@ -4433,7 +5610,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779169114",
    "productId": "gid://shopify/Product/10894075625818",
    "handle": "tischplatte-rund-59-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|hikora|25|D59": {
    "sku": "5908453741929",
@@ -4448,7 +5629,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779234650",
    "productId": "gid://shopify/Product/10894075691354",
    "handle": "tischplatte-rund-59-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|sonoma-eiche|25|D59": {
    "sku": "5908453741882",
@@ -4463,7 +5648,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779136346",
    "productId": "gid://shopify/Product/10894075593050",
    "handle": "tischplatte-rund-59-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|szary|25|D59": {
    "sku": "5908453741875",
@@ -4478,7 +5667,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779070810",
    "productId": "gid://shopify/Product/10894075527514",
    "handle": "tischplatte-rund-59-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|sosna-bielona|25|D59": {
    "sku": "5908453741905",
@@ -4493,7 +5686,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781036890",
    "productId": "gid://shopify/Product/10894077428058",
    "handle": "tischplatte-rund-59-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|schwarz|25|D59": {
    "sku": "5908453741868",
@@ -4508,7 +5705,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779038042",
    "productId": "gid://shopify/Product/10894075494746",
    "handle": "tischplatte-rund-59-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 59 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 59 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 5
+   }
   },
   "dekor|round|ahorn|25|D68": {
    "sku": "5908453741981",
@@ -4523,7 +5724,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779496794",
    "productId": "gid://shopify/Product/10894075920730",
    "handle": "tischplatte-rund-68-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|buk|25|D68": {
    "sku": "5908453741967",
@@ -4538,7 +5743,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779431258",
    "productId": "gid://shopify/Product/10894075855194",
    "handle": "tischplatte-rund-68-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|hikora|25|D68": {
    "sku": "5908453741998",
@@ -4553,7 +5762,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779529562",
    "productId": "gid://shopify/Product/10894075953498",
    "handle": "tischplatte-rund-68-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|sonoma-eiche|25|D68": {
    "sku": "5908453741950",
@@ -4568,7 +5781,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779398490",
    "productId": "gid://shopify/Product/10894075822426",
    "handle": "tischplatte-rund-68-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|szary|25|D68": {
    "sku": "5908453741943",
@@ -4583,7 +5800,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779365722",
    "productId": "gid://shopify/Product/10894075789658",
    "handle": "tischplatte-rund-68-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|sosna-bielona|25|D68": {
    "sku": "5908453741974",
@@ -4598,7 +5819,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779464026",
    "productId": "gid://shopify/Product/10894075887962",
    "handle": "tischplatte-rund-68-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|schwarz|25|D68": {
    "sku": "5908453741936",
@@ -4613,7 +5838,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779332954",
    "productId": "gid://shopify/Product/10894075756890",
    "handle": "tischplatte-rund-68-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 68 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 68 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 6
+   }
   },
   "dekor|round|ahorn|25|D80": {
    "sku": "5908453742056",
@@ -4628,7 +5857,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779758938",
    "productId": "gid://shopify/Product/10894076182874",
    "handle": "tischplatte-rund-80-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|buk|25|D80": {
    "sku": "5908453742032",
@@ -4643,7 +5876,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779693402",
    "productId": "gid://shopify/Product/10894076117338",
    "handle": "tischplatte-rund-80-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|hikora|25|D80": {
    "sku": "5908453742063",
@@ -4658,7 +5895,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779791706",
    "productId": "gid://shopify/Product/10894076215642",
    "handle": "tischplatte-rund-80-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|sonoma-eiche|25|D80": {
    "sku": "5908453742025",
@@ -4673,7 +5914,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779660634",
    "productId": "gid://shopify/Product/10894076084570",
    "handle": "tischplatte-rund-80-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|szary|25|D80": {
    "sku": "5908453742018",
@@ -4688,7 +5933,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779627866",
    "productId": "gid://shopify/Product/10894076051802",
    "handle": "tischplatte-rund-80-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|sosna-bielona|25|D80": {
    "sku": "5908453742049",
@@ -4703,7 +5952,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779726170",
    "productId": "gid://shopify/Product/10894076150106",
    "handle": "tischplatte-rund-80-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|schwarz|25|D80": {
    "sku": "5908453742001",
@@ -4718,7 +5971,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779595098",
    "productId": "gid://shopify/Product/10894076019034",
    "handle": "tischplatte-rund-80-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 80 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 80 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 9
+   }
   },
   "dekor|round|ahorn|25|D90": {
    "sku": "5908453742124",
@@ -4733,7 +5990,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779988314",
    "productId": "gid://shopify/Product/10894076412250",
    "handle": "tischplatte-rund-90-cm-ahorn-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Ahorn | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Ahorn | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   },
   "dekor|round|buk|25|D90": {
    "sku": "5908453742100",
@@ -4748,7 +6009,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779922778",
    "productId": "gid://shopify/Product/10894076346714",
    "handle": "tischplatte-rund-90-cm-buche-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Buche | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Buche | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   },
   "dekor|round|hikora|25|D90": {
    "sku": "5908453742131",
@@ -4763,7 +6028,11 @@
    "variantId": "gid://shopify/ProductVariant/54306780021082",
    "productId": "gid://shopify/Product/10894076445018",
    "handle": "tischplatte-rund-90-cm-eiche-hickory-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Eiche Hickory | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Eiche Hickory | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   },
   "dekor|round|sonoma-eiche|25|D90": {
    "sku": "5908453742094",
@@ -4778,7 +6047,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779890010",
    "productId": "gid://shopify/Product/10894076313946",
    "handle": "tischplatte-rund-90-cm-eiche-sonoma-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Eiche Sonoma | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Eiche Sonoma | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   },
   "dekor|round|szary|25|D90": {
    "sku": "5908453742087",
@@ -4793,7 +6066,11 @@
    "variantId": "gid://shopify/ProductVariant/54306781167962",
    "productId": "gid://shopify/Product/10894077559130",
    "handle": "tischplatte-rund-90-cm-grau-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Grau | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Grau | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   },
   "dekor|round|sosna-bielona|25|D90": {
    "sku": "5908453742117",
@@ -4808,7 +6085,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779955546",
    "productId": "gid://shopify/Product/10894076379482",
    "handle": "tischplatte-rund-90-cm-kiefer-gebleicht-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Kiefer Weiß | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Kiefer Weiß | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   },
   "dekor|round|schwarz|25|D90": {
    "sku": "5908453742070",
@@ -4823,7 +6104,11 @@
    "variantId": "gid://shopify/ProductVariant/54306779857242",
    "productId": "gid://shopify/Product/10894076281178",
    "handle": "tischplatte-rund-90-cm-schwarz-25-mm",
-   "title": "Tischplatte rund | Ø 90 cm | Schwarz | 25 mm"
+   "title": "Tischplatte rund | Ø 90 cm | Schwarz | 25 mm",
+   "versand": {
+    "p": "rund",
+    "kg": 11
+   }
   }
  }
 }
