@@ -255,8 +255,9 @@ warenkorbLeerBis = 0;
   reserven = []; aufrufe = []; storefront = [];
   const r1 = await warenkorb({ kanal:'eur', sprache:'de', konfig:S }, env, null);
   const anl = aufrufe.find(a=>/productVariantsBulkCreate/.test(a.query) && a.variables.v.length===1);
-  check('ERP: Möbelplatte Buche 25 → SKU NM-MP-BUK-25, ohne EAN kein Barcode', anl && anl.variables.v[0].inventoryItem.sku==='NM-MP-BUK-25' && !('barcode' in anl.variables.v[0]), anl && anl.variables.v[0].inventoryItem);
-  check('ERP: _kfg_sku als Eigenschaft, kein _kfg_ean solange leer', r1.attribute.some(a=>a.key==='_kfg_sku' && a.value==='NM-MP-BUK-25') && !r1.attribute.some(a=>a.key==='_kfg_ean'));
+  check('ERP: Möbelplatte Buche 25 → SKU NM-MP-BUK-25, EAN 5908453749598 als Barcode (Monika 08.10.)', anl && anl.variables.v[0].inventoryItem.sku==='NM-MP-BUK-25' && anl.variables.v[0].barcode==='5908453749598', anl && anl.variables.v[0]);
+  check('ERP: _kfg_sku und _kfg_ean als Eigenschaft', r1.attribute.some(a=>a.key==='_kfg_sku' && a.value==='NM-MP-BUK-25') && r1.attribute.some(a=>a.key==='_kfg_ean' && a.value==='5908453749598'));
+  check('ERP: alle 66 Schluessel tragen einen EAN mit gueltiger Pruefziffer', eintraege.every(([, e]) => /^\d{13}$/.test(e.ean) && (()=>{const d=[...e.ean].map(Number);return (10-(d.filter((_,i)=>i%2===0&&i<12).reduce((a,b)=>a+b,0)+3*d.filter((_,i)=>i%2===1&&i<12).reduce((a,b)=>a+b,0))%10)%10===d[12];})()), eintraege.filter(([, e]) => !/^\d{13}$/.test(e.ean)).map(([k])=>k));
   check('ERP: Name traegt weiter das #Token-Kuerzel (Kennung des Klicks)', /#[A-Za-z0-9]{4}$/.test(anl.variables.v[0].optionValues[0].name), anl.variables.v[0].optionValues[0].name);
 
   /* Mit eingetragenem EAN wandert er als Barcode auf die Variante und als Eigenschaft mit */
