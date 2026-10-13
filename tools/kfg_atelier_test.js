@@ -684,6 +684,27 @@ const pruef=(name,ok,detail)=>{ if(ok)gruen++; else rot.push(name+(detail?' — 
   }
   console.log('⑪ Versand geprueft');
 
+  /* ══ ⑫ Multiplex + HPL ohne vier Dekore (Sascha 13.10.) ═════════════════════
+     Alaska Weiss, Kiefer Weiss, Eiche Sonoma und Eiche Artison gibt es als HPL
+     nicht. Die Moebelplatte behaelt alle elf. */
+  {
+    const {ctx,p}=await seite({width:1440,height:1000},'de');
+    const dekore=async()=>p.evaluate(()=>[...document.querySelectorAll('#dekorGrid .kfg_dekor')].map(b=>b.dataset.d));
+    const moebel=await dekore();
+    await p.klick('[data-material="mpx"]'); await p.waitForTimeout(400);
+    await p.evaluate(()=>document.querySelector('#mpxSurfaceChips [data-sf="hpl"]').click()); await p.waitForTimeout(500);
+    const hpl=await dekore();
+    const weg=['alaska-weiss','sosna-bielona','sonoma-eiche','eiche-artison'];
+    pruef('⑫ Moebelplatte behaelt alle elf Dekore', moebel.length===11&&weg.every(k=>moebel.includes(k)), moebel.join(','));
+    pruef('⑫ Multiplex + HPL: sieben Dekore, die vier fehlen', hpl.length===7&&weg.every(k=>!hpl.includes(k))&&['weiss','buk','hikora'].every(k=>hpl.includes(k)), hpl.join(','));
+    /* Alter Link mit Artison auf HPL landet auf dem ersten HPL-Dekor */
+    await p.evaluate(()=>window.KFG.setConfig({mat:'mpx',mpxSurface:'hpl',dekor:'eiche-artison'})); await p.waitForTimeout(500);
+    const d=await p.evaluate(()=>window.KFG.getConfig().dekor);
+    pruef('⑫ Artison auf HPL aus altem Link faellt auf Weiss zurueck', d==='weiss', d);
+    await ctx.close();
+  }
+  console.log('⑫ HPL-Dekore geprueft');
+
   console.log('⑧ Vollbild und Masszahlen geprueft');
 
   await b.close();

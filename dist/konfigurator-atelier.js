@@ -19,13 +19,13 @@
   if (window.__KFG_LOADED) return;                      /* Idempotenz-Guard (Bootstrap-Quirk) */
   window.__KFG_LOADED = true;
 
-  var VERSION = '1.21.0';
+  var VERSION = '1.21.1';
   /* Basis-URL aus dem eigenen <script src> ableiten — so zeigen Daten und Bilder
      IMMER auf denselben Commit wie das Script (vorher liefen sie auseinander). */
   /* Auf den Commit gezogen, der am 10.09.2026 live lief — dort liegen Preiskurven,
    Sprachdatei und Bilder, die es unter dem alten Commit noch nicht gab. Greift,
    wenn das Skript NICHT ueber jsDelivr geladen wird (z. B. als Webflow-Asset). */
-var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@5163be9';
+var FALLBACK_BASE = 'https://cdn.jsdelivr.net/gh/SaschaKesslerPro/kessler-pro-scripts@02b23a6';
   var BASE = (function(){
     try{
       var me = document.currentScript && document.currentScript.src;
@@ -374,8 +374,11 @@ const DEKOR_MOEBEL = [
      Alt-Schlüssel 'eiche-kamienny' wird in ensureDekor() umgebogen. */
   ['hikora','Eiche Hickory']
 ];
-/* Auf Multiplex kann jedes Laminat der Möbelplatten-Palette aufgeklebt werden (Sascha 26.07.) */
-const DEKOR_HPL = DEKOR_MOEBEL;
+/* Auf Multiplex kann ein Laminat der Möbelplatten-Palette aufgeklebt werden (Sascha 26.07.) —
+   seit 13.10. ohne Alaska Weiß, Kiefer Weiß, Eiche Sonoma und Eiche Artison (Sascha):
+   diese vier gibt es als HPL nicht. Alte Links mit einem davon landen in ensureDekor()
+   beim ersten Dekor der Liste. */
+const DEKOR_HPL = DEKOR_MOEBEL.filter(([k]) => !['alaska-weiss','sosna-bielona','sonoma-eiche','eiche-artison'].includes(k));
 /* Naehtischplatten-Farben (Senior 30.07.). Eigene Draufsichten gibt es noch
    nicht — bis dahin leihen wir die farblich naechstliegende aus dem Archiv. */
 const DEKOR_SZWAL = [['sz-weiss','Weiß'],['sz-gewebe','Gewebestruktur Weiß'],

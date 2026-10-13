@@ -28,6 +28,7 @@ NAMEN = [
   'rules','baseEdge','profileOf','lackAn','isLack','edgeLfm',
   'dims','areaM2','perimM','dekorList','ensureDekor','calc','isStandard','needsOffer',
   'cornerFormOk','cornerPerCorner','cornerR','cornerIdx','cornerCount','cornerMax','cornerName','cornerLabel',
+  'cornerAuto','cornerAutoLabel','cornerSichtbar',   # 17.09.: automatische Rundung als Etikett — cornerLabel() greift darauf zu
   'clampCorner','setCorner','setAllCorners',
   'lfPos','lfSchraeg','lfMinR','LF_WINKEL','LF_MIN_AC','lfMasse','lfWinkelMax','lfWinkel','lfU','lfPts','lfGeo','lfSchnittCm','lfCornerName','lfCornerR','lfNotchCenter','lfInNotch',
   'massbandEintrag','massbandPreis','massbandName','massbandStrecke',

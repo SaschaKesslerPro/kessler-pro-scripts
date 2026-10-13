@@ -24,7 +24,7 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
     ['hikora','Eiche Hickory']
   ];
 
-  const DEKOR_HPL = DEKOR_MOEBEL;
+  const DEKOR_HPL = DEKOR_MOEBEL.filter(([k]) => !['alaska-weiss','sosna-bielona','sonoma-eiche','eiche-artison'].includes(k));
 
   const DEKOR_SZWAL = [['sz-weiss','Weiß'],['sz-gewebe','Gewebestruktur Weiß'],
                        ['sz-grau','Grau'],['sz-schwarz','Schwarz']];
@@ -328,12 +328,20 @@ function preisKern(S, SHOP, KURVEN, KFG_LANG){
   function cornerName(i){ return S.form==='lform' ? lfCornerName(i) : S.form==='bauch' ? BS_CORNER_NAMES[i] : CORNER_NAMES[i]; }
 
   function cornerLabel(){
-    const idx=cornerIdx(), on=idx.filter(i=>cornerR(i)>0);
-    if(!on.length) return 'eckig';
+    const idx=cornerIdx(), on=idx.filter(i=>cornerR(i)>0), auto=cornerAutoLabel();
+    if(!on.length) return auto || 'eckig';
     const uniq=[...new Set(on.map(cornerR))];
-    if(uniq.length===1) return `R${uniq[0]} · ${on.length===idx.length?(idx.length===6?'alle sechs':idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`;
-    return on.map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ');
+    const eigen = uniq.length===1
+      ? `R${uniq[0]} · ${on.length===idx.length?(idx.length===6?'alle sechs':idx.length===5?'alle fünf':'alle vier'):on.map(cornerName).join(', ')}`
+      : on.map(i=>`${cornerName(i)} R${cornerR(i)}`).join(' · ');
+    return auto ? `${eigen} + ${auto}` : eigen;
   }
+
+  function cornerAuto(){ return lfAutoEcken()+bsAutoEcken(); }
+
+  function cornerAutoLabel(){ return cornerAuto()>0 ? `Schräge R${lfMinR()*10} (Fertigungsregel)` : ''; }
+
+  function cornerSichtbar(){ return cornerCount()>0 || cornerAuto()>0; }
 
   function clampCorner(r){
     const d=dims(), lim=Math.min(d.w,d.h)*10/2, mn=rules().minCorner;
