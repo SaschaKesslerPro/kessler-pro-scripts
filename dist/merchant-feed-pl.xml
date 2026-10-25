@@ -3,7 +3,7 @@
 <channel>
   <title>Kessler PRO — Produkty (PL/PLN)</title>
   <link>https://www.kessler-pro.com</link>
-  <description>Kessler PRO Produktfeed (generiert 2026-10-25 08:00 UTC)</description>
+  <description>Kessler PRO Produktfeed (generiert 2026-10-25 13:29 UTC)</description>
   <item>
     <g:id>10915009331546</g:id>
     <g:title>Blat kompaktowy okrągły | Ø 130 cm | Czarny marmur | 12 mm</g:title>
@@ -216,10 +216,10 @@
   </item>
   <item>
     <g:id>10915008872794</g:id>
-    <g:title>Blat kompaktowy okrągły | Ø 60 cm | Biały marmur | 12 mm</g:title>
-    <g:description>Blat kompaktowy okrągły w dekorze biały marmur o wymiarach Ø 60 cm i grubości zaledwie 12 mm. Barwiona w masie płyta HPL o litym rdzeniu jest odporna na wodę, zarysowania i intensywne czyszczenie, a precyzyjnie frezowana krawędź odsłania charakterystyczny czarny rdzeń. Idealny do kompaktowych stołów gastronomicznych, na taras i balkon, a także do strefy recepcji. Jakość manufaktury z Polski od 1897 roku. Materiał: Płyta kompaktowa HPL. Waga: 5 kg.</g:description>
+    <g:title>Compact-Tischplatte rund | Ø 60 cm | Weißer Marmor | 12 mm</g:title>
+    <g:description>Mit Ø 60 cm und schlanken 12 mm Stärke bringt diese runde Compact-Platte in Weißer Marmor klare Linien an den Tisch. Als Vollkernplatte ist sie durch und durch wasserfest, stoß- und kratzunempfindlich und nimmt weder Reinigungsmittel noch Hitze übel. Die gefräste Kante mit schwarzem Kern unterstreicht den modernen Charakter. Damit ist sie die erste Wahl für Bistro- und Cafétische im Innen- wie Außenbereich, gefertigt in unserer Manufaktur in Polen, Holzverarbeitung seit 1897. Materiał: HPL-Kompaktplatte. Waga: 5 kg.</g:description>
     <g:link>https://www.kessler-pro.com/pl-pl/products/compact-tischplatte-rund-60-cm-weisser-marmor-12-mm</g:link>
-    <g:image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6aa7c6c4c4361855fbbaa49b_eef73ee719bba52831bec67a56fe7c91d1bdb280623a1d1354f00092585100bf.webp</g:image_link>
+    <g:image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6adde7bb47a080cf1b05b8c6_92b73dab6e261b8b2ef5a494fa43c2cc6dc2c3bf2e0951a984b67e1ca6d824b6.webp</g:image_link>
     <g:price>731.90 PLN</g:price>
     <g:availability>in_stock</g:availability>
     <g:condition>new</g:condition>
@@ -227,10 +227,10 @@
     <g:identifier_exists>no</g:identifier_exists>
     <g:product_type>Blaty Compact</g:product_type>
     <g:google_product_category>6910</g:google_product_category>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6aa7c6c4c4361855fbbaa4a1_06ecda33aeb46d1f5a8fe53af401aeea9980c599729dc506bff2e1ccf0e20c44.webp</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6aa7c6c4c4361855fbbaa49e_c309ff3d6b22ef60b0e43ba5727f8cbbc8ba7c264e83eab8a13d010b736be0e2.webp</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6aa7c6c4c4361855fbbaa4a4_4d5f4c9613a3d64692bca4a9e19e4a3fbaeb1d2095f3f2e7eae32ea03d4e123e.webp</g:additional_image_link>
-    <g:material>Płyta kompaktowa HPL</g:material>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6adde7bb47a080cf1b05b8bc_b7574c74b04a930db096aff93d451a59c6b1ed9b71924b0a605c7ff1ba6fad6b.webp</g:additional_image_link>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6adde7bb47a080cf1b05b8bf_fdeb0aee20282a4f32f4b73028fa324bf49ecddf01099683b2b9c326aa173c4e.webp</g:additional_image_link>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6adde7bb47a080cf1b05b8c3_48e0bb9bd9571b841bc6c6ea7e13bd310666e92ed871b70d2cae7f672b445dfa.webp</g:additional_image_link>
+    <g:material>HPL-Kompaktplatte</g:material>
     <g:item_group_id>COMPACT-RUND-12mm-O60</g:item_group_id>
     <g:shipping_weight>5 kg</g:shipping_weight>
     <g:shipping><g:country>PL</g:country><g:price>0.00 PLN</g:price></g:shipping>
@@ -4007,7 +4007,7 @@
     <g:title>Blat roboczy | 100 × 40 cm | buk | 18 mm</g:title>
     <g:description>Blat roboczy w dekorze buk o wymiarach 100 × 40 cm i grubości 18 mm, produkowany w naszej manufakturze z myślą o codziennym użytkowaniu. Powierzchnia laminowana melaminą jest odporna na zarysowania, łatwa w pielęgnacji i odporna na wilgoć; obrzeże ABS (2 mm) chroni krawędzie przed obiciem. Wyprodukowano w Polsce, z tradycją obróbki drewna od 1897 roku, sprawdzi się jako blat biurka, stołu roboczego lub jadalnianego, pasuje do popularnych stelaży. Materiał: Płyta wiórowa laminowana melaminą. Waga: 6 kg.</g:description>
     <g:link>https://www.kessler-pro.com/pl-pl/products/arbeitsplatte-100x40-cm-buche-18-mm</g:link>
-    <g:image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e16c4294263e05884fae3_5907255093878_1.jpeg</g:image_link>
+    <g:image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6addc92e0ffafbf34c5876cb_5908453744975_1.jpeg</g:image_link>
     <g:price>95.90 PLN</g:price>
     <g:availability>in_stock</g:availability>
     <g:condition>new</g:condition>
@@ -4015,9 +4015,9 @@
     <g:gtin>5908453744975</g:gtin>
     <g:product_type>Płyty meblowe</g:product_type>
     <g:google_product_category>6910</g:google_product_category>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e16c4294263e05884fafa_5907255093878_2.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a5e1ae9a190a8535305d7f1_5908453744975_3.jpeg</g:additional_image_link>
-    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6a903bce3dd84b0035450fd7_5907255093878_4.jpeg</g:additional_image_link>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6addc92e0ffafbf34c5876d3_5908453744975_2.jpeg</g:additional_image_link>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6ad75699ebec80c212fa954d_5908453745026_3.jpeg</g:additional_image_link>
+    <g:additional_image_link>https://cdn.prod.website-files.com/67fea16e9758f16a33bef7b4/6addc92e0ffafbf34c5876d7_5908453744975_4.jpeg</g:additional_image_link>
     <g:material>Płyta wiórowa laminowana melaminą</g:material>
     <g:color>Buk</g:color>
     <g:item_group_id>PLATTE-18mm-100x40</g:item_group_id>
